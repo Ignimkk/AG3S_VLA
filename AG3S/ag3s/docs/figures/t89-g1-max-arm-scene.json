@@ -1,0 +1,120 @@
+{
+ "label": "허들954_k0",
+ "request": 19,
+ "t_step": 152,
+ "close_row": 5,
+ "camera": "zed_left",
+ "chunk": "/mnt/dev/AG3S_VLA-storage/results/development/20261103T000257+0900_8ab3c7ef7757_905ff913aad2/verify/T89/CL/G/k0/server_G_8298_20261103T031951/server_constraints/run_0000/chunk_00348.npz",
+ "rows_palm_diff_mm": [
+  24.3,
+  22.0,
+  26.7,
+  29.2,
+  23.5,
+  32.7,
+  31.3,
+  29.4,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0
+ ],
+ "rows_palm_apple_ref_mm": [
+  26.1,
+  25.4,
+  25.1,
+  24.2,
+  23.6,
+  20.8,
+  22.9,
+  21.9,
+  21.3,
+  22.1,
+  20.9,
+  20.7,
+  20.8,
+  20.3,
+  22.8,
+  21.2
+ ],
+ "rows_palm_apple_refined_mm": [
+  47.6,
+  44.6,
+  49.5,
+  51.5,
+  42.2,
+  37.4,
+  36.1,
+  35.0,
+  21.3,
+  22.1,
+  20.9,
+  20.7,
+  20.8,
+  20.3,
+  22.8,
+  21.2
+ ],
+ "metrics": {
+  "request": 19,
+  "t_step": 152,
+  "chunk": "chunk_00348.npz",
+  "geo_phase": "latched",
+  "hsr5_phase": "grasp",
+  "hsr6_phase": "approach",
+  "close_gate": {
+   "applied": true,
+   "close_row": 5,
+   "pos_err_mm": 4.9,
+   "rot_err_deg": 16.2,
+   "decision": "defer",
+   "reason": "the corrected close missed its grasp",
+   "deferred": 1
+  },
+  "track": {
+   "scale": 0.25
+  },
+  "verdict_actions": [
+   "execute"
+  ],
+  "to_status": "feasible",
+  "initial_violation_mm": 0.755,
+  "ref_violation": true,
+  "arm_max_deg_exec": 24.9,
+  "arm_max_deg_plan": 24.9,
+  "arm_argmax_joint_exec": 11,
+  "both_arms_max_deg_exec": 24.9,
+  "palm_diff_mm_exec": 32.7,
+  "palm_diff_mm_plan": 32.7,
+  "close_row": 5,
+  "close_row_source": "anchor.rows",
+  "palm_diff_mm_close_row": 32.7,
+  "palm_apple_cmd_ref_mm": 20.8,
+  "palm_apple_cmd_refined_mm": 37.4,
+  "palm_apple_actual_at_request_mm": 16.1,
+  "palm_apple_actual_after_exec_mm": 26.4,
+  "actual_control_t": [
+   152,
+   160
+  ]
+ },
+ "anchor": {
+  "active": true,
+  "nearest_source": "tracked",
+  "nearest_pos_mm": 33.0,
+  "nearest_rot_deg": 18.1,
+  "chord_offset": 0.468,
+  "kind": "correct",
+  "goal_m": [
+   0.46425,
+   -0.345,
+   0.94892
+  ],
+  "rows": "3 from close row 5",
+  "grasp_id": 4
+ }
+}

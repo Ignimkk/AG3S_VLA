@@ -170,6 +170,21 @@ class SafePolicy:
     #: T82 — same reason (test doubles built without `__init__` read "HSR5 off").
     hsr5: Any = None
     _last_hsr5: dict = {}
+    # --- T92 — begin
+    #: T92 — same reason (test doubles built without `__init__` read "subtask label from the probe", as before).
+    subtask_from_latch: bool = False
+    _last_subtask_latch: dict = {}
+    # --- T92 — end
+    # --- T91c — begin
+    #: T91c — same reason (test doubles built without `__init__` read "subtask label not from the phase machine", as before).
+    subtask_from_phase_machine: bool = False
+    _last_phase_machine: dict = {}
+    _phase_gate: Any = None
+    # --- T91c — end
+    # --- T93 — begin
+    #: T93 — same reason (test doubles built without `__init__` read "no flow guidance", as before).
+    fm_guide: Any = None
+    # --- T93 — end
     #: AG3S-CORE-EVAL-A6 — same reason (test doubles built without `__init__` read "no palm allowance record").
     _last_neighbour_palm_contact: dict = {}
     #: T83 — same reason (test doubles built without `__init__` read "no grasp corridor record").
@@ -193,7 +208,10 @@ class SafePolicy:
                  task_gate_tau: Optional[float] = None,
                  held_3d: Any = None,
                  hsr6: Any = None,
-                 hsr5: Any = None):
+                 hsr5: Any = None,
+                 subtask_from_latch: bool = False,   # T92
+                 subtask_from_phase_machine: bool = False,   # T91c
+                 fm_guide: Any = None):   # T93
         self._policy = policy
         #: AG3S-CORE-EVAL-HSR6 — the four uses of the 6-phase probe (`hsr6.Hsr6Flags`, `serve_safe --hsr6-*`). None or
         #: every flag off = off: no `result["hsr6"]` is read, every decision / record as before.
@@ -207,6 +225,32 @@ class SafePolicy:
         self.hsr5 = hsr5
         #: this request's HSR5 record (`summary_json.hsr5`): stage, p, probe, ms, and per rule the stage source used.
         self._last_hsr5: dict[str, Any] = {}
+        # --- T92 — begin
+        #: T92 — `serve_safe --subtask-from-latch`: the 3-stage gate label (`AG3S.set_subtask`) is the one-hot of this
+        #: request's grasp-latch phase (`latch_subtask_probabilities`), not the kv_L4_v1 probe's probabilities. False
+        #: (default) = off: `_subtask_gate_input` and every record as before (no `subtask_source` key).
+        self.subtask_from_latch = bool(subtask_from_latch)
+        #: this request's record (`summary_json.subtask_source`): source · latch phase · label given to the gate.
+        self._last_subtask_latch: dict[str, Any] = {}
+        # --- T92 — end
+        # --- T91c — begin
+        #: T91c — `serve_safe --subtask-from-phase-machine`: the 3-stage gate label is the one-hot of the T91b `PhaseMachine`'s
+        #: stage (`phase_gate.PhaseGate`: measured opening · hand site · ATS target · VLA chunk gripper · wrist depth between the
+        #: fingertips), not the probe's probabilities and not the latch phase. False (default) = off: no `PhaseGate` is built,
+        #: `_subtask_gate_input` and every record as before (no `phase_machine` key).
+        self.subtask_from_phase_machine = bool(subtask_from_phase_machine)
+        if self.subtask_from_phase_machine and (self.subtask_from_latch or self.hsr5 is not None):
+            raise ValueError("subtask_from_phase_machine, subtask_from_latch and hsr5 are each a source of the gate label — give one")
+        self._phase_gate = None          # built on the first request (needs `gripper_columns`, set further down)
+        #: this request's record (`summary_json.phase_machine`): stage · label · evidence.
+        self._last_phase_machine: dict[str, Any] = {}
+        # --- T91c — end
+        # --- T93 — begin
+        #: T93 — `serve_safe --fm-guide`: a `fm_guide.FlowGuide`. None (default) = off: the refiner gets no `fm_resample`, no
+        #: `to.metrics.fm_guide`. On: the VLA is still sampled as before (same call, same compiled graph); the noise it draws is
+        #: read from the policy's key and a request whose chunk violates is resampled with it (see `fm_guide`).
+        self.fm_guide = fm_guide
+        # --- T93 — end
         #: IFG-S2SERVE — the training-free 3D held rule (`held_3d.Held3DRule`, `serve_safe --held-3d-rule on`), ANDed
         #: into the latch's attach checks (`_advance_grasp`). None (default) = off: checks · records as before.
         self.held_3d = held_3d
@@ -569,6 +613,12 @@ class SafePolicy:
         self._last_task_gate = {}
         self._last_hsr6 = {}         # AG3S-CORE-EVAL-HSR6
         self._last_hsr5 = {}         # T82
+        self._last_subtask_latch = {}   # T92
+        # --- T91c — begin
+        self._last_phase_machine = {}
+        if getattr(self, "_phase_gate", None) is not None:
+            self._phase_gate.reset()
+        # --- T91c — end
         for lin in self._finger_linearizers():
             lin.set_joint_parameter_path(None)
 
@@ -590,6 +640,19 @@ class SafePolicy:
             print(f"[safe_policy] seq={seq} policy_seed={self._seed_applied} "
                   "(policy RNG re-keyed before this request's infer)")
 
+        # --- T93 — begin: read the noise this request's sample is about to be drawn with (a pure function of the policy's key,
+        # which `infer` below then advances as always) so that the guided resample can reuse it. `infer` itself is called exactly
+        # as without the flag — no `noise=` — so the first sample runs the same compiled graph and stays bit-identical.
+        fm_noise, fm_skip = None, None
+        if self.fm_guide is not None:
+            try:
+                fm_noise = self.fm_guide.peek_noise()
+            except Exception as exc:  # noqa: BLE001 — no guidance for this request, the policy is sampled as without the flag
+                traceback.print_exc()
+                fm_skip = f"noise unavailable ({type(exc).__name__}: {exc})"
+            if self._recovery is not None:
+                fm_skip = "recovery retreat (the chunk is not the VLA's)"
+        # --- T93 — end
         t = time.monotonic()
         result = self._policy.infer(policy_obs, **kwargs)
         chunk = np.asarray(result["actions"], np.float64)
@@ -630,6 +693,9 @@ class SafePolicy:
                          "state": policy_obs.get("state"),
                          # SUBTASK-c: `AttentionPolicy` 가 실은 subtask label (없으면 None).
                          "subtask": result.get("subtask") if isinstance(result, dict) else None}
+        # --- T91c — begin: a request whose `_scene_fn` does not run must not report the previous request's stage
+        self._last_phase_machine = {}
+        # --- T91c — end
         # T57-A — 켰을 때만 (off 이면 `_pending` 도 T57 전과 같다).
         self._last_task_gate = {}
         if self.task_gate != "off":
@@ -657,6 +723,10 @@ class SafePolicy:
 
         previous, executed_steps = self._continuity_input(feedback)
         context: dict[str, Any] = {"t_step": seq, "previous_physical_chunk": previous}
+        # --- T93 — begin: the refiner may resample the VLA with this request's observation and noise (key exists only with the flag)
+        if self.fm_guide is not None:
+            context["fm_resample"] = self.fm_guide.bind(policy_obs, fm_noise, skip=fm_skip)
+        # --- T93 — end
         if executed_steps is not None:
             context["previous_executed_steps"] = executed_steps
         # T41 b — 직전 청크가 통째로 HOLD 였으면 로봇은 q_now 에 정지해 있다. 꺼져 있으면 `{}` 이고
@@ -1317,12 +1387,76 @@ class SafePolicy:
         """This request's `AG3S.set_subtask` input: off = the 3-stage probe's probabilities (as before); T82 --hsr5 =
         the 5-stage label's one-hot (approach · grasp → pick, carry · place → place, retreat → home; None = no label
         this request), debounced by AG3S as the 3-stage label was."""
+        # --- T92 — begin: the label from this request's latch phase; the probe is not read here (off: skipped, below as before)
+        if self.subtask_from_latch:
+            phase = getattr(getattr(self, "_latch", None), "phase", None)
+            p = latch_subtask_probabilities(phase)
+            self._last_subtask_latch = {
+                "source": "latch", "phase": getattr(phase, "value", None),
+                "label": None if p is None else max(p, key=p.get)}
+            return p
+        # --- T92 — end
+        # --- T91c — begin: the label from the phase machine (off: skipped, below as before)
+        if self.subtask_from_phase_machine:
+            return self._phase_machine_gate_input()
+        # --- T91c — end
         if self.hsr5 is None:
             return _subtask_probabilities(self._pending.get("subtask"))
         from AG3S.trajopt.hsr5 import subtask3_probabilities
 
         self._hsr5_source("subtask_gate")
         return subtask3_probabilities(self._hsr5_stage())
+
+    # --- T91c — begin
+    def _phase_machine_gate_input(self) -> Optional[dict[str, float]]:
+        """T91c — this request's `AG3S.set_subtask` input from the T91b phase machine (`phase_gate.PhaseGate`).
+
+        Stepped **once per request** (the result is kept in `_pending["t91c"]`; `_scene_fn` may run again for the same request).
+        The target / destination are `ag3s.manipulated` / `ag3s.destination` as they stand now = the previous request's (the label
+        goes to AG3S before this request's grounding). An error here never kills the request: the label is None (= no label, as for
+        a probe that did not answer) and the record says why (`error`)."""
+        cached = self._pending.get("t91c")
+        if cached is not None:
+            return cached[0]
+        try:
+            p, rec = self._phase_machine_step()
+        except Exception as exc:  # noqa: BLE001 — a label failure must not kill the policy call (as the probe's)
+            traceback.print_exc()
+            p, rec = None, {"source": "phase_machine", "stage": None, "label": None, "error": f"{type(exc).__name__}: {exc}"}
+        self._last_phase_machine = rec
+        self._pending["t91c"] = (p, rec)
+        return p
+
+    def _phase_machine_step(self) -> tuple[Optional[dict[str, float]], dict[str, Any]]:
+        from AG3S.trajopt.phase_gate import WRIST_CAMERA, PhaseGate
+
+        if self._phase_gate is None:
+            self._phase_gate = PhaseGate(self.gripper_columns)
+        scene = self._pending.get("scene", {}) or {}
+        manipulators = list(scene.get("active_manipulators", ()) or ())
+        hand, parent_link, _ = self._grasp_hand(manipulators)
+        measured, _src = self._measured_openings()
+        # hand site at the newest camera's robot state (the q `_scene_fn` plans from), same frame as the ATS centroids
+        cams = [c for c in (scene.get("cameras", ()) or ()) if scene.get(f"robot_state/{c}") is not None]
+        ee = None
+        if cams:
+            newest = max(cams, key=lambda c: float(scene.get(f"stamp/{c}", 0.0)))
+            ee = hold_site_position(self.constraint_robot_model, np.asarray(scene[f"robot_state/{newest}"], np.float64),
+                                    self.hold_links.get(hand, parent_link))
+        manip = getattr(self.ag3s, "manipulated", None)
+        dest = getattr(self.ag3s, "destination", None)
+        chunk = self._pending.get("chunk")
+        col = self._phase_gate.columns[hand if hand in self._phase_gate.columns else "left"]
+        chunk_g = None
+        if chunk is not None and getattr(chunk, "ndim", 0) == 2 and chunk.shape[1] > col:
+            chunk_g = np.asarray(chunk[:, col], np.float64)
+        return self._phase_gate.step(
+            hand=hand, gripper_raw=measured.get(hand), ee_pos=ee,
+            target_pos=None if manip is None else getattr(manip, "centroid", None),
+            target_fresh=manip is not None and str(getattr(manip, "state", "")) == "visible",
+            destination_pos=None if dest is None else dest.centroid, chunk_gripper=chunk_g,
+            wrist_depth_mm=scene.get(f"depth/{WRIST_CAMERA.get(hand, 'wrist_cam_l')}"))
+    # --- T91c — end
 
     def _hsr5_after_grasp(self, rule: str) -> Optional[bool]:
         """T82 — the after-grasp terms on (True) / off (False) by the stage; None = no stage (latch rule)."""
@@ -2658,6 +2792,13 @@ class SafePolicy:
             **({"hsr6": _jsonable(self._last_hsr6)} if self.hsr6 is not None else {}),
             # T82 — only with --hsr5: stage · p · probe · ms · per rule the stage source.
             **({"hsr5": _jsonable(self._last_hsr5)} if self.hsr5 is not None else {}),
+            # T92 — only with --subtask-from-latch: subtask_source="latch" · the latch phase · the label given to the gate.
+            **({"subtask_source": "latch", "subtask_latch": _jsonable(self._last_subtask_latch)}
+               if self.subtask_from_latch else {}),
+            # --- T91c — begin: only with --subtask-from-phase-machine: subtask_source="phase_machine" · stage · label · evidence.
+            **({"subtask_source": "phase_machine", "phase_machine": _jsonable(self._last_phase_machine)}
+               if self.subtask_from_phase_machine else {}),
+            # --- T91c — end
             # IFG-S2SERVE — 켰을 때만: 이번 frame 의 경보 기록 (gate_score · gate_alert · gate_why · ms · 적용 여부).
             **({"confidence_gate": _jsonable(self.ag3s.confidence_gate_record())}
                if self._confidence_gate_on() else {}),
@@ -3199,6 +3340,28 @@ def geometry_certified(constraint_set: Any) -> bool:
         return False
     status = getattr(getattr(constraint_set, "status", None), "value", None)
     return bool(status == "ok" or subtask_no_target(constraint_set))
+
+
+# --- T92 — begin
+#: T92 — the 3-stage gate label each grasp-latch phase stands for (pick before / while closing, place while held, home
+#: once placed). The caller's `GraspPhase` or its value string; any other phase has no label.
+LATCH_SUBTASK = {
+    GraspPhase.SEARCHING: "pick", GraspPhase.LATCHED: "pick", GraspPhase.CLOSING: "pick",
+    GraspPhase.HELD: "place", GraspPhase.PLACED: "home",
+}
+
+
+def latch_subtask_probabilities(phase: Any) -> Optional[dict[str, float]]:
+    """T92 — `AG3S.set_subtask` input from the grasp latch phase: the one-hot of `LATCH_SUBTASK[phase]` over
+    `{"pick", "place", "home"}`, None for no / an unknown phase (= a request without a label, as before)."""
+    try:
+        label = LATCH_SUBTASK.get(GraspPhase(getattr(phase, "value", phase)))
+    except ValueError:
+        return None
+    if label is None:
+        return None
+    return {c: (1.0 if c == label else 0.0) for c in ("pick", "place", "home")}
+# --- T92 — end
 
 
 def _subtask_probabilities(subtask: Any) -> Optional[dict[str, float]]:

@@ -1,0 +1,386 @@
+{
+ "_comment": "T90 verify — aggregation finished by lead d2 after the dev-07 handoff (HANDOFF_20261103_dev07_to_d2_KO.md §1). Numbers and paths only.",
+ "step": "T90",
+ "date": "2026-11-03 17:0x KST",
+ "runs": [
+  {
+   "id": "aggregation (T87 tools copy)",
+   "command": "bash /mnt/dev/AG3S_VLA-storage/results/development/20261103T125521+0900_ed0145a692ad_47f74feee80d/verify/T90/agg/run_t89_t90_agg.sh",
+   "raw_output": "/mnt/dev/AG3S_VLA-storage/results/development/20261103T125521+0900_ed0145a692ad_47f74feee80d/verify/T90/agg"
+  },
+  {
+   "id": "ATS precision",
+   "command": "/mnt/dev/AG3S_VLA-storage/results/development/20261103T125521+0900_ed0145a692ad_47f74feee80d/verify/T90/agg/t90_ats_precision.py (P_k0, B0_k0)",
+   "raw_output": "/mnt/dev/AG3S_VLA-storage/results/development/20261103T125521+0900_ed0145a692ad_47f74feee80d/verify/T90/agg/ats",
+   "stdout_log": "/mnt/dev/AG3S_VLA-storage/results/development/20261103T125521+0900_ed0145a692ad_47f74feee80d/verify/T90/agg/logs/ats_P_k0.out, ats_B0_k0.out"
+  },
+  {
+   "id": "aggregate + figures",
+   "command": ".venv-ag3s/bin/python /mnt/dev/AG3S_VLA-storage/results/development/20261103T125521+0900_ed0145a692ad_47f74feee80d/verify/T90/agg/t90_aggregate.py (SNAP=snapshot_t84)",
+   "raw_output": "/mnt/dev/AG3S_VLA-storage/results/development/20261103T125521+0900_ed0145a692ad_47f74feee80d/verify/T90/agg/t90_table.json",
+   "stdout_log": "/mnt/dev/AG3S_VLA-storage/results/development/20261103T125521+0900_ed0145a692ad_47f74feee80d/verify/T90/agg/logs/aggregate_final.out",
+   "note": "d2 patched scene_panel twice (precision missing for the B0 panel request: computed from the same 10 mm labels; title formatting). pre-patch copy agg/t90_aggregate.pre_d2fix.py"
+  }
+ ],
+ "configuration": "T87 base configuration with the ATS target signal = hidden patch probe (--attention-source hidden_probe), snapshot_t90",
+ "comparison": "T87 base configuration B0 k0, same 9 runs (hurdle 211 excluded)",
+ "definitions": "/mnt/dev/AG3S_VLA-storage/results/development/20261103T125521+0900_ed0145a692ad_47f74feee80d/verify/T90/agg/README_definitions.md (+ README_definitions_T87.md)",
+ "numbers": {
+  "P": {
+   "n_runs": 9,
+   "plain_success": 5,
+   "adjusted_success": 5,
+   "forbidden_runs_plain": 1,
+   "became_success_runs": 0,
+   "first_event_adjusted": {
+    "a": 0,
+    "b": 2,
+    "c-target": 0,
+    "c-other": 0,
+    "d": 0,
+    "e1": 0,
+    "e2": 2,
+    "e3": 0
+   },
+   "first_event_plain": {
+    "a": 0,
+    "b": 2,
+    "c-target": 0,
+    "c-other": 0,
+    "d": 0,
+    "e1": 0,
+    "e2": 2,
+    "e3": 0
+   },
+   "median_frac_left_nb": 0.1556,
+   "window_hold_requests_sum": 37,
+   "labels_plain": {
+    "성공": 5,
+    "이웃접촉": 1,
+    "쥐지못함": 2,
+    "못놓음": 1
+   }
+  },
+  "B0": {
+   "n_runs": 9,
+   "plain_success": 6,
+   "adjusted_success": 7,
+   "forbidden_runs_plain": 1,
+   "became_success_runs": 1,
+   "first_event_adjusted": {
+    "a": 0,
+    "b": 1,
+    "c-target": 0,
+    "c-other": 0,
+    "d": 0,
+    "e1": 0,
+    "e2": 1,
+    "e3": 0
+   },
+   "first_event_plain": {
+    "a": 0,
+    "b": 1,
+    "c-target": 0,
+    "c-other": 0,
+    "d": 0,
+    "e1": 1,
+    "e2": 1,
+    "e3": 0
+   },
+   "median_frac_left_nb": 0.1431,
+   "window_hold_requests_sum": 2,
+   "labels_plain": {
+    "이웃접촉": 1,
+    "성공": 6,
+    "쥐지못함": 2
+   }
+  },
+  "ats_P": {
+   "n_requests_with_target_points": 449,
+   "request_median_precision": 0.9107,
+   "run_median_of_medians": 0.9103,
+   "per_run_median": {
+    "회귀211_k0": 0.1951,
+    "회귀954_k0": 0.9032,
+    "회귀119_k1": 0.9107,
+    "가림121_k0": 0.9103,
+    "가림122_k0": 0.9125,
+    "허들119_k0": 0.9042,
+    "허들954_k0": 0.5965,
+    "허들1345_k0": 0.9117,
+    "허들850_k0": 0.9386
+   },
+   "n_majority_not_apple": 96,
+   "majority_counts": {
+    "apple": 353,
+    "none": 70,
+    "banana": 26
+   },
+   "pre_grasp_n_requests": 353,
+   "pre_grasp_request_median_precision": 0.9145,
+   "pre_grasp_run_median_of_medians": 0.9224,
+   "pre_grasp_per_run_median": {
+    "회귀211_k0": 0.6056,
+    "회귀954_k0": 0.9032,
+    "회귀119_k1": 0.9107,
+    "가림121_k0": 0.9232,
+    "가림122_k0": 0.9375,
+    "허들119_k0": 0.9256,
+    "허들954_k0": 0.9115,
+    "허들1345_k0": 0.9224,
+    "허들850_k0": 0.9386
+   },
+   "pre_grasp_n_majority_not_apple": 1,
+   "pre_grasp_majority_counts": {
+    "apple": 352,
+    "none": 1
+   },
+   "pre_grasp_centroid_to_apple_mm_median": 16.3,
+   "attention_source_ms": {
+    "n": 493,
+    "median": 26.93,
+    "p90": 27.64,
+    "max": 148.68,
+    "first_request_excluded": 4038.77,
+    "source": "spec chunks summary_json.attention_source.ms"
+   }
+  },
+  "ats_B0": {
+   "n_requests_with_target_points": 412,
+   "request_median_precision": 0.9107,
+   "run_median_of_medians": 0.9159,
+   "per_run_median": {
+    "회귀211_k0": 0.8178,
+    "회귀954_k0": 0.9174,
+    "회귀119_k1": 0.9107,
+    "가림121_k0": 0.9182,
+    "가림122_k0": 0.9159,
+    "허들119_k0": 0.5041,
+    "허들954_k0": 0.8246,
+    "허들1345_k0": 0.9166,
+    "허들850_k0": 0.9386
+   },
+   "n_majority_not_apple": 92,
+   "majority_counts": {
+    "apple": 320,
+    "none": 91,
+    "crate": 1
+   },
+   "pre_grasp_n_requests": 320,
+   "pre_grasp_request_median_precision": 0.919,
+   "pre_grasp_run_median_of_medians": 0.9232,
+   "pre_grasp_per_run_median": {
+    "회귀211_k0": 0.8358,
+    "회귀954_k0": 0.9274,
+    "회귀119_k1": 0.9107,
+    "가림121_k0": 0.9232,
+    "가림122_k0": 0.9375,
+    "허들119_k0": 0.9256,
+    "허들954_k0": 0.9115,
+    "허들1345_k0": 0.9224,
+    "허들850_k0": 0.9386
+   },
+   "pre_grasp_n_majority_not_apple": 1,
+   "pre_grasp_majority_counts": {
+    "apple": 319,
+    "none": 1
+   },
+   "pre_grasp_centroid_to_apple_mm_median": 16.3,
+   "attention_source_ms": null
+  },
+  "per_run": [
+   {
+    "label": "회귀211_k0",
+    "P_plain": "성공",
+    "P_adjusted_ok": true,
+    "P_first": null,
+    "B0_plain": "이웃접촉",
+    "B0_adjusted_ok": true,
+    "B0_first": null,
+    "P_ats_median": 0.1951,
+    "B0_ats_median": 0.8178,
+    "P_ats_pre_median": 0.6056,
+    "B0_ats_pre_median": 0.8358,
+    "P_not_apple": 27,
+    "B0_not_apple": 12,
+    "P_frac_left_nb": 0.1684,
+    "B0_frac_left_nb": 0.1885,
+    "P_window_hold": 0,
+    "B0_window_hold": 0
+   },
+   {
+    "label": "회귀954_k0",
+    "P_plain": "이웃접촉",
+    "P_adjusted_ok": false,
+    "P_first": "b",
+    "B0_plain": "성공",
+    "B0_adjusted_ok": true,
+    "B0_first": null,
+    "P_ats_median": 0.9032,
+    "B0_ats_median": 0.9174,
+    "P_ats_pre_median": 0.9032,
+    "B0_ats_pre_median": 0.9274,
+    "P_not_apple": 1,
+    "B0_not_apple": 14,
+    "P_frac_left_nb": 0.1275,
+    "B0_frac_left_nb": 0.1206,
+    "P_window_hold": 35,
+    "B0_window_hold": 0
+   },
+   {
+    "label": "회귀119_k1",
+    "P_plain": "쥐지못함",
+    "P_adjusted_ok": false,
+    "P_first": "b",
+    "B0_plain": "쥐지못함",
+    "B0_adjusted_ok": false,
+    "B0_first": "b",
+    "P_ats_median": 0.9107,
+    "B0_ats_median": 0.9107,
+    "P_ats_pre_median": 0.9107,
+    "B0_ats_pre_median": 0.9107,
+    "P_not_apple": 0,
+    "B0_not_apple": 0,
+    "P_frac_left_nb": 0.1556,
+    "B0_frac_left_nb": 0.1431,
+    "P_window_hold": 0,
+    "B0_window_hold": 0
+   },
+   {
+    "label": "가림121_k0",
+    "P_plain": "성공",
+    "P_adjusted_ok": true,
+    "P_first": null,
+    "B0_plain": "성공",
+    "B0_adjusted_ok": true,
+    "B0_first": null,
+    "P_ats_median": 0.9103,
+    "B0_ats_median": 0.9182,
+    "P_ats_pre_median": 0.9232,
+    "B0_ats_pre_median": 0.9232,
+    "P_not_apple": 14,
+    "B0_not_apple": 9,
+    "P_frac_left_nb": 0.1608,
+    "B0_frac_left_nb": 0.1608,
+    "P_window_hold": 1,
+    "B0_window_hold": 1
+   },
+   {
+    "label": "가림122_k0",
+    "P_plain": "성공",
+    "P_adjusted_ok": true,
+    "P_first": null,
+    "B0_plain": "성공",
+    "B0_adjusted_ok": true,
+    "B0_first": null,
+    "P_ats_median": 0.9125,
+    "B0_ats_median": 0.9159,
+    "P_ats_pre_median": 0.9375,
+    "B0_ats_pre_median": 0.9375,
+    "P_not_apple": 13,
+    "B0_not_apple": 12,
+    "P_frac_left_nb": 0.1557,
+    "B0_frac_left_nb": 0.1557,
+    "P_window_hold": 0,
+    "B0_window_hold": 0
+   },
+   {
+    "label": "허들954_k0",
+    "P_plain": "못놓음",
+    "P_adjusted_ok": false,
+    "P_first": "e2",
+    "B0_plain": "성공",
+    "B0_adjusted_ok": true,
+    "B0_first": null,
+    "P_ats_median": 0.5965,
+    "B0_ats_median": 0.8246,
+    "P_ats_pre_median": 0.9115,
+    "B0_ats_pre_median": 0.9115,
+    "P_not_apple": 20,
+    "B0_not_apple": 19,
+    "P_frac_left_nb": 0.1301,
+    "B0_frac_left_nb": 0.1301,
+    "P_window_hold": 0,
+    "B0_window_hold": 0
+   },
+   {
+    "label": "허들1345_k0",
+    "P_plain": "성공",
+    "P_adjusted_ok": true,
+    "P_first": null,
+    "B0_plain": "성공",
+    "B0_adjusted_ok": true,
+    "B0_first": null,
+    "P_ats_median": 0.9117,
+    "B0_ats_median": 0.9166,
+    "P_ats_pre_median": 0.9224,
+    "B0_ats_pre_median": 0.9224,
+    "P_not_apple": 14,
+    "B0_not_apple": 10,
+    "P_frac_left_nb": 0.162,
+    "B0_frac_left_nb": 0.162,
+    "P_window_hold": 1,
+    "B0_window_hold": 1
+   },
+   {
+    "label": "허들119_k0",
+    "P_plain": "성공",
+    "P_adjusted_ok": true,
+    "P_first": null,
+    "B0_plain": "성공",
+    "B0_adjusted_ok": true,
+    "B0_first": null,
+    "P_ats_median": 0.9042,
+    "B0_ats_median": 0.5041,
+    "P_ats_pre_median": 0.9256,
+    "B0_ats_pre_median": 0.9256,
+    "P_not_apple": 7,
+    "B0_not_apple": 16,
+    "P_frac_left_nb": 0.0952,
+    "B0_frac_left_nb": 0.0952,
+    "P_window_hold": 0,
+    "B0_window_hold": 0
+   },
+   {
+    "label": "허들850_k0",
+    "P_plain": "쥐지못함",
+    "P_adjusted_ok": false,
+    "P_first": "e2",
+    "B0_plain": "쥐지못함",
+    "B0_adjusted_ok": false,
+    "B0_first": "e2",
+    "P_ats_median": 0.9386,
+    "B0_ats_median": 0.9386,
+    "P_ats_pre_median": 0.9386,
+    "B0_ats_pre_median": 0.9386,
+    "P_not_apple": 0,
+    "B0_not_apple": 0,
+    "P_frac_left_nb": 0.1147,
+    "B0_frac_left_nb": 0.1147,
+    "P_window_hold": 0,
+    "B0_window_hold": 0
+   }
+  ]
+ },
+ "hold_reasons_regression954_P": {
+  "window_hold_requests": 35,
+  "t_step_range": [
+   41,
+   75
+  ],
+  "kinds": "unverified (authorized-link rows on the manipulated object answered by the coarse tier) on 34 requests, plus collision rows nearest_is_not_manipulated on 21; first HOLD t41 = collision ee_finger_r2 ↔ target -1.0 mm (answer_excludes_target)",
+  "source": "/mnt/dev/AG3S_VLA-storage/results/development/20261103T125521+0900_ed0145a692ad_47f74feee80d/verify/T90/CL/P/k0/server_P_8298_20261103T040054/server_constraints (summary_json.verdict)"
+ },
+ "figures": [
+  "AG3S/ag3s/docs/figures/t90-table.png",
+  "AG3S/ag3s/docs/figures/t90-outcome-hold-graph.png",
+  "AG3S/ag3s/docs/figures/t90-ats-precision-graph.png",
+  "AG3S/ag3s/docs/figures/t90-ats-target-scene.png"
+ ],
+ "outputs": "/mnt/dev/AG3S_VLA-development/outputs/2026-11-03_T90_ATS_hiddenprobe_serving_closedloop",
+ "verdict": "numbers only; the verdict sentence is lead's (README).",
+ "not_measured": [
+  "coarse vs fine tier coverage of the manipulated object per request (why the probe target leaves rows unresolved)",
+  "seed repeats"
+ ]
+}
