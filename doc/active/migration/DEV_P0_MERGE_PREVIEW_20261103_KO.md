@@ -88,7 +88,8 @@ untracked 파일은 merge 대상과 경로가 겹치지 않으면 merge를 막�
 | 11-03 13:1x | main 02fe59e6을 HEAD 96fda38a 위에 시험 merge했다. 충돌 6개 파일 25곳: grasp_latch 3 · hsr6 2 · linearize 2 · sqp 2 · serve_safe 4 · safe_policy 12. 추가끼리 겹친 것은 둘 다 남겼다. `_hsr6_objective_ok`는 `(term, q_now, manipulators)`로 합쳤고, 판정 1에 따라 `--hsr6-objective-window` + `--hsr6-objective-scope nbc` 조합을 시작할 때 거절하게 했다. 합친 6개 파일은 compile된다 |
 | 13:5x–14:38 | 전체 테스트를 한 번에 돌리면 pod OOM(cgroup oom_kill)으로 죽어서 디렉터리별로 나눠 돌렸다. tests/ag3s: 4 failed / 1985 passed |
 | 15:2x | benchmark·ag3s에서 실패가 난 20개 파일을 시험 merge와 merge 전 HEAD(20bdf7a4)에서 같은 조건으로 다시 돌렸다. merge: 11 failed + 20 errors, HEAD: 10 failed + 20 errors. **merge에서만 실패한 것은 1개**(`test_t86_patch_probe`, `.venv-ag3s`에 jax가 없음 = 환경). 공통 실패 30개는 worktree 환경 때문이다(golden이 checkout 경로를 기록 · worktree에 `.venv-libero` 등이 없음) |
-| 15:3x | tests/trajopt을 파일 하나씩 다시 돌리는 중 |
+| 15:3x–16:3x | tests/trajopt 122개 파일을 하나씩 돌렸다(판정 반영 뒤 코드). 실패 4개: legacy fixture가 없어 3개 실행 불가, `test_t43t_replay` 1개는 merge 전 HEAD에서도 같은 테스트(`test_off_is_bit_identical_to_the_pre_fix_commit`)가 실패 = 원래 있던 실패. `test_t46f_a14_wrist_cover`는 파일별 실행 중 OOM으로 죽었고, 메모리 정리 뒤 단독 재실행 30 passed |
+| 17:0x | **결론: 시험 merge에서 merge 때문에 새로 생긴 코드 회귀 없음.** 남은 실패는 모두 worktree 환경 차이이거나 원래 있던 실패 |
 
 ## 7. 사용자 판정 (2026-11-03) 과 시험 merge 반영
 
@@ -111,3 +112,14 @@ untracked 파일은 merge 대상과 경로가 겹치지 않으면 merge를 막�
 | 판정 반영 관련 묶음 | 339 passed / 5 skipped | — |
 
 **merge 때문에 생긴 코드 회귀는 찾지 못했다.** 실제 checkout의 미커밋 · untracked 경로 가운데 merge가 바꾸는 파일과 겹치는 것은 없다(경로 대조).
+
+## 8. merge 대상 변경: development main a0b16d0a (2026-11-03 18:0x KST, development d2 세션 지시)
+
+a0b16d0a = 02fe59e6 + T91–T93(63e98cc8 코드, 문서, benchmark 이식 지시 `BENCHMARK_T90_T93_TRANSFER_20261103_KO.md`). 02fe59e6 시험 merge 결과 위에 이어서 시험 merge했다.
+
+| 항목 | 내용 |
+|---|---|
+| 새 충돌 | 2곳: `safe_policy.py` `__init__` 인자(benchmark 로봇 주입 인자 + T92 `subtask_from_latch` · T91c `subtask_from_phase_machine` · T93 `fm_guide`, 둘 다 남김), `serve_safe.py` 서버 조립(`apply_grasp_contact_flags` + T92 · T91c announce, 둘 다 남김) |
+| 추가 수정 | T91c 테스트가 `__init__` 없이 만든 SafePolicy에서 benchmark의 `_hands`(SL5a 손 index 주입)를 읽어 10개 실패 → class 기본값 `_hands = None`(= RB-Y1 규칙) 추가. benchmark에 이미 있는 test double용 class 기본값과 같은 방식 |
+| Panda 거절 목록 | T91–T93 option 7개(`subtask_from_latch`, `subtask_from_phase_machine`, `fm_guide`, `fm_guide_scale`, `fm_guide_steps`, `fm_guide_max_step_rad`, `fm_guide_sweep`) 추가 — STEP별 Panda 이식 때 해제. 테스트 파일 이름을 `tests/benchmark/test_merge_dev_main_20261103_panda.py`로 바꿈 |
+| 테스트 | 핵심 묶음(Panda 최종 구성 · SL6-A · SL6-H · SL5j recorder · HSR6 · T67 · T82 · T91 · T91b · T91c · T92 · T93 · 거절 테스트) 485 passed / 6 skipped. benchmark · ag3s 20개 파일 재실행 결과는 02fe59e6 때와 같다(merge 전 HEAD 대비 새 실패 1개 = `test_t86_patch_probe`, jax 없음) |
