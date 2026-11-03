@@ -1,6 +1,6 @@
 # SL7f — 표면 seed를 ATS target에 맞추기 (`--surface-seed-ats-gate`): 오프라인 SafeLIBERO 재생 + LIBERO 9
 
-> writer: lead (benchmark checkout), 2026-11-04 06:2x KST. **결과를 보기 전에 고정.**
+> writer: lead (benchmark checkout), 2026-11-04 05:5x KST. **결과를 보기 전에 고정.**
 > 판정 주체: lead 자율 판정 D4 (사용자 지시 "11:30까지 스스로 판정") — `doc/active/experiments/SL7_AUTONOMOUS_DECISIONS_20261104_KO.md`.
 > 앞 단계: SL7e — pc판 + 표면 추출 3/9, pc판 − HSR6 2/9 → Panda 후보 뼈대 = pc판(HSR6 유지) + 고친 표면 추출. SL7c ② — 표면 seed가 장애물 위(4/6) · 표면은 맞는데 ATS와 어긋나 버려짐(2/6).
 

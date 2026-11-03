@@ -435,6 +435,15 @@ PC_NOPROBE_VERSIONS: tuple[str, ...] = ("AG3S-final-panda-v3-e0to-pc-nohsr6",)
 SEED_GATE_FLAGS: tuple[str, ...] = ("--surface-seed-ats-gate",)
 AG3S_VERSIONS["AG3S-final-panda-v3-e0to-pc-surface-gate"] = PC_SURFACE_FLAGS + SEED_GATE_FLAGS   # SL7f candidate
 PC_LATCH_VERSIONS = PC_LATCH_VERSIONS + ("AG3S-final-panda-v3-e0to-pc-surface-gate",)
+#: SL7g (lead self-ruling D5, 2026-11-04): surface where accepted, ball otherwise -- pc판 + the surface extent with the
+#: ATS overlap check but without `--surface-keep-last` / `--surface-grasp-hold` / `--surface-no-ball` (and hull fill /
+#: contact allowance, which need them): a request without an accepted region falls back to the `estimated` (ball) extent.
+PC_SURFACE_FALLBACK_FLAGS: tuple[str, ...] = (
+    tuple(PC_SURFACE_FLAGS[:len(PC_SURFACE_FLAGS) - len(P0M_SURFACE_FLAGS) - len(P0M_HULL_FLAGS)])
+    + ("--target-extent", "attention-surface", "--surface-target-check", "overlap", "--attention-surface-device", "cuda"))
+AG3S_VERSIONS["AG3S-final-panda-v3-e0to-pc-surface-fb"] = PC_SURFACE_FALLBACK_FLAGS                       # SL7g
+AG3S_VERSIONS["AG3S-final-panda-v3-e0to-pc-surface-fb-gate"] = PC_SURFACE_FALLBACK_FLAGS + SEED_GATE_FLAGS  # SL7g
+PC_LATCH_VERSIONS = PC_LATCH_VERSIONS + ("AG3S-final-panda-v3-e0to-pc-surface-fb", "AG3S-final-panda-v3-e0to-pc-surface-fb-gate")
 #: SL6-B B4 — the Panda HSR6 probe (5 classes, no retreat; labels approved by the user 2026-10-29), the default
 #: ``--hsr6-probe`` of the final versions, and its SHA-256 (recorded by the server, checked by the test when present).
 #: SL7 (0.7): found under the shared storage root (``AG3S_STORAGE_ROOT``, default the checkout's sibling

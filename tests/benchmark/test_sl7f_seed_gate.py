@@ -80,3 +80,28 @@ def test_pc_surface_gate_builds_with_the_gate(gpu_ok, monkeypatch):
         assert "--surface-seed-ats-gate" not in pf.AG3S_VERSIONS[old]
     assert list(pf.AG3S_VERSIONS["AG3S-final-panda-p0m-gate"]) == list(pf.AG3S_VERSIONS["AG3S-final-panda-p0m"]) + [
         "--surface-seed-ats-gate"]
+
+
+@pytest.mark.parametrize("v", ["AG3S-final-panda-v3-e0to-pc-surface-fb", "AG3S-final-panda-v3-e0to-pc-surface-fb-gate"])
+def test_sl7g_fallback_versions_build(v, gpu_ok, monkeypatch):
+    """SL7g — pc판 + surface extent with the ATS overlap check, no keep-last / grasp-hold / no-ball (ball fallback)."""
+    from AG3S.adapters.panda import profile as pf
+    from AG3S.adapters.panda import server as ps
+
+    if not pathlib.Path(pf.PANDA_HSR6_PROBE).exists():
+        pytest.skip("Panda HSR6 probe not in this storage root")
+    fl = list(pf.AG3S_VERSIONS[v])
+    for t in ("--surface-keep-last", "--surface-grasp-hold", "--surface-no-ball", "--surface-hull-fill",
+              "--surface-contact-allowance-mm", "--nontarget-evidence"):
+        assert t not in fl
+    assert fl[fl.index("--attention-source") + 1] == "action:last:L8H2" and "--hsr6-objective" in fl
+    monkeypatch.setenv("AG3S_PANDA_CONVERSION", "C")
+    argv = pf.version_server_argv(v)
+    argv[argv.index("--config") + 1] = "pi05_libero"
+    args = pf.parse_v11ab_args(argv=argv + ["--robot", "panda"] + pf.version_server_flags(v))
+    ps.check_unported_flags(args, None)
+    served, _ = ps.build_safe_server(_Stub(), args, gpu_warm_up=False)
+    e = served._policy.ag3s.config.esdf
+    assert e.target_extent == "attention_surface" and e.surface_target_check == "overlap"
+    assert not e.surface_keep_last and not e.surface_no_ball and not e.surface_grasp_hold and not e.surface_hull_fill
+    assert e.surface_seed_ats_gate is v.endswith("-gate") and served._policy.hsr6 is not None
