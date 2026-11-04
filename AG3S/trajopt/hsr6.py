@@ -62,6 +62,7 @@ __all__ = [
     "objective_allowed",
     "PLACEMENT",
     "PLACEMENT_BENEATH_COS",
+    "PLACEMENT_LIFT_PHASES",
     "PLACEMENT_CONTACT_CHECKS",
     "phase_of",
     "placement_contact_ok",
@@ -83,6 +84,10 @@ RETREAT = "retreat"
 OBJECTIVE_PHASE = "grasp"
 #: ⑤ (SL6-H) — the only phase in which the held object may touch the surfaces beneath it.
 PLACEMENT = "placement"
+#: ⑤ SL10e (`--hsr6-placement-contact-lift`) -- the phases when that flag is on: placement or lift (not transport: a carried
+#: object must not be allowed to touch what it passes over). Recorded as ``hsr6.detail.placement_contact.phase_rule``.
+PLACEMENT_LIFT_PHASES = frozenset({PLACEMENT, "lift"})
+PLACEMENT_LIFT_RULE = "placement|lift"
 #: ⑤ — the CLOSING evidence that counts as "held" for ⑤ (task SL6 §11 H1: `closed` ∧ `blocked`, as ① uses them).
 PLACEMENT_CONTACT_CHECKS = ("closed", "blocked")
 #: ⑤ — "beneath": the field's unit gradient at the held sphere's centre points up within 45° (``ĝ_z ≥ cos 45°``),
@@ -160,12 +165,15 @@ class Hsr6Flags:
     placement_contact: bool = False
     #: T67 ② (`--hsr6-objective-window`, merged 2026-11-03 after `placement_contact`).
     objective_window: bool = False
+    #: SL10e (`--hsr6-placement-contact-lift`): ⑤'s phase condition becomes placement ∨ lift. Not a use of its own: refused
+    #: without `placement_contact` (`serve_safe.reject_hsr6_flags`); after `objective_window` so `names()` keeps its order.
+    placement_contact_lift: bool = False
 
     @property
     def on(self) -> bool:
         # `objective_window` alone is refused at start (`reject_hsr6_flags`); it counts here so that check sees it
         return bool(self.attach_assist or self.held_gate or self.target_exempt or self.objective
-                    or self.placement_contact or self.objective_window)
+                    or self.placement_contact or self.objective_window or self.placement_contact_lift)
 
     def names(self) -> list[str]:
         return [f.name for f in dataclasses.fields(self) if getattr(self, f.name)]
@@ -221,7 +229,8 @@ def objective_allowed(phase: Optional[str], *, window: Optional[bool] = None) ->
     return bool(window) if (window is not None and phase == OBJECTIVE_WINDOW_PHASE) else False
 
 
-def placement_contact_ok(phase: Optional[str], *, latch: Optional[str], checks: Mapping[str, Any]) -> bool:
+def placement_contact_ok(phase: Optional[str], *, latch: Optional[str], checks: Mapping[str, Any],
+                         lift: bool = False) -> bool:
     """⑤ (SL6-H, task SL6 §11 H1, fixed before results): phase = placement ∧ (latch HELD ∨ (latch CLOSING ∧ the
     CLOSING evidence `closed` ∧ `blocked`)). `latch` is the `GraspPhase` value (``"held"`` · ``"closing"`` · …).
 
@@ -232,8 +241,12 @@ def placement_contact_ok(phase: Optional[str], *, latch: Optional[str], checks: 
     | placement | closing | otherwise | off |
     | placement | searching · latched · placed | any | off |
     | anything else / None | any | any | off |
+
+    SL10e: with ``lift=True`` (`--hsr6-placement-contact-lift`) the phase column is placement **or lift** -- every row of
+    the table above holds for lift as for placement (the latch condition is unchanged), transport · approach · grasp ·
+    retreat stay off. ``lift=False`` (default) = the table as written.
     """
-    if phase != PLACEMENT:
+    if phase != PLACEMENT and not (lift and phase in PLACEMENT_LIFT_PHASES):
         return False
     if latch == "held":
         return True
