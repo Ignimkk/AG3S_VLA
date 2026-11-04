@@ -26,15 +26,18 @@ RB-Y1 의 `fixed_input_ablation.py` 를 Panda 로 옮긴 짝 도구다 (그 modu
 
 ## 재현하지 **못하는** 것 (기록에 없다)
 
-* **쥔 물체의 부착 구** (`SceneSnapshot.attached_*`). 기록기가 싣지 않는다. 쥠(held) call 의 replay 는 이 구멍 때문에
-  충실도 검사에서 걸러진다. `--attached-spheres-json` 으로 구를 직접 줄 수 있다 (parent link 좌표계의 `[cx, cy, cz, r]`).
-* 서버가 `SceneSnapshot` 에 후처리로 붙이는 것 중 `held_capture_spheres`. (`neighbour_contact` · `neighbour_palm_contact` ·
+* **쥔 물체의 부착 구** (`SceneSnapshot.attached_*`) — SL10c 이전 기록(`held_local_spheres` 키 없음)에서만. 쥠(held) call 의
+  replay 는 이 구멍 때문에 충실도 검사에서 걸러진다. `--attached-spheres-json` 으로 구를 직접 줄 수 있다 (parent link 좌표계의
+  `[cx, cy, cz, r]`). SL10c 기록(`held_local_spheres` · `attached_parent_link`)에는 그 값이 있고, 도구는 기록값을 쓴다
+  (`--attached-spheres-json` 을 주면 그쪽이 이긴다).
+* 서버가 `SceneSnapshot` 에 후처리로 붙이는 것 중 `held_capture_spheres` — SL10c 이전 기록에서만 (SL10c 기록에는 `held_capture_spheres`
+  키가 있고 도구가 `scene_from_constraint_set(held_capture=)` 에 넘긴다). (`neighbour_contact` · `neighbour_palm_contact` ·
   `grasp_contact` · `placement_contact` · HSR6 ③ 는 기록에서 되짚어 붙인다 — `server_scene_additions`.)
 * 라벨 층 (목적지 마진 · "가장 가까운 표면이 target 인가").
 * QP 의 call 간 warm start (OSQP). call 마다 새 solver 로 푼다 (episode 를 이어 푸는 chain 은 구현하지 않았다 — impl.md).
 * `manipulated.points` — `summary.manipulated.last_seen_frame` 프레임의 `target_points` 로 대신한다 (`manipulated_points_for`).
-* 지지면 평면 — 법선 · 오프셋은 기록되지 않아 `support_mask` + 점군에서 TLS 로 다시 맞춘다 (`support_surfaces_from_record`; 근사,
-  두 번째 평면은 몇 mm · 몇 도 어긋날 수 있다).
+* 지지면 평면 — SL10c 이전 기록은 법선 · 오프셋이 없어 `support_mask` + 점군에서 TLS 로 다시 맞춘다 (`support_surfaces_from_record`;
+  근사, 두 번째 평면은 몇 mm · 몇 도 어긋날 수 있다). SL10c 기록은 `support_planes` 를 그대로 쓴다 (`support_surfaces_recorded`).
 * OSQP 의 call 간 상태 — 위반이 큰 call (QP 수천 iteration) 에서는 입력이 같아도 해가 다르다 (impl.md "실제 기록 충실도").
 
 ## 충실도 (먼저 하는 것)
@@ -742,6 +745,41 @@ def support_surfaces_from_record(z, *, max_planes: int = 2, threshold: float = 0
     return surfaces, info
 
 
+def support_surfaces_recorded(z) -> tuple[Optional[list], dict]:
+    """SL10c — 기록기가 싣는 서버의 지지면 평면 (`support_planes`, `(P, 4)` `[nx, ny, nz, offset]`, `n·p = offset`, base 좌표).
+
+    키가 있으면 `support_surfaces_from_record` 의 RANSAC 재맞춤 근사 대신 이 값을 쓴다 — 서버가 TrajOpt 에 준 평면 그대로다
+    (`linearize.support_planes_of`). 키가 없으면 `(None, 이유)` 이고 호출한 쪽이 기존 경로로 간다. `(0, 4)` 는 "서버에 평면이
+    없었다" 이다 (재맞춤으로 평면을 만들어 내지 않는다).
+    """
+    if "support_planes" not in z.files:
+        return None, {"source": None, "why": "no support_planes key in the record"}
+    planes = np.asarray(z["support_planes"], np.float64).reshape(-1, 4)
+    surfaces = [types.SimpleNamespace(normal=row[:3].copy(), offset=float(row[3])) for row in planes]
+    return surfaces, {"source": "record support_planes", "n_planes": int(len(planes)),
+                      "planes": [{"normal": [float(v) for v in row[:3]], "offset": float(row[3])} for row in planes]}
+
+
+def attached_spec_from_record(z) -> Optional[dict]:
+    """SL10c — 기록기가 싣는 쥔 물체 구 (`held_local_spheres` `(K, 4)` parent 좌표계 + `attached_parent_link`) 를
+    `--attached-spheres-json` 과 같은 모양 (`{"parent_link", "spheres"}`) 으로. 없으면 None."""
+    if "held_local_spheres" not in z.files or "attached_parent_link" not in z.files:
+        return None
+    sph = np.asarray(z["held_local_spheres"], np.float64).reshape(-1, 4)
+    if not len(sph):
+        return None
+    return {"parent_link": str(z["attached_parent_link"]), "spheres": sph.tolist()}
+
+
+def held_capture_from_record(z) -> Optional[np.ndarray]:
+    """SL10c — 기록의 `held_capture_spheres` (`(C, 4)` base) 또는 None. `scene_from_constraint_set(held_capture=)` 에 그대로 간다
+    (그 함수가 `held_obstacle_margin` · `lookahead` 일 때만 쓴다 — 서버의 `_held_capture_for_scene` 와 같은 조건)."""
+    if "held_capture_spheres" not in z.files:
+        return None
+    cap = np.asarray(z["held_capture_spheres"], np.float64).reshape(-1, 4)
+    return cap if len(cap) else None
+
+
 def server_scene_additions(rt: "Runtime", call: Call, summary: dict, scene, *, authorized: Sequence[str]):
     """서버(`SafePolicy._scene_and_state`)가 `scene_from_constraint_set` 의 결과에 **후처리로 붙이는** 것을 기록으로 되짚어 붙인다.
     `(scene, 근거)`. 순서는 서버와 같다: grasp_contact → HSR6 ③ target 허용 제거 → HSR6 ⑤ placement_contact → IFG-NBC →
@@ -869,8 +907,12 @@ def build_scene(rt: Runtime, call: Call, z, summary: dict, field, *, attached: b
     man = None
     margin = None
     attached_obj = None
+    spec = None
+    spec_source = "--attached-spheres-json"
     if attached:
-        spec = rt.attached_spheres
+        spec = rt.attached_spheres                       # 사용자가 직접 준 값이 이긴다
+        if not spec:
+            spec, spec_source = attached_spec_from_record(z), "record held_local_spheres"   # SL10c: 기록값
         if spec:
             parent = str(spec["parent_link"])
             sph = np.asarray(spec["spheres"], np.float64).reshape(-1, 4)
@@ -878,7 +920,7 @@ def build_scene(rt: Runtime, call: Call, z, summary: dict, field, *, attached: b
             base = (T[:3, :3] @ sph[:, :3].T).T + T[:3, 3]
             man = types.SimpleNamespace(points=None, sphere_centers=base, sphere_radii=sph[:, 3])
             attached_obj = types.SimpleNamespace(points=sph[:, :3], parent_link=parent, primitives=(), label="supplied")
-            info["attached"] = {"source": "--attached-spheres-json", "n": int(len(sph)), "parent_link": parent}
+            info["attached"] = {"source": spec_source, "n": int(len(sph)), "parent_link": parent}
         else:
             info["attached"] = {"source": None, "missing": "held spheres are not in the record"}
     elif target_points is not None:
@@ -893,16 +935,21 @@ def build_scene(rt: Runtime, call: Call, z, summary: dict, field, *, attached: b
         nonauth = np.asarray([n not in set(rt.policy.authorized_links(perm_ctx)) for n in names], bool)
     tf = (summary.get("target_exclusion") or {})
     field.stats = {"target_free": {"exclusion_method": tf.get("exclusion_method")}} if tf.get("exclusion_method") else {}
-    surfaces, info["support_surfaces"] = support_surfaces_from_record(z)
+    surfaces, info["support_surfaces"] = support_surfaces_recorded(z)      # SL10c: 서버가 실은 평면 그대로
+    if surfaces is None:
+        surfaces, info["support_surfaces"] = support_surfaces_from_record(z)   # 키가 없는 옛 기록: RANSAC 재맞춤 근사
     cs = types.SimpleNamespace(
         constraints=None, esdf=field, manipulated=man, manipulated_link_margin=margin, attached=attached_obj,
         destination_label=None, destination_margin=None, target_field_exclude=mask,
         target_field_policy=str(perm.get("policy") or ""), nonauthorized_target_rows=nonauth,
         metrics={"target_permission": perm}, support_surfaces=tuple(surfaces))
-    scene = scene_from_constraint_set(cs, rt.lin.robot_radii, rt.to_config, held_capture=None)
+    held_capture = held_capture_from_record(z) if attached_obj is not None else None
+    info["held_capture"] = ({"source": "record held_capture_spheres", "n": int(len(held_capture))}
+                            if held_capture is not None else None)
+    scene = scene_from_constraint_set(cs, rt.lin.robot_radii, rt.to_config, held_capture=held_capture)
     scene, info["server_additions"] = server_scene_additions(rt, call, summary, scene, authorized=authorized)
-    if attached_obj is not None and rt.attached_spheres:
-        sph = np.asarray(rt.attached_spheres["spheres"], np.float64).reshape(-1, 4)
+    if attached_obj is not None and spec:
+        sph = np.asarray(spec["spheres"], np.float64).reshape(-1, 4)
         scene = dataclasses.replace(scene, attached_radii=sph[:, 3])
     return scene, info
 
@@ -1549,9 +1596,11 @@ def main(argv=None) -> int:
         "target_phases": {c.id: c.phase for c in targets}, "dev_threshold_rad": args.min_dev_rad,
         "robot": {"n_constraint_spheres": int(rt.robot.n_spheres), "links": args.links if hasattr(args, "links") else None,
                   "sphere_options": None, "note": "Panda applies no constraint_sphere_options (adapter)"},
-        "not_reproduced": ["held (attached) spheres unless --attached-spheres-json", "label layer / destination margin",
-                           "held_capture_spheres", "OSQP state across calls (large-violation calls are not reproducible)",
-                           "support-plane normal/offset (refit from support_mask)"],
+        "not_reproduced": ["held (attached) spheres unless the record has held_local_spheres (SL10c) or --attached-spheres-json",
+                           "label layer / destination margin",
+                           "held_capture_spheres unless the record has them (SL10c)",
+                           "OSQP state across calls (large-violation calls are not reproducible)",
+                           "support-plane normal/offset (refit from support_mask) unless the record has support_planes (SL10c)"],
     }
     # J1 (재풀이 없이, 기록만으로)
     def _snap_for(c: Call):
