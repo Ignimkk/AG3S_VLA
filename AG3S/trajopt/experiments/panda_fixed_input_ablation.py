@@ -28,11 +28,14 @@ RB-Y1 의 `fixed_input_ablation.py` 를 Panda 로 옮긴 짝 도구다 (그 modu
 
 * **쥔 물체의 부착 구** (`SceneSnapshot.attached_*`). 기록기가 싣지 않는다. 쥠(held) call 의 replay 는 이 구멍 때문에
   충실도 검사에서 걸러진다. `--attached-spheres-json` 으로 구를 직접 줄 수 있다 (parent link 좌표계의 `[cx, cy, cz, r]`).
-* 서버가 `SceneSnapshot` 에 후처리로 붙이는 것: `neighbour_contact` · `neighbour_palm_contact` · `grasp_contact` ·
-  `placement_contact` · HSR6 gate · `held_capture_spheres`. 켠 판에서 이 항들이 해를 바꿨다면 충실도 검사가 잡는다.
+* 서버가 `SceneSnapshot` 에 후처리로 붙이는 것 중 `held_capture_spheres`. (`neighbour_contact` · `neighbour_palm_contact` ·
+  `grasp_contact` · `placement_contact` · HSR6 ③ 는 기록에서 되짚어 붙인다 — `server_scene_additions`.)
 * 라벨 층 (목적지 마진 · "가장 가까운 표면이 target 인가").
 * QP 의 call 간 warm start (OSQP). call 마다 새 solver 로 푼다 (episode 를 이어 푸는 chain 은 구현하지 않았다 — impl.md).
-* `manipulated.points` — 기록의 `target_points` 로 대신한다 (occluded 때 마지막 관측 형상이 아닐 수 있다).
+* `manipulated.points` — `summary.manipulated.last_seen_frame` 프레임의 `target_points` 로 대신한다 (`manipulated_points_for`).
+* 지지면 평면 — 법선 · 오프셋은 기록되지 않아 `support_mask` + 점군에서 TLS 로 다시 맞춘다 (`support_surfaces_from_record`; 근사,
+  두 번째 평면은 몇 mm · 몇 도 어긋날 수 있다).
+* OSQP 의 call 간 상태 — 위반이 큰 call (QP 수천 iteration) 에서는 입력이 같아도 해가 다르다 (impl.md "실제 기록 충실도").
 
 ## 충실도 (먼저 하는 것)
 
@@ -414,6 +417,12 @@ class Call:
     chunk_path: Optional[pathlib.Path] = None
     #: 같은 episode 의 직전 call (seq − 1). 연속성 · 꺾임 변화율 context 를 짓는 데 쓴다.
     prev: Optional["Call"] = None
+    #: 요청의 `panda/robot_state` 손가락 qpos 에서 서버와 같은 식 (`|finger_joint1| / 0.04`) 으로 만든 정규화 개도.
+    #: 기록의 `summary.finger_joints.opening_norm` 이 없을 때만 쓴다.
+    opening_norm: Optional[float] = None
+    #: 같은 episode 의 모든 call (`seq` → Call). 서버의 조작 대상 점군(`ag3s.manipulated.points` = 마지막으로 **본** 프레임의 점)을
+    #: 그 프레임의 call 기록에서 찾는 데 쓴다.
+    episode: Optional[dict] = None
 
     @property
     def id(self) -> str:
@@ -440,13 +449,17 @@ def load_episode_calls(episodes_dir: pathlib.Path, stem: str) -> list[Call]:
         if st == "closing":
             seen = True
         oi = int(r["obs_index"])
-        q, _ = pm.split_robot_state(robot_state[oi])
+        q, fingers = pm.split_robot_state(robot_state[oi])
         out.append(Call(stem=stem, seq=int(r["seq"]), index=i, obs_index=oi, phase=phase_of(st, seen), row=r,
                         q_now=q, T_world_base=np.asarray(T[i], np.float64),
                         prev_step=prev_step_world(eef_pos, eef_quat, oi),
                         actions_policy=np.asarray(pol[i], np.float32), joint_reference=np.asarray(ref[i], np.float32),
                         joint_refined=np.asarray(red[i], np.float32), actions_executed=np.asarray(exe[i], np.float64),
-                        prev=out[-1] if out and out[-1].seq == int(r["seq"]) - 1 else None))
+                        prev=out[-1] if out and out[-1].seq == int(r["seq"]) - 1 else None,
+                        opening_norm=abs(float(fingers["panda_finger_joint1"])) / 0.04))
+    by_seq = {c.seq: c for c in out}
+    for c in out:
+        c.episode = by_seq
     return out
 
 
@@ -584,6 +597,7 @@ class Prepared:
     scene_info: dict
     fidelity: dict
     conv_mode: str = "C"
+    finger: Optional[FingerState] = None
     _field_wo: Any = None
 
     def recorded_reference(self) -> np.ndarray:
@@ -667,6 +681,164 @@ def _deflection_history(rt: Runtime, call: Call, fb: dict) -> tuple[Optional[np.
     return arm[-1] - ref[row], f"applied_arm[-1] - previous reference[{row}]"
 
 
+def support_surfaces_from_record(z, *, max_planes: int = 2, threshold: float = 0.008,
+                                 min_points: int = 500) -> tuple[list, dict]:
+    """기록의 `support_mask` (+ 같은 점군) 에서 서버가 TrajOpt 에 준 지지면 평면을 되짚는다. `(surfaces, 근거)`.
+
+    서버는 AG3S 의 RANSAC 평면(`fit_support_surfaces`)을 `constraint_set.support_surfaces` 로 `scene.support_planes` 에 싣고,
+    TrajOpt 가 (i) 지지면 위의 look-ahead 꼬리 행을 버리고 (ii) 지지면 행의 마진 규칙을 가른다. 평면의 법선 · 오프셋은
+    기록되지 않지만, RANSAC 이 끝에 하는 일 (inlier 를 모아 `_refit`: total-least-squares) 의 inlier 집합이 `support_mask` 로
+    기록된다. 같은 점군에 같은 `_refit` 을 다시 하면 평면이 나온다 (두 번째 평면이 있으면 마스크에서 첫 평면 inlier 를 뺀 점들로
+    같은 일을 한다). 마스크가 점군과 길이가 다르면 (기록기가 점군을 솎았다) 되짚지 못한다 — 평면 없음으로 두고 이유를 적는다.
+    """
+    from AG3S.ag3s.stages.support_surface import _orient, _refit
+
+    info: dict[str, Any] = {"source": "support_mask + refit"}
+    if "support_mask" not in z.files:
+        return [], {**info, "unavailable": "no support_mask in the record"}
+    mask = np.asarray(z["support_mask"], bool)
+    cloud = None
+    for key in ("filtered_cloud", "raw_cloud"):
+        if key in z.files and z[key].shape[0] == mask.shape[0]:
+            cloud = np.asarray(z[key], np.float64)
+            break
+    if cloud is None:
+        return [], {**info, "unavailable": "support_mask length does not match a recorded cloud (thinned?)"}
+    remaining = np.flatnonzero(mask)
+    surfaces, planes = [], []
+    up = np.array([0.0, 0.0, 1.0])
+    for plane_i in range(max_planes):
+        if remaining.size < min_points:
+            break
+        pts = cloud[remaining]
+        n, off = _orient(*_refit(pts), up)
+        if plane_i == max_planes - 1:
+            # 마지막 평면: 서버의 마스크는 평면들의 합집합이므로 앞 평면이 가져간 점을 뺀 나머지가 전부 이 평면의 inlier 다
+            surfaces.append(types.SimpleNamespace(normal=n, offset=float(off)))
+            planes.append({"normal": [float(v) for v in n], "offset": float(off), "n_points": int(len(pts)),
+                           "rms_mm": float(np.sqrt(np.mean((pts @ n - off) ** 2)) * 1000.0), "last": True})
+            remaining = remaining[:0]
+            break
+        # 마스크는 평면 둘의 합집합일 수 있다 — 전체의 TLS 는 평면 사이에 선다. inlier 를 거르고 다시 맞추는 것을 고정점까지 되풀이한다
+        # (RANSAC 의 마지막 단계 "inlier 로 `_refit`" 과 같은 일).
+        inl = np.abs(pts @ n - off) <= threshold
+        for _it in range(20):
+            if inl.sum() < min_points:
+                break
+            n2, off2 = _orient(*_refit(pts[inl]), up)
+            inl2 = np.abs(pts @ n2 - off2) <= threshold
+            done = bool((inl2 == inl).all())
+            n, off, inl = n2, off2, inl2
+            if done:
+                break
+        if inl.sum() < min_points:
+            break
+        surfaces.append(types.SimpleNamespace(normal=n, offset=float(off)))
+        planes.append({"normal": [float(v) for v in n], "offset": float(off), "n_points": int(inl.sum()),
+                       "rms_mm": float(np.sqrt(np.mean((pts[inl] @ n - off) ** 2)) * 1000.0)})
+        remaining = remaining[~inl]
+    info["planes"] = planes
+    info["n_mask_points_left"] = int(remaining.size)
+    return surfaces, info
+
+
+def server_scene_additions(rt: "Runtime", call: Call, summary: dict, scene, *, authorized: Sequence[str]):
+    """서버(`SafePolicy._scene_and_state`)가 `scene_from_constraint_set` 의 결과에 **후처리로 붙이는** 것을 기록으로 되짚어 붙인다.
+    `(scene, 근거)`. 순서는 서버와 같다: grasp_contact → HSR6 ③ target 허용 제거 → HSR6 ⑤ placement_contact → IFG-NBC →
+    A6 palm contact. 각각 켜진 서버 flag 와 **그 call 의 기록**이 모두 "켜짐" 일 때만 붙고, 아니면 scene 은 그대로다.
+
+    | 항 | 켜짐 조건 (서버 argv) | 그 call 에서 켜졌나 (기록) | 값의 출처 |
+    |---|---|---|---|
+    | `grasp_contact` | `--held-hand-exempt` / `--grasp-zone-mm` / `--closing-hand-exempt` 중 하나 | (언제나 만든다) | latch = `grasp.state`, authorized = 기록의 권한 link, centroid = `manipulated.centroid`, closing_exempt = state closing ∧ evidence.checks(closed · not_empty · blocked) |
+    | HSR6 ③ | `--hsr6-target-exempt` | `hsr6.changed.target_exempt` | `strip_target_permission` |
+    | HSR6 ⑤ | `--hsr6-placement-contact` | `hsr6.detail.placement_contact.applied` | `placement_contact_spec()` |
+    | IFG-NBC | `--neighbour-contact-mm` | `grasp.neighbour_contact.active` | links = 기록의 `links`, depth · radius = config, centre = `manipulated.centroid` |
+    | A6 palm | `--neighbour-palm-contact-mm` | `grasp.neighbour_palm_contact.active` | link = 기록의 `link`, 나머지는 NBC 와 같다 |
+
+    기록에 없는 것(이 함수가 못 하는 것): 쥔 물체의 `held_capture_spheres`, 부착 구.
+    """
+    from AG3S.trajopt import hsr6 as hs
+    from AG3S.trajopt.safe_policy import palm_contact_rows
+
+    args, col = rt.args, rt.to_config.collision
+    names = [str(n) for n in rt.robot.sphere_link_names]
+    grasp = dict(summary.get("grasp") or call.row.get("grasp") or {})
+    state = str(grasp.get("state") or "")
+    checks = ((grasp.get("evidence") or {}).get("checks") or {})
+    manip = summary.get("manipulated") or {}
+    centroid = None if manip.get("centroid") is None else np.asarray(manip["centroid"], np.float64).reshape(3)
+    info: dict[str, Any] = {"applied": []}
+
+    held_exempt = bool(getattr(args, "held_hand_exempt", False))
+    zone = getattr(args, "grasp_zone_mm", None)
+    closing_hand_exempt = bool(getattr(args, "closing_hand_exempt", False))
+    if held_exempt or zone is not None or closing_hand_exempt:
+        gc = {"latch": state, "authorized": np.asarray([n in set(authorized) for n in names], bool),
+              "held_exempt": held_exempt, "zone_allowance": None if zone is None else float(zone) / 1000.0,
+              "zone_radius": float(getattr(args, "grasp_zone_radius_mm", 100.0) or 100.0) / 1000.0, "centroid": centroid}
+        if closing_hand_exempt:
+            gc["closing_exempt"] = bool(state == "closing"
+                                        and all(checks.get(k) is True for k in ("closed", "not_empty", "blocked")))
+        scene = dataclasses.replace(scene, grasp_contact=gc)
+        info["applied"].append("grasp_contact")
+        info["grasp_contact"] = {k: (v if not isinstance(v, np.ndarray) else int(v.sum())) for k, v in gc.items()
+                                 if k != "centroid"}
+    hsr = summary.get("hsr6") or {}
+    if getattr(args, "hsr6_target_exempt", False) and (hsr.get("changed") or {}).get("target_exempt"):
+        scene, rec = hs.strip_target_permission(scene)
+        info["applied"].append("hsr6_target_exempt")
+    pc = ((hsr.get("detail") or {}).get("placement_contact") or {})
+    if getattr(args, "hsr6_placement_contact", False) and pc.get("applied"):
+        scene = dataclasses.replace(scene, placement_contact=hs.placement_contact_spec())
+        info["applied"].append("hsr6_placement_contact")
+    nbc = grasp.get("neighbour_contact") or {}
+    if float(getattr(col, "neighbour_contact_depth", 0.0) or 0.0) > 0.0 and nbc.get("active") and centroid is not None:
+        links = set(nbc.get("links") or ())
+        scene = dataclasses.replace(scene, neighbour_contact={
+            "links_mask": np.asarray([n in links for n in names], bool), "depth": float(col.neighbour_contact_depth),
+            "centre": centroid, "radius": float(col.neighbour_contact_radius)})
+        info["applied"].append("neighbour_contact")
+    npc = grasp.get("neighbour_palm_contact") or {}
+    if float(getattr(col, "neighbour_palm_contact_depth", 0.0) or 0.0) > 0.0 and npc.get("active") and centroid is not None:
+        scene = dataclasses.replace(scene, neighbour_palm_contact={
+            "links_mask": palm_contact_rows(rt.robot, str(npc["link"])), "depth": float(col.neighbour_palm_contact_depth),
+            "centre": centroid, "radius": float(col.neighbour_palm_contact_radius)})
+        info["applied"].append("neighbour_palm_contact")
+    return scene, info
+
+
+def manipulated_points_for(call: Call, summary: dict, z) -> tuple[Optional[np.ndarray], dict]:
+    """서버 scene 의 `manipulated.points` (= `ag3s.manipulated.points`: 추적 중인 대상을 마지막으로 **본** 프레임의 점군) 를 되짚는다.
+
+    기록의 `target_points` 는 **이번 프레임의 grounding 결과** (`cs.target`) 라서, 대상이 가려졌을 때(`has_target: false`,
+    `manipulated.state: occluded`) 는 아예 없고, 가려진 뒤에 다시 잡혀도 서버가 TrajOpt 에 준 점군(마지막으로 본 프레임)과
+    다를 수 있다. 서버 쪽 값은 `summary.manipulated.last_seen_frame` 프레임의 `target_points` 와 같다 (점 수 `n_points` 로 확인한다).
+    그 프레임의 기록이 없으면 이번 프레임의 `target_points` 로 물러나고 그렇게 했다고 적는다.
+    """
+    man = summary.get("manipulated") or {}
+    info: dict[str, Any] = {"state": man.get("state"), "last_seen_frame": man.get("last_seen_frame"),
+                            "n_points_recorded": man.get("n_points"), "source": None}
+    n_expected = man.get("n_points")
+    own = np.asarray(z["target_points"], np.float64) if "target_points" in z.files else None
+    seen = man.get("last_seen_frame")
+    if seen is not None and int(seen) != call.seq and call.episode is not None:
+        other = call.episode.get(int(seen))
+        if other is not None and other.chunk_path is not None:
+            with np.load(other.chunk_path, allow_pickle=False) as oz:
+                if "target_points" in oz.files:
+                    pts = np.asarray(oz["target_points"], np.float64)
+                    if n_expected is None or len(pts) == int(n_expected):
+                        info["source"] = f"target_points of frame {int(seen)}"
+                        return pts, info
+        info["why_not_last_seen"] = f"no usable target_points at frame {int(seen)}"
+    if own is not None and (n_expected is None or len(own) == int(n_expected)):
+        info["source"] = "target_points of this frame"
+        return own, info
+    info["source"] = None
+    info["missing"] = "no recorded point cloud matches manipulated.n_points"
+    return None, info
+
+
 def build_scene(rt: Runtime, call: Call, z, summary: dict, field, *, attached: bool) -> tuple[Any, dict]:
     """모조 `constraint_set` 을 **실제** `scene_from_constraint_set` 에 먹여 `SceneSnapshot` 을 만든다."""
     from AG3S.ag3s.types import ContactPolicyContext, SourceType
@@ -692,7 +864,8 @@ def build_scene(rt: Runtime, call: Call, z, summary: dict, field, *, attached: b
                             "authorized_links_recorded": perm.get("authorized_links"),
                             "authorized_match": perm.get("authorized_links") is None
                             or sorted(perm["authorized_links"]) == authorized}
-    target_points = np.asarray(z["target_points"], np.float64) if "target_points" in z.files else None
+    target_points, info["manipulated_points"] = manipulated_points_for(call, summary, z)
+    info["_manipulated_array"] = target_points
     man = None
     margin = None
     attached_obj = None
@@ -708,7 +881,7 @@ def build_scene(rt: Runtime, call: Call, z, summary: dict, field, *, attached: b
             info["attached"] = {"source": "--attached-spheres-json", "n": int(len(sph)), "parent_link": parent}
         else:
             info["attached"] = {"source": None, "missing": "held spheres are not in the record"}
-    elif target_points is not None and bool(summary.get("has_target")):
+    elif target_points is not None:
         man = types.SimpleNamespace(points=target_points, sphere_centers=None, sphere_radii=None)
     if man is not None and (not attached or attached_obj is not None):
         margin = rt.policy.margin_matrix(names, [SourceType.TARGET], context=perm_ctx, target_grounded=True)[:, 0]
@@ -720,16 +893,70 @@ def build_scene(rt: Runtime, call: Call, z, summary: dict, field, *, attached: b
         nonauth = np.asarray([n not in set(rt.policy.authorized_links(perm_ctx)) for n in names], bool)
     tf = (summary.get("target_exclusion") or {})
     field.stats = {"target_free": {"exclusion_method": tf.get("exclusion_method")}} if tf.get("exclusion_method") else {}
+    surfaces, info["support_surfaces"] = support_surfaces_from_record(z)
     cs = types.SimpleNamespace(
         constraints=None, esdf=field, manipulated=man, manipulated_link_margin=margin, attached=attached_obj,
         destination_label=None, destination_margin=None, target_field_exclude=mask,
         target_field_policy=str(perm.get("policy") or ""), nonauthorized_target_rows=nonauth,
-        metrics={"target_permission": perm}, support_surfaces=())
+        metrics={"target_permission": perm}, support_surfaces=tuple(surfaces))
     scene = scene_from_constraint_set(cs, rt.lin.robot_radii, rt.to_config, held_capture=None)
+    scene, info["server_additions"] = server_scene_additions(rt, call, summary, scene, authorized=authorized)
     if attached_obj is not None and rt.attached_spheres:
         sph = np.asarray(rt.attached_spheres["spheres"], np.float64).reshape(-1, 4)
         scene = dataclasses.replace(scene, attached_radii=sph[:, 3])
     return scene, info
+
+
+@dataclasses.dataclass
+class FingerState:
+    """서버 `SafePolicy._apply_finger_state` 가 한 call 에 건 손가락 값 — 제약 모델의 **현재** 값(`values`)과 TO 창 스텝별
+    경로(`path`, `(n_params, horizon)`).
+
+    Panda 의 손가락 관절은 결정 변수가 아니라 linearizer 의 parameter 다. 서버는 요청 상태의 측정 개도를 모델에 넣고(스텝 0),
+    스텝 k 에는 `max(측정, max(clip(명령[0..k], 0, 1)))` (`gripper_state.opening_envelope`) 를 넣는다. 명령은 그 call 의
+    reference chunk 의 gripper 열이다. 도구가 이것을 안 걸면 모델 손가락이 닫힌 채(기본값)라 손가락 구의 위치가 어긋난다
+    (SL10 충실도 B: 손가락 구 clearance 가 최대 39 mm 어긋남).
+    """
+
+    values: dict
+    path: np.ndarray
+    source: str
+    opening_norm: dict
+
+
+def finger_state_for(rt: "Runtime", call: Call, summary: dict, reference_chunk: np.ndarray) -> Optional[FingerState]:
+    """기록으로 되짚은 `FingerState`. 측정 개도는 기록의 `finger_joints.opening_norm` (없으면 요청 상태의 손가락 qpos)."""
+    from AG3S.adapters.panda import action as pa
+    from AG3S.adapters.panda import server as ps
+    from AG3S.ag3s.robot_models.gripper_state import FingerJointMap
+
+    if not tuple(getattr(rt.robot, "param_joint_names", ()) or ()):
+        return None
+    rec = summary.get("finger_joints") or {}
+    measured = {str(h): float(v) for h, v in (rec.get("opening_norm") or {}).items()}
+    source = str(rec.get("source") or "")
+    if not measured and call.opening_norm is not None:
+        measured = {"left": float(call.opening_norm)}
+        source = "robot_state finger qpos (not in the record)"
+    if not measured:
+        return None
+    fmap = FingerJointMap(rt.robot, convention=ps.panda_gripper_convention())
+    values = fmap.joint_values(measured)
+    commanded = {h: np.asarray(reference_chunk, np.float64)[:, pa.GRIPPER_COLUMN] for h in measured}
+    # 서버와 같은 순서: 모델에 측정값을 먼저 넣고, 그 모델의 현재 값을 경로의 default 로 쓴다
+    rt.robot.set_joint_parameters(values)
+    path, _ = fmap.path(measured, commanded, int(rt.lin.horizon), default=rt.robot.param_vector())
+    return FingerState(values=values, path=path, source=source, opening_norm=measured)
+
+
+def apply_finger_state(rt: "Runtime", fs: Optional[FingerState], *extra_linearizers) -> None:
+    """`fs` 를 제약 모델과 linearizer 들(도구 것 + refiner 안의 것)에 건다. `None` = 건드리지 않는다 (기록에 손가락 정보 없음)."""
+    if fs is None:
+        return
+    rt.robot.set_joint_parameters(fs.values)
+    for lin in (rt.lin, *extra_linearizers):
+        if lin is not None and getattr(lin, "param_names", ()):
+            lin.set_joint_parameter_path(fs.path)
 
 
 def _solver(rt: Runtime, cfg) -> tuple[Any, dict]:
@@ -763,6 +990,7 @@ def variant_config(rt: Runtime, variant: Variant, sqp_iterations: int, extra: Op
 def solve(rt: Runtime, prep: Prepared, cfg, scene, context: Optional[dict] = None):
     refiner, holder = _solver(rt, cfg)
     refiner.reset()
+    apply_finger_state(rt, prep.finger, getattr(getattr(refiner, "optimizer", None), "linearizer", None))
     holder["value"] = (scene, np.asarray(prep.call.q_now, np.float64), prep.certified)
     refiner.refine(prep.chunk, dict(prep.context if context is None else context))
     result = refiner.last_result
@@ -801,7 +1029,9 @@ def prepare_call(rt: Runtime, call: Call, *, tol_mm: float) -> tuple[Optional[Pr
     fid["conversion_rows_rebuilt"] = {"saturated": cm["saturated_rows"], "corrected": cm["corrected_rows"]}
     fid["conversion_rows_recorded"] = {"saturated": rec_conv.get("saturated_rows"),
                                        "corrected": rec_conv.get("corrected_rows")}
-    # B. 기록 clearance 재현
+    # B. 기록 clearance 재현 — 서버가 건 손가락 값(측정 개도 + 명령 포락선)을 먼저 건다
+    finger = finger_state_for(rt, call, summary, conv.joint_chunk)
+    apply_finger_state(rt, finger)
     field = build_field(z, outside_distance=rt.outside_distance)
     traj = rt.layout.chunk_to_trajectory(recorded_refined.astype(np.float64))[:, :rt.to_config.horizon.planned]
     centres = rt.lin.sphere_states(traj, call.q_now)[0]
@@ -820,11 +1050,15 @@ def prepare_call(rt: Runtime, call: Call, *, tol_mm: float) -> tuple[Optional[Pr
     info["context"] = why
     info["attached_in_record"] = attached
     sqp_it = int((summary.get("to") or {}).get("sqp_iterations") or (summary.get("to") or {}).get("iterations") or 1)
+    manip_array = info.pop("_manipulated_array", None)
     prep = Prepared(call=call, id=call.id, summary=summary, z=z, conv=conv, chunk=np.asarray(conv.joint_chunk, np.float64),
                     recorded_refined=recorded_refined, field=field, scene=scene, certified=certified,
                     attached=attached, context=context, sqp_iterations=sqp_it,
-                    target_points=np.asarray(z["target_points"], np.float64) if "target_points" in z.files else None,
-                    scene_info=info, fidelity=fid, conv_mode=conv_mode)
+                    target_points=(np.asarray(z["target_points"], np.float64) if "target_points" in z.files
+                                   else manip_array),
+                    scene_info=info, fidelity=fid, conv_mode=conv_mode, finger=finger)
+    info["finger"] = (None if finger is None else {"source": finger.source, "opening_norm": finger.opening_norm,
+                                                    "joints": finger.values})
     # C. replay
     result = solve(rt, prep, variant_config(rt, VARIANTS["replay"], sqp_it), scene)
     fid["replay_mm"] = ee_mm_diff(rt.kin, result.chunk, recorded_refined)
@@ -1081,6 +1315,7 @@ def j1_for_call(rt: Runtime, call: Call, *, band_m: float, geom_snapshot: Option
         out["voxel_classes"] = {"unavailable": f"obs_index {call.obs_index} is not in the geom snapshot"}
         return out
     field = build_field(z, outside_distance=rt.outside_distance)
+    apply_finger_state(rt, finger_state_for(rt, call, summary, np.asarray(z["reference_chunk"], np.float64)))
     traj = rt.layout.chunk_to_trajectory(np.asarray(z["refined_chunk"], np.float64))[:, :rt.to_config.horizon.planned]
     centres = rt.lin.sphere_states(traj, call.q_now)[0]
     T = np.asarray(call.T_world_base, np.float64)
@@ -1224,8 +1459,8 @@ def main(argv=None) -> int:
         "robot": {"n_constraint_spheres": int(rt.robot.n_spheres), "links": args.links if hasattr(args, "links") else None,
                   "sphere_options": None, "note": "Panda applies no constraint_sphere_options (adapter)"},
         "not_reproduced": ["held (attached) spheres unless --attached-spheres-json", "label layer / destination margin",
-                           "neighbour_contact / neighbour_palm_contact / grasp_contact / placement_contact / HSR6 gates",
-                           "held_capture_spheres", "QP warm start across calls", "manipulated.points (target_points used)"],
+                           "held_capture_spheres", "OSQP state across calls (large-violation calls are not reproducible)",
+                           "support-plane normal/offset (refit from support_mask)"],
     }
     # J1 (재풀이 없이, 기록만으로)
     out["j1"] = {c.id: j1_for_call(rt, c, band_m=args.j1_band_mm / 1000.0, geom_snapshot=args.geom_snapshot,
