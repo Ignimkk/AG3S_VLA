@@ -382,6 +382,9 @@ class SafePolicy:
         #: attention·grounding·거리장을 내보내지 않으므로, 진단하려면 여기서 남겨야 한다 —
         #: `AG3S/trajopt/bringup.py`의 `LivePipeline._record`와 같은 계약.
         self.recorder = recorder
+        # SL10c — with a `full` recorder the pipeline keeps what it freed for the held object (record only; off otherwise)
+        if getattr(recorder, "esdf_mode", None) == "full" and ag3s is not None:
+            ag3s.record_held_free = True
         #: 조작 대상을 에피소드 상태로 붙드는 것 (F17 — grounding 은 무상태라 파지 순간
         #: attention 이 목적지로 넘어가면 권한이 엉뚱한 물체에 붙는다). `attach`/`detach` 를
         #: **언제** 불러야 하는지만 답하고, 부르는 것은 이 클래스다 — AG3S 는 그 결정을 하지
@@ -3022,6 +3025,7 @@ class SafePolicy:
                              .reshape(all_centres.shape[:2])
                              - radii[None, :] - float(self.to_config.collision.esdf_margin))
                 centres = all_centres[0]
+            held_record = self._held_record(cs, result)
             self.recorder.record(
                 t_step=seq, chunk_index=self._chunk_index,
                 constraint_set=cs, debug=self._last_debug,
@@ -3032,6 +3036,7 @@ class SafePolicy:
                 attention_maps=self._last_attention_by_camera,
                 occupancy=self._occupancy(),
                 summary_extra=self._exec_summary(),
+                **({} if held_record is None else {"held_record": held_record}),
             )
         except Exception as exc:  # noqa: BLE001
             # **조용히 넘기지 않는다.** 2026-09-28 에 이 자리가 `print` 한 줄이라 75 chunk 가
@@ -3050,6 +3055,28 @@ class SafePolicy:
             else:
                 log.warning("[safe_policy] constraint record failed at seq=%d (%d 번째): %s: %s",
                             seq, self._record_failures, type(exc).__name__, exc)
+
+    def _held_record(self, cs, result) -> Optional[dict[str, Any]]:
+        """SL10c — held object geometry + support planes for the record, only with a `full` recorder (else None).
+
+        Read-only (`held_record.build_held_record`). A failure here must not cost the chunk its record: it is written as
+        `held_geometry_record = {"error": ...}` and logged.
+        """
+        if getattr(self.recorder, "esdf_mode", None) != "full":
+            return None
+        try:
+            from AG3S.trajopt.held_record import build_held_record
+
+            return build_held_record(
+                constraint_set=cs, snapshot=self._last_snapshot,
+                linearizer=getattr(getattr(self.refiner, "optimizer", None), "linearizer", None),
+                trajectory=getattr(result, "trajectory", None), q_now=self._last_q_now,
+                held_capture=getattr(self.ag3s, "held_capture_spheres", None),
+                held_free=getattr(self.ag3s, "held_free_record", None),
+                finger_plan=(self._last_finger or {}).get("plan"))
+        except Exception as exc:  # noqa: BLE001
+            logging.getLogger(__name__).warning("[safe_policy] held record failed: %s: %s", type(exc).__name__, exc)
+            return {"arrays": {}, "summary": {"error": f"{type(exc).__name__}: {exc}"}}
 
     def _exec_summary(self) -> dict[str, Any]:
         """`summary_json` 에 실을 `exec_feedback` 계열 세 키 (T18). **셋 다 언제나 실린다.**
