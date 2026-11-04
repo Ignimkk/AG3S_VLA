@@ -444,6 +444,14 @@ PC_SURFACE_FALLBACK_FLAGS: tuple[str, ...] = (
 AG3S_VERSIONS["AG3S-final-panda-v3-e0to-pc-surface-fb"] = PC_SURFACE_FALLBACK_FLAGS                       # SL7g
 AG3S_VERSIONS["AG3S-final-panda-v3-e0to-pc-surface-fb-gate"] = PC_SURFACE_FALLBACK_FLAGS + SEED_GATE_FLAGS  # SL7g
 PC_LATCH_VERSIONS = PC_LATCH_VERSIONS + ("AG3S-final-panda-v3-e0to-pc-surface-fb", "AG3S-final-panda-v3-e0to-pc-surface-fb-gate")
+#: SL7j (lead self-ruling D12, 2026-11-04): the two non-surface differences between pc판 and `-pc-surface-fb`, one at a
+#: time on pc판 -- (a) the explicit `--attention-source action:last:L8H2` (the extended path instead of the default one),
+#: (b) without `--nontarget-evidence surface`. Diagnostic only (task 7 of LIBERO spatial diverged at call 4).
+AG3S_VERSIONS["AG3S-final-panda-v3-e0to-pc-l8h2explicit"] = FINAL_CONFIG_V3_E0TO_PC_FLAGS + (
+    "--attention-source", "action:last:L8H2")
+AG3S_VERSIONS["AG3S-final-panda-v3-e0to-pc-nonte"] = _drop_flags(
+    FINAL_CONFIG_V3_E0TO_PC_FLAGS, {"--nontarget-evidence": 1})
+PC_LATCH_VERSIONS = PC_LATCH_VERSIONS + ("AG3S-final-panda-v3-e0to-pc-l8h2explicit", "AG3S-final-panda-v3-e0to-pc-nonte")
 #: SL6-B B4 — the Panda HSR6 probe (5 classes, no retreat; labels approved by the user 2026-10-29), the default
 #: ``--hsr6-probe`` of the final versions, and its SHA-256 (recorded by the server, checked by the test when present).
 #: SL7 (0.7): found under the shared storage root (``AG3S_STORAGE_ROOT``, default the checkout's sibling
