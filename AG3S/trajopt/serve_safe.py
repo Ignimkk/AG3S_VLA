@@ -2348,6 +2348,14 @@ def build_parser() -> argparse.ArgumentParser:
                          "제자리 · 장애물 반대쪽과 그 수직 두 방향으로 손바닥 5 / 10 cm 우회 · 관절 noise σ 0.02 / 0.05 rad)"
                          "에서 다시 풀고 최대 침범 → 목표 오차 → 관절 경로 길이 → 가속도 제곱합 순으로 하나를 고른다 (표준 "
                          "풀이도 후보, 같으면 표준). 기록 to.metrics.multi_seed. chunk 시간이 seed 수만큼 는다")
+    ap.add_argument("--to-action-box", action="store_true",
+                    help="SL10 §2.2 — Panda 만. TrajOpt QP 에 행마다 선형 부등식을 넣어, 변환 C 가 돌려줄 OSC action "
+                         "(a + (Dy_k - alpha Dy_{k-1})/beta/scale, 위치·회전 성분별) 이 [-1 + margin, 1 - margin] 안에 들게 "
+                         "한다 (Dy 는 EE Jacobian 으로 선형화; 상수는 osc_response_fit.json). 기본 꺼짐 = 서버·기록 그대로. "
+                         "RB-Y1 서버는 거절한다. --to-multi-seed · --to-gpu-seeds · look-ahead gate 와 함께 쓸 수 없다. "
+                         "기록 to.action_box = {on, n_rows, active_rows, max_pred_abs_action}")
+    ap.add_argument("--to-action-box-margin", type=float, default=None, metavar="M",
+                    help="SL10 §2.2 — --to-action-box 의 여유 (action 단위, 기본 0.05, 0 <= M < 1). --to-action-box 가 필요하다")
     ap.add_argument("--to-gpu-seeds", choices=("off", "curobo"), default="off",
                     help="AG3S-PRE-CORE-TO E3-b — --to-multi-seed N 의 seed 를 GPU 에서 한꺼번에 푼다. off (기본) = E2 그대로 "
                          "(seed 마다 CPU SQP). curobo: 같은 N 개 seed 를 cuRobo L-BFGS 한 batch 로 최적화 (관절 VLA 추종 "
@@ -3810,6 +3818,16 @@ def panda_seed_map_labels(args) -> tuple[str, ...]:
     return tuple(PANDA_SEED_MAP_LABELS)
 
 
+def reject_panda_only_flags(ap: argparse.ArgumentParser, args) -> None:
+    """SL10 §2.2 — flags that only the Panda server applies: the RB-Y1 server refuses them at start (it would ignore
+    them, and the log would read as if the rows were in the QP)."""
+    if getattr(args, "robot", "rby1") == "panda":
+        return
+    if getattr(args, "to_action_box", False) or getattr(args, "to_action_box_margin", None) is not None:
+        ap.error("--to-action-box · --to-action-box-margin 는 Panda 의 OSC action 한계를 TrajOpt 행으로 넣는 flag 입니다 "
+                 "(--robot panda 만). RB-Y1 서버는 그 변환이 없어 아무 일도 하지 않으므로 거절합니다")
+
+
 def reject_bad_flag_combinations(ap: argparse.ArgumentParser, args, *, seed_map_labels=None) -> None:
     """안전 계층을 끈 채 그 계층의 flag 를 준 조합을 시작할 때 막는다.
 
@@ -4367,6 +4385,20 @@ def reject_bad_flag_combinations(ap: argparse.ArgumentParser, args, *, seed_map_
                  "그대로 띄우면 효과가 있었다고 믿게 됩니다")
     if int(getattr(args, "to_multi_seed", 0) or 0) < 0:
         ap.error(f"--to-multi-seed N 은 0 (꺼짐) 이상이어야 합니다 (got {args.to_multi_seed})")   # AG3S-PRE-CORE-TO E2
+    # --- SL10 §2.2 — begin
+    if getattr(args, "to_action_box_margin", None) is not None and not getattr(args, "to_action_box", False):
+        ap.error("--to-action-box-margin 은 --to-action-box 의 여유입니다 (--to-action-box 와 함께만). "
+                 "그대로 띄우면 효과가 있었다고 믿게 됩니다")
+    if getattr(args, "to_action_box", False):
+        margin = getattr(args, "to_action_box_margin", None)
+        if margin is not None and not 0.0 <= float(margin) < 1.0:
+            ap.error(f"--to-action-box-margin 은 0 이상 1 미만이어야 합니다 (got {margin})")
+        if args.no_safe:
+            ap.error("--to-action-box 는 TO 를 고치는 flag 입니다 (--no-safe 는 TO 를 아예 안 돌립니다)")
+        if int(getattr(args, "to_multi_seed", 0) or 0) > 0 or getattr(args, "to_gpu_seeds", "off") != "off":
+            ap.error("--to-action-box 는 --to-multi-seed · --to-gpu-seeds 와 함께 쓸 수 없습니다 (seed 풀이는 action "
+                     "행 없이 풀리고 그 결과가 고를 수 있다)")
+    # --- SL10 §2.2 — end
     if getattr(args, "to_gpu_seeds", "off") != "off":   # AG3S-PRE-CORE-TO E3-b
         if args.no_safe or int(getattr(args, "to_multi_seed", 0) or 0) <= 0:
             ap.error("--to-gpu-seeds curobo 는 --to-multi-seed N (> 0) 의 seed 를 GPU 에서 푸는 flag 입니다 (TO 가 있고 "
@@ -5009,6 +5041,7 @@ def main() -> None:
     ap = build_parser()
     args = ap.parse_args()
     reject_bad_flag_combinations(ap, args)
+    reject_panda_only_flags(ap, args)   # SL10 §2.2
 
     logging.basicConfig(level=logging.INFO, force=True)
     if args.blas_threads < 0:

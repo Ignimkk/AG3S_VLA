@@ -197,6 +197,9 @@ class TrajOptChunkRefiner(DecodedChunkRefiner):
                 # IFG-TOA — the grasp-goal anchor `SafePolicy` set for this chunk (absent key = as before).
                 **({"grasp_anchor": context["grasp_anchor"]}
                    if context is not None and context.get("grasp_anchor") is not None else {}),
+                # SL10 §2.2 — the Panda controller's action limit for this chunk (absent key = as before).
+                **({"action_box": context["action_box"]}
+                   if context is not None and context.get("action_box") is not None else {}),
                 # IFG-TOW — per-joint tracking scale `SafePolicy` set for this chunk (absent key = as before).
                 **({"joint_track_scale": context["joint_track_scale"]}
                    if context is not None and context.get("joint_track_scale") is not None else {}),

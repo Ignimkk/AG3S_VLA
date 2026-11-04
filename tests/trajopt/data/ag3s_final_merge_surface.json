@@ -1,5 +1,5 @@
 {
- "_doc": "Keys the AG3S final-configuration merge (main 3ff415d5, 2026-10-29) added to the serve_safe surface, with their value at the merge (bare argv = parser defaults; v11ab = V11AB argv incl. profile.V11AB_PRE_MERGE_DEFAULTS). _sl5a_golden drops a key only while it has exactly this value. Merge of development main a0b16d0a (02fe59e6 + T67-T93, 2026-11-03) added 41 more namespace keys at their parser default (values as recorded at that merge). SL7f (benchmark, 2026-11-04) added surface_seed_ats_gate (default False). Merge of development main 4ecf8d61 (T96-T97, 2026-11-04; SL9 benchmark) added 11 namespace keys (surface_solid_*, surface_removed_sign_free, surface_crease_protrusion*, surface_crease_hand_freeze_mm, palm_cover_margin) at their parser default.",
+ "_doc": "Keys the AG3S final-configuration merge (main 3ff415d5, 2026-10-29) added to the serve_safe surface, with their value at the merge (bare argv = parser defaults; v11ab = V11AB argv incl. profile.V11AB_PRE_MERGE_DEFAULTS). _sl5a_golden drops a key only while it has exactly this value. Merge of development main a0b16d0a (02fe59e6 + T67-T93, 2026-11-03) added 41 more namespace keys at their parser default (values as recorded at that merge). SL7f (benchmark, 2026-11-04) added surface_seed_ats_gate (default False). Merge of development main 4ecf8d61 (T96-T97, 2026-11-04; SL9 benchmark) added 11 namespace keys (surface_solid_*, surface_removed_sign_free, surface_crease_protrusion*, surface_crease_hand_freeze_mm, palm_cover_margin) at their parser default. SL10 (benchmark, 2026-11-04) added to_action_box (False) and to_action_box_margin (None).",
  "bare": {
   "build_call_added": {
    "**14": "{'palm_shell': palm_shell_options(args)} if palm_shell_options(args) else {}",
@@ -169,6 +169,8 @@
    "task_gate": false,
    "task_gate_shadow": false,
    "task_probe": null,
+   "to_action_box": false,
+   "to_action_box_margin": null,
    "to_gpu_seeds": "off",
    "to_gpu_seeds_check": "all",
    "to_multi_seed": 0,
@@ -415,6 +417,8 @@
    "task_gate": false,
    "task_gate_shadow": false,
    "task_probe": null,
+   "to_action_box": false,
+   "to_action_box_margin": null,
    "to_gpu_seeds": "off",
    "to_gpu_seeds_check": "all",
    "to_multi_seed": 0,

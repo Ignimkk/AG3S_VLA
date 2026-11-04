@@ -738,6 +738,39 @@ def gpu_seeds_setup(safe, to_config, *, warm_up: bool) -> Optional[dict]:
     return rec
 
 
+#: SL10 §2.2 -- OSQP's iteration cap with the action rows. The rows (coefficients ~10^2: 1 / (beta scale) of a difference
+#: of EE poses) make the ADMM slow: 2000-6000 iterations for a QP that takes 300-1000 without them (measured on the
+#: synthetic Panda chunks of ``tests/benchmark/test_sl10_action_box.py``), and the default cap (4000) ended a first QP as
+#: ``maximum iterations reached`` -- a failed QP returns the iterate unchanged, so the box would silently switch the
+#: correction off. Only with ``--to-action-box``; the SQP iteration count (3) and its wall budget are unchanged.
+ACTION_BOX_QP_MAX_ITER = 30000
+
+
+def action_box_qp_config(to_config):
+    return dataclasses.replace(to_config, qp=dataclasses.replace(to_config.qp, max_iter=ACTION_BOX_QP_MAX_ITER))
+
+
+def action_box_kwargs(args, to_config, chunk_policy: "ChunkToJointPolicy", mode: str) -> dict:
+    """SL10 §2.2 -- ``{"action_box_fn": fn}`` for ``SafePolicy`` with ``--to-action-box``, else ``{}`` (the SafePolicy
+    arguments are then exactly the earlier ones). ``fn()`` is the action-limit box of the chunk the policy just produced
+    (``ChunkToJointPolicy.last``, the adapter's own conversion). The rows are the executed ones
+    (``PANDA_HORIZON["execution_length"]``). With the look-ahead gate closed the K-row window optimizer carries the same
+    rows."""
+    if not getattr(args, "to_action_box", False):
+        return {}
+    from AG3S.trajopt.action_box import ACTION_BOX_MARGIN_DEFAULT
+
+    margin = getattr(args, "to_action_box_margin", None)
+    margin = ACTION_BOX_MARGIN_DEFAULT if margin is None else float(margin)
+    n_rows = int(PANDA_HORIZON["execution_length"])
+
+    def action_box_fn():
+        conv = chunk_policy.last
+        return None if conv is None else pa.action_box_from_conversion(conv, margin=margin, n_rows=n_rows, mode=mode)
+
+    return {"action_box_fn": action_box_fn}
+
+
 def build_safe_server(policy, args, *, attention_model=None, gpu_warm_up: bool = True):
     """Everything below the openpi policy (also used by tests with a stub policy and no attention model).
 
@@ -763,6 +796,8 @@ def build_safe_server(policy, args, *, attention_model=None, gpu_warm_up: bool =
     kin = pa.PandaKinematics(constraint)
     chunk_policy = ChunkToJointPolicy(served_policy, kin)
     to_config = _replace_horizon_limits(ss.trajopt_config_from_args(args))
+    if getattr(args, "to_action_box", False):
+        to_config = action_box_qp_config(to_config)   # SL10 §2.2: a QP budget the action rows can converge in
     attention_fn = ss.attention_extractor(alias=ATTENTION_ALIAS, cameras=ATTENTION_CAMERAS,
                                           transform=lambda _cam, grid: pat.unmirror_grid(np.asarray(grid)))
     mode = conversion_mode()
@@ -772,6 +807,7 @@ def build_safe_server(policy, args, *, attention_model=None, gpu_warm_up: bool =
     scope = getattr(args, "hsr6_objective_scope", "all")
     # SL6-A — SafePolicy's Panda geometry + the HSR6 arguments only with a final-configuration option on: a V11AB / pb
     # server constructs SafePolicy with exactly the pre-SL6 arguments (tests/benchmark/test_panda_sl5j_recorder.py).
+    abox_kw = action_box_kwargs(args, to_config, chunk_policy, mode)   # SL10 §2.2: {} unless --to-action-box
     final_kw = ({**safe_policy_injections(), **({"hsr6": hsr6} if hsr6 is not None else {}),
                  **({"hsr6_objective_scope": scope} if scope != "all" else {}),
                  **ss.subtask_from_latch_kwargs(args)}   # SL7 (T92): {} unless --subtask-from-latch
@@ -781,7 +817,7 @@ def build_safe_server(policy, args, *, attention_model=None, gpu_warm_up: bool =
                       static_geometry=None, recorder=recorder, shadow=bool(getattr(args, "shadow", False)),
                       layout=pa.panda_chunk_layout(constraint.joint_names), gripper_columns=GRIPPER_COLUMNS,
                       finger_map=FingerJointMap(constraint, convention=panda_gripper_convention()), hands=HANDS,
-                      **final_kw)
+                      **final_kw, **abox_kw)
     grasp_contact = ss.apply_grasp_contact_flags(safe, args)  # V11AB-pb4 / pb5 (all off = V11AB)
     gpu = gpu_seeds_setup(safe, to_config, warm_up=gpu_warm_up)
     inert = []
