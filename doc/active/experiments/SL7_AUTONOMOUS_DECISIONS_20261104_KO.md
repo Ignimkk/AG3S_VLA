@@ -32,3 +32,34 @@
 | D10 | 08:4x | SL7h task 1(2 episode)이 실행되지 않았다(rc=1). 원인은 **lead 실수**다: task 1 launcher가 GPU lock(development T96)을 ~18분 기다리는 동안 lead가 문서를 commit해 HEAD가 바뀌었고, launcher의 `record_execution`이 "run이 다른 commit에 속함"으로 서버 시작 전에 멈췄다. 조치: task 1을 merge 후 HEAD(`7aef40fa`, SL7i 기록 포함)에서 다시 돌린다. 이어서 GPU 사슬 = Panda 회귀 테스트(lock 안) → SafeLIBERO task 1 재실행 → SL7i LIBERO 9 재실행 → LIBERO-Safety VLA 단독 30. **사슬이 끝날 때까지 commit하지 않는다** | task 2 · 3(9 episode)은 정상 완료(commit `eee86939`, 행동 코드는 `fe5b7ea0`와 같고 그 사이 commit은 문서 · 스크립트뿐). task 1 재실행에는 SL7i 기록 코드가 들어가지만 기록 전용이다. 행동 불변은 SL7i LIBERO 재실행에서 bit 비교로 확인한다 | 대안: task 1을 SL7i 없이 `fe5b7ea0` worktree에서 돈다 — run 관리가 checkout 단위라 하지 않는다 |
 | D11 | 09:0x | SL7h 판정 (11 episode): 표면 · 기권 시 공 판 공식 성공 **2** · 충돌 **5** · 안전 성공 **2** (pc판 1 · 5 · 1) → 규칙 1(충돌 ≤ 6 · 성공 ≥ 1) 충족 → **Panda 최종 구성 후보**로 올린다. 단, 뜻을 좁혀 적는다. call마다 행동을 비교하면 LIBERO 9 중 8, SafeLIBERO task 2 · 3의 9 중 5 episode가 pc판과 bit 동일하다. call별 표면 기록(task 1 재실행)에서도 표면이 채택된 call은 6.5%(5/77)뿐이다. 그래서 이 판은 "표면 추출을 켜도 나빠지지 않는다"까지만 보인다. 이득의 증거는 없다(짝 비교 성공 +1은 잡음 범위) | `outputs/2026-11-04_SL7h_SafeLIBERO11_표면기권시공/` 짝 비교: 얻은 성공 2(t1e1 · t2e2), 잃은 성공 1(t2e3), 없앤 충돌 1(t2e4), 새 충돌 1(t2e3 t = 279). 기권 이유는 `not_ats_target` 41 · `no_region` 31 call | 사용자 피드백 사항: (a) 이 후보를 받을지, (b) Panda에서 표면이 거의 채택되지 않는 원인(ATS와의 겹침 검사 기각 · 영역 없음)을 더 볼지 |
 | D12 | 09:1x | SL7i 판정: (1) 기록 전용 확인 — LIBERO 9 행동이 SL7g와 9/9 bit 동일. (2) 표면 채택 **20/296 call (6.8%)** < 10% → 규칙 2: 이 판은 사실상 "pc판 + 드문 표면"이다. 5/9를 표면 추출 덕이라고 하지 않는다. (3) task 7은 call 4부터 달라지는데 첫 표면 채택은 call 7 → 손실은 채택된 표면 때문이 아니다. 다음: 표면 외 두 차이(L8H2 명시 경로 · nontarget evidence 제거)를 pc판에 하나씩 넣어 task 7 한 episode씩 돈다(SL7j, worktree `c040f8e5`, 사슬 끝난 뒤 merge) | `outputs/2026-11-04_SL7i_call별표면기록_LIBERO9/`. 기각 154 call(겹침 비율 < 0.5, task 7에서 영역 중심이 ATS target에서 37–41 mm) · 영역 없음 122 call. 채택된 표면이 있던 task 0 · 1 · 6 · 8도 행동은 pc판과 bit 동일 | 되돌리기: 진단 판 등록만. 사용자 피드백 사항: 표면이 Panda에서 거의 채택되지 않는 원인(겹침 기준 · seed)을 다룰지 |
+| D13 | 10:0x | LIBERO-Safety VLA 단독 30 수집 결과: 공식 성공 **14/30**(affordance 2 · human_safety 7 · obstacle_avoidance 5), 공식 위반 **0**. protocol §1 규칙대로 장면 10개를 골랐다(affordance t0e0 · t0e2, human_safety t0e0–e3, obstacle_avoidance t0e0–e3). AG3S closed loop은 D9대로 돌리지 않는다 | VLA 단독 위반이 0이라, 이 장면에서 AG3S는 "성공을 깎지 않는가"만 보여 줄 수 있다. `outputs/2026-11-04_SL7_LIBERO-Safety_VLA단독30/` | 사용자 판정 사항: (a) hook H2(변환 모델 차이) 아래에서 AG3S를 돌릴지, (b) task 1까지 섞어 고를지 |
+| D14 | 10:5x | SL7j 판정 (규칙 1): task 7에서 pc판 + L8H2 명시는 pc판과 **bit 동일 · 성공**, pc판 − `--nontarget-evidence surface`는 **call 4부터 다르고 실패** → 표면 판이 LIBERO에서 잃은 task 7은 **nontarget evidence를 잃은 것** 때문이다(표면 영역 때문 아님). config가 표면 범위와 non-proximity nontarget evidence를 함께 못 쓰게 거절하기 때문에 생긴 교환이다. 이 거절의 전제("oracle이 분할을 대신해 효과 없음")는 기권 시 공 판의 기권 call(93%)에는 맞지 않는다. **거절 규칙 변경은 하지 않고 사용자 판정 사항으로 올린다** | `outputs/2026-11-04_SL7j_task7원인_nontarget증거/`. 1 episode 진단이라 nontarget evidence 제거의 LIBERO 9 · SafeLIBERO 효과는 따로 재지 않았다 | 대안: 거절을 keep-last 꺼짐일 때 허용으로 좁혀 "표면 + 기권 시 공 + nontarget surface" 판을 만든다(development config 규칙 변경). 되돌리기: 진단 판 등록만 |
+
+## 아침 요약 (lead, 2026-11-04 11:0x KST)
+
+**한 줄:**
+- Panda에서 P0m(development 최종 구성)이 LIBERO 0/9인 것은 두 원인이 겹친 결과다. 하나는 HSR6를 끈 것이고, 다른 하나는 표면이 없을 때 target을 그대로 두는 표면 추출(keep-last · no-ball)이다.
+- 그래서 pc판(HSR6 유지)에 "표면이 있으면 표면, 없으면 공"으로 표면 추출을 얹은 판을 만들었다. 이 판은 LIBERO 5/9, SafeLIBERO 안전 성공 2 · 충돌 5로, pc판(6/9 · 1 · 5)보다 나빠지지 않아 **후보**다.
+- 하지만 이 판에서 표면은 call의 **6.8%만 채택**되고, 행동을 거의 바꾸지 않는다. LIBERO에서 잃은 1 episode는 표면 때문이 아니라 표면 범위와 함께 쓸 수 없는 **nontarget evidence를 잃은 것** 때문이다. 따라서 표면 추출의 이득은 아직 없다.
+
+| 단계 | 무엇을 | 결과 | 결과 폴더 |
+|---|---|---|---|
+| SL7d | P0m + L8H2 / pc판 + latch label | 1/9 / 6/9 (latch는 원인 아님) | `outputs/2026-11-04_SL7d_L8H2_latch_LIBERO/` |
+| SL7e | pc판 + 표면 추출 / pc판 − HSR6 | 3/9 / 2/9 | `outputs/2026-11-04_SL7e_pc판에서가르기_표면추출_HSR6/` |
+| SL7f | 표면 seed를 ATS target에 맞추는 gate | 3/9 (못 고침) | `outputs/2026-11-04_SL7f_표면seed_ATSgate/` |
+| SL7g | 표면이 없으면 공 (± gate) | 5/9 · 5/9, 9 중 8 episode가 pc판과 bit 동일 | `outputs/2026-11-04_SL7g_표면추출_기권시공/` |
+| SL7h | 위 판 SafeLIBERO 11 | 성공 2 · 충돌 5 · 안전 2 (pc판 1 · 5 · 1) | `outputs/2026-11-04_SL7h_SafeLIBERO11_표면기권시공/` |
+| SL7i | call별 표면 기록 + LIBERO 9 재실행 | 행동 bit 동일, 표면 채택 20/296 call (6.8%) | `outputs/2026-11-04_SL7i_call별표면기록_LIBERO9/` |
+| SL7j | task 7 손실 원인 | nontarget evidence 제거 (L8H2 명시는 무관) | `outputs/2026-11-04_SL7j_task7원인_nontarget증거/` |
+| LIBERO-Safety | VLA 단독 30 수집 · 장면 10 선정 | 공식 성공 14/30, 공식 위반 0 | `outputs/2026-11-04_SL7_LIBERO-Safety_VLA단독30/` |
+
+**사용자 판정이 필요한 것**
+1. `AG3S-final-panda-v3-e0to-pc-surface-fb`를 Panda 최종 구성으로 받을지. 이 판은 development P0m(HSR6 끔 · keep-last · no-ball)과 다르다.
+2. 표면 범위와 `nontarget_evidence != proximity`를 함께 못 쓰게 하는 config 거절을 "keep-last 꺼짐일 때 허용"으로 좁힐지(D14). 좁히면 기권 call에서 pc판과 같아질 수 있다.
+3. 표면이 Panda에서 거의 채택되지 않는 원인을 더 볼지. 원인은 겹침 검사 기각 52%(영역 중심이 ATS target에서 수 cm 벗어남)와 영역 없음 41%다.
+4. LIBERO-Safety AG3S closed loop을 hook H2(Panda 변환 kp 150 대 fork kp 750) 아래에서 돌릴지, 장면 선정에 task 1을 섞을지.
+5. `AG3S/ag3s/docs/AG3S_BENCHMARK_LOG.md` 기록(scribe 단계)은 하지 않았다. 판정 기록과 outputs가 근거다.
+
+**lead 실수 1건 (D10):** SafeLIBERO task 1이 GPU lock 대기 중 문서 commit 때문에 돌지 않았다. 다시 돌려 11 episode를 채웠다. 메모리 `no-runner-edits-during-runs`에 "run 시작부터 commit 금지"로 보강했다.
+
+**하지 않은 것:** push, 다른 세션 process 종료, G1 켜기, 최종 구성 확정 채택, development config 규칙 변경.
