@@ -41,6 +41,9 @@ angle ≥ `crease.angle_deg` cut (`_crease_cut`), and the linear solve on the de
 relative residual of 1e-10; the host `ifg_graph.solve` when it does not converge) — the 2.5 mm ROI is ~3× the 5 mm
 one and the host `spsolve` alone took 50–110 ms. The re-attach (`attention_surface_crease.reattach`) runs on the host.
 Record: `crease` (+ `crease.solve` = `cg_iter` · `residual`), `ms_detail.crease`.
+
+T97: `crease.protrusion` → `attention_surface_crease.protrude` on the host after the region (record
+`crease.protrusion`, `ms_detail.protrusion`).
 """
 
 from __future__ import annotations
@@ -673,6 +676,18 @@ def select(views: Sequence[Any], cfg, smap: np.ndarray, *, arm: str, codes: bool
         rec["crease"]["reattach"] = rr
         sel_sub = sel_sub | add
     # --- T78d — end
+    # --- T97 — begin: protrusion re-attach (host, the same function and inputs as the CPU path)
+    if crease is not None and crease.protrusion and sel_sub.any():
+        from AG3S.ag3s.runtime import attention_surface_crease as CR
+
+        tr = time.perf_counter()
+        add, pr = CR.protrude(n, sub_edges, cut_edges, sub.support, sel_sub, sub.pos, float(crease.protrusion_area),
+                              crease.voxel_m)
+        det["protrusion"] = (time.perf_counter() - tr) * 1e3
+        pr["ms"] = round(det["protrusion"], 3)
+        rec["crease"]["protrusion"] = pr
+        sel_sub = sel_sub | add
+    # --- T97 — end
     roi_h = roi_idx.cpu().numpy()
     sel = roi_h[sel_sub]
     rec["n_selected_nodes"] = int(len(sel))

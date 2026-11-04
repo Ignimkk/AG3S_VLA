@@ -145,7 +145,8 @@ class OracleMemory:
     def __init__(self, *, cell: float = 0.0025, roi_margin: float = 0.065, carve_tol: float = 0.010,
                  carve_window: int = 5, depth_min: float = 0.0, depth_max: float = np.inf,
                  band_depth: float = 0.030, band_stride: int = 2, band_cell: Optional[float] = None,
-                 target_sticky: bool = False):
+                 target_sticky: bool = False,
+                 track_ever_target: bool = False):   # T96d
         if not (cell > 0 and roi_margin >= 0 and carve_tol > 0 and int(carve_window) >= 1
                 and band_depth >= 0 and int(band_stride) >= 1):
             raise ValueError("cell > 0, roi_margin >= 0, carve_tol > 0, carve_window >= 1, band_depth >= 0, "
@@ -161,6 +162,15 @@ class OracleMemory:
             raise ValueError(f"target_sticky must be a bool, got {target_sticky!r}")
         self.target_sticky = target_sticky
         # --- T78e — end
+        # --- T96d — begin
+        #: **T96d — the episode's "ever target" cells** (`esdf.surface_solid_dn_ever_target`). False (default) = not
+        #: kept (bit-identical to before, no new `last` key). True = after every `update`, the cells whose stored sample
+        #: is code 1 join `ever_target_keys` (sorted unique cell keys; never carved, cleared by `reset`). Labels are
+        #: not changed — `evidence_dn` only leaves those cells' non-target samples out of the solid's `d_N`.
+        if not isinstance(track_ever_target, bool):
+            raise ValueError(f"track_ever_target must be a bool, got {track_ever_target!r}")
+        self.track_ever_target = track_ever_target
+        # --- T96d — end
         #: the truncation band behind each object pixel (m) — the fine TSDF's truncation — and the pixel stride
         self.band_depth = float(band_depth)
         self.band_stride = int(band_stride)
@@ -190,6 +200,7 @@ class OracleMemory:
         #: still holds, wherever they came from.
         self.band_keys = np.zeros(0, np.int64)
         self.band_masks = np.zeros(0, np.uint32)
+        self.ever_target_keys = np.zeros(0, np.int64)   # T96d (filled only with `track_ever_target`)
 
     def __len__(self) -> int:
         return int(len(self.keys))
@@ -287,6 +298,11 @@ class OracleMemory:
                      "update": int(self.n_updates)}
         if self.target_sticky:   # T78e (key present only when on)
             self.last["n_sticky_kept"] = int(n_sticky)
+        # --- T96d — begin: the cells labelled target after this update join the episode's "ever target" cells
+        if self.track_ever_target:
+            self.ever_target_keys = np.union1d(self.ever_target_keys, self.keys[self.codes == CODE_TARGET])
+            self.last["n_ever_target_cells"] = int(len(self.ever_target_keys))
+        # --- T96d — end
         return dict(self.last)
 
     # --- T78e — begin
@@ -414,6 +430,19 @@ class OracleMemory:
         """`(samples of object `code`, every other sample)` — what `oracle_visible_split` compares."""
         on = self.codes == int(code)
         return self.points[on].copy(), self.points[~on].copy()
+
+    # --- T96d — begin
+    def evidence_dn(self, code: int) -> tuple[np.ndarray, int]:
+        """T96d — `(the non-`code` samples whose cell was never labelled target, n left out)`: the solid's `d_N`
+        samples. Same order as `evidence(code)[1]` with the "ever target" cells' samples removed. Needs
+        `track_ever_target`."""
+        if not self.track_ever_target:
+            raise RuntimeError("evidence_dn needs OracleMemory(track_ever_target=True) (T96d)")
+        other = self.codes != int(code)
+        ever = np.isin(self.keys, self.ever_target_keys, assume_unique=True)
+        drop = other & ever
+        return self.points[other & ~ever].copy(), int(drop.sum())
+    # --- T96d — end
 
 
 def oracle_evidence(memory: Optional["OracleMemory"], geometry_points, *, radius: float, identity: str = "pipeline",

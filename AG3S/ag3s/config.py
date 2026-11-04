@@ -1434,6 +1434,21 @@ class EsdfConfig:
     #: (default) = off. Needs `surface_crease_cut`. Limit: a touching neighbour smaller than R × the region is added too.
     surface_crease_reattach_ratio: Optional[float] = None
     # --- T78d — end
+    # --- T97 — begin (off by default = T78d as is; `surface_crease_cut` only)
+    #: **protrusion re-attach** — after the top-1 region R is chosen, a component C of the cut ROI graph (non-support)
+    #: that touches R only through cut edges is added whole iff its median height above the ROI support plane ≥ R's
+    #: top-10 % height boundary ∧ its projected area ≤ `surface_crease_protrusion_area` × R's ∧ its projection overlaps
+    #: R's projected convex hull (one pass, `attention_surface_crease.protrude`). Needs `surface_crease_cut`; refused
+    #: with `surface_crease_reattach_ratio` (the two re-attach rules are compared, T97 §2.1).
+    surface_crease_protrusion: bool = False
+    #: ρ of the protrusion area condition. Read only with `surface_crease_protrusion`.
+    surface_crease_protrusion_area: float = 0.15
+    #: **hand freeze** (mm) — while the latch is searching · latched · closing and the grasping palm point
+    #: (`_grasp_palm_points`) is within this distance of the last accepted region's centroid, no region is selected this
+    #: request (carve only, the A4 rule): the hand layer keeps the last accepted region (selected with the hand far).
+    #: None (default) = off. Needs `surface_crease_cut` and `surface_keep_last`.
+    surface_crease_hand_freeze_mm: Optional[float] = None
+    # --- T97 — end
     # --- T78e — begin (off by default = newest-wins memory as is; `attention_surface` + `surface_keep_last` only)
     #: **target-sticky memory** — a memory cell (`runtime.oracle_segmentation.OracleMemory`, 2.5 mm) once holding a
     #: code-1 (target) sample keeps it until carving drops it: a later frame's code ≠ 1 sample in that cell does not
@@ -1456,6 +1471,61 @@ class EsdfConfig:
     #: Needs `target_extent = "attention_surface"`. Record `t78.seed_ats_gate`.
     surface_seed_ats_gate: bool = False
     # --- SL7f — end
+    # --- T96 — begin (off by default = the oracle split as is; `attention_surface` + A3 · A5 only)
+    #: **target solid ownership** — the hand layer (fine target-free tier, `curobo_builder.oracle_visible_split`) also
+    #: removes every seed inside the target solid S ⊕ δ: S = convex hull of the last accepted region's nodes R ∪ their
+    #: perpendicular projection R⊥ onto the support plane under the region centroid (`_support_plane_z`'s plane);
+    #: seed rule `x ∈ S ⊕ δ ∧ z ≥ z_floor ∧ d_N > τ ∧ d_T ≤ d_N` (`d_N` = nearest non-target memory sample, `d_T` =
+    #: nearest of target samples ∪ R ∪ R⊥). With it on, a voxel with `d_N ≤ τ` is removed by **no** path (surface and
+    #: band included). Record `target_exclusion.attention_surface.solid`. Replaces `surface_hull_fill` ·
+    #: `surface_contact_allowance_mm` · `surface_memory_target_sticky` (refused together). Needs
+    #: `target_extent == "attention_surface"`, `surface_keep_last` and `surface_no_ball`. Risk: a non-closed object
+    #: (bowl · thin plate) has its inner empty space removed; a hanging object has no support plane below (no solid).
+    surface_solid_owned: bool = False
+    #: τ (mm) — the neighbour protection band (METHOD_GUIDE §7.1, "neighbour ≥ 5 mm"). Read only with the solid on.
+    surface_solid_protect_mm: float = 5.0
+    #: δ (mm) — the solid path's dilation of S (facets pushed out by δ). Read only with the solid on.
+    surface_solid_dilate_mm: float = 0.0
+    # --- T96 — end
+    # --- T96b — begin (D28; read only with `surface_solid_owned`)
+    #: the support-plane samples in `d_N` (the solid path's `d_N > τ ∧ d_T ≤ d_N` and the τ protection of the surface ·
+    #: band paths). `"exclude"` (default) = drop every non-target sample within `support_surface.distance_threshold`
+    #: (the RANSAC inlier threshold) of the support plane under the region (the plane of R⊥) — d_N means "neighbour
+    #: observed surface"; the table is guarded by `z_floor`. `"include"` = every non-target sample (T96 as first
+    #: implemented). Record `attention_surface.solid.voxels.n_dn_support_dropped`.
+    surface_solid_dn_support: str = "exclude"
+    SURFACE_SOLID_DN_SUPPORT = ("exclude", "include")
+    # --- T96b — end
+    # --- T96c — begin (default off; read only with `surface_solid_owned`)
+    #: L (mm) — **camera-ray shadow of the target**: the hand layer also removes a seed `x` (above `z_floor`, `d_N > τ`
+    #: with D28's support exclusion, no `d_T ≤ d_N`) when, in one camera of the request whose region was last accepted,
+    #: `x` projects onto a target (code-1) pixel and lies behind that pixel's observed depth by `0 < Δz ≤ L` — the
+    #: unobserved space behind the seen target surface is the target's (closed-object assumption along the ray).
+    #: Candidates = seeds in S's AABB ± L. Record `attention_surface.solid.shadow` · `solid.voxels.n_removed_shadow`.
+    #: Risk: a neighbour hidden **behind** the target within L, farther than τ from every observed non-target sample,
+    #: is removed (never observed = no `d_N` to protect it). None (default) = off.
+    surface_solid_shadow_mm: Optional[float] = None
+    # --- T96c — end
+    # --- T96d — begin (D34; default off; read only with `surface_solid_owned`)
+    #: **`d_N` without the "ever target" cells**: the samples of `d_N` (the τ protection of every path, the solid
+    #: path's `d_N > τ ∧ d_T ≤ d_N`, the shadow path's `d_N > τ`) leave out every non-target memory sample whose cell
+    #: (2.5 mm) was labelled target (code 1, an accepted region) after any update of this episode — the target's own
+    #: surface that a later frame relabelled code 2 (newest wins, T78c) is not neighbour evidence. Labels and every
+    #: other use of the other samples (the surface · band paths' `d_o`) are unchanged. Record
+    #: `attention_surface.solid.voxels.n_dn_ever_target_dropped`. Risk: a neighbour sample in a cell the target once
+    #: occupied (a moved target, a region that leaked onto the neighbour) stops protecting. False (default) = off.
+    surface_solid_dn_ever_target: bool = False
+    # --- T96d — end
+    # --- T96e — begin (default off)
+    #: **A seed the hand layer's target exclusion removed is free space there.** After the distance transform every
+    #: voxel of the exclusion's removed list (`target_free_removed_ijk` — every path: surface · band · hull fill · contact
+    #: allowance · solid · shadow) gets `|d|` = the distance to the nearest remaining seed, also when that seed is within
+    #: the sign-correction purity radius (`_force_sign_on_pure_voxels`, `|d| > 1.5 vs`) — which otherwise leaves the
+    #: TSDF-interior sign (≤ 0) on a removed seed next to a kept one. Kept seeds, the non-seed sign candidates and every
+    #: other voxel keep their value. Record `oracle_split.removed_sign_free`. Needs `target_extent == "attention_surface"`.
+    #: False (default) = off (values · record keys as before).
+    surface_removed_sign_free: bool = False
+    # --- T96e — end
 
     #: **T44c A5 — target 을 지운 거친 계층 (`coarse_no_target`) 을 한 겹 더 만들고 target-free 질의에
     #: 합성한다.** 기본 `False` = 예전 그대로 (값 비트 동일, 계층을 만들지도 않는다).
@@ -1680,6 +1750,29 @@ class EsdfConfig:
             raise AG3SConfigError("esdf.surface_crease_cut 는 target_extent='attention_surface' 의 표면 graph 를 바꿉니다 — "
                                   f"target_extent={self.target_extent!r} 에서는 효과가 없습니다")
         # --- T78d — end
+        # --- T97 — begin
+        if not isinstance(self.surface_crease_protrusion, bool):
+            raise AG3SConfigError(f"esdf.surface_crease_protrusion 는 true 또는 false 여야 합니다: "
+                                  f"{self.surface_crease_protrusion!r}")
+        v = self.surface_crease_protrusion_area
+        if isinstance(v, bool) or not isinstance(v, (int, float)) or not (math.isfinite(float(v)) and float(v) > 0.0):
+            raise AG3SConfigError(f"esdf.surface_crease_protrusion_area 는 0 보다 큰 유한한 수여야 합니다: {v!r}")
+        if self.surface_crease_protrusion and not self.surface_crease_cut:
+            raise AG3SConfigError("esdf.surface_crease_protrusion 은 오목 꺾임 끊기 (surface_crease_cut) 가 떼어 낸 조각을 "
+                                  "다시 붙이는 규칙입니다 — surface_crease_cut 과 함께 켜십시오")
+        if self.surface_crease_protrusion and self.surface_crease_reattach_ratio is not None:
+            raise AG3SConfigError("esdf.surface_crease_protrusion 과 surface_crease_reattach_ratio 는 함께 켤 수 없습니다 — "
+                                  "두 다시 붙이기 규칙의 효과를 가른다 (T97 §1.1)")
+        v = self.surface_crease_hand_freeze_mm
+        if v is not None:
+            if isinstance(v, bool) or not isinstance(v, (int, float)) or not (math.isfinite(float(v)) and float(v) > 0.0):
+                raise AG3SConfigError(f"esdf.surface_crease_hand_freeze_mm 는 0 보다 큰 유한한 mm 여야 합니다 (끔 = None): "
+                                      f"{v!r}")
+            if not (self.surface_crease_cut and self.surface_keep_last):
+                raise AG3SConfigError("esdf.surface_crease_hand_freeze_mm 는 오목 끊기 (surface_crease_cut) 영역을 손이 멀 때 "
+                                      "고른 것으로 유지하는 규칙이며 마지막 채택 영역 (surface_keep_last) 위에서 정의됩니다 — "
+                                      "함께 켜십시오")
+        # --- T97 — end
         # --- T78e — begin
         if not isinstance(self.surface_memory_target_sticky, bool):
             raise AG3SConfigError(f"esdf.surface_memory_target_sticky 는 true 또는 false 여야 합니다: "
@@ -1709,6 +1802,53 @@ class EsdfConfig:
                 raise AG3SConfigError(f"esdf.surface_contact_allowance_mm ({v}) 가 후보 거리 (oracle_max_dist_voxels × fine "
                                       f"voxel = {reach_mm:g} mm) 보다 큽니다 — 후보 밖 seed 는 보지 않습니다")
         # --- T78f — end
+        # --- T96 — begin
+        if not isinstance(self.surface_solid_owned, bool):
+            raise AG3SConfigError(f"esdf.surface_solid_owned 는 true 또는 false 여야 합니다: {self.surface_solid_owned!r}")
+        for name in ("surface_solid_protect_mm", "surface_solid_dilate_mm"):
+            v = getattr(self, name)
+            if isinstance(v, bool) or not isinstance(v, (int, float)) or not (math.isfinite(float(v)) and float(v) >= 0.0):
+                raise AG3SConfigError(f"esdf.{name} 는 0 이상의 유한한 mm 여야 합니다: {v!r}")
+        if self.surface_solid_dn_support not in self.SURFACE_SOLID_DN_SUPPORT:   # T96b (D28)
+            raise AG3SConfigError(f"esdf.surface_solid_dn_support 는 {' · '.join(self.SURFACE_SOLID_DN_SUPPORT)} 중 하나: "
+                                  f"{self.surface_solid_dn_support!r}")
+        if self.surface_solid_owned:
+            if not (self.target_extent == "attention_surface" and self.surface_keep_last and self.surface_no_ball):
+                raise AG3SConfigError("esdf.surface_solid_owned 는 target_extent='attention_surface' 의 마지막 채택 영역 "
+                                      "(surface_keep_last) 과 공 없는 지지면 guard (surface_no_ball) 위에서 정의됩니다 — 함께 "
+                                      f"켜십시오 (target_extent={self.target_extent!r}, surface_keep_last="
+                                      f"{self.surface_keep_last!r}, surface_no_ball={self.surface_no_ball!r})")
+            clash = ([n for n in ("surface_hull_fill", "surface_memory_target_sticky") if getattr(self, n)]
+                     + (["surface_contact_allowance_mm"] if self.surface_contact_allowance_mm is not None else []))
+            if clash:
+                raise AG3SConfigError(f"esdf.surface_solid_owned 는 {', '.join(clash)} 를 한 규칙으로 대체합니다 — 같이 켜면 "
+                                      "무엇의 효과인지 가를 수 없습니다 (T96 §1.1)")
+        # --- T96 — end
+        # --- T96c — begin
+        v = self.surface_solid_shadow_mm
+        if v is not None:
+            if isinstance(v, bool) or not isinstance(v, (int, float)) or not (math.isfinite(float(v)) and float(v) > 0.0):
+                raise AG3SConfigError(f"esdf.surface_solid_shadow_mm 는 0 보다 큰 유한한 mm 여야 합니다 (끔 = null): {v!r}")
+            if not self.surface_solid_owned:
+                raise AG3SConfigError("esdf.surface_solid_shadow_mm 는 surface_solid_owned 의 길입니다 — 혼자서는 아무 일도 "
+                                      "하지 않습니다 (T96c)")
+        # --- T96c — end
+        # --- T96d — begin
+        if not isinstance(self.surface_solid_dn_ever_target, bool):
+            raise AG3SConfigError("esdf.surface_solid_dn_ever_target 는 true 또는 false 여야 합니다: "
+                                  f"{self.surface_solid_dn_ever_target!r}")
+        if self.surface_solid_dn_ever_target and not self.surface_solid_owned:
+            raise AG3SConfigError("esdf.surface_solid_dn_ever_target 는 surface_solid_owned 의 d_N 규칙입니다 — 혼자서는 "
+                                  "아무 일도 하지 않습니다 (T96d)")
+        # --- T96d — end
+        # --- T96e — begin
+        if not isinstance(self.surface_removed_sign_free, bool):
+            raise AG3SConfigError("esdf.surface_removed_sign_free 는 true 또는 false 여야 합니다: "
+                                  f"{self.surface_removed_sign_free!r}")
+        if self.surface_removed_sign_free and self.target_extent != "attention_surface":
+            raise AG3SConfigError("esdf.surface_removed_sign_free 는 target_extent='attention_surface' 의 손 층 지우기 "
+                                  f"목록 위에서 정의됩니다 (target_extent={self.target_extent!r}) (T96e)")
+        # --- T96e — end
         # IFG-CL2
         if self.surface_hybrid_identity not in self.SURFACE_HYBRID_IDENTITIES:
             raise AG3SConfigError(

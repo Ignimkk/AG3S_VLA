@@ -125,7 +125,9 @@ def test_config_default_absent_from_to_dict_and_validated():
     # T83: the grasp corridor carve keys too (same rule).
     t83 = {"grasp_corridor_allow", "grasp_corridor_ahead", "grasp_corridor_min_target_points", "grasp_corridor_margin_in",
            "grasp_corridor_margin_y", "grasp_corridor_support_band"}
-    assert set(d["collision"]) == {f.name for f in dataclasses.fields(CollisionConfig)} - {"palm_shell_margin"} - a6 - t67 - t83
+    t96b = {"palm_cover_margin"}                                             # T96b (D27): same rule (`_OMIT_WHEN_NONE`)
+    assert set(d["collision"]) == ({f.name for f in dataclasses.fields(CollisionConfig)} - {"palm_shell_margin"} - a6
+                                   - t67 - t83 - t96b)
     assert TrajOptConfig.from_dict(d) == c                                   # round trip
     on = TrajOptConfig.from_dict({"collision": {**base, "palm_shell_margin": 0.005}})
     assert on.to_dict()["collision"]["palm_shell_margin"] == 0.005

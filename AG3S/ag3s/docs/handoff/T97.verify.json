@@ -1,0 +1,1215 @@
+{
+ "_comment": "ag3s-verifier. 숫자와 경로만, 해석 없음. 판정은 lead (D30 · D32) 와 사용자.",
+ "step": "T97",
+ "date": "2026-11-04",
+ "runs": [
+  {
+   "id": "T97-region (lead, not rerun)",
+   "command": "bash /mnt/dev/AG3S_VLA-storage/results/development/20261104T045052+0900_054748e6a73c_a02802211ca9/verify/T97/region/run.sh",
+   "venv": ".venv-ag3s",
+   "raw_output": "/mnt/dev/AG3S_VLA-storage/results/development/20261104T045052+0900_054748e6a73c_a02802211ca9/verify/T97/region/t97_region_summary.json",
+   "rows": [
+    "/mnt/dev/AG3S_VLA-storage/results/development/20261104T045052+0900_054748e6a73c_a02802211ca9/verify/T97/region/serveC12_rows_w0.json",
+    "/mnt/dev/AG3S_VLA-storage/results/development/20261104T045052+0900_054748e6a73c_a02802211ca9/verify/T97/region/serveC12_rows_w1.json"
+   ],
+   "stdout_log": "/mnt/dev/AG3S_VLA-storage/results/development/20261104T045052+0900_054748e6a73c_a02802211ca9/verify/T97/region/agg.out"
+  },
+  {
+   "id": "T97-replay-metrics (lead, not rerun)",
+   "command": "bash /mnt/dev/AG3S_VLA-storage/results/development/20261104T045052+0900_054748e6a73c_a02802211ca9/verify/T97/replay/metrics/run_metrics.sh",
+   "venv": ".venv-ag3s",
+   "raw_output": "/mnt/dev/AG3S_VLA-storage/results/development/20261104T045052+0900_054748e6a73c_a02802211ca9/verify/T97/replay/metrics/replay_metrics.json",
+   "stdout_log": "/mnt/dev/AG3S_VLA-storage/results/development/20261104T045052+0900_054748e6a73c_a02802211ca9/verify/T97/replay/metrics/agg.out"
+  },
+  {
+   "id": "replay-C2f",
+   "server_args_file": "/mnt/dev/AG3S_VLA-storage/results/development/20261104T045052+0900_054748e6a73c_a02802211ca9/verify/T97/replay/C2f/B0_k0/server_argv.json",
+   "chunks": "/mnt/dev/AG3S_VLA-storage/results/development/20261104T045052+0900_054748e6a73c_a02802211ca9/verify/T97/replay/C2f/B0_k0/server_constraints",
+   "what": "P0m hand layer + --surface-crease-cut --surface-crease-protrusion --surface-crease-protrusion-area 0.15 --surface-crease-hand-freeze-mm 80"
+  },
+  {
+   "id": "replay-B0p / P0f",
+   "note": "symlinks to T96 replay arms"
+  },
+  {
+   "id": "verifier-supplement + figures",
+   "venv": ".venv-ag3s",
+   "scripts": {
+    "supplement": "/mnt/dev/AG3S_VLA-storage/results/development/20261104T045052+0900_054748e6a73c_a02802211ca9/verify/T96/verifier/replay_supplement.py",
+    "scene": "/mnt/dev/AG3S_VLA-storage/results/development/20261104T045052+0900_054748e6a73c_a02802211ca9/verify/T96/verifier/scene_handlayer.py",
+    "tables_graphs": "/mnt/dev/AG3S_VLA-storage/results/development/20261104T045052+0900_054748e6a73c_a02802211ca9/verify/T96/verifier/tables_graphs.py",
+    "region_excl211": "/mnt/dev/AG3S_VLA-storage/results/development/20261104T045052+0900_054748e6a73c_a02802211ca9/verify/T97/verifier/t97_region_excl211.py",
+    "this": "/mnt/dev/AG3S_VLA-storage/results/development/20261104T045052+0900_054748e6a73c_a02802211ca9/verify/T96/verifier/write_verify.py",
+    "definitions": "/mnt/dev/AG3S_VLA-storage/results/development/20261104T045052+0900_054748e6a73c_a02802211ca9/verify/T96/verifier/definitions_verifier.json"
+   }
+  }
+ ],
+ "code_state": {
+  "repo": "AG3S_VLA-development",
+  "head": "054748e6",
+  "dirty_files": [
+   "AG3S/ag3s/config.py",
+   "AG3S/ag3s/docs/handoff/DECISIONS_20261103_KO.md",
+   "AG3S/ag3s/docs/handoff/T87.verify.json",
+   "AG3S/ag3s/experiments/sources/constraint_record.py",
+   "AG3S/ag3s/fields/curobo_builder.py",
+   "AG3S/ag3s/runtime/attention_surface.py",
+   "AG3S/ag3s/runtime/attention_surface_crease.py",
+   "AG3S/ag3s/runtime/attention_surface_gpu.py",
+   "AG3S/ag3s/runtime/pipeline.py",
+   "AG3S/trajopt/config.py",
+   "AG3S/trajopt/experiments/ta_offline.py",
+   "AG3S/trajopt/gpu_seeds.py",
+   "AG3S/trajopt/linearize.py",
+   "AG3S/trajopt/safe_policy.py",
+   "AG3S/trajopt/serve_safe.py",
+   "AG3S/trajopt/sqp.py",
+   "paper/evidence/PAPER_LOG.md",
+   "paper/figures/fig03_attention_to_3d/figure_cvpr_v1.tex",
+   "paper/latex/sections/03_method.tex",
+   "paper/notes/CVPR_V1_BUILD.json",
+   "tests/trajopt/test_scm_palm_shell_margin.py"
+  ],
+  "replay_snapshot": "/mnt/dev/AG3S_VLA-storage/results/development/20261104T045052+0900_054748e6a73c_a02802211ca9/snapshot_t96",
+  "snapshot_head": "HEAD 054748e6a73c7cc6c25d52ee6d017d797266bd56 (git archive of AG3S common scripts robots Baseline integration tests third_party/openpi) + working-tree modified/untracked files; built 2026-11-03T21:00:11+00:00 UTC",
+  "gt_tool": "/mnt/dev/AG3S_VLA-storage/results/development/20261101T212251+0900_8ab3c7ef7757_7d4bbf78ee5a/verify/T84/fail_reason/t84_fail_reason.py (Scene / classify / visible_wrist, unchanged) via T96 t96_replay_metrics.py",
+  "gt_snapshot": "/mnt/dev/AG3S_VLA-storage/results/development/20261101T212251+0900_8ab3c7ef7757_7d4bbf78ee5a/snapshot_t84"
+ },
+ "definitions": {
+  "region": "T97.task.md §2.1 (= T78c §8 · T78d §2.2 metrics, T78c GT rows); touching = gap < 5 mm pre-grasp, separated = gap >= 5 mm and 5 mm graph seed on apple (precision >= 0.5); aggregation t97_region_agg.py",
+  "region_criteria_prefixed": "C2 (and C1): touching precision median >= 0.95, touching cover median >= 0.90, separated cover median loss <= 2 %p vs 5 mm graph, separated other-object nodes 0; selection rule: both pass -> fewer neighbour-attached, tie -> C2",
+  "replay_metrics": "same as T96 (T87 README_definitions.md, hurdle 211 excluded)",
+  "replay_criteria_prefixed": "T97.task.md §2.2: touching-neighbour requests' freed neighbour-fruit voxels fewer than P0m hand layer; separated-scene grasp-window remaining target voxels (band-excluded) <= P0m hand layer + 1 %p",
+  "verifier": {
+   "fixed_at": "2026-11-04 07:18 KST (2026-11-03 22:18 UTC), before computing any verifier-side number below; replay metrics themselves were computed by lead with T87 README_definitions.md unchanged (hurdle 211 excluded, 9 runs)",
+   "reused_definitions": "outputs/2026-11-03_T87_표면추출위_기능따로재기_HSR5단계/재생_고정입력/README_definitions.md (grasp window, frac_left_nb with 6 mm floor band excluded, freed = B0p<=0 & arm>0 classified by MuJoCo GT 8 mm rule, HOLD flips)",
+   "visible_hidden": "visible = apple surface voxel containing >=1 GT apple surface sample visible in the grasping-hand wrist camera at that request (t84 visible_wrist v3: projects inside image, segmentation = apple geom, render depth >= point depth - 5 mm); hidden = not visible. Sums are lead's replay_metrics.json sum_n_left_visible_nb / sum_n_left_hidden_nb; verifier adds request medians of n_left_visible_nb / n_left_hidden_nb over the same 78 requests (part_w0/w1.json rows)",
+   "scene_request_selection": "per run (REG_ep211_s2113 touching banana, HURDLE_ep1345_s13453 separated): among that run's requests in the 78-request remaining-voxel set, the one with the smallest palm-apple distance (part json palm_apple_mm); tie -> smaller request index",
+   "scene_overlay": "per arm, recomputed from that arm's chunk esdf_free grid at the selected request: band-excluded GT apple surface voxels (same voxel keys as t84 voxel_metric) coloured by hand-layer value d (mm, continuous colormap, clipped [-5, 20]); remaining = d <= 0 (black edge). Neighbour-fruit freed voxels = freed_w*.npz points of class 'fruit' for that request and arm (B0p has none by definition). GT outlines = MuJoCo segmentation boundary of apple and of neighbour fruit geoms in the wrist render; slice = horizontal layer of esdf_free through the voxel containing the GT apple centre, GT samples within +-half voxel of that z drawn as outline points",
+   "supplement_region_excluding_hurdle211": "T97 region criteria recomputed with t97_region_agg.py logic unchanged but rows with run == '허들211_k0' removed (memory rule: hurdle 211 excluded from all tests). Reported as supplement; lead's D30 numbers are the 304-request set including hurdle 211",
+   "supplement_t97_separated": "T97 §2.2 criterion 2 auxiliary: request median of frac_left_nb over the 78-request set minus the 회귀211 run (touching banana), for B0p / P0f / C2f; plus run medians (lead's). Threshold as task: C2f <= P0f + 0.01",
+   "tolerances": "no tolerance: numbers are reported raw (4 decimals as in lead files)"
+  },
+  "arm_names": {
+   "CL": "original B0 closed-loop record (replay noise floor)",
+   "B0p": "no feature (surface extraction only, B0 server args)",
+   "P0f": "P0m hand layer = + --surface-hull-fill --surface-contact-allowance-mm 10",
+   "C2f": "P0m hand layer + --surface-crease-cut --surface-crease-protrusion --surface-crease-protrusion-area 0.15 --surface-crease-hand-freeze-mm 80"
+  },
+  "region_arm_names": {
+   "v5": "current 5 mm graph (P0m)",
+   "v25_cut": "2.5 mm crease cut only (T78c study)",
+   "serve_C1": "crease cut + re-attach R 0.25 (T78d)",
+   "serve_C2": "crease cut + protrusion rho 0.15 (T97)"
+  }
+ },
+ "numbers": {
+  "region": {
+   "lead_summary": {
+    "touching_gap<5": {
+     "n": 100,
+     "v5": {
+      "cover_median": 0.9985,
+      "cover_mean": 0.8575,
+      "precision_median": 0.6256,
+      "precision_mean": 0.5181,
+      "other_nodes": 14819,
+      "by_class": {
+       "fruit": 14357,
+       "robot": 1734,
+       "crate": 462,
+       "none": 375
+      }
+     },
+     "v25_cut": {
+      "cover_median": 0.955,
+      "cover_mean": 0.8361,
+      "precision_median": 0.9988,
+      "precision_mean": 0.785,
+      "other_nodes": 11036,
+      "by_class": {
+       "robot": 3059,
+       "fruit": 8764,
+       "crate": 2272,
+       "none": 3543
+      }
+     },
+     "serve_C1": {
+      "cover_median": 0.988,
+      "cover_mean": 0.8471,
+      "precision_median": 0.9985,
+      "precision_mean": 0.7841,
+      "other_nodes": 11233,
+      "by_class": {
+       "fruit": 8785,
+       "robot": 3258,
+       "crate": 2448,
+       "none": 3555
+      }
+     },
+     "serve_C2": {
+      "cover_median": 0.9808,
+      "cover_mean": 0.8435,
+      "precision_median": 0.9988,
+      "precision_mean": 0.7857,
+      "other_nodes": 11036,
+      "by_class": {
+       "robot": 3059,
+       "fruit": 8764,
+       "crate": 2272,
+       "none": 3555
+      }
+     }
+    },
+    "separated_on_apple": {
+     "n": 204,
+     "v5": {
+      "cover_median": 1.0,
+      "cover_mean": 0.9753,
+      "precision_median": 1.0,
+      "precision_mean": 0.9671,
+      "other_nodes": 0,
+      "by_class": {
+       "robot": 2168
+      }
+     },
+     "v25_cut": {
+      "cover_median": 0.9749,
+      "cover_mean": 0.9504,
+      "precision_median": 1.0,
+      "precision_mean": 0.9802,
+      "other_nodes": 0,
+      "by_class": {
+       "robot": 3854
+      }
+     },
+     "serve_C1": {
+      "cover_median": 0.9921,
+      "cover_mean": 0.9634,
+      "precision_median": 1.0,
+      "precision_mean": 0.9795,
+      "other_nodes": 0,
+      "by_class": {
+       "robot": 4099
+      }
+     },
+     "serve_C2": {
+      "cover_median": 0.9901,
+      "cover_mean": 0.9592,
+      "precision_median": 1.0,
+      "precision_mean": 0.9802,
+      "other_nodes": 0,
+      "by_class": {
+       "robot": 3854
+      }
+     }
+    },
+    "criteria": {
+     "serve_C1": {
+      "1_touch_precision>=0.95": true,
+      "2_touch_cover>=0.90": true,
+      "3_sep_cover_loss<=0.02": true,
+      "4_sep_other==0": true,
+      "pass": true
+     },
+     "serve_C2": {
+      "1_touch_precision>=0.95": true,
+      "2_touch_cover>=0.90": true,
+      "3_sep_cover_loss<=0.02": true,
+      "4_sep_other==0": true,
+      "pass": true
+     }
+    },
+    "n_rows": 358,
+    "ms_median": {
+     "serve_C1": 281.2765,
+     "serve_C2": 280.71349999999995
+    }
+   },
+   "per_run_touching": {
+    "허들211_k0": {
+     "n": 32,
+     "v5": {
+      "cover_median": 0.9448,
+      "cover_mean": 0.9274,
+      "precision_median": 0.3442,
+      "precision_mean": 0.4012,
+      "other_nodes": 6959,
+      "by_class": {
+       "fruit": 6959,
+       "robot": 170
+      }
+     },
+     "v25_cut": {
+      "cover_median": 0.9493,
+      "cover_mean": 0.9301,
+      "precision_median": 1.0,
+      "precision_mean": 0.9077,
+      "other_nodes": 2416,
+      "by_class": {
+       "fruit": 2416,
+       "robot": 300
+      }
+     },
+     "serve_C1": {
+      "cover_median": 0.9551,
+      "cover_mean": 0.9349,
+      "precision_median": 1.0,
+      "precision_mean": 0.9066,
+      "other_nodes": 2432,
+      "by_class": {
+       "fruit": 2432,
+       "robot": 300
+      }
+     },
+     "serve_C2": {
+      "cover_median": 0.9493,
+      "cover_mean": 0.9301,
+      "precision_median": 1.0,
+      "precision_mean": 0.9077,
+      "other_nodes": 2416,
+      "by_class": {
+       "fruit": 2416,
+       "robot": 300
+      }
+     }
+    },
+    "허들954_k0": {
+     "n": 1,
+     "v5": {
+      "cover_median": 0.964,
+      "cover_mean": 0.964,
+      "precision_median": 0.4467,
+      "precision_mean": 0.4467,
+      "other_nodes": 0,
+      "by_class": {
+       "robot": 166
+      }
+     },
+     "v25_cut": {
+      "cover_median": 0.9126,
+      "cover_mean": 0.9126,
+      "precision_median": 0.9803,
+      "precision_mean": 0.9803,
+      "other_nodes": 0,
+      "by_class": {
+       "robot": 9
+      }
+     },
+     "serve_C1": {
+      "cover_median": 0.9126,
+      "cover_mean": 0.9126,
+      "precision_median": 0.9803,
+      "precision_mean": 0.9803,
+      "other_nodes": 0,
+      "by_class": {
+       "robot": 9
+      }
+     },
+     "serve_C2": {
+      "cover_median": 0.9126,
+      "cover_mean": 0.9126,
+      "precision_median": 0.9803,
+      "precision_mean": 0.9803,
+      "other_nodes": 0,
+      "by_class": {
+       "robot": 9
+      }
+     }
+    },
+    "회귀211_k0": {
+     "n": 24,
+     "v5": {
+      "cover_median": 1.0,
+      "cover_mean": 0.9956,
+      "precision_median": 0.6414,
+      "precision_mean": 0.6973,
+      "other_nodes": 4514,
+      "by_class": {
+       "fruit": 4514
+      }
+     },
+     "v25_cut": {
+      "cover_median": 0.9932,
+      "cover_mean": 0.9807,
+      "precision_median": 1.0,
+      "precision_mean": 1.0,
+      "other_nodes": 0,
+      "by_class": {}
+     },
+     "serve_C1": {
+      "cover_median": 0.9975,
+      "cover_mean": 0.9958,
+      "precision_median": 1.0,
+      "precision_mean": 1.0,
+      "other_nodes": 1,
+      "by_class": {
+       "fruit": 1
+      }
+     },
+     "serve_C2": {
+      "cover_median": 0.9941,
+      "cover_mean": 0.993,
+      "precision_median": 1.0,
+      "precision_mean": 1.0,
+      "other_nodes": 0,
+      "by_class": {}
+     }
+    },
+    "회귀954_k0": {
+     "n": 43,
+     "v5": {
+      "cover_median": 0.9718,
+      "cover_mean": 0.7194,
+      "precision_median": 0.6071,
+      "precision_mean": 0.5068,
+      "other_nodes": 3346,
+      "by_class": {
+       "robot": 1398,
+       "fruit": 2884,
+       "crate": 462,
+       "none": 375
+      }
+     },
+     "v25_cut": {
+      "cover_median": 0.9132,
+      "cover_mean": 0.6763,
+      "precision_median": 0.7445,
+      "precision_mean": 0.5691,
+      "other_nodes": 8620,
+      "by_class": {
+       "robot": 2750,
+       "fruit": 6348,
+       "crate": 2272,
+       "none": 3543
+      }
+     },
+     "serve_C1": {
+      "cover_median": 0.9388,
+      "cover_mean": 0.69,
+      "precision_median": 0.7583,
+      "precision_mean": 0.5679,
+      "other_nodes": 8800,
+      "by_class": {
+       "robot": 2949,
+       "fruit": 6352,
+       "crate": 2448,
+       "none": 3555
+      }
+     },
+     "serve_C2": {
+      "cover_median": 0.9159,
+      "cover_mean": 0.6866,
+      "precision_median": 0.7583,
+      "precision_mean": 0.5707,
+      "other_nodes": 8620,
+      "by_class": {
+       "robot": 2750,
+       "fruit": 6348,
+       "crate": 2272,
+       "none": 3555
+      }
+     }
+    }
+   },
+   "verifier_excluding_hurdle211": {
+    "n_rows": 283,
+    "touching_gap<5": {
+     "n": 68,
+     "v5": {
+      "cover_median": 1.0,
+      "precision_median": 0.6363,
+      "other_nodes": 7860,
+      "by_class": {
+       "fruit": 7398,
+       "robot": 1564,
+       "crate": 462,
+       "none": 375
+      }
+     },
+     "v25_cut": {
+      "cover_median": 0.9621,
+      "precision_median": 0.9869,
+      "other_nodes": 8620,
+      "by_class": {
+       "robot": 2759,
+       "fruit": 6348,
+       "crate": 2272,
+       "none": 3543
+      }
+     },
+     "serve_C1": {
+      "cover_median": 0.9951,
+      "precision_median": 0.987,
+      "other_nodes": 8801,
+      "by_class": {
+       "fruit": 6353,
+       "robot": 2958,
+       "crate": 2448,
+       "none": 3555
+      }
+     },
+     "serve_C2": {
+      "cover_median": 0.9907,
+      "precision_median": 0.9869,
+      "other_nodes": 8620,
+      "by_class": {
+       "robot": 2759,
+       "fruit": 6348,
+       "crate": 2272,
+       "none": 3555
+      }
+     }
+    },
+    "separated_on_apple": {
+     "n": 203,
+     "v5": {
+      "cover_median": 1.0,
+      "precision_median": 1.0,
+      "other_nodes": 0,
+      "by_class": {
+       "robot": 2168
+      }
+     },
+     "v25_cut": {
+      "cover_median": 0.9753,
+      "precision_median": 1.0,
+      "other_nodes": 0,
+      "by_class": {
+       "robot": 3854
+      }
+     },
+     "serve_C1": {
+      "cover_median": 0.9921,
+      "precision_median": 1.0,
+      "other_nodes": 0,
+      "by_class": {
+       "robot": 4099
+      }
+     },
+     "serve_C2": {
+      "cover_median": 0.9901,
+      "precision_median": 1.0,
+      "other_nodes": 0,
+      "by_class": {
+       "robot": 3854
+      }
+     }
+    },
+    "criteria": {
+     "serve_C1": {
+      "1_touch_precision>=0.95": true,
+      "2_touch_cover>=0.90": true,
+      "3_sep_cover_loss<=0.02": true,
+      "4_sep_other==0": true,
+      "pass": true
+     },
+     "serve_C2": {
+      "1_touch_precision>=0.95": true,
+      "2_touch_cover>=0.90": true,
+      "3_sep_cover_loss<=0.02": true,
+      "4_sep_other==0": true,
+      "pass": true
+     }
+    }
+   },
+   "n_pre_grasp_requests_lead": 304
+  },
+  "replay": {
+   "n_runs": 9,
+   "n_requests": 435,
+   "n_window_requests": 87,
+   "n_remaining_metric_requests": 78,
+   "same_78_request_set_as_T96": true,
+   "arms": {
+    "CL": {
+     "remaining_request_median": 0.1406,
+     "remaining_request_mean": 0.1363,
+     "remaining_median_of_run_medians": 0.1431,
+     "remaining_run_median": {
+      "회귀211": 0.1885,
+      "회귀954": 0.1206,
+      "회귀119": 0.1431,
+      "가림121": 0.1608,
+      "가림122": 0.1557,
+      "허들119": 0.0952,
+      "허들954": 0.1301,
+      "허들1345": 0.162,
+      "허들850": 0.1147
+     },
+     "sum_n_left_nb": 3863,
+     "sum_n_apple_voxels_nb": 28177,
+     "sum_n_left_visible_nb": 39,
+     "sum_n_left_hidden_nb": 3824,
+     "request_median_n_left_visible_nb": 0.0,
+     "request_median_n_left_hidden_nb": 49.5,
+     "request_median_excl_reg211": 0.1332,
+     "finger_contact_region": {
+      "median_frac_region_left_nb": 0.0,
+      "median_n_region_left_nb": 0.0,
+      "sum_n_region_left_nb": 76,
+      "sum_n_region_voxels_nb": 1260,
+      "n_requests_any_region_left": 28
+     },
+     "paired_diff_vs_no_feature": {
+      "median": -0.0001,
+      "mean": 0.0009,
+      "n_lower": 39,
+      "n_equal": 12,
+      "n_higher": 27
+     },
+     "freed_vs_no_feature": {
+      "all": {
+       "n_requests_compared": 126,
+       "n_freed": 471081,
+       "by_class": {
+        "obstacle": 337821,
+        "none": 113125,
+        "crate": 10947,
+        "table": 6762,
+        "apple": 2149,
+        "fruit": 205,
+        "robot": 72
+       },
+       "share_neighbour_table_crate": 0.038,
+       "n_neighbour_table_crate": 17914,
+       "share_obstacle": 0.7171,
+       "share_robot": 0.0002,
+       "share_apple": 0.0046,
+       "share_none": 0.2401,
+       "n_reoccupied": 99555
+      },
+      "window": {
+       "n_requests_compared": 62,
+       "n_freed": 231773,
+       "by_class": {
+        "obstacle": 159419,
+        "none": 58170,
+        "crate": 7138,
+        "table": 4795,
+        "apple": 2018,
+        "fruit": 161,
+        "robot": 72
+       },
+       "share_neighbour_table_crate": 0.0522,
+       "n_neighbour_table_crate": 12094,
+       "share_obstacle": 0.6878,
+       "share_robot": 0.0003,
+       "share_apple": 0.0087,
+       "share_none": 0.251,
+       "n_reoccupied": 36912
+      },
+      "all_per_run_by_class": {
+       "회귀211": {
+        "obstacle": 28028,
+        "none": 18039,
+        "crate": 387,
+        "table": 654,
+        "apple": 107,
+        "fruit": 103,
+        "robot": 2
+       },
+       "회귀954": {
+        "obstacle": 34200,
+        "none": 17343,
+        "table": 1380,
+        "apple": 186,
+        "crate": 379,
+        "fruit": 18,
+        "robot": 3
+       },
+       "회귀119": {
+        "table": 464,
+        "crate": 176,
+        "none": 981,
+        "apple": 33,
+        "robot": 1
+       },
+       "가림121": {
+        "none": 1972,
+        "obstacle": 4900,
+        "crate": 124,
+        "table": 267,
+        "robot": 21,
+        "apple": 421
+       },
+       "가림122": {
+        "table": 383,
+        "none": 2343,
+        "crate": 198,
+        "obstacle": 5776,
+        "robot": 18,
+        "apple": 558
+       },
+       "허들119": {
+        "obstacle": 60085,
+        "none": 16188,
+        "crate": 722,
+        "table": 915,
+        "fruit": 1,
+        "apple": 35,
+        "robot": 6
+       },
+       "허들954": {
+        "obstacle": 86279,
+        "none": 22599,
+        "crate": 656,
+        "table": 706,
+        "apple": 110,
+        "fruit": 46,
+        "robot": 1
+       },
+       "허들1345": {
+        "none": 10241,
+        "obstacle": 31335,
+        "table": 582,
+        "crate": 2894,
+        "robot": 18,
+        "apple": 578
+       },
+       "허들850": {
+        "obstacle": 87218,
+        "none": 23419,
+        "crate": 5411,
+        "table": 1411,
+        "apple": 121,
+        "fruit": 37,
+        "robot": 2
+       }
+      }
+     },
+     "vs_no_feature_plan": {
+      "all": {
+       "n_requests": 435,
+       "n_both_have_hand_layer": 316,
+       "n_origin_differs": 243,
+       "origin_offset_max_mm": 4.0565,
+       "n_grid_identical": 0,
+       "n_refined_identical": 94,
+       "dpalm_max_mm": {
+        "n": 435,
+        "median": 0.0318,
+        "p90": 18.0246,
+        "max": 230.3834,
+        "min": 0.0
+       },
+       "dq_max_deg": {
+        "n": 435,
+        "median": 0.0027,
+        "p90": 1.1732,
+        "max": 24.8306,
+        "min": 0.0
+       },
+       "n_dpalm_gt_1mm": 119,
+       "n_dpalm_gt_5mm": 85,
+       "hold_flips": {
+        "B0p execute -> HOLD": 1,
+        "B0p HOLD -> execute": 1
+       },
+       "n_hold_B0p": 2,
+       "n_hold_this": 2
+      },
+      "window": {
+       "n_requests": 87,
+       "n_both_have_hand_layer": 78,
+       "n_origin_differs": 19,
+       "origin_offset_max_mm": 4.0565,
+       "n_grid_identical": 0,
+       "n_refined_identical": 34,
+       "dpalm_max_mm": {
+        "n": 87,
+        "median": 0.2526,
+        "p90": 16.2292,
+        "max": 200.339,
+        "min": 0.0
+       },
+       "dq_max_deg": {
+        "n": 87,
+        "median": 0.0331,
+        "p90": 1.3485,
+        "max": 24.8306,
+        "min": 0.0
+       },
+       "n_dpalm_gt_1mm": 36,
+       "n_dpalm_gt_5mm": 25,
+       "hold_flips": {
+        "B0p execute -> HOLD": 1,
+        "B0p HOLD -> execute": 1
+       },
+       "n_hold_B0p": 2,
+       "n_hold_this": 2
+      }
+     }
+    },
+    "B0p": {
+     "remaining_request_median": 0.1325,
+     "remaining_request_mean": 0.1354,
+     "remaining_median_of_run_medians": 0.1371,
+     "remaining_run_median": {
+      "회귀211": 0.1873,
+      "회귀954": 0.118,
+      "회귀119": 0.151,
+      "가림121": 0.1371,
+      "가림122": 0.1261,
+      "허들119": 0.1009,
+      "허들954": 0.1404,
+      "허들1345": 0.1484,
+      "허들850": 0.1193
+     },
+     "sum_n_left_nb": 3845,
+     "sum_n_apple_voxels_nb": 28238,
+     "sum_n_left_visible_nb": 49,
+     "sum_n_left_hidden_nb": 3796,
+     "request_median_n_left_visible_nb": 0.0,
+     "request_median_n_left_hidden_nb": 48.5,
+     "request_median_excl_reg211": 0.1289,
+     "finger_contact_region": {
+      "median_frac_region_left_nb": 0.05,
+      "median_n_region_left_nb": 1.0,
+      "sum_n_region_left_nb": 112,
+      "sum_n_region_voxels_nb": 1262,
+      "n_requests_any_region_left": 37
+     }
+    },
+    "P0f": {
+     "remaining_request_median": 0.1153,
+     "remaining_request_mean": 0.1117,
+     "remaining_median_of_run_medians": 0.1151,
+     "remaining_run_median": {
+      "회귀211": 0.1178,
+      "회귀954": 0.1114,
+      "회귀119": 0.1146,
+      "가림121": 0.1256,
+      "가림122": 0.1141,
+      "허들119": 0.0868,
+      "허들954": 0.125,
+      "허들1345": 0.1257,
+      "허들850": 0.1151
+     },
+     "sum_n_left_nb": 3170,
+     "sum_n_apple_voxels_nb": 28238,
+     "sum_n_left_visible_nb": 5,
+     "sum_n_left_hidden_nb": 3165,
+     "request_median_n_left_visible_nb": 0.0,
+     "request_median_n_left_hidden_nb": 42.0,
+     "request_median_excl_reg211": 0.1141,
+     "finger_contact_region": {
+      "median_frac_region_left_nb": 0.0,
+      "median_n_region_left_nb": 0.0,
+      "sum_n_region_left_nb": 51,
+      "sum_n_region_voxels_nb": 1262,
+      "n_requests_any_region_left": 26
+     },
+     "paired_diff_vs_no_feature": {
+      "median": -0.0084,
+      "mean": -0.0238,
+      "n_lower": 51,
+      "n_equal": 27,
+      "n_higher": 0
+     },
+     "freed_vs_no_feature": {
+      "all": {
+       "n_requests_compared": 316,
+       "n_freed": 9037,
+       "by_class": {
+        "apple": 6354,
+        "fruit": 2015,
+        "none": 464,
+        "robot": 204
+       },
+       "share_neighbour_table_crate": 0.223,
+       "n_neighbour_table_crate": 2015,
+       "share_obstacle": 0.0,
+       "share_robot": 0.0226,
+       "share_apple": 0.7031,
+       "share_none": 0.0513,
+       "n_reoccupied": 0
+      },
+      "window": {
+       "n_requests_compared": 78,
+       "n_freed": 4994,
+       "by_class": {
+        "apple": 2943,
+        "fruit": 1756,
+        "robot": 204,
+        "none": 91
+       },
+       "share_neighbour_table_crate": 0.3516,
+       "n_neighbour_table_crate": 1756,
+       "share_obstacle": 0.0,
+       "share_robot": 0.0408,
+       "share_apple": 0.5893,
+       "share_none": 0.0182,
+       "n_reoccupied": 0
+      },
+      "all_per_run_by_class": {
+       "회귀211": {
+        "apple": 873,
+        "fruit": 2013,
+        "none": 37,
+        "robot": 53
+       },
+       "회귀954": {
+        "none": 10,
+        "apple": 627,
+        "fruit": 1
+       },
+       "회귀119": {
+        "apple": 2446,
+        "none": 406,
+        "robot": 51
+       },
+       "가림121": {
+        "apple": 472,
+        "robot": 13,
+        "none": 4
+       },
+       "가림122": {
+        "apple": 552,
+        "robot": 31
+       },
+       "허들119": {
+        "apple": 329,
+        "robot": 40,
+        "none": 2
+       },
+       "허들954": {
+        "apple": 414,
+        "none": 4,
+        "fruit": 1,
+        "robot": 1
+       },
+       "허들1345": {
+        "apple": 434,
+        "none": 1,
+        "robot": 15
+       },
+       "허들850": {
+        "apple": 207
+       }
+      }
+     },
+     "vs_no_feature_plan": {
+      "all": {
+       "n_requests": 435,
+       "n_both_have_hand_layer": 316,
+       "n_origin_differs": 0,
+       "origin_offset_max_mm": 0.0,
+       "n_grid_identical": 79,
+       "n_refined_identical": 223,
+       "dpalm_max_mm": {
+        "n": 435,
+        "median": 0.0,
+        "p90": 0.8648,
+        "max": 132.4068,
+        "min": 0.0
+       },
+       "dq_max_deg": {
+        "n": 435,
+        "median": 0.0,
+        "p90": 0.0638,
+        "max": 20.4149,
+        "min": 0.0
+       },
+       "n_dpalm_gt_1mm": 41,
+       "n_dpalm_gt_5mm": 19,
+       "hold_flips": {
+        "B0p execute -> HOLD": 2,
+        "B0p HOLD -> execute": 1
+       },
+       "n_hold_B0p": 2,
+       "n_hold_this": 3
+      },
+      "window": {
+       "n_requests": 87,
+       "n_both_have_hand_layer": 78,
+       "n_origin_differs": 0,
+       "origin_offset_max_mm": 0.0,
+       "n_grid_identical": 6,
+       "n_refined_identical": 41,
+       "dpalm_max_mm": {
+        "n": 87,
+        "median": 0.0,
+        "p90": 9.3885,
+        "max": 132.4068,
+        "min": 0.0
+       },
+       "dq_max_deg": {
+        "n": 87,
+        "median": 0.0,
+        "p90": 1.3485,
+        "max": 20.4149,
+        "min": 0.0
+       },
+       "n_dpalm_gt_1mm": 23,
+       "n_dpalm_gt_5mm": 16,
+       "hold_flips": {
+        "B0p execute -> HOLD": 2,
+        "B0p HOLD -> execute": 1
+       },
+       "n_hold_B0p": 2,
+       "n_hold_this": 3
+      }
+     }
+    },
+    "C2f": {
+     "remaining_request_median": 0.1346,
+     "remaining_request_mean": 0.1311,
+     "remaining_median_of_run_medians": 0.1343,
+     "remaining_run_median": {
+      "회귀211": 0.1285,
+      "회귀954": 0.126,
+      "회귀119": 0.1639,
+      "가림121": 0.1384,
+      "가림122": 0.1359,
+      "허들119": 0.1201,
+      "허들954": 0.1467,
+      "허들1345": 0.1313,
+      "허들850": 0.1343
+     },
+     "sum_n_left_nb": 3717,
+     "sum_n_apple_voxels_nb": 28238,
+     "sum_n_left_visible_nb": 1,
+     "sum_n_left_hidden_nb": 3716,
+     "request_median_n_left_visible_nb": 0.0,
+     "request_median_n_left_hidden_nb": 48.5,
+     "request_median_excl_reg211": 0.1359,
+     "finger_contact_region": {
+      "median_frac_region_left_nb": 0.0436,
+      "median_n_region_left_nb": 1.0,
+      "sum_n_region_left_nb": 67,
+      "sum_n_region_voxels_nb": 1262,
+      "n_requests_any_region_left": 31
+     },
+     "paired_diff_vs_no_feature": {
+      "median": 0.0084,
+      "mean": -0.0043,
+      "n_lower": 26,
+      "n_equal": 5,
+      "n_higher": 47
+     },
+     "freed_vs_no_feature": {
+      "all": {
+       "n_requests_compared": 316,
+       "n_freed": 7701,
+       "by_class": {
+        "apple": 6988,
+        "none": 441,
+        "robot": 205,
+        "fruit": 67
+       },
+       "share_neighbour_table_crate": 0.0087,
+       "n_neighbour_table_crate": 67,
+       "share_obstacle": 0.0,
+       "share_robot": 0.0266,
+       "share_apple": 0.9074,
+       "share_none": 0.0573,
+       "n_reoccupied": 26495
+      },
+      "window": {
+       "n_requests_compared": 78,
+       "n_freed": 4393,
+       "by_class": {
+        "apple": 4044,
+        "robot": 205,
+        "none": 84,
+        "fruit": 60
+       },
+       "share_neighbour_table_crate": 0.0137,
+       "n_neighbour_table_crate": 60,
+       "share_obstacle": 0.0,
+       "share_robot": 0.0467,
+       "share_apple": 0.9206,
+       "share_none": 0.0191,
+       "n_reoccupied": 5496
+      },
+      "all_per_run_by_class": {
+       "회귀211": {
+        "apple": 843,
+        "fruit": 52,
+        "none": 3,
+        "robot": 11
+       },
+       "회귀954": {
+        "none": 35,
+        "apple": 829,
+        "fruit": 13
+       },
+       "회귀119": {
+        "apple": 2264,
+        "none": 390,
+        "robot": 54
+       },
+       "가림121": {
+        "apple": 594,
+        "robot": 28,
+        "none": 5
+       },
+       "가림122": {
+        "apple": 735,
+        "robot": 39,
+        "none": 1
+       },
+       "허들119": {
+        "apple": 366,
+        "robot": 42,
+        "none": 2
+       },
+       "허들954": {
+        "apple": 499,
+        "none": 4,
+        "fruit": 2,
+        "robot": 4
+       },
+       "허들1345": {
+        "apple": 646,
+        "none": 1,
+        "robot": 27
+       },
+       "허들850": {
+        "apple": 212
+       }
+      }
+     },
+     "vs_no_feature_plan": {
+      "all": {
+       "n_requests": 435,
+       "n_both_have_hand_layer": 316,
+       "n_origin_differs": 0,
+       "origin_offset_max_mm": 0.0,
+       "n_grid_identical": 0,
+       "n_refined_identical": 231,
+       "dpalm_max_mm": {
+        "n": 435,
+        "median": 0.0,
+        "p90": 1.0762,
+        "max": 58.9413,
+        "min": 0.0
+       },
+       "dq_max_deg": {
+        "n": 435,
+        "median": 0.0,
+        "p90": 0.0787,
+        "max": 24.7064,
+        "min": 0.0
+       },
+       "n_dpalm_gt_1mm": 46,
+       "n_dpalm_gt_5mm": 22,
+       "hold_flips": {
+        "B0p HOLD -> execute": 1
+       },
+       "n_hold_B0p": 2,
+       "n_hold_this": 1
+      },
+      "window": {
+       "n_requests": 87,
+       "n_both_have_hand_layer": 78,
+       "n_origin_differs": 0,
+       "origin_offset_max_mm": 0.0,
+       "n_grid_identical": 0,
+       "n_refined_identical": 39,
+       "dpalm_max_mm": {
+        "n": 87,
+        "median": 0.0004,
+        "p90": 12.1197,
+        "max": 58.9413,
+        "min": 0.0
+       },
+       "dq_max_deg": {
+        "n": 87,
+        "median": 0.0,
+        "p90": 1.2775,
+        "max": 24.7064,
+        "min": 0.0
+       },
+       "n_dpalm_gt_1mm": 27,
+       "n_dpalm_gt_5mm": 19,
+       "hold_flips": {
+        "B0p HOLD -> execute": 1
+       },
+       "n_hold_B0p": 2,
+       "n_hold_this": 1
+      }
+     }
+    }
+   },
+   "criteria_prefixed_T97_2_2": {
+    "touching_neighbour_fruit_freed_reg211_all_requests": {
+     "P0m_hand_layer": 2013,
+     "C2f": 52,
+     "rule": "C2f < P0m hand layer",
+     "met": true
+    },
+    "separated_remaining_request_median_excl_reg211": {
+     "P0m_hand_layer": 0.1141,
+     "C2f": 0.1359,
+     "diff": 0.0218,
+     "rule": "C2f <= P0m hand layer + 0.01",
+     "met": false,
+     "n_requests": 71
+    },
+    "run_median_diff_C2f_minus_P0m": {
+     "회귀211": 0.0107,
+     "회귀954": 0.0146,
+     "회귀119": 0.0493,
+     "가림121": 0.0128,
+     "가림122": 0.0218,
+     "허들119": 0.0333,
+     "허들954": 0.0217,
+     "허들1345": 0.0056,
+     "허들850": 0.0192
+    },
+    "note": "separated split = runs other than 회귀211 (verifier definition fixed before computing); 회귀954 has 43 touching pre-grasp requests in the region set"
+   }
+  }
+ },
+ "lead_judgment_quoted": {
+  "D30": "DECISIONS_20261104_3a_KO.md D30",
+  "D32": "DECISIONS_20261104_3a_KO.md D32"
+ },
+ "figures": [
+  {
+   "path": "AG3S/ag3s/docs/figures/t97-region-table.png",
+   "kind": "table",
+   "pdf": "AG3S/ag3s/docs/figures/t97-region-table.pdf",
+   "sidecar": "AG3S/ag3s/docs/figures/t97-region-table.json"
+  },
+  {
+   "path": "AG3S/ag3s/docs/figures/t97-replay-table.png",
+   "kind": "table",
+   "pdf": "AG3S/ag3s/docs/figures/t97-replay-table.pdf",
+   "sidecar": "AG3S/ag3s/docs/figures/t97-replay-table.json"
+  },
+  {
+   "path": "AG3S/ag3s/docs/figures/t97-replay-criteria.png",
+   "kind": "table",
+   "pdf": "AG3S/ag3s/docs/figures/t97-replay-criteria.pdf",
+   "sidecar": "AG3S/ag3s/docs/figures/t97-replay-criteria.json"
+  },
+  {
+   "path": "AG3S/ag3s/docs/figures/t97-replay-graph.png",
+   "kind": "graph",
+   "pdf": "AG3S/ag3s/docs/figures/t97-replay-graph.pdf",
+   "sidecar": "AG3S/ag3s/docs/figures/t97-replay-graph.json"
+  },
+  {
+   "path": "AG3S/ag3s/docs/figures/t96-replay-scene-handlayer.png",
+   "kind": "scene",
+   "pdf": "AG3S/ag3s/docs/figures/t96-replay-scene-handlayer.pdf",
+   "sidecar": "AG3S/ag3s/docs/figures/t96-replay-scene-handlayer.json"
+  }
+ ],
+ "outputs": "outputs/2026-11-04_T96_T97_target닫힌부피_맞닿은경계_재생",
+ "baseline_check": {
+  "matched": true,
+  "note": "legacy esdf_rollout (CPU, nice 10, OMP 1): 위반으로 시작 14/15 · has_target 15/15 · frame0 clearance_before -29.031048280806342 mm; skill [legacy] = 14/15 · 15/15 · -29.031048280806342",
+  "raw": "/mnt/dev/AG3S_VLA-storage/results/development/20261104T045052+0900_054748e6a73c_a02802211ca9/verify/T96/verifier/baseline/base.json",
+  "log": "/mnt/dev/AG3S_VLA-storage/results/development/20261104T045052+0900_054748e6a73c_a02802211ca9/verify/T96/verifier/baseline/base.log"
+ },
+ "verdict": "기준선 일치. 영역 판정: C1 · C2 모두 사전 기준 4 개 충족 (lead 집계, 허들 211 제외 재집계도 같음). 손 층 재생: 회귀211 이웃 과일 freed 2013 → 52 (기준 충족), 회귀211 제외 남은 target 요청 중앙 0.1141 → 0.1359 (+0.0218, 문턱 +0.01 초과).",
+ "not_measured": [
+  "GT class of each re-attached component (꼭지 · 잎 = 사과 vs 이웃): rows hold only node counts per class, no per-component record",
+  "closed-loop (§2.3) — not run (lead D32)",
+  "region figure in the robot view (selected region · cut edges · attached components): not made; only the hand-layer scene figure (t96-replay-scene-handlayer) shows C2f"
+ ]
+}

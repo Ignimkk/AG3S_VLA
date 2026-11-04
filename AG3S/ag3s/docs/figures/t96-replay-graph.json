@@ -1,0 +1,148 @@
+{
+ "source": "T96 replay_metrics.json",
+ "plotted": [
+  {
+   "arm": "B0p",
+   "remaining_request_median": 0.1325,
+   "remaining_run_median": {
+    "회귀211": 0.1873,
+    "회귀954": 0.118,
+    "회귀119": 0.151,
+    "가림121": 0.1371,
+    "가림122": 0.1261,
+    "허들119": 0.1009,
+    "허들954": 0.1404,
+    "허들1345": 0.1484,
+    "허들850": 0.1193
+   },
+   "sum_left_visible_nb": 49,
+   "sum_left_hidden_nb": 3796,
+   "sum_left_nb": 3845
+  },
+  {
+   "arm": "P0f",
+   "remaining_request_median": 0.1153,
+   "remaining_run_median": {
+    "회귀211": 0.1178,
+    "회귀954": 0.1114,
+    "회귀119": 0.1146,
+    "가림121": 0.1256,
+    "가림122": 0.1141,
+    "허들119": 0.0868,
+    "허들954": 0.125,
+    "허들1345": 0.1257,
+    "허들850": 0.1151
+   },
+   "sum_left_visible_nb": 5,
+   "sum_left_hidden_nb": 3165,
+   "sum_left_nb": 3170,
+   "freed_all": 9037,
+   "freed_all_by_class": {
+    "apple": 6354,
+    "fruit": 2015,
+    "none": 464,
+    "robot": 204
+   },
+   "freed_all_share_nb_table_crate": 0.223
+  },
+  {
+   "arm": "S0",
+   "remaining_request_median": 0.1299,
+   "remaining_run_median": {
+    "회귀211": 0.2084,
+    "회귀954": 0.1102,
+    "회귀119": 0.1656,
+    "가림121": 0.1424,
+    "가림122": 0.2381,
+    "허들119": 0.1232,
+    "허들954": 0.1765,
+    "허들1345": 0.1554,
+    "허들850": 0.1172
+   },
+   "sum_left_visible_nb": 85,
+   "sum_left_hidden_nb": 4056,
+   "sum_left_nb": 4141,
+   "freed_all": 12454,
+   "freed_all_by_class": {
+    "apple": 12098,
+    "fruit": 308,
+    "none": 42,
+    "robot": 6
+   },
+   "freed_all_share_nb_table_crate": 0.0247
+  },
+  {
+   "arm": "S5",
+   "remaining_request_median": 0.1275,
+   "remaining_run_median": {
+    "회귀211": 0.2084,
+    "회귀954": 0.1102,
+    "회귀119": 0.1561,
+    "가림121": 0.1424,
+    "가림122": 0.2381,
+    "허들119": 0.1176,
+    "허들954": 0.1711,
+    "허들1345": 0.1554,
+    "허들850": 0.108
+   },
+   "sum_left_visible_nb": 85,
+   "sum_left_hidden_nb": 3957,
+   "sum_left_nb": 4042,
+   "freed_all": 16001,
+   "freed_all_by_class": {
+    "apple": 15169,
+    "none": 458,
+    "fruit": 356,
+    "robot": 18
+   },
+   "freed_all_share_nb_table_crate": 0.0222
+  },
+  {
+   "arm": "S0i",
+   "remaining_request_median": 0.1299,
+   "remaining_run_median": {
+    "회귀211": 0.2084,
+    "회귀954": 0.1102,
+    "회귀119": 0.1656,
+    "가림121": 0.1424,
+    "가림122": 0.2381,
+    "허들119": 0.1232,
+    "허들954": 0.1765,
+    "허들1345": 0.1554,
+    "허들850": 0.1172
+   },
+   "sum_left_visible_nb": 85,
+   "sum_left_hidden_nb": 4079,
+   "sum_left_nb": 4164,
+   "freed_all": 12104,
+   "freed_all_by_class": {
+    "apple": 11819,
+    "fruit": 255,
+    "none": 24,
+    "robot": 6
+   },
+   "freed_all_share_nb_table_crate": 0.0211
+  },
+  {
+   "arm": "S0p",
+   "remaining_request_median": 0.1357,
+   "remaining_run_median": {
+    "회귀211": 0.2042,
+    "회귀954": 0.1156,
+    "회귀119": 0.1589,
+    "가림121": 0.1411,
+    "가림122": 0.2271,
+    "허들119": 0.1281,
+    "허들954": 0.1178,
+    "허들1345": 0.1582,
+    "허들850": 0.1001
+   },
+   "sum_left_visible_nb": 89,
+   "sum_left_hidden_nb": 3988,
+   "sum_left_nb": 4077,
+   "freed_all": 0,
+   "freed_all_by_class": {},
+   "freed_all_share_nb_table_crate": null
+  }
+ ]
+}

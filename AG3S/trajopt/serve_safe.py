@@ -805,6 +805,38 @@ def announce_palm_shell_margin(collision_cfg) -> None:
 # --- AG3S-PRE-CORE-TO SC palm shell (block end) ------------------------------------------------
 
 
+# --- T96b — begin: the palm-cover rows' own obstacle margin (D27, default off) ---------------------------------
+def palm_cover_margin_overrides(args) -> dict:
+    """T96b (D27) — `--palm-cover-margin MM` → `collision.palm_cover_margin` (m), the `--palm-shell-margin` rule on
+    the palm-cover (`palm_body`) rows. Not given (default) → `{}` (the config before this flag existed). Refused
+    without `--palm-cover on` (no palm-cover row) and without `--obstacle-margin > 0`."""
+    mm = getattr(args, "palm_cover_margin", None)
+    if mm is None:
+        return {}
+    if palm_cover_options(args) is None:
+        raise SystemExit("--palm-cover-margin 은 --palm-cover on 과 함께 줘야 합니다 — 손바닥 덮개 구가 없으면 "
+                         "이 여유를 받을 행이 없습니다")
+    value = float(mm)
+    if not (math.isfinite(value) and value >= 0.0):
+        raise SystemExit(f"--palm-cover-margin 은 0 이상이어야 합니다 (mm): {mm}")
+    if not float(getattr(args, "obstacle_margin", 0.0) or 0.0) > 0.0:
+        raise SystemExit("--palm-cover-margin 은 --obstacle-margin M (> 0) 과 함께 줘야 합니다 — 덮개 행의 그 여유를 "
+                         "바꾸는 flag 입니다")
+    return {"palm_cover_margin": value / 1000.0}
+
+
+def announce_palm_cover_margin(collision_cfg) -> None:
+    """T96b (D27) — the server start line for `collision.palm_cover_margin`. Nothing when it is `None`."""
+    m = getattr(collision_cfg, "palm_cover_margin", None)
+    if m is None:
+        return
+    logging.getLogger(__name__).warning(
+        "TO palm_cover_margin: %.1f mm — 손바닥 덮개 구 행 (role palm_body) 의 장애물 행만 max(esdf_margin, 이 값); 다른 "
+        "장애물 행은 obstacle_margin %.1f mm 그대로. cuRobo 초기값 (gpu_seeds) 은 덮개 행에도 obstacle_margin (T96b)",
+        float(m) * 1000, float(collision_cfg.obstacle_margin) * 1000)
+# --- T96b — end
+
+
 # --- T46f A14 wrist cover (block start) -------------------------------------------------------
 #: `--links` 값 중 손목 보정 형상 (`wrist_cover`) 을 쓰는 것.
 WRIST_COVER_LINK_GROUPS: tuple[str, ...] = ("gripper_wrist",)
@@ -1137,6 +1169,9 @@ def target_exclusion_section(args) -> dict:
     # --- T78d — begin (given flags only)
     out.update(_t78d_esdf_keys(args))
     # --- T78d — end
+    # --- T97 — begin (given flags only)
+    out.update(_t97_esdf_keys(args))
+    # --- T97 — end
     # --- T78e — begin (given flag only)
     if getattr(args, "surface_memory_target_sticky", False):
         out["surface_memory_target_sticky"] = True
@@ -1145,6 +1180,12 @@ def target_exclusion_section(args) -> dict:
     if getattr(args, "surface_contact_allowance_mm", None) is not None:
         out["surface_contact_allowance_mm"] = float(args.surface_contact_allowance_mm)
     # --- T78f — end
+    # --- T96 — begin (given flags only)
+    out.update(_t96_esdf_keys(args))
+    # --- T96 — end
+    out.update(_t96c_esdf_keys(args))   # T96c (given flag only)
+    out.update(_t96d_esdf_keys(args))   # T96d (given flag only)
+    out.update(_t96e_esdf_keys(args))   # T96e (given flag only)
     if getattr(args, "hybrid_identity", None) is not None:   # IFG-CL2 (given flag only)
         out["surface_hybrid_identity"] = str(args.hybrid_identity)
     if getattr(args, "hybrid_other_exclude_voxels", None) is not None:   # IFG-CL2b (given flag only)
@@ -1648,6 +1689,16 @@ def build_ag3s(model_xml: str, *, voxel: float, range_max: float, links: str,
                                 "이하, 한 번) !!!", e.surface_crease_voxel_mm, e.surface_crease_angle_deg,
                                 e.surface_crease_reattach_ratio)
             # --- T78d — end
+            # --- T97 — begin
+            if getattr(e, "surface_crease_protrusion", False):
+                logging.warning("!!! AG3S T97 — 오목 끊기 돌출 보존: 끊긴 edge 로만 선택 영역과 이웃한 성분 (지지면 아님) 을 "
+                                "받침면 위 높이 중앙 ≥ 영역 상위 10 %% 경계 ∧ 투영 면적 ≤ %.3g × 영역 ∧ 영역 투영 hull 과 겹침 "
+                                "일 때만 통째로 붙인다 (한 번) !!!", e.surface_crease_protrusion_area)
+            if getattr(e, "surface_crease_hand_freeze_mm", None) is not None:
+                logging.warning("!!! AG3S T97 — 손 가까울 때 영역 유지: latch searching · latched · closing 에서 쥐는 손바닥이 "
+                                "직전 채택 영역 중심 %.1f mm 안이면 영역을 새로 고르지 않는다 (깎기만, 직전 채택 영역 유지) !!!",
+                                e.surface_crease_hand_freeze_mm)
+            # --- T97 — end
             # --- T78e — begin
             if getattr(e, "surface_memory_target_sticky", False):
                 logging.warning("!!! AG3S T78e — 표본 기억 target 우선: 한 번 target 인 칸 (2.5 mm) 은 깎이기 전까지 "
@@ -1661,6 +1712,36 @@ def build_ag3s(model_xml: str, *, voxel: float, range_max: float, links: str,
                                 "oracle.n_allowance_extra). 가정: 쥐는 순간 target 주변에 장애물이 없다 !!!",
                                 e.surface_contact_allowance_mm, e.surface_contact_allowance_mm)
             # --- T78f — end
+            # --- T96 — begin
+            if getattr(e, "surface_solid_owned", False):
+                logging.warning("!!! AG3S T96 — 손 층 target solid: 마지막 채택 영역 node R ∪ 받침면에 수직으로 내린 R⊥ 의 convex "
+                                "hull S ⊕ δ %.1f mm 안 · 지지면 guard 위 · 비 target 표본 τ %.1f mm 밖 · target 쪽이 더 가까운 seed 를 "
+                                "지운다. τ 안 voxel 은 표면 · 띠 길로도 지우지 않는다 (기록 target_exclusion.attention_surface.solid) "
+                                "!!!", e.surface_solid_dilate_mm, e.surface_solid_protect_mm)
+                # --- T96b — begin (D28)
+                logging.warning("AG3S T96b — d_N 의 받침면 표본: %s (exclude = 영역 아래 받침면에서 %.1f mm 안 비 target 표본을 "
+                                "d_N 에서 뺀다, include = 모든 비 target 표본)",
+                                getattr(e, "surface_solid_dn_support", "exclude"),
+                                float(ag3s.config.support_surface.distance_threshold) * 1e3)
+                # --- T96b — end
+                # --- T96c — begin
+                if getattr(e, "surface_solid_shadow_mm", None) is not None:
+                    logging.warning("!!! AG3S T96c — 손 층 target 그림자: 직전 채택 영역 요청의 카메라에서 target pixel 뒤 %.1f mm "
+                                    "안 · 지지면 guard 위 · d_N > τ 인 seed 도 지운다 (기록 attention_surface.solid.shadow · "
+                                    "solid.voxels.n_removed_shadow) !!!", e.surface_solid_shadow_mm)
+                # --- T96c — end
+                # --- T96d — begin
+                if getattr(e, "surface_solid_dn_ever_target", False):
+                    logging.warning("!!! AG3S T96d — d_N 에서 한 번이라도 target 으로 표시된 기억 칸의 표본을 뺀다 (τ 보호 · solid · "
+                                    "그림자 길; 표면 · 띠 길의 d_o 는 그대로, 기록 solid.voxels.n_dn_ever_target_dropped) !!!")
+                # --- T96d — end
+            # --- T96 — end
+            # --- T96e — begin
+            if getattr(e, "surface_removed_sign_free", False):
+                logging.warning("!!! AG3S T96e — 손 층에서 target 제외가 지운 seed (removed 목록, 모든 길) 는 거리 변환 뒤 |d| "
+                                "(남은 seed 까지 양수 거리) 를 받는다 — 남은 seed 1.5 voxel 안이어도 (부호 교정 순수 판정 무시, "
+                                "남은 seed · 다른 voxel 은 그대로, 기록 oracle_split.removed_sign_free) !!!")
+            # --- T96e — end
         if e.target_extent == "attention_surface_hybrid":
             # IFG-CL2 — ball_owned range, attention-surface protection.
             logging.warning("!!! AG3S IFG-CL2 — target_extent = attention_surface_hybrid (identity %s): 미세 target-free "
@@ -2500,6 +2581,18 @@ def build_parser() -> argparse.ArgumentParser:
                     help="T78d — 선택 뒤, 끊긴 edge 로만 선택 영역과 이웃한 성분 (지지면 아님) 의 node 수가 선택 영역의 R 배 "
                          "이하이면 그 성분 전체를 붙인다 (한 번). 권장 0.25. --surface-crease-cut 과 함께만. 기본 off")
     # --- T78d — end
+    # --- T97 — begin (default off)
+    ap.add_argument("--surface-crease-protrusion", action="store_true",
+                    help="T97 — 선택 뒤, 끊긴 edge 로만 선택 영역과 이웃한 성분 (지지면 아님) 을 받침면 위 높이 중앙 ≥ 영역 "
+                         "상위 10 %% 경계 ∧ 투영 면적 ≤ ρ × 영역 ∧ 영역 투영 convex hull 과 겹침일 때만 통째로 붙인다 (한 번). "
+                         "--surface-crease-cut 과 함께만, --surface-crease-reattach-ratio 와는 함께 못 준다. 기본 off")
+    ap.add_argument("--surface-crease-protrusion-area", type=float, default=None, metavar="RHO",
+                    help="T97 — 돌출 보존의 면적 비 ρ (기본 config 0.15). --surface-crease-protrusion 과 함께만")
+    ap.add_argument("--surface-crease-hand-freeze-mm", type=float, default=None, metavar="D",
+                    help="T97 — latch searching · latched · closing 에서 쥐는 손바닥이 직전 채택 영역 중심 D mm 안이면 이번 "
+                         "요청은 영역을 새로 고르지 않는다 (깎기만, 손이 멀 때 고른 영역 유지). 권장 80. "
+                         "--surface-crease-cut · --surface-keep-last 와 함께만. 기본 off")
+    # --- T97 — end
     # --- T78e — begin (default off)
     ap.add_argument("--surface-memory-target-sticky", action="store_true",
                     help="T78e — 표본 기억 (OracleMemory, 2.5 mm 칸) 에서 한 번 target (code 1) 인 칸은 깎이기 (광선이 그 "
@@ -2512,6 +2605,44 @@ def build_parser() -> argparse.ArgumentParser:
                          "상관없이 지운다 (지금 d_t < d_o 규칙과 합집합). 0 < M ≤ 후보 거리 (oracle-max-dist-voxels × "
                          "fine voxel, 기본 30 mm). --target-extent attention-surface · --surface-keep-last 와 함께만. 기본 off")
     # --- T78f — end
+    # --- T96 — begin (default off)
+    ap.add_argument("--surface-solid-owned", action="store_true",
+                    help="T96 — 손 층 (미세 target-free 계층) 에서 target solid S (마지막 채택 영역 node ∪ 그 점을 받침면에 수직으로 "
+                         "내린 점의 convex hull) ⊕ δ 안 · 지지면 guard 위 · 비 target 표본 τ 밖 (d_N > τ) · d_T ≤ d_N 인 seed 를 "
+                         "지운다. 켜면 τ 안 voxel 은 표면 · 띠 길로도 지우지 않는다. --target-extent attention-surface · "
+                         "--surface-keep-last · --surface-no-ball 과 함께만, --surface-hull-fill · "
+                         "--surface-contact-allowance-mm · --surface-memory-target-sticky 와 같이 못 줌. 기본 off")
+    ap.add_argument("--surface-solid-protect-mm", type=float, default=None, metavar="TAU",
+                    help="T96 — 이웃 보호 띠 τ (mm, 기본 config 5). --surface-solid-owned 와 함께만")
+    ap.add_argument("--surface-solid-dilate-mm", type=float, default=None, metavar="DELTA",
+                    help="T96 — solid 길의 S 넓힘 δ (mm, 기본 config 0). --surface-solid-owned 와 함께만")
+    # --- T96c — begin (default off)
+    ap.add_argument("--surface-solid-shadow-mm", type=float, default=None, metavar="L",
+                    help="T96c — 카메라 광선 그림자: 직전 채택 영역 요청의 카메라에서 target pixel 로 투영되고 그 관측 표면 뒤 "
+                         "0 < Δz ≤ L (mm) 인 seed (지지면 guard 위 · d_N > τ, d_T ≤ d_N 없음) 도 지운다. 권장 80. "
+                         "--surface-solid-owned 와 함께만")
+    # --- T96c — end
+    # --- T96e — begin (default off)
+    ap.add_argument("--surface-removed-sign-free", action="store_true",
+                    help="T96e — 손 층 target 제외가 지운 seed (removed 목록: 표면 · 띠 · hull 채우기 · 접촉 여유 · solid · "
+                         "그림자) 는 거리 변환 뒤 남은 seed 까지의 양수 거리 |d| 를 받는다 (남은 seed 1.5 voxel 안이라 부호 "
+                         "교정이 건너뛰던 것 포함). 남은 seed · 다른 voxel 은 그대로. --target-extent attention-surface 와 함께만. "
+                         "기본 off")
+    # --- T96e — end
+    # --- T96d — begin (D34; default off)
+    ap.add_argument("--surface-solid-dn-ever-target", action="store_true",
+                    help="T96d — d_N (모든 길의 τ 보호 · solid 길 · 그림자 길) 에서 이 episode 동안 한 번이라도 target (code 1, "
+                         "채택 영역) 으로 표시된 기억 칸의 비 target 표본을 뺀다 (newest-wins 로 code 2 가 된 target 자기 "
+                         "표면). 라벨 · 표면 · 띠 길의 d_o 는 그대로. --surface-solid-owned 와 함께만. 기본 off")
+    # --- T96d — end
+    # --- T96b — begin (D28)
+    ap.add_argument("--surface-solid-dn-support", default=None, choices=("exclude", "include"),
+                    help="T96b — d_N (solid 길의 d_N > τ · d_T ≤ d_N, 표면 · 띠 길의 τ 보호) 에 받침면 표본을 넣는가. exclude "
+                         "(기본 config) = 영역 아래 받침면 (R⊥ 의 평면) 에서 RANSAC inlier 문턱 (support_surface."
+                         "distance_threshold) 안 표본을 뺀다. include = 모든 비 target 표본 (T96 처음 구현). "
+                         "--surface-solid-owned 와 함께만")
+    # --- T96b — end
+    # --- T96 — end
     # T44c A5 — begin
     ap.add_argument("--target-free-coarse", action="store_true",
                     help="T44c — target 을 지운 거친 계층 (coarse_no_target) 을 한 겹 더 만들어 target-free "
@@ -2594,6 +2725,13 @@ def build_parser() -> argparse.ArgumentParser:
                          "--obstacle-margin 과 같음 (예전과 bit 동일). --palm-shell on/left/right 와 --obstacle-margin > 0 이 "
                          "필요하다. 기록 to.metrics.palm_shell_margin_m. cuRobo 초기값 (--to-gpu-seeds) 은 껍질 행에도 "
                          "--obstacle-margin 을 쓴다")
+    # --- T96b — begin (default off, D27)
+    ap.add_argument("--palm-cover-margin", type=float, default=None, metavar="MM",
+                    help="T96b — 손바닥 덮개 구 행 (role palm_body) 만의 obstacle 여유 (mm): --palm-shell-margin 과 같은 규칙. "
+                         "기본 = 안 줌 = --obstacle-margin 과 같음 (예전과 bit 동일). --palm-cover on 과 --obstacle-margin > 0 "
+                         "이 필요하다. 기록 to.metrics.palm_cover_margin_m. cuRobo 초기값 (--to-gpu-seeds) 은 덮개 행에도 "
+                         "--obstacle-margin 을 쓴다")
+    # --- T96b — end
     ap.add_argument("--wrist-cover-overflow", type=float, default=None, metavar="MM",
                     help="T46f A14 — 손목 (arm_5 · arm_6 · FT sensor) 몸통 구가 MJCF collision mesh 밖으로 나가는 "
                          "최대 거리 (mm, 기본 5.0). --links gripper_wrist 와 함께만")
@@ -3046,6 +3184,57 @@ def _t78d_crease(args):
 # --- T78d — end
 
 
+# --- T97 — begin: protrusion re-attach · hand freeze flags (default off)
+def _t97_esdf_keys(args) -> dict:
+    """T97 — the `esdf.surface_crease_protrusion*` · `surface_crease_hand_freeze_mm` keys of the given flags only."""
+    out: dict = {}
+    if getattr(args, "surface_crease_protrusion", False):
+        out["surface_crease_protrusion"] = True
+    for flag in ("surface_crease_protrusion_area", "surface_crease_hand_freeze_mm"):
+        v = getattr(args, flag, None)
+        if v is not None:
+            out[flag] = float(v)
+    return out
+
+
+def _t97_reject(ap, args) -> None:
+    """T97 — fail loudly: protrusion · freeze without `--surface-crease-cut`, ρ without `--surface-crease-protrusion`,
+    protrusion with `--surface-crease-reattach-ratio`, freeze without `--surface-keep-last`, values ≤ 0 / NaN / inf."""
+    cut = bool(getattr(args, "surface_crease_cut", False))
+    prot = bool(getattr(args, "surface_crease_protrusion", False))
+    area = getattr(args, "surface_crease_protrusion_area", None)
+    frz = getattr(args, "surface_crease_hand_freeze_mm", None)
+    for k, v in (("surface_crease_protrusion_area", area), ("surface_crease_hand_freeze_mm", frz)):
+        if v is not None and not (math.isfinite(float(v)) and float(v) > 0.0):
+            ap.error(f"--{k.replace('_', '-')} 는 0 보다 큰 유한한 수여야 합니다: {v}")
+    if (prot or frz is not None) and not cut:
+        given = (["--surface-crease-protrusion"] if prot else []) + (
+            ["--surface-crease-hand-freeze-mm"] if frz is not None else [])
+        ap.error(f"{', '.join(given)} 는 --surface-crease-cut 과 함께만 줄 수 있습니다")
+    if area is not None and not prot:
+        ap.error("--surface-crease-protrusion-area 는 --surface-crease-protrusion 과 함께만 줄 수 있습니다")
+    if prot and getattr(args, "surface_crease_reattach_ratio", None) is not None:
+        ap.error("--surface-crease-protrusion 과 --surface-crease-reattach-ratio 는 함께 줄 수 없습니다 — 두 다시 붙이기 규칙의 "
+                 "효과를 가른다 (T97 §1.1)")
+    if frz is not None and not getattr(args, "surface_keep_last", False):
+        ap.error("--surface-crease-hand-freeze-mm 는 마지막 채택 영역을 쓰므로 --surface-keep-last 와 함께만 줄 수 있습니다")
+
+
+def _t97_crease(args):
+    """T97 — `_t78d_crease(args)` with the protrusion flags (the warm-up's `CreaseParams`); None when crease is off."""
+    p = _t78d_crease(args)
+    if p is None or not getattr(args, "surface_crease_protrusion", False):
+        return p
+    import dataclasses
+
+    from AG3S.ag3s.config import EsdfConfig
+
+    area = getattr(args, "surface_crease_protrusion_area", None)
+    return dataclasses.replace(p, protrusion=True, protrusion_area=float(
+        EsdfConfig.surface_crease_protrusion_area if area is None else area))
+# --- T97 — end
+
+
 def apply_attention_surface_device(args, *, warm: bool = True) -> str | None:
     """T78 갈래 B — `--attention-surface-device`: set `config.ATTENTION_SURFACE_DEVICE` (read by
     `attention_surface.select_target_surface`) and, for cuda, compile / warm the GPU path once so the first request is
@@ -3061,7 +3250,7 @@ def apply_attention_surface_device(args, *, warm: bool = True) -> str | None:
         if warm:
             from AG3S.ag3s.runtime.attention_surface_gpu import warmup
 
-            msg += f" (warm-up {warmup(crease=_t78d_crease(args)):.1f} s)"   # T78d: crease None = the T78 B warm-up
+            msg += f" (warm-up {warmup(crease=_t97_crease(args)):.1f} s)"   # T78d/T97: crease None = the T78 B warm-up
         logging.warning("!!! %s !!!", msg)
     return str(dev)
 
@@ -3099,6 +3288,9 @@ def ifg_cl1_record_meta(args) -> dict:
     # --- T78d — begin (only when on)
     out.update(_t78d_esdf_keys(args))
     # --- T78d — end
+    # --- T97 — begin (only when on)
+    out.update(_t97_esdf_keys(args))
+    # --- T97 — end
     # --- T78e — begin (only when on)
     if getattr(args, "surface_memory_target_sticky", False):
         out["surface_memory_target_sticky"] = True
@@ -3107,7 +3299,109 @@ def ifg_cl1_record_meta(args) -> dict:
     if getattr(args, "surface_contact_allowance_mm", None) is not None:
         out["surface_contact_allowance_mm"] = float(args.surface_contact_allowance_mm)
     # --- T78f — end
+    # --- T96 — begin (only when on)
+    out.update(_t96_esdf_keys(args))
+    # --- T96 — end
+    out.update(_t96c_esdf_keys(args))   # T96c (only when on)
+    out.update(_t96d_esdf_keys(args))   # T96d (only when on)
+    out.update(_t96e_esdf_keys(args))   # T96e (only when on)
     return out
+
+
+# --- T96 — begin: target solid ownership flags (default off) ------------------------------------------------------
+def _t96_esdf_keys(args) -> dict:
+    """T96 — `esdf` keys of `--surface-solid-owned` · `--surface-solid-protect-mm` · `--surface-solid-dilate-mm`, only
+    the given ones (absent = config default off, bit-identical)."""
+    out: dict = {}
+    if getattr(args, "surface_solid_owned", False):
+        out["surface_solid_owned"] = True
+    for flag in ("surface_solid_protect_mm", "surface_solid_dilate_mm"):
+        if getattr(args, flag, None) is not None:
+            out[flag] = float(getattr(args, flag))
+    if getattr(args, "surface_solid_dn_support", None) is not None:   # T96b (D28), given only
+        out["surface_solid_dn_support"] = str(args.surface_solid_dn_support)
+    return out
+
+
+def _t96_reject(ap, args, extent) -> None:
+    """T96 — start-up refusals of the solid flags (fail loudly: the effect would otherwise be believed)."""
+    on = bool(getattr(args, "surface_solid_owned", False))
+    for flag, name in (("surface_solid_protect_mm", "--surface-solid-protect-mm"),
+                       ("surface_solid_dilate_mm", "--surface-solid-dilate-mm")):
+        v = getattr(args, flag, None)
+        if v is None:
+            continue
+        if not on:
+            ap.error(f"{name} 는 --surface-solid-owned 와 함께만 줄 수 있습니다 — 혼자서는 아무 일도 하지 않습니다")
+        if not (math.isfinite(float(v)) and float(v) >= 0.0):
+            ap.error(f"{name} 는 0 이상의 유한한 mm 여야 합니다: {v}")
+    if getattr(args, "surface_solid_dn_support", None) is not None and not on:   # T96b (D28)
+        ap.error("--surface-solid-dn-support 는 --surface-solid-owned 와 함께만 줄 수 있습니다 — 혼자서는 아무 일도 하지 않습니다")
+    if not on:
+        return
+    if extent != "attention-surface":
+        ap.error("--surface-solid-owned 는 --target-extent attention-surface 의 손 층 지우기 규칙입니다 — 그대로 띄우면 효과가 "
+                 "있었다고 믿게 됩니다")
+    missing = [f for f, a in (("--surface-keep-last", "surface_keep_last"), ("--surface-no-ball", "surface_no_ball"))
+               if not getattr(args, a, False)]
+    if missing:
+        ap.error(f"--surface-solid-owned 는 {' · '.join(missing)} 와 함께만 줄 수 있습니다 (마지막 채택 영역 · 지지면 guard)")
+    clash = [f for f, on_ in (("--surface-hull-fill", getattr(args, "surface_hull_fill", False)),
+                              ("--surface-contact-allowance-mm",
+                               getattr(args, "surface_contact_allowance_mm", None) is not None),
+                              ("--surface-memory-target-sticky", getattr(args, "surface_memory_target_sticky", False)))
+             if on_]
+    if clash:
+        ap.error(f"--surface-solid-owned 는 {', '.join(clash)} 를 한 규칙으로 대체합니다 — 같이 주면 무엇의 효과인지 가를 수 "
+                 "없습니다 (T96 §1.1)")
+# --- T96 — end
+
+
+# --- T96c — begin: the camera-ray shadow flag (default off) ----------------------------------------------------------
+def _t96c_esdf_keys(args) -> dict:
+    """T96c — `esdf.surface_solid_shadow_mm` only when `--surface-solid-shadow-mm` is given (absent = off)."""
+    v = getattr(args, "surface_solid_shadow_mm", None)
+    return {} if v is None else {"surface_solid_shadow_mm": float(v)}
+
+
+def _t96c_reject(ap, args) -> None:
+    """T96c — `--surface-solid-shadow-mm` needs `--surface-solid-owned` and a finite L > 0."""
+    v = getattr(args, "surface_solid_shadow_mm", None)
+    if v is None:
+        return
+    if not getattr(args, "surface_solid_owned", False):
+        ap.error("--surface-solid-shadow-mm 는 --surface-solid-owned 와 함께만 줄 수 있습니다 — 혼자서는 아무 일도 하지 않습니다")
+    if not (math.isfinite(float(v)) and float(v) > 0.0):
+        ap.error(f"--surface-solid-shadow-mm 는 0 보다 큰 유한한 mm 여야 합니다: {v}")
+# --- T96c — end
+
+
+# --- T96d — begin: d_N without the "ever target" memory cells (default off) -----------------------------------------
+def _t96d_esdf_keys(args) -> dict:
+    """T96d — `esdf.surface_solid_dn_ever_target` only when `--surface-solid-dn-ever-target` is given (absent = off)."""
+    return {"surface_solid_dn_ever_target": True} if getattr(args, "surface_solid_dn_ever_target", False) else {}
+
+
+def _t96d_reject(ap, args) -> None:
+    """T96d — `--surface-solid-dn-ever-target` needs `--surface-solid-owned`."""
+    if getattr(args, "surface_solid_dn_ever_target", False) and not getattr(args, "surface_solid_owned", False):
+        ap.error("--surface-solid-dn-ever-target 는 --surface-solid-owned 와 함께만 줄 수 있습니다 — 혼자서는 아무 일도 "
+                 "하지 않습니다")
+# --- T96d — end
+
+
+# --- T96e — begin: the hand layer's removed seeds are free space (default off) ---------------------------------------
+def _t96e_esdf_keys(args) -> dict:
+    """T96e — `esdf.surface_removed_sign_free` only when `--surface-removed-sign-free` is given (absent = off)."""
+    return {"surface_removed_sign_free": True} if getattr(args, "surface_removed_sign_free", False) else {}
+
+
+def _t96e_reject(ap, args) -> None:
+    """T96e — `--surface-removed-sign-free` needs `--target-extent attention-surface` (the hand layer's removed list)."""
+    if getattr(args, "surface_removed_sign_free", False) and getattr(args, "target_extent", None) != "attention-surface":
+        ap.error("--surface-removed-sign-free 는 --target-extent attention-surface 의 손 층 지우기 목록에 거는 규칙입니다 — "
+                 "그대로 띄우면 효과가 있었다고 믿게 됩니다")
+# --- T96e — end
 
 
 def reject_t57a_flags(ap: argparse.ArgumentParser, args) -> None:
@@ -3737,6 +4031,9 @@ def reject_bad_flag_combinations(ap: argparse.ArgumentParser, args, *, seed_map_
     # --- T78d — begin
     _t78d_reject(ap, args, extent)
     # --- T78d — end
+    # --- T97 — begin
+    _t97_reject(ap, args)
+    # --- T97 — end
     # --- T78e — begin
     if getattr(args, "surface_memory_target_sticky", False):
         if extent != "attention-surface":
@@ -3762,6 +4059,12 @@ def reject_bad_flag_combinations(ap: argparse.ArgumentParser, args, *, seed_map_
             ap.error(f"--surface-contact-allowance-mm 는 0 < M ≤ 후보 거리 ({reach:g} mm = oracle-max-dist-voxels × "
                      f"fine voxel) 여야 합니다: {v}")
     # --- T78f — end
+    # --- T96 — begin
+    _t96_reject(ap, args, extent)
+    # --- T96 — end
+    _t96c_reject(ap, args)   # T96c
+    _t96d_reject(ap, args)   # T96d
+    _t96e_reject(ap, args)   # T96e
     # T78 갈래 A — end
     if oracle_on:
         # T46f A14c — `none` (예외 없음, T46f A14) 도 `relax` 처럼 target-free 계층을 만들지 않는다: oracle 이 바꿀
@@ -4029,6 +4332,13 @@ def reject_bad_flag_combinations(ap: argparse.ArgumentParser, args, *, seed_map_
             palm_shell_margin_overrides(args)
         except SystemExit as exc:
             ap.error(str(exc))
+    # --- T96b — begin: 덮개 행 여유 — --palm-cover on 없이 · --obstacle-margin 0 이면 거절 (D27)
+    if getattr(args, "palm_cover_margin", None) is not None:
+        try:
+            palm_cover_margin_overrides(args)
+        except SystemExit as exc:
+            ap.error(str(exc))
+    # --- T96b — end
     # **self-filter flag 의 형식 오류도 여기서 죽는다** (T19). 모르는 link 이름은 모델이 있어야
     # 가를 수 있으므로 `AG3S` 생성자가 거절한다 — 그것도 체크포인트를 올리기 전이다.
     try:
@@ -4587,6 +4897,7 @@ def trajopt_config_from_args(args):
                       **obstacle_overrides(args),
                       # AG3S-PRE-CORE-TO SCM — 준 것만.
                       **palm_shell_margin_overrides(args),
+                      **palm_cover_margin_overrides(args),     # T96b (D27) — 준 것만.
                       # T43 TP — 준 것만.
                       **tp_collision_overrides(args),
                       # T44 I2 (A2) — 준 것만.
@@ -4923,6 +5234,7 @@ def main() -> None:
                 to_config.collision.obstacle_margin * 1000,
                 "포함" if to_config.collision.obstacle_margin_support else "제외")
         announce_palm_shell_margin(to_config.collision)                 # AG3S-PRE-CORE-TO SCM (off: no line)
+        announce_palm_cover_margin(to_config.collision)                 # T96b (D27) (off: no line)
         if float(getattr(to_config.collision, "neighbour_contact_depth", 0.0)) > 0.0:
             c_ = to_config.collision
             logging.warning(

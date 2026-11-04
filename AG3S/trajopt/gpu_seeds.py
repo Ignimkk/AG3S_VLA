@@ -575,7 +575,11 @@ class CuroboSeedBatch:
                 # palm-shell rows are seeded at `obstacle_margin` (our check / selection reads `palm_shell_margin`).
                 **({"palm_shell_margin_gap": {
                     "palm_shell_margin_m": float(scene.palm_shell_margin), "gpu_shell_rows_margin_m": om}}
-                   if getattr(scene, "palm_shell_margin", None) is not None else {})}
+                   if getattr(scene, "palm_shell_margin", None) is not None else {}),
+                # T96b (D27) — the same for the palm-cover rows (only when on).
+                **({"palm_cover_margin_gap": {
+                    "palm_cover_margin_m": float(scene.palm_cover_margin), "gpu_cover_rows_margin_m": om}}
+                   if getattr(scene, "palm_cover_margin", None) is not None else {})}
 
     def solve(self, seeds: np.ndarray) -> tuple[np.ndarray, dict[str, Any]]:
         """`seeds (N, nq, H)` → the L-BFGS best actions `(N, nq, H)` (float64) and timing / cost record."""

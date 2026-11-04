@@ -236,6 +236,10 @@ class SceneSnapshot:
     #: A value = obstacle rows of the robot's `palm_shell` spheres (`CollisionLinearizer._palm_shell_cols`) get
     #: `max(margin, palm_shell_margin)` instead.
     palm_shell_margin: Optional[float] = None
+    #: **T96b (D27)** — `collision.palm_cover_margin` (m), set by `scene_from_constraint_set` only when it is given.
+    #: `None` (default) = as before. A value = obstacle rows of the robot's `palm_body` spheres (`--palm-cover on`,
+    #: `CollisionLinearizer._palm_body_cols`) get `max(margin, palm_cover_margin)` instead.
+    palm_cover_margin: Optional[float] = None
     #: `(K, 4)` — AG3S 지지면 `[n_x, n_y, n_z, offset]` (`SupportSurface.normal`·`offset`, 단위 법선,
     #: 자유쪽 `n·p ≥ offset`). **기하 그대로** — `plane_offset` 과 달리 `safety_margin` 을 더하지
     #: 않았고, `use_support_planes=False` 가 끄는 `plane_active` 와도 무관하다. 위 여유가 "최근접
@@ -1058,11 +1062,18 @@ class CollisionLinearizer:
             cls = self._obstacle_rows(d, flat, scene, d_object)
             self._last_obstacle_class = cls
             shell_margin = getattr(scene, "palm_shell_margin", None)
-            if shell_margin is None:
+            cover_margin = getattr(scene, "palm_cover_margin", None)   # T96b (D27)
+            if shell_margin is None and cover_margin is None:
                 margin = np.where(cls == _OBSTACLE, np.maximum(margin, obstacle_margin), margin)
             else:
                 # AG3S-PRE-CORE-TO SCM — the palm-shell rows' own obstacle margin; every other row as above.
-                per_row = np.where(self._palm_shell_cols(n_query), float(shell_margin), obstacle_margin)
+                # --- T96b — begin: … and the palm-cover (`palm_body`) rows' own margin, the same rule (D27)
+                per_row = np.full(n_query, obstacle_margin, np.float64)
+                if shell_margin is not None:
+                    per_row = np.where(self._palm_shell_cols(n_query), float(shell_margin), per_row)
+                if cover_margin is not None:
+                    per_row = np.where(self._palm_body_cols(n_query), float(cover_margin), per_row)
+                # --- T96b — end
                 margin = np.where(cls == _OBSTACLE, np.maximum(margin, per_row[None, :]), margin)
             if getattr(scene, "held_obstacle_margin", False):
                 # T43 HM — the held rows' classes and clearances for the record (`held_rows_record`).
@@ -1398,25 +1409,41 @@ class CollisionLinearizer:
         (`UrdfSphereChain.sphere_roles`, same order as the FK); held query rows are `False`. Read only with
         `scene.palm_shell_margin`. **Refuses a model without such spheres** — the margin would silently do nothing
         (the server refuses `--palm-shell-margin` without `--palm-shell`; this is the same rule one layer down)."""
-        cols = self.__dict__.get("_palm_shell_mask")
-        if cols is None:
-            from AG3S.ag3s.robot_models.urdf_sphere_chain import PALM_SHELL_ROLE
+        from AG3S.ag3s.robot_models.urdf_sphere_chain import PALM_SHELL_ROLE
 
+        return self._role_cols(n_query, PALM_SHELL_ROLE, "_palm_shell_mask", "palm_shell_margin", "palm-shell",
+                               "--palm-shell on/left/right")
+
+    # --- T96b — begin: the palm-cover rows (D27) — the same role check, generalised to a role
+    def _palm_body_cols(self, n_query: int) -> np.ndarray:
+        """T96b (D27) — `(n_query,)` bool: the query rows of this robot model's `palm_body` spheres (`--palm-cover on`);
+        held query rows are `False`. Read only with `scene.palm_cover_margin`. Refuses a model without such spheres
+        (the server refuses `--palm-cover-margin` without `--palm-cover on`; the same rule one layer down)."""
+        from AG3S.ag3s.robot_models.urdf_sphere_chain import PALM_BODY_ROLE
+
+        return self._role_cols(n_query, PALM_BODY_ROLE, "_palm_body_mask", "palm_cover_margin", "palm-cover",
+                               "--palm-cover on")
+
+    def _role_cols(self, n_query: int, role: str, cache: str, what: str, rows: str, flag: str) -> np.ndarray:
+        """`(n_query,)` bool rows of the spheres whose role is `role` (cached per linearizer under `cache`)."""
+        cols = self.__dict__.get(cache)
+        if cols is None:
             roles = tuple(getattr(self.robot_model, "sphere_roles", ()) or ())
             if len(roles) != self.n_spheres:
                 raise ValueError(
-                    f"palm_shell_margin: the robot model names {len(roles)} sphere roles for {self.n_spheres} "
-                    "spheres — cannot tell which rows are palm-shell rows")
-            cols = np.asarray([str(r) == PALM_SHELL_ROLE for r in roles], bool)
+                    f"{what}: the robot model names {len(roles)} sphere roles for {self.n_spheres} "
+                    f"spheres — cannot tell which rows are {rows} rows")
+            cols = np.asarray([str(r) == role for r in roles], bool)
             if not cols.any():
                 raise ValueError(
-                    "palm_shell_margin is set but this robot model has no palm_shell sphere — build it with "
-                    "--palm-shell on/left/right (the margin would change nothing)")
-            self.__dict__["_palm_shell_mask"] = cols
+                    f"{what} is set but this robot model has no {role} sphere — build it with "
+                    f"{flag} (the margin would change nothing)")
+            self.__dict__[cache] = cols
         out = np.zeros(int(n_query), bool)
         k = min(int(n_query), cols.shape[0])
         out[:k] = cols[:k]
         return out
+    # --- T96b — end
 
     def _obstacle_rows(self, d: np.ndarray, flat: np.ndarray, scene: SceneSnapshot,
                        d_object: Optional[np.ndarray]) -> np.ndarray:
@@ -1829,6 +1856,13 @@ class CollisionLinearizer:
                     out["palm_shell_row"] = shell
                     if shell:
                         out["palm_shell_margin_m"] = float(scene.palm_shell_margin)
+                # --- T96b — begin: the same, for the palm-cover rows (only when on, D27)
+                if getattr(scene, "palm_cover_margin", None) is not None:
+                    cover = bool(self._palm_body_cols(cls.shape[1])[query])
+                    out["palm_cover_row"] = cover
+                    if cover:
+                        out["palm_cover_margin_m"] = float(scene.palm_cover_margin)
+                # --- T96b — end
             offset = float(getattr(scene, "support_surface_offset", 0.0) or 0.0)
             sup = getattr(self, "_last_support_offset_rows", None)
             if sup is not None and esdf_block is not None and sup.shape[1:] == esdf_block.shape[1:2]:
@@ -2548,6 +2582,10 @@ def scene_from_constraint_set(constraint_set, robot_radii: np.ndarray,
         if shell_margin is not None:
             # AG3S-PRE-CORE-TO SCM — only when given (default `None`: no key, the snapshot as before).
             obstacle["palm_shell_margin"] = float(shell_margin)
+        cover_margin = getattr(collision_cfg, "palm_cover_margin", None)   # T96b (D27)
+        if cover_margin is not None:
+            # T96b — only when given (default `None`: no key, the snapshot as before).
+            obstacle["palm_cover_margin"] = float(cover_margin)
         offset = float(getattr(collision_cfg, "support_surface_offset", 0.0) or 0.0)
         if offset > 0.0:
             # T67 ① — only when given (default 0: no key, the snapshot as before).

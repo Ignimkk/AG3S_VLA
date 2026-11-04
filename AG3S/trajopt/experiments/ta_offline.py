@@ -196,6 +196,15 @@ VARIANTS.update({
     "PS": dict(_PS),
     # AG3S-PRE-CORE-TO SCM — `--palm-shell on --palm-shell-margin 5`
     "PSM5": {k: (dict(v) if isinstance(v, dict) else list(v)) for k, v in _PSM5.items()},
+    # --- T96 — begin: a P0m record (palm shell + its 5 mm margin) re-solved with the palm cover instead (§1.2)
+    "P0M_PC": {"_server_args": ["--drop:--palm-shell", "--drop:--palm-shell-margin", "--palm-cover", "on"],
+               "collision": {"palm_shell_margin": None}},
+    # --- T96 — end
+    # --- T96b — begin: the same with the palm-cover rows' own 5 mm margin (D27, `--palm-cover-margin 5`)
+    "P0M_PC5": {"_server_args": ["--drop:--palm-shell", "--drop:--palm-shell-margin", "--palm-cover", "on",
+                                 "--palm-cover-margin", "5"],
+                "collision": {"palm_shell_margin": None, "palm_cover_margin": 0.005}},
+    # --- T96b — end
     # T46 — the recorded server config with the fine target-free layer replayed offline
     # (`target_free_replay.rebuild_target_free`): `TF0` = the record's own settings (the control: a
     # variant minus TF0 is the option alone), `F1` = `--nontarget-evidence surface`, `F2` =
@@ -241,7 +250,22 @@ def server_args(chunk_dir: pathlib.Path, extra: tuple = ()):
     line = next(x for x in proc.read_text().splitlines() if any(name in x for name in modules))
     tokens = shlex.split(line)
     module = next(name for name in modules if name in tokens)
-    argv = tokens[tokens.index(module) + 1:] + list(extra)
+    argv = tokens[tokens.index(module) + 1:]
+    # --- T96 — begin: `--drop:FLAG` in `extra` removes FLAG (and its value) from the recorded command line first
+    drops = [x[len("--drop:"):] for x in extra if str(x).startswith("--drop:")]
+    if drops:
+        extra = tuple(x for x in extra if not str(x).startswith("--drop:"))
+        kept: list = []
+        i = 0
+        while i < len(argv):
+            if argv[i] in drops:
+                i += 2 if i + 1 < len(argv) and not argv[i + 1].startswith("--") else 1
+                continue
+            kept.append(argv[i])
+            i += 1
+        argv = kept
+    # --- T96 — end
+    argv = argv + list(extra)
     return serve_safe.build_parser().parse_args(argv), " ".join(argv)
 
 
@@ -586,6 +610,9 @@ class Run:
         if getattr(cfg.collision, "palm_shell_margin", None) is not None:
             # AG3S-PRE-CORE-TO SCM — as `scene_from_constraint_set` (only when the command line gives it)
             extra["palm_shell_margin"] = float(cfg.collision.palm_shell_margin)
+        if getattr(cfg.collision, "palm_cover_margin", None) is not None:
+            # T96b (D27) — as `scene_from_constraint_set` (only when the command line / variant gives it)
+            extra["palm_cover_margin"] = float(cfg.collision.palm_cover_margin)
         if float(getattr(cfg.collision, "support_surface_offset", 0.0) or 0.0) > 0.0:
             # T67 ① — as `scene_from_constraint_set` (only when the command line / variant gives it)
             extra["support_surface_offset"] = float(cfg.collision.support_surface_offset)

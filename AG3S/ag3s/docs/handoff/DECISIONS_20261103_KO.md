@@ -9,13 +9,46 @@
 - G1 (기하 grasp 보정, `--geo-grasp*`) 은 이후 모든 단계에서 끈다. 켜라고 할 때까지.
 - 쥐는 순간 쥐는 손이 붙은 이웃에 닿는 것은 실패로 세지 않는다 (따로 센다).
 
+## 0.1 사용자 판정 (2026-11-03 18:2x KST) — 이 문서의 판정이 아니라 사용자가 정한 것
+
+1. **P0m 을 최종 구성으로 채택** (T92, `--subtask-from-latch` 명시). serving 의 학습 요소는 VLA 뿐. T91c 는 기본 꺼짐, 손목 카메라가 있는 benchmark 의 선택지.
+2. **확정 전에 한 번 더 잰다 (T92b):** (가) P0m 대 (나) P0m − `--surface-hull-fill` − `--surface-contact-allowance-mm 10`, 9 run + 허들 12 run, k1 추가 ((가) k1, (나) k0 · k1). 확정 조건: 채택 구성 9 run 합계 (k0 + k1) ≥ 16 / 18, 금지 접촉 ≤ 1, 탁자 · 바구니 0. (가) 대 (나) 차이 ≤ 2 run 이면 (나) 가 최종. 이 실험으로 "32 run 전 확정 안 함" 을 닫는다.
+3. **D1 확인:** benchmark profile 은 `--neighbour-contact-mm` · `--neighbour-palm-contact-mm` 와 평가의 이웃 과일 면제를 모두 끄고, 접촉 허용은 target (쥘 때) · 목적지 (놓을 때) 만. MuJoCo 데모 profile 과 다른 점으로 명시. LIBERO (장애물 없음) pilot 에서 끈 비용을 먼저 잰다.
+4. **미채택 4 건 이견 없음:** P1 (충돌 없으면 통과) 은 1 번 (P0m 채택) 뒤 재시험, T93 은 T93b 로, T90 은 seed 가 아니라 "후보 중 prompt 물체 확인자" 역할로 나중에 재설계, T91c 는 benchmark 선택지.
+5. **확정 문서 수정:** P0_FINAL_CONFIG · ADOPTED A9 — 옛 3 단계 gate 는 P0 에서 켜져 있었고 P0m 에서 latch 로 대체, A9.2 HSR 5 단계 채택 철회 (`--hsr5` 끔), ball-owned 인자 무효 · `--nontarget-evidence surface` 금지, 바닥 띠 guard 5 mm 와 잔여 측정 제외 6 mm 는 다른 값, 평가 정의의 "붙은 (10 mm)" 조건은 D2 로 뺌, 코드 기준 HEAD f964439d (코드 63e98cc8) · main 32a45fb8 · 새 flag 기본 꺼짐. → 반영함 (18:4x KST).
+
+## 0.2 사용자 판정 (2026-11-04 00:xx KST)
+
+1. **T92b → hull 채우기 · 접촉 여유 10 mm 포함을 최종으로 확정.** 단, 껐다 켰다 할 수 있게 둔다 — 이미 각각 독립 기본 꺼짐 flag (`--surface-hull-fill`, `--surface-contact-allowance-mm M`), benchmark 는 `p0m` · `p0m-nohull` 판. "32 run 전 확정 안 함" 문장은 T92b 로 닫는다.
+2. **Panda P0m 의 TrajOpt 정의:** 제안대로 — benchmark 가 같은 LIBERO 9 episode 로 (c) 연속성 · 꺾임 변화율 항만 끈 판, (b) pc판의 Panda 보정을 얹은 판 (target 범위 · 단계 판정은 P0m 그대로, HSR6 끔), (d) 충돌 없으면 VLA 그대로 통과 (`--passthrough-when-clear`) 를 붙인 판을 돌려 포화 원인을 가른다. 성공이 비슷하면 보정이 적은 쪽. SafeLIBERO closed loop 전에 "지운 voxel 0 call 41 %" 원인을 기록으로 확인.
+3. **(03:2x KST) SL7b 결과 (c) · (b) · (d) 모두 1/9 → TrajOpt 는 원인 아님, 표면 영역 채택 call 10 % (기각 영역은 ATS target 점에서 약 150 mm) → 다음 진단 승인:** ① P0m 에서 target 범위만 공 방식으로 되돌린 판을 같은 LIBERO 9 episode 로 돌린다 — **원인 확인용만, 채택 후보 아님** (표면 추출은 최종에 반드시 포함). ② SafeLIBERO 재생 기록의 기각 call 을 카메라 영상 위에 표면 영역 · ATS target 점 · attention · 정답 윤곽으로 겹쳐, 어긋남이 attention head (L8H6) · 가짜 세 번째 view · 표면 graph 값 중 어디서 오는지 가른다 (offline, ① 과 동시). 둘 다 benchmark-78 이 수행, SafeLIBERO closed loop 은 표면 추출을 고친 뒤. 결과 · 출처: `/mnt/dev/AG3S_VLA-benchmark/outputs/2026-11-04_SL7b_P0m_TrajOpt대조_LIBERO_표면기각/README.md`.
+
+## 0.3 사용자 판정 (2026-11-04 04:3x KST, 세션 ag3s-vla-development-3a) — 우선순위 목록 1–8 의 착수 순서
+
+1. **첫 STEP = T96: 우선순위 1 (실제 크기 손바닥 구 `--palm-cover on` + target 에 한한 접촉 허용) 과 2 (target 을 닫힌 물체로 제외 — 받침면까지 내린 convex 부피, 이웃 관측 표면 τ 띠 보호) 를 한 쌍으로.** 기본 꺼짐 flag. 재생 기준 (잔여 < 5 % · 이웃 과다 삭제 ≤ 5 %) 통과 뒤 closed-loop (1345 오렌지 · 기둥 두 개 · 9 run). hull 채우기 · 접촉 여유 10 mm (11-04 확정) 를 대체하는 후보이므로 채택은 다시 사용자 판정. `T96.task.md`.
+2. **우선순위 3 (맞닿은 물체 경계) 을 범위 안으로 — 오목 꺾임 + 돌출 보존 (T97).** 2026-11-01 "맞닿은 물체 범위 밖" 판정을 바꾼다. attention 경계 판정은 계속 금지. `T97.task.md`.
+3. **우선순위 4 (hidden probe 확인자) 보류** — 1 · 2 · 5 · 7 뒤에 다시 묻는다.
+4. **우선순위 6: 단계 출처는 latch 유지** (D23 그대로). P0m 으로 serving 학습 요소는 이미 VLA 뿐 → 우선순위 6 은 끝난 것으로 기록. T91c 는 손목 카메라 benchmark 선택지.
+
+### lead 가 기록에서 확인한 것 (우선순위 목록 본문과 다른 점)
+
+- 기둥 두 개 장면 (라운드 6) 의 껍질 구 실패 원인은 "손바닥 구가 target 에 걸림" 이 아니라 "작은 기둥이 손바닥 들어갈 자리를 막아 접촉 없이 쥘 자세 없음 (GIK 와 같은 결론)" 으로 기록돼 있다 (`outputs/2026-10-28_기둥두개장면_손바닥접촉_4구성x3_closedloop/README.md`). VLA 단독도 3 / 3 접촉. → T96 §3.0 에서 쥘 자세 유무를 먼저 확인하고, 없으면 그 장면은 쥐기 성공 조건에서 뺀다.
+- 1345 palm cover 기록은 두 원인이 함께 있다: 손바닥 URDF 굵기에서 요청 13 손바닥–target 0.6 mm (target 잔여) + 손바닥 mesh–오렌지 0.76 mm (`AG3S-PALM-COVER-1345.verify.json`).
+- 우선순위 3 의 "꼭지 · 잎 2.5 %p 손실로 보류" 는 T78c (다시 붙이기 없음) 값이다. T78d (다시 붙이기 R 0.25) 는 영역 판정을 통과했다 (떨어진 장면 덮음 0.992). T78d 가 멈춘 이유는 손 층에서 손이 가까울 때 사과 지움 77.0 → 73.2 % (`outputs/2026-11-01_T78d_T78e_…/README.md`). → T97 은 돌출 보존 (크기 비율 대신) + 손 가까울 때 영역 유지를 시험한다.
+
+| # | 판정 (lead) | 왜 | 다른 선택지 | 틀렸으면 |
+|---|---|---|---|---|
+| D24 | **T96 재생은 T87 재생 입력 (B0 = HSR5 구성 closed-loop 요청, 허들 211 제외) 을 쓴다.** P0m 의 `--record-inputs` 기록을 새로 만들지 않는다. | 우선순위 2 의 검증 조건이 "T87 과 같은 기준" — 같은 입력 · 같은 정의여야 T87 수치와 바로 비교된다. 재생은 손 층 기능 비교용이고 HSR 차이는 쥐기 창 정의 (MuJoCo 정답) 에 들어가지 않는다 | P0m 9 run 을 `--record-inputs` 로 다시 돌려 입력을 만듦 (약 1 시간) | P0m 입력으로 재생만 다시 |
+| D25 | **T96 의 P0m 9 run 기준은 T92b 결과를 재사용** (꺼짐 bit 동일 test + snapshot 차이 = T96 · T97 블록뿐일 때만). | 같은 장면 · seed · 서버 인자, 꺼짐 = bit 동일이면 결과가 같다 (D5 와 같은 논리) | P0m 18 run 다시 (약 1 시간) | P0m 18 run 다시 |
+| D26 | **T96 · T97 구현을 implementer 2 개로 동시에.** closed-loop 은 순서대로 (T96 먼저). | 주 파일이 다르다 (T96: `fields/curobo_builder.py` · `pipeline.py` 의 손 층 / T97: `attention_surface*.py`). 공유 파일은 begin/end 블록 + SendMessage | 순서대로 구현 | — |
+
 ## 1. 판정 목록
 
 | # | 판정 | 왜 | 다른 선택지 | 틀렸으면 다시 돌릴 것 |
 |---|---|---|---|---|
 | D1 | **벤치마크 (SafeLIBERO · LIBERO-safety) 에서 접촉 허용은 target 자체 (쥘 때) 와 목적지 (놓을 때) 로만 좁힌다.** MuJoCo 데모 평가는 "붙은 이웃 접촉 허용" 그대로 둔다. | SafeLIBERO Level I 은 target 옆에 장애물을 두고 그 접촉을 충돌로 센다 (`paper/notes/SAFELIBERO_PLAN.md` §2). 이웃까지 허용하면 Level I 에서 충돌로 잡힌다. | 벤치마크에서도 이웃 허용 (Level I 충돌 증가 감수) | 벤치마크는 아직 안 돌렸다. task 문서만 고친다 (재실험 없음) |
 | D2 | **"쥐는 순간 이웃 접촉" 창 = 정답 쥠 (두 손가락 접촉 + 20 mm 상승) 전 ∧ 쥐는 손 손바닥–사과 중심 ≤ 60 mm, 쥐는 손 (손바닥 · 두 손가락 subtree). 이 창 안에서 쥐는 손이 이웃에 닿으면 이웃–사과 거리와 상관없이 실패로 세지 않는다** (dev-07 임시 값의 "사과 표면 10 mm 안 이웃" 조건을 뺌, 00:5x KST 에 dev-07 에 알림). 집계 코드 = dev-07 `verify/T87/agg/grasp_contact.py` 복사 + `ATT_MM = inf`. | 사용자 표현 "물체를 집을 때는 그냥 접촉 허용". dev-07 검증에서 회귀 954 의 같은 바나나 문지름이 간격 10 / 11 mm 로 갈렸다 (12 step 제외 · 5 step 금지) — 임의 경계. 60 mm 는 A6 · 정답 단계 "쥐기" 와 같은 값 | 10 mm 조건 유지 (dev-07 임시 값) | 집계만 다시 (CPU, 재실험 없음) |
-| D3 | **다음 기준 구성 (T88 P0) = HSR 규칙 4 개 끔 · 분류기 없음 (쥠 상태는 grasp latch 의 측정 개도 · feedback 만) · G1 끔 · 표면 추출 (분할 없음) + hull 채우기 + 접촉 여유 10 mm · E0 TrajOpt.** target 유지 기억은 넣지 않는다. | ① 사용자: "HSR 끄고 물리 신호나 정답으로 단계" · 기억 "HSR6 폐기". ② T85 에서 HSR 규칙이 정답 단계로 G1 을 풀어 쥐기 2 건을 망쳤다. ③ 접촉 여유는 T78f 구성과 같게 해 S9cl (4 / 10) · T85 (3 / 10) 와 한 변수씩 비교. 유지 기억 효과는 dev-07 T87 이 따로 잰다 | `--hsr5` (5 단계 분류기) 를 넣은 기준 (dev-07 T87 B0) | 그 구성으로 P0 다시 (closed-loop 10 run, 약 40 분) |
+| D3 | **다음 기준 구성 (T88 P0) = HSR 규칙 4 개 끔 · 분류기 없음 [정정: 옛 3 단계 gate 분류기 `kv_L4_v1` 는 P0 에서 켜져 있었고 P0m 에서 latch 로 대체 — 1.0 절 · D19] (쥠 상태는 grasp latch 의 측정 개도 · feedback 만) · G1 끔 · 표면 추출 (분할 없음) + hull 채우기 + 접촉 여유 10 mm · E0 TrajOpt.** target 유지 기억은 넣지 않는다. | ① 사용자: "HSR 끄고 물리 신호나 정답으로 단계" · 기억 "HSR6 폐기". ② T85 에서 HSR 규칙이 정답 단계로 G1 을 풀어 쥐기 2 건을 망쳤다. ③ 접촉 여유는 T78f 구성과 같게 해 S9cl (4 / 10) · T85 (3 / 10) 와 한 변수씩 비교. 유지 기억 효과는 dev-07 T87 이 따로 잰다 | `--hsr5` (5 단계 분류기) 를 넣은 기준 (dev-07 T87 B0) | 그 구성으로 P0 다시 (closed-loop 10 run, 약 40 분) |
 | D4 | **새 기능 T88: VLA 계획에 충돌 위반이 없으면 TrajOpt 가 VLA chunk 를 그대로 통과 (`--passthrough-when-clear`, 기본 꺼짐).** | T85 실패 run 에서 2° 이상 바꾼 요청 중 15 개가 VLA 계획 위반 0. 10 run 이 모두 VLA 단독 성공 장면이므로 이런 수정은 해만 낸다. LIBERO (장애물 없음) 에서 성공률을 pi0.5 와 같게 유지하려면 필요. | 비용항 (손목 추종 약화 · 연속성) 을 하나씩 끄기 | flag 를 끄면 지금과 같다 (bit 동일 test). P1 결과만 버리면 된다 |
 | D5 | **P0 는 `snapshot_t85` 코드로 먼저 돌린다** (T88 구현 전). P1 은 `snapshot_t88`. | GPU 가 밤새 dev-07 T87 (120 run) 과 나눠 써서, 구현을 기다리면 P0 를 못 돌릴 수 있다. T88 코드는 꺼짐 = bit 동일이라 P0 결과는 같아야 한다. | P0 · P1 모두 `snapshot_t88` | 두 snapshot 의 차이 파일 목록을 아침 보고에 적는다. 차이가 T88 블록 밖이면 P0 를 snapshot_t88 로 다시 |
 | D6 | **평가는 새 정의 (쥐는 순간 이웃 접촉 제외) 로 판정하고 옛 정의 결과도 같이 낸다.** 10 run 차이 ≤ 2 는 "구분 못 함". | 사용자 판정 + dev-07 T87 §3 과 같은 규칙. 같은 구성에서도 run 결과가 바뀌는 것을 T85 에서 봤다 (허들 119 · 850 · 가림 121) | 성공 수만 보고 | 집계만 다시 |

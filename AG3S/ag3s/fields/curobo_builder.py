@@ -97,6 +97,8 @@ __all__ = ["CuroboFieldBuilder", "TargetBall", "OwnedEvidence", "OWNED_CLASSES",
            "WINDOW_PLACEMENTS", "NONTARGET_EVIDENCES", "nontarget_surface_evidence",
            "OracleVisibleEvidence", "oracle_candidates", "oracle_visible_split", "oracle_cell_keys",
            "HullFill", "hull_fill_split",   # T78b
+           "SolidOwned", "solid_candidates", "solid_facet_value",   # T96
+           "SolidShadow", "ShadowCamera", "shadow_box_voxels", "shadow_hits",   # T96c
            "SurfaceProtectEvidence", "surface_protect_split",   # IFG-CL2
            "oracle_band_masks",
            "TargetLayerRequest", "target_owned", "target_pixel_mask", "roi_boxes", "in_boxes"]   # TASK-DYNAMIC-MAP
@@ -980,6 +982,18 @@ class OracleVisibleEvidence:
     #: (union with the `d_t < d_o` rule; `oracle_visible_split`). None (default) = the oracle split as before.
     contact_allowance_m: Optional[float] = None
     # --- T78f — end
+    # --- T96 — begin: target solid ownership (`esdf.surface_solid_owned`)
+    #: (`SolidOwned`) the target solid S (convex hull of the last accepted region ∪ its projection onto the support
+    #: plane) as a third removal path, and the τ protection of every path (`oracle_visible_split`). None (default) =
+    #: the oracle split as before.
+    solid: Optional["SolidOwned"] = None
+    # --- T96 — end
+    # --- T96d — begin: the solid's d_N samples (`esdf.surface_solid_dn_ever_target`)
+    #: (N, 3) the other samples without those whose memory cell was ever labelled target (`OracleMemory.evidence_dn`).
+    #: Read only with `solid`: they replace `other_points` in `d_N` (the τ protection of every path, the solid and
+    #: shadow paths); `d_o` (surface · band paths) keeps `other_points`. None (default) = `d_N` from `other_points`.
+    dn_other_points: Optional[np.ndarray] = None
+    # --- T96d — end
 
     def __post_init__(self) -> None:
         object.__setattr__(self, "target_points",
@@ -1006,6 +1020,14 @@ class OracleVisibleEvidence:
         if a is not None and (isinstance(a, bool) or not (np.isfinite(float(a)) and float(a) > 0.0)):
             raise ValueError(f"contact_allowance_m 는 0 보다 큰 유한한 m 여야 합니다 (끔 = None): {a!r}")
         # --- T78f — end
+        # --- T96 — begin: the solid replaces the hull fill and the contact allowance (one rule, not three)
+        if self.solid is not None and (self.hull_fill is not None or self.contact_allowance_m is not None):
+            raise ValueError("solid (T96) 는 hull_fill (T78b) · contact_allowance_m (T78f) 와 같이 쓰지 않습니다")
+        # --- T96 — end
+        # --- T96d — begin
+        if self.dn_other_points is not None:
+            object.__setattr__(self, "dn_other_points", np.asarray(self.dn_other_points, np.float64).reshape(-1, 3))
+        # --- T96d — end
 
 
 # --- T78b — begin: hull fill of the fine target-free tier (`esdf.surface_hull_fill`) ---------------------------------
@@ -1086,6 +1108,276 @@ def hull_fill_split(hull: HullFill, origin: np.ndarray, voxel_size: float, shape
 # --- T78b — end
 
 
+# --- T96 — begin: target solid ownership of the fine target-free tier (`esdf.surface_solid_owned`) -------------------
+@dataclasses.dataclass(frozen=True)
+class SolidOwned:
+    """T96 — the target solid S and the neighbour protection band τ of the hand layer (`oracle_visible_split`).
+
+    | 필드 | 무엇 |
+    |---|---|
+    | `protect_m` | τ (m): 가장 가까운 비 target 표본 (`OracleVisibleEvidence.other_points`) 이 이 거리 **안** (`d_N ≤ τ`) 인 voxel 은 어느 길 (표면 · 띠 · solid) 로도 지우지 않는다 |
+    | `dilate_m` | δ (m): solid 길은 S 를 바깥으로 δ 만큼 넓힌 부피 (facet 을 δ 밀어낸 polytope) 안 voxel 중심을 본다 |
+    | `equations` | S 의 facet (F, 4): `n · x + b ≤ 0` 안, `|n| = 1` (`attention_surface_post.convex_hull`). None = 이 요청에 solid 없음 (τ 보호만) |
+    | `lo` · `hi` | S 꼭짓점 AABB (m) — 후보 voxel 범위 |
+    | `target_points` | S 를 만든 점 `R ∪ R⊥` (영역 node + 받침면에 수직으로 내린 점) — solid 길의 `d_T` 에 oracle target 표본과 함께 쓴다 |
+    | `info` | 기록에 그대로 실린다 |
+    | `dn_plane` · `dn_threshold_m` | T96b (D28): 받침면 `[n, offset]` (단위 법선, R⊥ 의 평면) 과 RANSAC inlier 문턱. 있으면 그 평면에서 `|n·p − offset| ≤ 문턱` 인 비 target 표본을 `d_N` 에서 뺀다 (solid 길 · τ 보호만; 표면 · 띠 길의 `d_o` 는 그대로). None = 모든 표본 (T96 그대로) |
+
+    solid 길 (seed): `x ∈ S ⊕ δ` ∧ `z ≥ z_floor` (oracle 의 guard) ∧ `d_N > τ` ∧ `d_T ≤ d_N`.
+    """
+
+    protect_m: float
+    dilate_m: float = 0.0
+    equations: Optional[np.ndarray] = None
+    lo: Optional[np.ndarray] = None
+    hi: Optional[np.ndarray] = None
+    target_points: Optional[np.ndarray] = None
+    info: dict = dataclasses.field(default_factory=dict)
+    # --- T96b — begin: the support-plane samples left out of d_N (D28; None = every sample, T96 as is)
+    dn_plane: Optional[np.ndarray] = None
+    dn_threshold_m: Optional[float] = None
+    # --- T96b — end
+    # --- T96c — begin: the camera-ray shadow path (`SolidShadow`; None = the T96 split as is)
+    shadow: Optional["SolidShadow"] = None
+    # --- T96c — end
+
+    def __post_init__(self) -> None:
+        # --- T96b — begin
+        if (self.dn_plane is None) != (self.dn_threshold_m is None):
+            raise ValueError("SolidOwned: dn_plane 과 dn_threshold_m 은 함께 주거나 함께 빼야 합니다")
+        if self.dn_plane is not None:
+            pl = np.asarray(self.dn_plane, np.float64).reshape(4)
+            nn = float(np.linalg.norm(pl[:3]))
+            thr = self.dn_threshold_m
+            if not (np.isfinite(pl).all() and nn > 0.0):
+                raise ValueError(f"SolidOwned.dn_plane 은 유한한 [n, offset] (|n| > 0) 이어야 합니다: {self.dn_plane!r}")
+            if isinstance(thr, bool) or not (np.isfinite(float(thr)) and float(thr) > 0.0):
+                raise ValueError(f"SolidOwned.dn_threshold_m 는 0 보다 큰 유한한 m 여야 합니다: {thr!r}")
+            object.__setattr__(self, "dn_plane", pl / nn)
+            object.__setattr__(self, "dn_threshold_m", float(thr))
+        # --- T96b — end
+        for name in ("protect_m", "dilate_m"):
+            v = getattr(self, name)
+            if isinstance(v, bool) or not (np.isfinite(float(v)) and float(v) >= 0.0):
+                raise ValueError(f"SolidOwned.{name} 는 0 이상의 유한한 m 여야 합니다: {v!r}")
+        tp = self.target_points
+        object.__setattr__(self, "target_points",
+                           np.zeros((0, 3)) if tp is None else np.asarray(tp, np.float64).reshape(-1, 3))
+        if self.equations is not None:
+            eq = np.asarray(self.equations, np.float64).reshape(-1, 4)
+            if not len(eq) or self.lo is None or self.hi is None:
+                raise ValueError("SolidOwned: equations 가 있으면 facet 과 lo · hi 가 있어야 합니다")
+            object.__setattr__(self, "equations", eq)
+            object.__setattr__(self, "lo", np.asarray(self.lo, np.float64).reshape(3))
+            object.__setattr__(self, "hi", np.asarray(self.hi, np.float64).reshape(3))
+        # --- T96c — begin
+        if self.shadow is not None and (self.equations is None or not isinstance(self.shadow, SolidShadow)):
+            raise ValueError("SolidOwned.shadow 는 solid (equations) 가 있을 때의 SolidShadow 여야 합니다 (T96c)")
+        # --- T96c — end
+
+    @property
+    def has_solid(self) -> bool:
+        return self.equations is not None
+
+
+def solid_facet_value(solid: SolidOwned, centres: np.ndarray) -> np.ndarray:
+    """T96 — `max_f (n_f · x + b_f)` per centre (≤ 0 = inside S, ≤ δ = inside S ⊕ δ). No solid → +∞."""
+    c = np.asarray(centres, np.float64).reshape(-1, 3)
+    if not solid.has_solid:
+        return np.full(len(c), np.inf)
+    eq = solid.equations
+    out = np.empty(len(c))
+    for i in range(0, len(c), 8192):   # blocks bound the (block × facets) temporary
+        blk = c[i:i + 8192]
+        out[i:i + 8192] = (blk @ eq[:, :3].T + eq[:, 3][None, :]).max(axis=1)
+    return out
+
+
+def solid_candidates(solid: SolidOwned, origin: np.ndarray, voxel_size: float, shape) -> Optional[np.ndarray]:
+    """T96 — grid voxels `(K, 3)` int64 whose centre lies in `S ⊕ δ` (meshgrid `ij` order), or None (no solid / none)."""
+    if not solid.has_solid:
+        return None
+    vs = float(voxel_size)
+    nx, ny, nz = (int(v) for v in shape)
+    org = np.asarray(origin, np.float64).reshape(3)
+    d = float(solid.dilate_m)
+    lo = np.maximum(np.floor((solid.lo - d - org) / vs).astype(np.int64), 0)
+    hi = np.minimum(np.ceil((solid.hi + d - org) / vs).astype(np.int64) + 1, np.array([nx, ny, nz]))
+    if np.any(hi <= lo):
+        return None
+    ax = [np.arange(int(lo[i]), int(hi[i]), dtype=np.int64) for i in range(3)]
+    grid = np.stack(np.meshgrid(*ax, indexing="ij"), axis=-1).reshape(-1, 3)
+    inside = solid_facet_value(solid, org[None, :] + grid.astype(np.float64) * vs) <= d
+    cand = grid[inside]
+    return cand if len(cand) else None
+# --- T96 — end
+
+
+# --- T96c — begin: the camera-ray shadow of the target (`esdf.surface_solid_shadow_mm`) ----------------------------
+@dataclasses.dataclass(frozen=True)
+class ShadowCamera:
+    """T96c — one camera of the request whose region was last accepted: `target` (H, W) bool = its code-1 (accepted
+    region) pixels, `depth_m` (H, W) observed z-depth, `K`, `T_base_cam` (OpenCV → base) — the pinhole of
+    `attention_surface_post.region_from_codes` (pixel (row, col) centre = integer (v, u))."""
+
+    name: str
+    target: np.ndarray
+    depth_m: np.ndarray
+    K: np.ndarray
+    T_base_cam: np.ndarray
+
+    def __post_init__(self) -> None:
+        t = np.asarray(self.target, bool)
+        d = np.asarray(self.depth_m, np.float64)
+        if t.ndim != 2 or t.shape != d.shape:
+            raise ValueError(f"ShadowCamera {self.name}: target {t.shape} 와 depth {d.shape} 의 모양이 다릅니다")
+        object.__setattr__(self, "target", t)
+        object.__setattr__(self, "depth_m", d)
+        object.__setattr__(self, "K", np.asarray(self.K, np.float64).reshape(3, 3))
+        object.__setattr__(self, "T_base_cam", np.asarray(self.T_base_cam, np.float64).reshape(4, 4))
+
+
+@dataclasses.dataclass(frozen=True)
+class SolidShadow:
+    """T96c — the shadow path of `SolidOwned` (`oracle_visible_split`).
+
+    | 필드 | 무엇 |
+    |---|---|
+    | `length_m` | L (m): `x` 가 target pixel 의 관측 표면 **뒤** `0 < z_cam(x) − depth ≤ L` 이면 그 카메라의 그림자 안 |
+    | `cameras` | `ShadowCamera` 들 (하나라도 조건을 만족하면 소유) |
+    | `lo` · `hi` | 후보 상자 (m) = S 의 AABB ± L (그림자는 보인 target 표면 (⊂ S) 에서 L 안이다) |
+    | `info` | 기록에 그대로 |
+
+    seed 규칙: `x ∈ 상자` ∧ `z ≥ z_floor` ∧ 어느 카메라의 그림자 안 ∧ `d_N > τ` (`SolidOwned` 의 τ · D28 받침면 제외 그대로).
+    `d_T ≤ d_N` 은 걸지 않는다 (뒤쪽은 보인 target 표본에서 멀어도 그림자 안이다 — L 과 τ 가 범위를 묶는다).
+    """
+
+    length_m: float
+    cameras: tuple = ()
+    lo: Optional[np.ndarray] = None
+    hi: Optional[np.ndarray] = None
+    info: dict = dataclasses.field(default_factory=dict)
+
+    def __post_init__(self) -> None:
+        L = self.length_m
+        if isinstance(L, bool) or not (np.isfinite(float(L)) and float(L) > 0.0):
+            raise ValueError(f"SolidShadow.length_m 는 0 보다 큰 유한한 m 여야 합니다: {L!r}")
+        object.__setattr__(self, "length_m", float(L))
+        cams = tuple(self.cameras)
+        if not all(isinstance(c, ShadowCamera) for c in cams):
+            raise ValueError("SolidShadow.cameras 는 ShadowCamera 여야 합니다")
+        object.__setattr__(self, "cameras", cams)
+        if self.lo is None or self.hi is None:
+            raise ValueError("SolidShadow: 후보 상자 lo · hi 가 필요합니다")
+        object.__setattr__(self, "lo", np.asarray(self.lo, np.float64).reshape(3))
+        object.__setattr__(self, "hi", np.asarray(self.hi, np.float64).reshape(3))
+
+
+def shadow_box_voxels(shadow: SolidShadow, origin: np.ndarray, voxel_size: float, shape) -> Optional[np.ndarray]:
+    """T96c — grid voxels `(K, 3)` int64 whose centre lies in the shadow box `[lo, hi]` (meshgrid `ij`), or None."""
+    vs = float(voxel_size)
+    dims = np.array([int(v) for v in shape])
+    org = np.asarray(origin, np.float64).reshape(3)
+    lo = np.maximum(np.ceil((shadow.lo - org) / vs - 1e-9).astype(np.int64), 0)
+    hi = np.minimum(np.floor((shadow.hi - org) / vs + 1e-9).astype(np.int64) + 1, dims)
+    if np.any(hi <= lo):
+        return None
+    ax = [np.arange(int(lo[i]), int(hi[i]), dtype=np.int64) for i in range(3)]
+    return np.stack(np.meshgrid(*ax, indexing="ij"), axis=-1).reshape(-1, 3)
+
+
+def shadow_hits(shadow: SolidShadow, centres: np.ndarray) -> np.ndarray:
+    """T96c — `(C, N)` bool: centre `n` lies in camera `c`'s target shadow (projects onto a code-1 pixel — nearest
+    pixel centre, the `region_from_codes` pinhole — in front of the camera, and `0 < z_cam − depth ≤ L`)."""
+    x = np.asarray(centres, np.float64).reshape(-1, 3)
+    out = np.zeros((len(shadow.cameras), len(x)), bool)
+    L = float(shadow.length_m)
+    for ci, cam in enumerate(shadow.cameras):
+        T = cam.T_base_cam
+        pc = (x - T[:3, 3]) @ T[:3, :3]                  # base → camera (OpenCV): R^T (x − t)
+        z = pc[:, 2]
+        ok = z > 1e-6
+        if not ok.any():
+            continue
+        K = cam.K
+        H, W = cam.target.shape
+        idx = np.nonzero(ok)[0]
+        u = np.floor(K[0, 0] * pc[idx, 0] / z[idx] + K[0, 2] + 0.5).astype(np.int64)
+        v = np.floor(K[1, 1] * pc[idx, 1] / z[idx] + K[1, 2] + 0.5).astype(np.int64)
+        inimg = (u >= 0) & (u < W) & (v >= 0) & (v < H)
+        idx, u, v = idx[inimg], u[inimg], v[inimg]
+        tgt = cam.target[v, u]
+        idx, u, v = idx[tgt], u[tgt], v[tgt]
+        d = cam.depth_m[v, u]
+        dz = z[idx] - d
+        hit = np.isfinite(d) & (d > 0.0) & (dz > 0.0) & (dz <= L)
+        out[ci, idx[hit]] = True
+    return out
+
+
+def _shadow_split(sol: "SolidOwned", c: np.ndarray, seed: np.ndarray, above: np.ndarray, taken: np.ndarray,
+                  other_points: np.ndarray) -> dict:
+    """T96c — the shadow path of `oracle_visible_split` (pure numpy). Looks only at seeds in the box, above the guard,
+    not already removed by another path (`taken`). `d_N` here = nearest non-target sample (the whole memory, cut to the
+    box ± τ — exact for the `d_N ≤ τ` test) without D28's support-plane samples (the plane of `sol.dn_plane`)."""
+    t0 = time.perf_counter()
+    sh = sol.shadow
+    n = len(c)
+    tau = float(sol.protect_m)
+    box = np.all((c >= sh.lo) & (c <= sh.hi), axis=1)
+    look = np.nonzero(seed & above & box & ~taken)[0]
+    hits = shadow_hits(sh, c[look]) if len(look) else np.zeros((len(sh.cameras), 0), bool)
+    any_hit = hits.any(axis=0) if len(sh.cameras) else np.zeros(len(look), bool)
+    op = np.asarray(other_points, np.float64).reshape(-1, 3)
+    n_dropped = 0
+    if len(op):
+        pad = tau + 1e-9
+        op = op[np.all((op >= sh.lo - pad) & (op <= sh.hi + pad), axis=1)]
+    if sol.dn_plane is not None and len(op):
+        on_plane = np.abs(op @ sol.dn_plane[:3] - sol.dn_plane[3]) <= float(sol.dn_threshold_m)
+        n_dropped = int(on_plane.sum())
+        op = op[~on_plane]
+    hit_rows = look[any_hit]
+    prot_rows = np.zeros(len(hit_rows), bool)
+    if len(hit_rows) and len(op):
+        prot_rows = _nearest(op, c[hit_rows]) <= tau
+    shadow = np.zeros(n, bool)
+    shadow[hit_rows[~prot_rows]] = True
+    protected = np.zeros(n, bool)
+    protected[hit_rows[prot_rows]] = True
+    keep_cols = any_hit.copy()
+    keep_cols[np.nonzero(any_hit)[0][prot_rows]] = False      # the removed ones, per camera (a seed may count twice)
+    by_cam = {cam.name: int(hits[ci, keep_cols].sum()) for ci, cam in enumerate(sh.cameras)}
+    return {"shadow": shadow, "protected_shadow": protected, "shadow_by_camera": by_cam,
+            "n_shadow_looked": int(len(look)), "n_shadow_hits": int(len(hit_rows)),
+            "n_shadow_dn_support_dropped": n_dropped, "shadow_ms": round((time.perf_counter() - t0) * 1e3, 3)}
+# --- T96c — end
+
+
+# --- T96d — begin: the solid's d_N without the "ever target" cells (`esdf.surface_solid_dn_ever_target`) ---------------
+def _t96d_crop(oracle: "OracleVisibleEvidence", tp: np.ndarray, sol: "SolidOwned", max_d: float,
+               vs: float) -> np.ndarray:
+    """T96d — `oracle.dn_other_points` cut to the AABB the T96 split cuts `other_points` to (target samples ∪ R ∪ R⊥
+    ± `2·max_dist + vs`; no cut when there are no other samples or no reference points — the same rule)."""
+    dn = oracle.dn_other_points
+    ref = np.vstack([tp, sol.target_points])
+    if len(oracle.other_points) and len(ref) and len(dn):
+        lo = ref.min(axis=0) - (2.0 * max_d + vs)
+        hi = ref.max(axis=0) + (2.0 * max_d + vs)
+        dn = dn[np.all((dn >= lo) & (dn <= hi), axis=1)]
+    return dn
+
+
+def _t96d_in_box(points: np.ndarray, sh: "SolidShadow", tau: float) -> int:
+    """T96d — the number of points in the shadow box ± τ (the cut `_shadow_split` makes)."""
+    p = np.asarray(points, np.float64).reshape(-1, 3)
+    if not len(p):
+        return 0
+    pad = float(tau) + 1e-9
+    return int(np.all((p >= sh.lo - pad) & (p <= sh.hi + pad), axis=1).sum())
+# --- T96d — end
+
+
 def oracle_cell_keys(points: np.ndarray, cell: float) -> np.ndarray:
     """T46e — `floor(p / cell)` 칸의 int64 key (`runtime.oracle_segmentation` 의 표본 · 띠와 같은 규약, 축마다 ±2²⁰ 칸)."""
     c = np.floor(np.asarray(points, np.float64).reshape(-1, 3) / float(cell)).astype(np.int64) + (1 << 20)
@@ -1139,6 +1431,7 @@ def oracle_visible_split(centres: np.ndarray, is_seed: np.ndarray, oracle: Oracl
     | 표면 | `d_t ≤ max_dist` ∧ `d_t < d_o` | 보인 표면의 seed — 이 episode 에 본 모든 표본 중 그 물체가 가장 가깝다 |
     | 띠 | 그 칸을 지나간 띠가 **그 물체 것뿐** (`band_masks`) ∧ `d_o > surface_protect·vs` ∧ `d_t ≤ max_dist` | 보인 면 **뒤** truncation 띠의 seed — TSDF 가 그 물체 pixel 의 광선으로 만든 음수 띠의 경계 (물체 밑 · 안쪽의 그림자 seed). 표면 표본에서 멀어 표면 길이 못 잡는다 (실측 C1a_ep54_s541 seq 16: 425 개, 앞 frame 광선의 것이 많아 이 요청의 카메라만으로는 설명되지 않는다 — 그래서 띠도 episode 동안 모은다) |
     | 여유 (T78f, `contact_allowance_m` = M 일 때만) | `d_t ≤ M` ∧ `z_floor` 위 (`d_o` 와 상관없이) | 쥐는 순간 target 근처의 애매한 seed (옛 표면 · 손가락 mask 누락 표본이 더 가까운 것). 시나리오 가정: 쥐는 순간 target M mm 안에는 장애물이 없다 — 붙어 있는 이웃 · 얇은 벽도 지운다 |
+    | solid (T96, `solid` 일 때만) | `x ∈ S ⊕ δ` ∧ `z_floor` 위 ∧ `d_N > τ` ∧ `d_T ≤ d_N` (`d_N` = `d_o`, `d_T` = target 표본 ∪ `R ∪ R⊥`) | 받침면까지 내린 닫힌 부피 안의 seed (안 보인 뒷면 · 표면과 받침면 사이). 이때 `d_o ≤ τ` 인 voxel 은 표면 · 띠 길로도 지우지 않는다 (이웃 τ 띠) |
     | 그 밖 | | 보존 (이웃 · table · crate 표면, 두 물체의 띠가 겹친 칸, 동률 — 보수 쪽) |
 
     부호 교정 후보 (`sign`) = 지운 seed ∪ 표면 길의 non-seed (그 물체 안쪽). 띠 길은 non-seed 의 부호를 바꾸지 않는다 —
@@ -1151,7 +1444,16 @@ def oracle_visible_split(centres: np.ndarray, is_seed: np.ndarray, oracle: Oracl
     tp = oracle.target_points
     max_d = float(oracle.max_dist_voxels) * vs
     op = oracle.other_points
-    if len(op) and len(tp):
+    sol = oracle.solid   # T96 (None = the split as before)
+    if sol is not None:
+        # --- T96 — begin: the other samples near the solid count too (the AABB of the target samples ∪ R ∪ R⊥)
+        ref = np.vstack([tp, sol.target_points])
+        if len(op) and len(ref):
+            lo = ref.min(axis=0) - (2.0 * max_d + vs)
+            hi = ref.max(axis=0) + (2.0 * max_d + vs)
+            op = op[np.all((op >= lo) & (op <= hi), axis=1)]
+        # --- T96 — end
+    elif len(op) and len(tp):
         lo = tp.min(axis=0) - (2.0 * max_d + vs)
         hi = tp.max(axis=0) + (2.0 * max_d + vs)
         op = op[np.all((op >= lo) & (op <= hi), axis=1)]
@@ -1166,7 +1468,66 @@ def oracle_visible_split(centres: np.ndarray, is_seed: np.ndarray, oracle: Oracl
         bit = np.uint32(1) << np.uint32(int(oracle.code))
         band = ((m == bit) & seed & (d_t <= max_d) & above
                 & (d_o > float(oracle.surface_protect_voxels) * vs) & ~surface)
+    # --- T96 — begin: τ protection of every path + the solid path (None = nothing here runs)
+    t96 = None
+    if sol is not None:
+        # --- T96b — begin: d_N = d_o without the support-plane samples (D28; no plane = d_o, T96 as is)
+        d_N, n_dn_dropped = d_o, 0
+        # --- T96d — begin: d_N's samples without the "ever target" cells (off: `op`, the lines below as before)
+        op_dn, n_et = op, None
+        if oracle.dn_other_points is not None:
+            op_dn = _t96d_crop(oracle, tp, sol, max_d, vs)
+            n_et = int(len(op) - len(op_dn))
+        # --- T96d — end
+        if sol.dn_plane is not None and len(op_dn):   # T96d: op → op_dn (= op when off)
+            on_plane = np.abs(op_dn @ sol.dn_plane[:3] - sol.dn_plane[3]) <= float(sol.dn_threshold_m)
+            n_dn_dropped = int(on_plane.sum())
+            if n_dn_dropped:
+                op_dn = op_dn[~on_plane]   # T96d: kept for the line below (was `d_N = _nearest(op[~on_plane], c)`)
+        if n_dn_dropped or n_et:   # T96d: `or n_et` (n_et is None when off)
+            d_N = _nearest(op_dn, c)
+        # --- T96b — end
+        prot = d_N <= float(sol.protect_m)                       # the neighbour band τ: never removed
+        dil = float(sol.dilate_m)
+        fv = np.full(len(c), np.inf)
+        if sol.has_solid:   # facets only for centres in the AABB of S ⊕ δ (outside it, `fv > δ` anyway)
+            box = np.all((c >= sol.lo - dil) & (c <= sol.hi + dil), axis=1)
+            fv[box] = solid_facet_value(sol, c[box])
+        cand_s = (fv <= dil) & above
+        d_T = d_t.copy()                                          # target samples ∪ R ∪ R⊥ (where the solid path looks)
+        if cand_s.any():
+            d_T[cand_s] = np.minimum(d_t[cand_s], _nearest(sol.target_points, c[cand_s]))
+        fill_raw = cand_s & (d_T <= d_N)                          # T96b: d_N (= d_o unless D28 drops samples)
+        surface_raw, band_raw = surface, band
+        surface, band = surface & ~prot, band & ~prot
+        fill = fill_raw & ~prot
+        solid_only = seed & fill & ~surface & ~band
+        t96 = {"fill": fill, "solid": solid_only & (fv <= 0.0), "dilate": solid_only & (fv > 0.0),
+               "protected": seed & prot & (surface_raw | band_raw | fill_raw),
+               "protected_surface": seed & prot & surface_raw, "protected_band": band_raw & prot,
+               "protected_solid": seed & prot & fill_raw & ~surface_raw & ~band_raw,
+               "in_solid": fv <= dil, "d_T": d_T,
+               "d_N": d_N, "n_dn_support_dropped": n_dn_dropped}   # T96b (D28)
+        if n_et is not None:   # T96d (the key exists only when on)
+            t96["n_dn_ever_target_dropped"] = n_et
+        # --- T96c — begin: the camera-ray shadow path (None = nothing here runs; seeds only, joins `sign` via removed)
+        if sol.shadow is not None:
+            t96.update(_shadow_split(sol, c, seed, above, seed & (surface | band | fill),
+                                     oracle.other_points if oracle.dn_other_points is None   # T96d
+                                     else oracle.dn_other_points))
+            # --- T96d — begin: the "ever target" samples left out of the shadow path's d_N (box ± τ, as it cuts)
+            if oracle.dn_other_points is not None:
+                t96["n_shadow_dn_ever_target_dropped"] = int(
+                    _t96d_in_box(oracle.other_points, sol.shadow, sol.protect_m)
+                    - _t96d_in_box(oracle.dn_other_points, sol.shadow, sol.protect_m))
+            # --- T96d — end
+        # --- T96c — end
+    # --- T96 — end
     removed = seed & (surface | band)
+    if t96 is not None:   # T96
+        removed = removed | (seed & t96["fill"])
+    if t96 is not None and "shadow" in t96:   # T96c (the key exists only with the shadow on)
+        removed = removed | t96["shadow"]
     # --- T78f — begin: contact allowance (None = the two paths above as is). Seeds `d_t ≤ M` above `z_floor` go,
     # whatever `d_o` (union; `surface` · `band` keep their meaning). They join `sign` through `removed`; a non-seed is
     # never added (its negative distance may be the neighbour's inside). `allowance_extra` = removed only by this rule.
@@ -1181,6 +1542,9 @@ def oracle_visible_split(centres: np.ndarray, is_seed: np.ndarray, oracle: Oracl
            "d_t": d_t, "d_o": d_o, "n_other_near": int(len(op))}
     if allowance_extra is not None:   # T78f (the key exists only when on)
         out["allowance_extra"] = allowance_extra
+    if t96 is not None:   # T96 (the key exists only when on): the solid fill voxels join the sign set
+        out["sign"] = out["sign"] | t96["fill"]
+        out["solid"] = t96
     return out
 
 
@@ -2479,6 +2843,12 @@ class CuroboFieldBuilder:
             site_linear = unpack_site_linear(itg._site_index.detach(), tuple(values.shape))
             sign = self._force_sign_on_pure_voxels(
                 values, att_idx, vs, threshold_voxels=sign_thr_voxels)
+            # --- T96e — begin: the exclusion's removed seeds are free space (only when on; off = the call as before)
+            if (oracle is not None and excl is not None
+                    and bool(getattr(self.config, "surface_removed_sign_free", False))):
+                rsf = self._removed_sign_free(values, excl["trace"].get("removed_ijk"), vs)
+                excl["counts"].setdefault("oracle", {})["removed_sign_free"] = rsf
+            # --- T96e — end
             tier = _Tier(name=name, values=values, site_linear=site_linear,
                          origin=org, voxel_size=float(vs))
             tier.extra["tsdf_truncation_m"] = (self.coarse_truncation if itg is itg_coarse
@@ -3036,6 +3406,43 @@ class CuroboFieldBuilder:
                 "threshold_voxels": float(threshold_voxels),
                 "threshold_m": thr}
 
+    # --- T96e — begin
+    @staticmethod
+    def _removed_sign_free(values, removed_ijk, voxel_size: float) -> dict:
+        """T96e — every voxel of the target exclusion's removed list gets `|d|`: the distance to the nearest remaining
+        seed (PBA, after the removal). `_force_sign_on_pure_voxels` leaves a removed seed alone when a kept seed is
+        within `1.5 vs` (the "shared voxel" guard of the attached-object path), so a removed target seed next to a kept
+        one kept the TSDF-interior sign. Here the removal itself is the evidence that the voxel holds no other surface;
+        the kept seed next to it stays a site (value 0) and its own sign is untouched. Only the listed voxels change.
+        A listed voxel whose value is 0 would still be a site — it is counted (`n_zero_left`) and left as it is."""
+        rec = {"applied": True, "n_removed_listed": 0, "n_flipped": 0, "n_flipped_within_purity": 0,
+               "n_zero_left": 0, "purity_radius_m": 1.5 * float(voxel_size)}
+        if removed_ijk is None or not len(removed_ijk):
+            return rec
+        idx = np.asarray(removed_ijk, np.int64).reshape(-1, 3)
+        thr = np.float32(1.5 * float(voxel_size))
+        rec["n_removed_listed"] = int(len(idx))
+        if not isinstance(values, np.ndarray) and hasattr(values, "device"):
+            import torch
+
+            t = torch.as_tensor(idx, device=values.device)
+            i, j, k = t[:, 0], t[:, 1], t[:, 2]
+            d = values[i, j, k]
+            neg = d < 0
+            near = neg & (d.abs() <= torch.tensor(thr, dtype=d.dtype, device=values.device))
+            values[i[neg], j[neg], k[neg]] = d[neg].abs()
+            rec.update(n_flipped=int(neg.sum().item()), n_flipped_within_purity=int(near.sum().item()),
+                       n_zero_left=int((d == 0).sum().item()))
+            return rec
+        i, j, k = idx[:, 0], idx[:, 1], idx[:, 2]
+        d = values[i, j, k]
+        neg = d < 0
+        values[i[neg], j[neg], k[neg]] = np.abs(d[neg])
+        rec.update(n_flipped=int(neg.sum()), n_flipped_within_purity=int((neg & (np.abs(d) <= thr)).sum()),
+                   n_zero_left=int((d == 0).sum()))
+        return rec
+    # --- T96e — end
+
     def _exclude_seed_points(self, itg, points: np.ndarray, origin: np.ndarray,
                              voxel_size: float, shape):
         """**점이 실제로 차지한** 복셀의 seed 를 지운다. 쥔 물체(attached)가 쓰는 길이다.
@@ -3326,12 +3733,58 @@ class CuroboFieldBuilder:
             info.update({"allowance_mm": round(float(oracle.contact_allowance_m) * 1e3, 6), "n_allowance_extra": 0})
         # --- T78f — end
         cand = oracle_candidates(oracle.target_points, origin, vs, shape, max_d)
+        # --- T96 — begin: candidates ∪ the voxels of S ⊕ δ (the solid can reach beyond max_dist of every sample)
+        sol_rec = None
+        if oracle.solid is not None:
+            t1 = time.monotonic()
+            sol_rec = self._solid_record_base(oracle.solid)
+            # --- T96d — begin (keys only when on; the counts are filled after the split)
+            if oracle.dn_other_points is not None:
+                sol_rec.update({"dn_ever_target": True, "n_dn_ever_target_dropped": 0,
+                                **({"n_shadow_dn_ever_target_dropped": 0} if oracle.solid.shadow is not None else {})})
+            # --- T96d — end
+            cs = solid_candidates(oracle.solid, origin, vs, shape)
+            sol_rec["n_solid_voxels"] = 0 if cs is None else int(len(cs))
+            if cs is not None and cand is None:
+                cand = cs
+            elif cs is not None:   # the union in meshgrid `ij` (C) order, as `np.unique(axis=0)` would give
+                grid = np.zeros(tuple(int(v) for v in shape), bool)
+                grid[cand[:, 0], cand[:, 1], cand[:, 2]] = True
+                grid[cs[:, 0], cs[:, 1], cs[:, 2]] = True
+                cand = np.argwhere(grid).astype(np.int64)
+            sol_rec["candidates_ms"] = round((time.monotonic() - t1) * 1e3, 3)
+            info["solid"] = sol_rec
+        # --- T96 — end
+        # --- T96c — begin: ∪ the seeds in the shadow box (S's AABB ± L) — seeds only (the shadow path removes seeds)
+        if oracle.solid is not None and oracle.solid.shadow is not None:
+            t3 = time.monotonic()
+            shb = shadow_box_voxels(oracle.solid.shadow, origin, vs, shape)
+            n_box_seeds, n_added = 0, 0
+            if shb is not None:
+                shb = shb[self._seed_mask(itg, shb)]
+                n_box_seeds = int(len(shb))
+            if shb is not None and len(shb):
+                grid = np.zeros(tuple(int(v) for v in shape), bool)
+                if cand is not None:
+                    grid[cand[:, 0], cand[:, 1], cand[:, 2]] = True
+                n0 = int(grid.sum())
+                grid[shb[:, 0], shb[:, 1], shb[:, 2]] = True
+                n_added = int(grid.sum()) - n0
+                cand = np.argwhere(grid).astype(np.int64)
+            sol_rec.update({"shadow_mm": round(float(oracle.solid.shadow.length_m) * 1e3, 6),
+                            "n_shadow_box_seeds": n_box_seeds, "n_shadow_candidates_added": n_added,
+                            "shadow_candidates_ms": round((time.monotonic() - t3) * 1e3, 3),
+                            "n_removed_shadow": 0, "n_protected_tau_shadow": 0, "n_shadow_looked": 0,
+                            "n_shadow_hits": 0,
+                            "n_removed_shadow_by_camera": {cm.name: 0 for cm in oracle.solid.shadow.cameras}})
+        # --- T96c — end
         if cand is None:
             counts["oracle"] = info
             counts["classify_ms"] = round((time.monotonic() - t0) * 1e3, 3)
             return 0, None, {"counts": counts, "trace": trace}
         seed = self._seed_mask(itg, cand)
         centres = origin[None, :] + cand.astype(np.float64) * vs
+        t2 = time.monotonic()   # T96 (read only when on)
         split = oracle_visible_split(centres, seed, oracle, vs)
         removed = cand[split["removed"]]
         n = 0
@@ -3343,6 +3796,41 @@ class CuroboFieldBuilder:
                      "n_removed_band": int(split["band"].sum())})
         if oracle.contact_allowance_m is not None:   # T78f — the seeds only the allowance removed
             info["n_allowance_extra"] = int(split["allowance_extra"].sum())
+        # --- T96 — begin: the seeds of each path, the τ-protected ones and their trace (only when on)
+        if sol_rec is not None:
+            sp = split["solid"]
+            sol_rec.update({
+                "split_ms": round((time.monotonic() - t2) * 1e3, 3),
+                "n_removed_surface": int(split["surface"].sum()), "n_removed_band": int(split["band"].sum()),
+                "n_removed_solid": int(sp["solid"].sum()), "n_removed_dilate": int(sp["dilate"].sum()),
+                "n_removed_total": int(split["removed"].sum()),
+                "n_protected_tau": int(sp["protected"].sum()),
+                "n_protected_tau_surface": int(sp["protected_surface"].sum()),
+                "n_protected_tau_band": int(sp["protected_band"].sum()),
+                "n_protected_tau_solid": int(sp["protected_solid"].sum()),
+                "n_seeds_in_solid": int((seed & sp["in_solid"]).sum()),
+                "n_sign_fill_nonseed": int((sp["fill"] & ~seed).sum()),
+                "n_dn_support_dropped": int(sp["n_dn_support_dropped"])})   # T96b (D28)
+            trace["solid_removed_ijk"] = cand[sp["solid"] | sp["dilate"]]
+            trace["solid_protected_ijk"] = cand[sp["protected"]]
+            # --- T96c — begin: the shadow path's seeds, its τ-kept seeds, per camera (only with the shadow on)
+            if "shadow" in sp:
+                sol_rec.update({"n_removed_shadow": int(sp["shadow"].sum()),
+                                "n_protected_tau_shadow": int(sp["protected_shadow"].sum()),
+                                "n_shadow_looked": int(sp["n_shadow_looked"]), "n_shadow_hits": int(sp["n_shadow_hits"]),
+                                "n_removed_shadow_by_camera": dict(sp["shadow_by_camera"]),
+                                "n_shadow_dn_support_dropped": int(sp["n_shadow_dn_support_dropped"]),
+                                "shadow_ms": float(sp["shadow_ms"])})
+                trace["solid_shadow_removed_ijk"] = cand[sp["shadow"]]
+                trace["solid_shadow_protected_ijk"] = cand[sp["protected_shadow"]]
+            # --- T96c — end
+            # --- T96d — begin
+            if "n_dn_ever_target_dropped" in sp:
+                sol_rec["n_dn_ever_target_dropped"] = int(sp["n_dn_ever_target_dropped"])
+            if "n_shadow_dn_ever_target_dropped" in sp:
+                sol_rec["n_shadow_dn_ever_target_dropped"] = int(sp["n_shadow_dn_ever_target_dropped"])
+            # --- T96d — end
+        # --- T96 — end
         counts.update({
             "n_seeds_in_ball": int(seed.sum()),
             "n_removed": int(n),
@@ -3356,6 +3844,23 @@ class CuroboFieldBuilder:
         trace["nontarget_kept_ijk"] = cand[split["kept_other"]]
         counts["classify_ms"] = round((time.monotonic() - t0) * 1e3, 3)
         return n, (sign_idx if len(sign_idx) else None), {"counts": counts, "trace": trace}
+
+    # --- T96 — begin
+    @staticmethod
+    def _solid_record_base(solid: "SolidOwned") -> dict:
+        """T96 — the builder half of `attention_surface.solid` (the pipeline adds hull volume · R⊥ · why)."""
+        return {**dict(solid.info), "protect_mm": round(float(solid.protect_m) * 1e3, 6),
+                "dilate_mm": round(float(solid.dilate_m) * 1e3, 6), "has_solid": bool(solid.has_solid),
+                "n_solid_voxels": 0, "n_removed_surface": 0, "n_removed_band": 0, "n_removed_solid": 0,
+                "n_removed_dilate": 0, "n_removed_total": 0, "n_protected_tau": 0, "n_protected_tau_surface": 0,
+                "n_protected_tau_band": 0, "n_protected_tau_solid": 0, "n_seeds_in_solid": 0,
+                "n_sign_fill_nonseed": 0,
+                # T96b (D28): was a support plane given to d_N, its threshold, the support samples dropped (of the
+                # samples near the solid). The mode (`dn_support`) comes from the pipeline through `info`.
+                "dn_support_plane": solid.dn_plane is not None,
+                "dn_threshold_mm": None if solid.dn_threshold_m is None else round(float(solid.dn_threshold_m) * 1e3, 6),
+                "n_dn_support_dropped": 0}
+    # --- T96 — end
 
     def _hull_fill_exclusion(self, itg, oracle: OracleVisibleEvidence, origin: np.ndarray, voxel_size: float, shape,
                              n_removed: int, sign_idx, excl):

@@ -479,10 +479,13 @@ class AG3S:
         if self._oracle_memory is not None:
             self._oracle_memory.reset()
         self._surface_frame = None   # IFG-CL1
+        self._t97_last_region = None   # T97 (one line): the last accepted region's centroid is per episode
         self._surface_codes = None
         self._render_frame = None
         self._surface_hybrid = None   # IFG-CL2
         self._surface_hull = None   # T78b: the last accepted region's hull is per episode
+        self._surface_solid_region = None   # T96: the last accepted region's nodes (the solid's R) are per episode
+        self._surface_solid_cams = None   # T96c: the last accepted region's cameras (code-1 · depth · K · T) too
         if self.confidence_gate is not None:   # IFG-S2SERVE: the chain memory is per episode
             self.confidence_gate.reset()
             self._gate_feature_pending = None
@@ -715,13 +718,18 @@ class AG3S:
             # --- T78e — begin: target-sticky memory cells (`esdf.surface_memory_target_sticky`, off = newest wins)
             t78e = ({"target_sticky": True} if bool(getattr(cfg, "surface_memory_target_sticky", False)) else {})
             # --- T78e — end
+            # --- T96d — begin: the memory keeps its "ever target" cells (`esdf.surface_solid_dn_ever_target`, off = not)
+            t96d = ({"track_ever_target": True}
+                    if bool(getattr(cfg, "surface_solid_owned", False))
+                    and bool(getattr(cfg, "surface_solid_dn_ever_target", False)) else {})
+            # --- T96d — end
             # cell = half a fine voxel; ROI margin ≥ 2 × the candidate reach (`oracle_visible_split`); carving
             # tolerance = two fine voxels (a sample is dropped only when a ray clearly passed beyond it).
             self._oracle_memory = OracleMemory(cell=0.5 * fine, roi_margin=2.0 * max_d + fine,
                                                carve_tol=2.0 * fine, depth_min=float(cfg.depth_min),
                                                depth_max=float(cfg.depth_max),
                                                # the truncation band of the TSDF the fine tiers read
-                                               band_depth=float(cfg.fine_truncation), **t78e)
+                                               band_depth=float(cfg.fine_truncation), **t78e, **t96d)   # T96d
         return self._oracle_memory
 
     def _oracle_fold(self, observations, labels: Mapping[str, Any], meta: Mapping[str, Any],
@@ -915,6 +923,150 @@ class AG3S:
         return ev, {**rec, "hull_fill": hf}
     # --- T78b — end
 
+    # --- T96 — begin: target solid ownership of the hand layer (`esdf.surface_solid_owned`) ----------------------------
+    def _surface_solid_store(self, region) -> dict:
+        """T96 — keep this request's accepted region nodes as the solid's R (`self._surface_solid_region`, per episode;
+        a request without an accepted region — abstain · A2 · A4 hold — keeps the last one). Returns the record."""
+        pos = np.asarray(region.pos, np.float64).reshape(-1, 3)
+        if not len(pos):
+            return {"stored": False, "why": "empty_region", "n_nodes": 0}
+        self._surface_solid_region = {"pos": pos.copy(), "frame_index": int(self.frame_index)}
+        return {"stored": True, "n_nodes": int(len(pos))}
+
+    def _surface_solid(self, ev, support_surfaces):
+        """T96 (`esdf.surface_solid_owned`) — `(evidence with `SolidOwned`, record)`.
+
+        S = convex hull of R (the last accepted region's nodes) ∪ R⊥ (R projected perpendicularly onto the support plane
+        under R's centroid — the plane `_support_plane_z` takes its z from, `_support_surface_under`). The evidence always
+        carries τ (the protection applies to the surface · band paths even without a solid); the solid itself is absent
+        (`applied` False, `why`) when there is no accepted region, no plane below the centroid, no support guard
+        (`ev.z_floor` — the solid never reaches the table without it) or a degenerate hull. No ball, no apple geometry.
+        The record is `target_exclusion.attention_surface.solid` (the builder adds the voxel counts after the build)."""
+        from AG3S.ag3s.fields.curobo_builder import SolidOwned
+        from AG3S.ag3s.runtime.attention_surface_post import convex_hull
+
+        cfg = self.config.esdf
+        t0 = time.perf_counter()
+        tau = float(cfg.surface_solid_protect_mm) * 1e-3
+        delta = float(cfg.surface_solid_dilate_mm) * 1e-3
+        so: dict[str, Any] = {"applied": False, "protect_mm": float(cfg.surface_solid_protect_mm),
+                              "dilate_mm": float(cfg.surface_solid_dilate_mm)}
+        # --- T96b — begin: d_N without the support-plane samples (D28): the plane of R⊥ + the RANSAC inlier threshold
+        dn_mode = str(getattr(cfg, "surface_solid_dn_support", "exclude"))
+        dn: dict[str, Any] = {}
+        so.update({"dn_support": dn_mode, "dn_support_applied": False})
+        # --- T96b — end
+        solid = SolidOwned(protect_m=tau, dilate_m=delta, info={"dn_support": dn_mode})   # T96b: + info
+        sr = getattr(self, "_surface_solid_region", None)
+        if sr is None:
+            so["why"] = "no_accepted_region"
+        else:
+            R = sr["pos"]
+            c = R.mean(axis=0)
+            so.update({"region_source": ("this_request" if sr["frame_index"] == int(self.frame_index)
+                                         else "last_accepted"),
+                       "region_age_frames": int(self.frame_index) - int(sr["frame_index"]),
+                       "n_region_nodes": int(len(R))})
+            plane = self._support_surface_under(support_surfaces, c)
+            # --- T96b — begin (D28): this plane's samples leave d_N (τ protection too, with or without a hull)
+            if plane is not None and dn_mode == "exclude":
+                dn = {"dn_plane": np.r_[np.asarray(plane.normal, np.float64).reshape(3), float(plane.offset)],
+                      "dn_threshold_m": float(self.config.support_surface.distance_threshold)}
+                so.update({"dn_support_applied": True, "dn_threshold_mm": round(dn["dn_threshold_m"] * 1e3, 6)})
+                solid = SolidOwned(protect_m=tau, dilate_m=delta, info={"dn_support": dn_mode}, **dn)
+            # --- T96b — end
+            if plane is None:
+                so["why"] = "no_support_plane"
+            elif ev.z_floor is None:
+                so["why"] = "no_support_guard"
+            else:
+                n = np.asarray(plane.normal, np.float64).reshape(3)
+                nn = float(np.linalg.norm(n))
+                n, off = n / nn, float(plane.offset) / nn
+                R_perp = R - (R @ n - off)[:, None] * n[None, :]
+                pts = np.vstack([R, R_perp])
+                hull, why = convex_hull(pts)
+                so.update({"n_projected": int(len(R_perp)), "support_surface_id": int(getattr(plane, "id", -1)),
+                           "plane_z_at_centroid_m": float((off - n[0] * c[0] - n[1] * c[1]) / n[2]),
+                           "z_floor_m": float(ev.z_floor)})
+                if hull is None:
+                    so["why"] = f"degenerate_hull ({why})"
+                else:
+                    so.update({"applied": True, "volume_cm3": round(float(hull["volume"]) * 1e6, 3),
+                               "n_vertices": int(hull["n_vertices"])})
+                    solid = SolidOwned(protect_m=tau, dilate_m=delta, equations=hull["equations"], lo=hull["lo"],
+                                       hi=hull["hi"], target_points=pts,
+                                       info={"region_source": so["region_source"],
+                                             "volume_cm3": so["volume_cm3"], "dn_support": dn_mode},   # T96b
+                                       **dn)                                                             # T96b (D28)
+                    # --- T96c — begin: the camera-ray shadow of this solid's region (off: nothing)
+                    if getattr(cfg, "surface_solid_shadow_mm", None) is not None:
+                        solid, so["shadow"] = self._surface_solid_shadow(solid, sr)
+                    # --- T96c — end
+        # --- T96c — begin: no solid this request → no shadow either (recorded)
+        if getattr(cfg, "surface_solid_shadow_mm", None) is not None and "shadow" not in so:
+            so["shadow"] = {"applied": False, "why": "no_solid", "shadow_mm": float(cfg.surface_solid_shadow_mm)}
+        # --- T96c — end
+        # --- T96d — begin: d_N's samples without the memory cells ever labelled target (off: nothing)
+        if bool(getattr(cfg, "surface_solid_dn_ever_target", False)):
+            from AG3S.ag3s.runtime.oracle_segmentation import CODE_TARGET
+
+            mem = self._oracle_memory_or_new()
+            dn_op, n_drop = mem.evidence_dn(CODE_TARGET)
+            ev = dataclasses.replace(ev, dn_other_points=dn_op)
+            so["dn_ever_target"] = {"applied": True, "n_ever_target_cells": int(len(mem.ever_target_keys)),
+                                    "n_other_samples": int(len(ev.other_points)),
+                                    "n_dn_ever_target_dropped_memory": int(n_drop)}
+        # --- T96d — end
+        so["ms"] = round((time.perf_counter() - t0) * 1e3, 3)
+        return dataclasses.replace(ev, solid=solid), so
+    # --- T96 — end
+
+    # --- T96c — begin: the camera-ray shadow of the target (`esdf.surface_solid_shadow_mm`) ---------------------------
+    def _surface_solid_shadow_store(self, views, codes) -> dict:
+        """T96c — keep this accepted request's cameras next to its region (`self._surface_solid_cams`, per episode):
+        per camera with code-1 pixels, the code-1 mask (the accepted region after A1), its depth, `K`, `T_base_cam`.
+        Same frame index as `_surface_solid_store` (the shadow is used only when the two match)."""
+        from AG3S.ag3s.runtime.oracle_segmentation import CODE_TARGET
+
+        cams, rec = [], {}
+        for v in views:
+            img = codes.get(v.name)
+            if img is None:
+                continue
+            m = np.asarray(img) == CODE_TARGET
+            n = int(m.sum())
+            if not n:
+                continue
+            cams.append({"name": str(v.name), "target": m, "depth_m": np.asarray(v.depth_m, np.float64).copy(),
+                         "K": np.asarray(v.K, np.float64).copy(), "T_base_cam": np.asarray(v.T_base_cam, np.float64).copy()})
+            rec[str(v.name)] = n
+        self._surface_solid_cams = {"cameras": cams, "frame_index": int(self.frame_index)}
+        return {"stored": bool(cams), "n_target_px": rec}
+
+    def _surface_solid_shadow(self, solid, sr):
+        """T96c — `(solid with `SolidShadow`, record)`. The cameras of the request whose region `sr` is (same frame
+        index); box = S's AABB ± L. Missing / mismatched cameras → the solid as is (`applied` False, `why`)."""
+        from AG3S.ag3s.fields.curobo_builder import ShadowCamera, SolidShadow
+
+        L = float(self.config.esdf.surface_solid_shadow_mm) * 1e-3
+        rec: dict[str, Any] = {"applied": False, "shadow_mm": round(L * 1e3, 6)}
+        st = getattr(self, "_surface_solid_cams", None)
+        if st is None or not st["cameras"]:
+            rec["why"] = "no_cameras"
+            return solid, rec
+        if int(st["frame_index"]) != int(sr["frame_index"]):
+            rec["why"] = "camera_frame_mismatch"
+            return solid, rec
+        cams = tuple(ShadowCamera(name=c["name"], target=c["target"], depth_m=c["depth_m"], K=c["K"],
+                                  T_base_cam=c["T_base_cam"]) for c in st["cameras"])
+        sh = SolidShadow(length_m=L, cameras=cams, lo=solid.lo - L, hi=solid.hi + L,
+                         info={"cameras": [c.name for c in cams]})
+        rec.update({"applied": True, "cameras": {c.name: int(c.target.sum()) for c in cams},
+                    "box_lo_m": [round(float(x), 6) for x in sh.lo], "box_hi_m": [round(float(x), 6) for x in sh.hi]})
+        return dataclasses.replace(solid, shadow=sh), rec
+    # --- T96c — end
+
     # --- IFG-CL1: rendered-robot mask · attention-surface code images --------------------------------
     def _apply_render_mask(self, observations, cameras):
         """IFG-CL1 (`esdf.robot_mask == "render"`) — `(cameras, sphere masks, render masks)`.
@@ -990,6 +1142,44 @@ class AG3S:
         p = self._surface_crease_params()
         return {} if p is None else {"crease": p}
     # --- T78d — end
+
+    # --- T97 — begin: hand freeze of the crease region (`esdf.surface_crease_hand_freeze_mm`, None = off)
+    def _t97_freeze_check(self) -> Optional[dict]:
+        """T97 §1.2 — None when off, else the `freeze` record: `applied` iff the latch is searching · latched · closing
+        (nothing attached, not placed, not HELD), a region was accepted earlier this episode, and the grasping palm
+        point (`_grasp_palm_points`, this request's `robot_state` · contact context) lies within
+        `surface_crease_hand_freeze_mm` of that region's centroid. Applied → this request selects no region (the A4
+        rule: carve only), so the hand layer keeps the last accepted region (selected with the hand far)."""
+        e = self.config.esdf
+        d_mm = getattr(e, "surface_crease_hand_freeze_mm", None)
+        if d_mm is None:
+            return None
+        placed = bool(getattr(self._target_confirm, "_placed_seen", False))
+        latch = ("attached" if self._attached is not None else "placed" if placed
+                 else "closing" if (self._grasp_active and self._grasp_latched)
+                 else "held" if self._grasp_active else "latched" if self._grasp_latched else "searching")
+        fz: dict[str, Any] = {"applied": False, "d_mm": float(d_mm), "latch": latch}
+        last = getattr(self, "_t97_last_region", None)
+        if last is None:
+            fz["why"] = "no_accepted_region"
+            return fz
+        fz["region_age_frames"] = int(self.frame_index) - int(last["frame_index"])
+        if latch not in ("searching", "latched", "closing"):
+            fz["why"] = "outside_latch_window"
+            return fz
+        robot_state, context = getattr(self, "_t97_freeze_inputs", (None, None))
+        palms, fz["palm_source"] = self._grasp_palm_points(robot_state, context)
+        if not palms:
+            fz["why"] = "no_palm"
+            return fz
+        palm_mm = float(min(np.linalg.norm(np.asarray(p, np.float64) - last["centroid"]) for p in palms)) * 1e3
+        fz["palm_mm"] = round(palm_mm, 1)
+        if palm_mm > float(d_mm):
+            fz["why"] = "palm_far"
+            return fz
+        fz["applied"] = True
+        return fz
+    # --- T97 — end
 
     def _attention_surface_update(self, observations, cameras, sphere_masks, render_masks,
                                   ats_points=None) -> dict[str, Any]:
@@ -1126,6 +1316,17 @@ class AG3S:
             rec["memory"] = {**self._oracle_carve(observations), "frozen": True}
             post["ms"]["total"] = round((time.perf_counter() - t0) * 1e3, 3)
             return rec
+        # --- T97 — begin: hand freeze (off: `_t97_freeze_check` is None, nothing here runs)
+        freeze = self._t97_freeze_check()
+        if freeze is not None:
+            post["freeze"] = freeze
+            if freeze["applied"]:   # the A4 rule: no selection, no fold, carve only — the last accepted region stands
+                self._surface_frame = {"applied": False, "why": "crease_hand_freeze", "freeze": freeze, "t78": post}
+                self._surface_codes = None
+                rec["memory"] = {**self._oracle_carve(observations), "frozen": True}
+                post["ms"]["total"] = round((time.perf_counter() - t0) * 1e3, 3)
+                return rec
+        # --- T97 — end
         views, mask_src, render_on = self._surface_views(observations, cameras, sphere_masks, render_masks)
         if bool(getattr(e, "surface_seed_ats_gate", False)):   # SL7f (off: the views as they are)
             views, post["seed_ats_gate"] = post_mod.ats_gate_views(views, ats_points)
@@ -1137,7 +1338,8 @@ class AG3S:
         codes = res.codes
         hull_fill = bool(getattr(e, "surface_hull_fill", False))   # T78b
         dropped = np.zeros((0, 3))                                  # T78b: samples of the components A1 dropped
-        if codes is not None and (e.surface_split or str(e.surface_target_check) != "off" or hull_fill):
+        solid = bool(getattr(e, "surface_solid_owned", False))     # T96
+        if codes is not None and (e.surface_split or str(e.surface_target_check) != "off" or hull_fill or solid):
             t1 = time.perf_counter()
             region = post_mod.region_from_codes(views, codes, voxel=float(graph_config().voxel))
             post["region"] = post_mod.extent_record(region)
@@ -1169,6 +1371,13 @@ class AG3S:
                     surf["why"] = "not_ats_target"
             if hull_fill and codes is not None:   # T78b: this request's accepted region → the hull the fill uses
                 post["hull"] = self._surface_hull_store(region, dropped)
+            if solid and codes is not None:   # T96: this request's accepted region → the solid's R
+                post["solid_region"] = self._surface_solid_store(region)
+            # --- T96c — begin: the same request's cameras → the shadow path (only when on; stored with the region)
+            if (solid and codes is not None and getattr(e, "surface_solid_shadow_mm", None) is not None
+                    and (post.get("solid_region") or {}).get("stored")):
+                post["solid_shadow_views"] = self._surface_solid_shadow_store(views, codes)
+            # --- T96c — end
             post["ms"]["post"] = round((time.perf_counter() - t1) * 1e3, 3)
         post["ms"]["total"] = round((time.perf_counter() - t0) * 1e3, 3)
         surf["t78"] = post
@@ -1180,6 +1389,13 @@ class AG3S:
             else:
                 rec["memory"] = {"n_samples": len(mem), "update": mem.n_updates, "updated": False}
             return rec
+        # --- T97 — begin: this accepted region's centroid → the hand-freeze reference (only when on)
+        if getattr(e, "surface_crease_hand_freeze_mm", None) is not None:
+            reg = post.get("region_after_split") or post.get("region") or {}
+            c = reg.get("centroid") or surf.get("selected_centroid")
+            if c is not None:
+                self._t97_last_region = {"centroid": np.asarray(c, np.float64), "frame_index": int(self.frame_index)}
+        # --- T97 — end
         rec["segmentation"] = True
         return self._oracle_fold(observations, codes, {"target": None, "codes": {"attention_surface": 1}}, rec)
 
@@ -2559,6 +2775,10 @@ class AG3S:
                 if extent == "oracle_visible":
                     self._oracle_frame = self._oracle_update(observations)
                 elif extent == "attention_surface":
+                    # --- T97 — begin: the hand-freeze inputs (only when on)
+                    if getattr(cfg.esdf, "surface_crease_hand_freeze_mm", None) is not None:
+                        self._t97_freeze_inputs = (robot_state, context)
+                    # --- T97 — end
                     # IFG-CL1: the same memory, fed with the server's attention-surface code images.
                     with profiler.stage("attention_surface"):
                         self._oracle_frame = self._attention_surface_update(
@@ -3618,6 +3838,7 @@ class AG3S:
         # T46e A13 — the GT extent of the fine target-free layer (`esdf.target_extent == "oracle_visible"` only).
         oracle_evidence = None
         oracle_record = None
+        solid_record = None   # T96 (None = off)
         extent = getattr(cfg, "target_extent", "estimated")
         if extent in ("oracle_visible", "attention_surface"):
             if target_free_points is None:
@@ -3636,6 +3857,10 @@ class AG3S:
                     oracle_evidence = dataclasses.replace(oracle_evidence, contact_allowance_m=allow_mm * 1e-3)
                     oracle_record = {**oracle_record, "allowance_mm": allow_mm, "n_allowance_extra": None}
                 # --- T78f — end
+                # --- T96 — begin: the target solid S ⊕ δ and the neighbour band τ of the hand layer (off: nothing)
+                if bool(getattr(cfg, "surface_solid_owned", False)) and oracle_evidence is not None:
+                    oracle_evidence, solid_record = self._surface_solid(oracle_evidence, support_surfaces)
+                # --- T96 — end
             elif extent == "attention_surface" and not (self._surface_frame or {}).get("applied"):
                 # IFG-CL1: no region this frame → the estimated extent (the memory is not used either).
                 oracle_record = {**dict(self._oracle_frame or {}), "applied": False,
@@ -3739,6 +3964,16 @@ class AG3S:
                      or {})
             oracle_record["n_allowance_extra"] = split.get("n_allowance_extra")   # None = the builder did not split
         # --- T78f — end
+        # --- T96 — begin: `target_exclusion.attention_surface.solid` = the pipeline record + the builder's voxel counts
+        if bool(getattr(cfg, "surface_solid_owned", False)) and extent == "attention_surface":
+            stats = getattr(field, "stats", None)
+            tf = stats.get("target_free") if isinstance(stats, dict) else None
+            if isinstance(tf, dict) and isinstance(tf.get("attention_surface"), dict):
+                sr = (dict(solid_record) if solid_record is not None
+                      else {"applied": False, "why": (oracle_record or {}).get("why", "no_evidence")})
+                sr["voxels"] = ((tf.get("oracle_split") or {}).get("solid"))   # None = the builder did not split
+                tf["attention_surface"]["solid"] = sr
+        # --- T96 — end
         if hybrid_record is not None:   # IFG-CL2
             stats = getattr(field, "stats", None)
             if isinstance(stats, dict) and isinstance(stats.get("target_free"), dict):
