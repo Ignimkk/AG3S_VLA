@@ -1,0 +1,561 @@
+{
+ "source": "T97 replay_metrics.json + verifier replay_supplement.json",
+ "rows": [
+  {
+   "arm": "CL",
+   "name": "Original closed-loop record (replay noise floor)",
+   "remaining_request_median": 0.1406,
+   "remaining_median_of_run_medians": 0.1431,
+   "remaining_run_median": {
+    "회귀211": 0.1885,
+    "회귀954": 0.1206,
+    "회귀119": 0.1431,
+    "가림121": 0.1608,
+    "가림122": 0.1557,
+    "허들119": 0.0952,
+    "허들954": 0.1301,
+    "허들1345": 0.162,
+    "허들850": 0.1147
+   },
+   "sum_left_visible_nb": 39,
+   "sum_left_hidden_nb": 3824,
+   "sum_left_nb": 3863,
+   "sum_apple_voxels_nb": 28177,
+   "request_median_left_visible_nb": 0.0,
+   "request_median_left_hidden_nb": 49.5,
+   "request_median_excl_reg211": 0.1332,
+   "finger_region_left_median_frac": 0.0,
+   "finger_region_left_sum": 76,
+   "finger_region_voxels_sum": 1260,
+   "paired_diff_median": -0.0001,
+   "paired_lower_equal_higher": [
+    39,
+    12,
+    27
+   ],
+   "freed_all": 471081,
+   "freed_all_by_class": {
+    "obstacle": 337821,
+    "none": 113125,
+    "crate": 10947,
+    "table": 6762,
+    "apple": 2149,
+    "fruit": 205,
+    "robot": 72
+   },
+   "freed_all_share_nb_table_crate": 0.038,
+   "freed_all_n_requests_compared": 126,
+   "freed_window": 231773,
+   "freed_window_by_class": {
+    "obstacle": 159419,
+    "none": 58170,
+    "crate": 7138,
+    "table": 4795,
+    "apple": 2018,
+    "fruit": 161,
+    "robot": 72
+   },
+   "freed_window_share_nb_table_crate": 0.0522,
+   "freed_window_n_requests_compared": 62,
+   "freed_all_per_run_by_class": {
+    "회귀211": {
+     "obstacle": 28028,
+     "none": 18039,
+     "crate": 387,
+     "table": 654,
+     "apple": 107,
+     "fruit": 103,
+     "robot": 2
+    },
+    "회귀954": {
+     "obstacle": 34200,
+     "none": 17343,
+     "table": 1380,
+     "apple": 186,
+     "crate": 379,
+     "fruit": 18,
+     "robot": 3
+    },
+    "회귀119": {
+     "table": 464,
+     "crate": 176,
+     "none": 981,
+     "apple": 33,
+     "robot": 1
+    },
+    "가림121": {
+     "none": 1972,
+     "obstacle": 4900,
+     "crate": 124,
+     "table": 267,
+     "robot": 21,
+     "apple": 421
+    },
+    "가림122": {
+     "table": 383,
+     "none": 2343,
+     "crate": 198,
+     "obstacle": 5776,
+     "robot": 18,
+     "apple": 558
+    },
+    "허들119": {
+     "obstacle": 60085,
+     "none": 16188,
+     "crate": 722,
+     "table": 915,
+     "fruit": 1,
+     "apple": 35,
+     "robot": 6
+    },
+    "허들954": {
+     "obstacle": 86279,
+     "none": 22599,
+     "crate": 656,
+     "table": 706,
+     "apple": 110,
+     "fruit": 46,
+     "robot": 1
+    },
+    "허들1345": {
+     "none": 10241,
+     "obstacle": 31335,
+     "table": 582,
+     "crate": 2894,
+     "robot": 18,
+     "apple": 578
+    },
+    "허들850": {
+     "obstacle": 87218,
+     "none": 23419,
+     "crate": 5411,
+     "table": 1411,
+     "apple": 121,
+     "fruit": 37,
+     "robot": 2
+    }
+   },
+   "hold_flips_all": {
+    "B0p execute -> HOLD": 1,
+    "B0p HOLD -> execute": 1
+   },
+   "n_hold_all": 2,
+   "n_hold_B0p_all": 2,
+   "refined_identical_all": [
+    94,
+    435
+   ],
+   "origin_differs_all": [
+    243,
+    316,
+    4.0565
+   ]
+  },
+  {
+   "arm": "B0p",
+   "name": "No feature (surface extraction only)",
+   "remaining_request_median": 0.1325,
+   "remaining_median_of_run_medians": 0.1371,
+   "remaining_run_median": {
+    "회귀211": 0.1873,
+    "회귀954": 0.118,
+    "회귀119": 0.151,
+    "가림121": 0.1371,
+    "가림122": 0.1261,
+    "허들119": 0.1009,
+    "허들954": 0.1404,
+    "허들1345": 0.1484,
+    "허들850": 0.1193
+   },
+   "sum_left_visible_nb": 49,
+   "sum_left_hidden_nb": 3796,
+   "sum_left_nb": 3845,
+   "sum_apple_voxels_nb": 28238,
+   "request_median_left_visible_nb": 0.0,
+   "request_median_left_hidden_nb": 48.5,
+   "request_median_excl_reg211": 0.1289,
+   "finger_region_left_median_frac": 0.05,
+   "finger_region_left_sum": 112,
+   "finger_region_voxels_sum": 1262
+  },
+  {
+   "arm": "P0f",
+   "name": "P0m hand layer (hull fill + contact allowance 10 mm)",
+   "remaining_request_median": 0.1153,
+   "remaining_median_of_run_medians": 0.1151,
+   "remaining_run_median": {
+    "회귀211": 0.1178,
+    "회귀954": 0.1114,
+    "회귀119": 0.1146,
+    "가림121": 0.1256,
+    "가림122": 0.1141,
+    "허들119": 0.0868,
+    "허들954": 0.125,
+    "허들1345": 0.1257,
+    "허들850": 0.1151
+   },
+   "sum_left_visible_nb": 5,
+   "sum_left_hidden_nb": 3165,
+   "sum_left_nb": 3170,
+   "sum_apple_voxels_nb": 28238,
+   "request_median_left_visible_nb": 0.0,
+   "request_median_left_hidden_nb": 42.0,
+   "request_median_excl_reg211": 0.1141,
+   "finger_region_left_median_frac": 0.0,
+   "finger_region_left_sum": 51,
+   "finger_region_voxels_sum": 1262,
+   "paired_diff_median": -0.0084,
+   "paired_lower_equal_higher": [
+    51,
+    27,
+    0
+   ],
+   "freed_all": 9037,
+   "freed_all_by_class": {
+    "apple": 6354,
+    "fruit": 2015,
+    "none": 464,
+    "robot": 204
+   },
+   "freed_all_share_nb_table_crate": 0.223,
+   "freed_all_n_requests_compared": 316,
+   "freed_window": 4994,
+   "freed_window_by_class": {
+    "apple": 2943,
+    "fruit": 1756,
+    "robot": 204,
+    "none": 91
+   },
+   "freed_window_share_nb_table_crate": 0.3516,
+   "freed_window_n_requests_compared": 78,
+   "freed_all_per_run_by_class": {
+    "회귀211": {
+     "apple": 873,
+     "fruit": 2013,
+     "none": 37,
+     "robot": 53
+    },
+    "회귀954": {
+     "none": 10,
+     "apple": 627,
+     "fruit": 1
+    },
+    "회귀119": {
+     "apple": 2446,
+     "none": 406,
+     "robot": 51
+    },
+    "가림121": {
+     "apple": 472,
+     "robot": 13,
+     "none": 4
+    },
+    "가림122": {
+     "apple": 552,
+     "robot": 31
+    },
+    "허들119": {
+     "apple": 329,
+     "robot": 40,
+     "none": 2
+    },
+    "허들954": {
+     "apple": 414,
+     "none": 4,
+     "fruit": 1,
+     "robot": 1
+    },
+    "허들1345": {
+     "apple": 434,
+     "none": 1,
+     "robot": 15
+    },
+    "허들850": {
+     "apple": 207
+    }
+   },
+   "hold_flips_all": {
+    "B0p execute -> HOLD": 2,
+    "B0p HOLD -> execute": 1
+   },
+   "n_hold_all": 3,
+   "n_hold_B0p_all": 2,
+   "refined_identical_all": [
+    223,
+    435
+   ],
+   "origin_differs_all": [
+    0,
+    316,
+    0.0
+   ]
+  },
+  {
+   "arm": "C2f",
+   "name": "P0m hand layer + crease cut + protrusion re-attach + hand freeze 80 mm",
+   "remaining_request_median": 0.1346,
+   "remaining_median_of_run_medians": 0.1343,
+   "remaining_run_median": {
+    "회귀211": 0.1285,
+    "회귀954": 0.126,
+    "회귀119": 0.1639,
+    "가림121": 0.1384,
+    "가림122": 0.1359,
+    "허들119": 0.1201,
+    "허들954": 0.1467,
+    "허들1345": 0.1313,
+    "허들850": 0.1343
+   },
+   "sum_left_visible_nb": 1,
+   "sum_left_hidden_nb": 3716,
+   "sum_left_nb": 3717,
+   "sum_apple_voxels_nb": 28238,
+   "request_median_left_visible_nb": 0.0,
+   "request_median_left_hidden_nb": 48.5,
+   "request_median_excl_reg211": 0.1359,
+   "finger_region_left_median_frac": 0.0436,
+   "finger_region_left_sum": 67,
+   "finger_region_voxels_sum": 1262,
+   "paired_diff_median": 0.0084,
+   "paired_lower_equal_higher": [
+    26,
+    5,
+    47
+   ],
+   "freed_all": 7701,
+   "freed_all_by_class": {
+    "apple": 6988,
+    "none": 441,
+    "robot": 205,
+    "fruit": 67
+   },
+   "freed_all_share_nb_table_crate": 0.0087,
+   "freed_all_n_requests_compared": 316,
+   "freed_window": 4393,
+   "freed_window_by_class": {
+    "apple": 4044,
+    "robot": 205,
+    "none": 84,
+    "fruit": 60
+   },
+   "freed_window_share_nb_table_crate": 0.0137,
+   "freed_window_n_requests_compared": 78,
+   "freed_all_per_run_by_class": {
+    "회귀211": {
+     "apple": 843,
+     "fruit": 52,
+     "none": 3,
+     "robot": 11
+    },
+    "회귀954": {
+     "none": 35,
+     "apple": 829,
+     "fruit": 13
+    },
+    "회귀119": {
+     "apple": 2264,
+     "none": 390,
+     "robot": 54
+    },
+    "가림121": {
+     "apple": 594,
+     "robot": 28,
+     "none": 5
+    },
+    "가림122": {
+     "apple": 735,
+     "robot": 39,
+     "none": 1
+    },
+    "허들119": {
+     "apple": 366,
+     "robot": 42,
+     "none": 2
+    },
+    "허들954": {
+     "apple": 499,
+     "none": 4,
+     "fruit": 2,
+     "robot": 4
+    },
+    "허들1345": {
+     "apple": 646,
+     "none": 1,
+     "robot": 27
+    },
+    "허들850": {
+     "apple": 212
+    }
+   },
+   "hold_flips_all": {
+    "B0p HOLD -> execute": 1
+   },
+   "n_hold_all": 1,
+   "n_hold_B0p_all": 2,
+   "refined_identical_all": [
+    231,
+    435
+   ],
+   "origin_differs_all": [
+    0,
+    316,
+    0.0
+   ]
+  }
+ ],
+ "criteria_header": [
+  "T97 2.2 criterion (pre-fixed)",
+  "P0m hand layer (baseline)",
+  "P0m + crease cut + protrusion + hand freeze 80 mm",
+  "Difference",
+  "Met"
+ ],
+ "criteria_rows": [
+  [
+   "Neighbour fruit voxels freed, touching run REG211 (all requests): fewer than baseline",
+   "2013",
+   "52",
+   "-1961",
+   "yes"
+  ],
+  [
+   "Neighbour fruit voxels freed, all 9 runs (all requests)",
+   "2015",
+   "67",
+   "-1948",
+   "(report)"
+  ],
+  [
+   "Remaining target voxels, request median over the 8 runs other than REG211 (71 req.): <= baseline + 1 %p",
+   "0.1141",
+   "0.1359",
+   "+2.18 %p",
+   "no"
+  ],
+  [
+   "Remaining target voxels, request median, all 78 requests",
+   "0.1153",
+   "0.1346",
+   "+1.93 %p",
+   "(report)"
+  ],
+  [
+   "Remaining, run median REG954: <= baseline + 1 %p",
+   "0.1114",
+   "0.1260",
+   "+1.46 %p",
+   "no"
+  ],
+  [
+   "Remaining, run median REG119: <= baseline + 1 %p",
+   "0.1146",
+   "0.1639",
+   "+4.93 %p",
+   "no"
+  ],
+  [
+   "Remaining, run median OCC121: <= baseline + 1 %p",
+   "0.1256",
+   "0.1384",
+   "+1.28 %p",
+   "no"
+  ],
+  [
+   "Remaining, run median OCC122: <= baseline + 1 %p",
+   "0.1141",
+   "0.1359",
+   "+2.18 %p",
+   "no"
+  ],
+  [
+   "Remaining, run median HUR119: <= baseline + 1 %p",
+   "0.0868",
+   "0.1201",
+   "+3.33 %p",
+   "no"
+  ],
+  [
+   "Remaining, run median HUR954: <= baseline + 1 %p",
+   "0.1250",
+   "0.1467",
+   "+2.17 %p",
+   "no"
+  ],
+  [
+   "Remaining, run median HUR1345: <= baseline + 1 %p",
+   "0.1257",
+   "0.1313",
+   "+0.56 %p",
+   "yes"
+  ],
+  [
+   "Remaining, run median HUR850: <= baseline + 1 %p",
+   "0.1151",
+   "0.1343",
+   "+1.92 %p",
+   "no"
+  ]
+ ],
+ "run_table": [
+  [
+   "Run",
+   "no feature",
+   "P0m hand layer",
+   "P0m + crease/protrusion/freeze"
+  ],
+  [
+   "REG211 (touching banana)",
+   "0.1873",
+   "0.1178",
+   "0.1285"
+  ],
+  [
+   "REG954",
+   "0.1180",
+   "0.1114",
+   "0.1260"
+  ],
+  [
+   "REG119",
+   "0.1510",
+   "0.1146",
+   "0.1639"
+  ],
+  [
+   "OCC121",
+   "0.1371",
+   "0.1256",
+   "0.1384"
+  ],
+  [
+   "OCC122",
+   "0.1261",
+   "0.1141",
+   "0.1359"
+  ],
+  [
+   "HUR119",
+   "0.1009",
+   "0.0868",
+   "0.1201"
+  ],
+  [
+   "HUR954",
+   "0.1404",
+   "0.1250",
+   "0.1467"
+  ],
+  [
+   "HUR1345",
+   "0.1484",
+   "0.1257",
+   "0.1313"
+  ],
+  [
+   "HUR850",
+   "0.1193",
+   "0.1151",
+   "0.1343"
+  ]
+ ]
+}

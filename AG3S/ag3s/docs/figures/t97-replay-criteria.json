@@ -1,0 +1,96 @@
+{
+ "source": "T97 replay_metrics.json + replay_supplement.json",
+ "criteria_header": [
+  "T97 2.2 criterion (pre-fixed)",
+  "P0m hand layer (baseline)",
+  "P0m + crease cut + protrusion + hand freeze 80 mm",
+  "Difference",
+  "Met"
+ ],
+ "criteria_rows": [
+  [
+   "Neighbour fruit voxels freed, touching run REG211 (all requests): fewer than baseline",
+   "2013",
+   "52",
+   "-1961",
+   "yes"
+  ],
+  [
+   "Neighbour fruit voxels freed, all 9 runs (all requests)",
+   "2015",
+   "67",
+   "-1948",
+   "(report)"
+  ],
+  [
+   "Remaining target voxels, request median over the 8 runs other than REG211 (71 req.): <= baseline + 1 %p",
+   "0.1141",
+   "0.1359",
+   "+2.18 %p",
+   "no"
+  ],
+  [
+   "Remaining target voxels, request median, all 78 requests",
+   "0.1153",
+   "0.1346",
+   "+1.93 %p",
+   "(report)"
+  ],
+  [
+   "Remaining, run median REG954: <= baseline + 1 %p",
+   "0.1114",
+   "0.1260",
+   "+1.46 %p",
+   "no"
+  ],
+  [
+   "Remaining, run median REG119: <= baseline + 1 %p",
+   "0.1146",
+   "0.1639",
+   "+4.93 %p",
+   "no"
+  ],
+  [
+   "Remaining, run median OCC121: <= baseline + 1 %p",
+   "0.1256",
+   "0.1384",
+   "+1.28 %p",
+   "no"
+  ],
+  [
+   "Remaining, run median OCC122: <= baseline + 1 %p",
+   "0.1141",
+   "0.1359",
+   "+2.18 %p",
+   "no"
+  ],
+  [
+   "Remaining, run median HUR119: <= baseline + 1 %p",
+   "0.0868",
+   "0.1201",
+   "+3.33 %p",
+   "no"
+  ],
+  [
+   "Remaining, run median HUR954: <= baseline + 1 %p",
+   "0.1250",
+   "0.1467",
+   "+2.17 %p",
+   "no"
+  ],
+  [
+   "Remaining, run median HUR1345: <= baseline + 1 %p",
+   "0.1257",
+   "0.1313",
+   "+0.56 %p",
+   "yes"
+  ],
+  [
+   "Remaining, run median HUR850: <= baseline + 1 %p",
+   "0.1151",
+   "0.1343",
+   "+1.92 %p",
+   "no"
+  ]
+ ]
+}

@@ -1094,6 +1094,15 @@ class CollisionBackendConfig:
     #: rules. Needs `obstacle_margin > 0` (the class table runs only then). The linearizer refuses a model without
     #: `palm_shell` spheres (on but no effect). cuRobo seeds (`gpu_seeds`) keep `obstacle_margin` on those rows.
     palm_shell_margin: Optional[float] = None
+    # --- T96b — begin: the obstacle margin of the palm-cover sphere rows only (m), D27
+    #: `None` (default) = those rows get `obstacle_margin` like every other robot row (bit-identical; the key is also
+    #: left out of `to_dict`). A value = a robot row whose sphere has role `palm_body` (`serve_safe --palm-cover on`)
+    #: and whose nearest surface is an obstacle gets `max(its margin, palm_cover_margin)` instead of
+    #: `max(its margin, obstacle_margin)` — the same rule as `palm_shell_margin` on `palm_shell` rows. Target · support ·
+    #: held rows keep their rules. Needs `obstacle_margin > 0`; the linearizer refuses a model without `palm_body`
+    #: spheres. cuRobo seeds (`gpu_seeds`) keep `obstacle_margin` on those rows.
+    palm_cover_margin: Optional[float] = None
+    # --- T96b — end
     #: **IFG-NBC — light contact with a neighbour object while grasping (m).** `0.0` (default) = off. On pre-grasp
     #: chunks (latch `latched` / `closing`) whose grasping palm is within `neighbour_contact_gate` of the manipulated
     #: centroid, the grasping hand's finger rows whose sphere centre is within `neighbour_contact_radius` of that
@@ -1278,6 +1287,17 @@ class CollisionBackendConfig:
                 raise ValueError(
                     "collision.palm_shell_margin needs collision.obstacle_margin > 0 — it replaces that margin on "
                     "the palm-shell obstacle rows, and the obstacle class table runs only with it")
+        # --- T96b — begin: the same rules for the palm-cover rows' margin (D27)
+        if self.palm_cover_margin is not None:
+            v = self.palm_cover_margin
+            if isinstance(v, bool) or not isinstance(v, (int, float)) or not (math.isfinite(v) and v >= 0.0):
+                raise ValueError(
+                    f"collision.palm_cover_margin must be None or a finite value >= 0 (m), got {v!r}")
+            if not self.obstacle_margin > 0.0:
+                raise ValueError(
+                    "collision.palm_cover_margin needs collision.obstacle_margin > 0 — it replaces that margin on "
+                    "the palm-cover obstacle rows, and the obstacle class table runs only with it")
+        # --- T96b — end
 
     @property
     def wants_esdf(self) -> bool:
@@ -1440,6 +1460,7 @@ class TrajOptConfig:
 #: `(section, field)` left out of `TrajOptConfig.to_dict` while `None` (their default), so a record that dumps the
 #: config keeps the keys it had before the field existed (AG3S-PRE-CORE-TO SCM). `from_dict` fills the default back.
 _OMIT_WHEN_NONE = frozenset({("collision", "palm_shell_margin"),
+                             ("collision", "palm_cover_margin"),       # T96b (D27)
                              ("cost", "geo_time_budget_ms")})          # AG3S-CORE-EVAL-G1 (geo-grasp merge)
 #: AG3S-PRE-CORE-TO-GGW — `(section, field)` left out of `to_dict` while at this default (same reason: a record that
 #: dumps the config keeps its keys when the option is off).

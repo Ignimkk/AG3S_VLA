@@ -1,0 +1,768 @@
+{
+ "source": "T96 replay_metrics.json + verifier replay_supplement.json",
+ "rows": [
+  {
+   "arm": "CL",
+   "name": "Original closed-loop record (replay noise floor)",
+   "remaining_request_median": 0.1406,
+   "remaining_median_of_run_medians": 0.1431,
+   "remaining_run_median": {
+    "회귀211": 0.1885,
+    "회귀954": 0.1206,
+    "회귀119": 0.1431,
+    "가림121": 0.1608,
+    "가림122": 0.1557,
+    "허들119": 0.0952,
+    "허들954": 0.1301,
+    "허들1345": 0.162,
+    "허들850": 0.1147
+   },
+   "sum_left_visible_nb": 39,
+   "sum_left_hidden_nb": 3824,
+   "sum_left_nb": 3863,
+   "sum_apple_voxels_nb": 28177,
+   "request_median_left_visible_nb": 0.0,
+   "request_median_left_hidden_nb": 49.5,
+   "request_median_excl_reg211": 0.1332,
+   "finger_region_left_median_frac": 0.0,
+   "finger_region_left_sum": 76,
+   "finger_region_voxels_sum": 1260,
+   "paired_diff_median": -0.0001,
+   "paired_lower_equal_higher": [
+    39,
+    12,
+    27
+   ],
+   "freed_all": 471081,
+   "freed_all_by_class": {
+    "obstacle": 337821,
+    "none": 113125,
+    "crate": 10947,
+    "table": 6762,
+    "apple": 2149,
+    "fruit": 205,
+    "robot": 72
+   },
+   "freed_all_share_nb_table_crate": 0.038,
+   "freed_all_n_requests_compared": 126,
+   "freed_window": 231773,
+   "freed_window_by_class": {
+    "obstacle": 159419,
+    "none": 58170,
+    "crate": 7138,
+    "table": 4795,
+    "apple": 2018,
+    "fruit": 161,
+    "robot": 72
+   },
+   "freed_window_share_nb_table_crate": 0.0522,
+   "freed_window_n_requests_compared": 62,
+   "freed_all_per_run_by_class": {
+    "회귀211": {
+     "obstacle": 28028,
+     "none": 18039,
+     "crate": 387,
+     "table": 654,
+     "apple": 107,
+     "fruit": 103,
+     "robot": 2
+    },
+    "회귀954": {
+     "obstacle": 34200,
+     "none": 17343,
+     "table": 1380,
+     "apple": 186,
+     "crate": 379,
+     "fruit": 18,
+     "robot": 3
+    },
+    "회귀119": {
+     "table": 464,
+     "crate": 176,
+     "none": 981,
+     "apple": 33,
+     "robot": 1
+    },
+    "가림121": {
+     "none": 1972,
+     "obstacle": 4900,
+     "crate": 124,
+     "table": 267,
+     "robot": 21,
+     "apple": 421
+    },
+    "가림122": {
+     "table": 383,
+     "none": 2343,
+     "crate": 198,
+     "obstacle": 5776,
+     "robot": 18,
+     "apple": 558
+    },
+    "허들119": {
+     "obstacle": 60085,
+     "none": 16188,
+     "crate": 722,
+     "table": 915,
+     "fruit": 1,
+     "apple": 35,
+     "robot": 6
+    },
+    "허들954": {
+     "obstacle": 86279,
+     "none": 22599,
+     "crate": 656,
+     "table": 706,
+     "apple": 110,
+     "fruit": 46,
+     "robot": 1
+    },
+    "허들1345": {
+     "none": 10241,
+     "obstacle": 31335,
+     "table": 582,
+     "crate": 2894,
+     "robot": 18,
+     "apple": 578
+    },
+    "허들850": {
+     "obstacle": 87218,
+     "none": 23419,
+     "crate": 5411,
+     "table": 1411,
+     "apple": 121,
+     "fruit": 37,
+     "robot": 2
+    }
+   },
+   "hold_flips_all": {
+    "B0p execute -> HOLD": 1,
+    "B0p HOLD -> execute": 1
+   },
+   "n_hold_all": 2,
+   "n_hold_B0p_all": 2,
+   "refined_identical_all": [
+    94,
+    435
+   ],
+   "origin_differs_all": [
+    243,
+    316,
+    4.0565
+   ]
+  },
+  {
+   "arm": "B0p",
+   "name": "No feature (surface extraction only)",
+   "remaining_request_median": 0.1325,
+   "remaining_median_of_run_medians": 0.1371,
+   "remaining_run_median": {
+    "회귀211": 0.1873,
+    "회귀954": 0.118,
+    "회귀119": 0.151,
+    "가림121": 0.1371,
+    "가림122": 0.1261,
+    "허들119": 0.1009,
+    "허들954": 0.1404,
+    "허들1345": 0.1484,
+    "허들850": 0.1193
+   },
+   "sum_left_visible_nb": 49,
+   "sum_left_hidden_nb": 3796,
+   "sum_left_nb": 3845,
+   "sum_apple_voxels_nb": 28238,
+   "request_median_left_visible_nb": 0.0,
+   "request_median_left_hidden_nb": 48.5,
+   "request_median_excl_reg211": 0.1289,
+   "finger_region_left_median_frac": 0.05,
+   "finger_region_left_sum": 112,
+   "finger_region_voxels_sum": 1262
+  },
+  {
+   "arm": "P0f",
+   "name": "P0m hand layer (hull fill + contact allowance 10 mm)",
+   "remaining_request_median": 0.1153,
+   "remaining_median_of_run_medians": 0.1151,
+   "remaining_run_median": {
+    "회귀211": 0.1178,
+    "회귀954": 0.1114,
+    "회귀119": 0.1146,
+    "가림121": 0.1256,
+    "가림122": 0.1141,
+    "허들119": 0.0868,
+    "허들954": 0.125,
+    "허들1345": 0.1257,
+    "허들850": 0.1151
+   },
+   "sum_left_visible_nb": 5,
+   "sum_left_hidden_nb": 3165,
+   "sum_left_nb": 3170,
+   "sum_apple_voxels_nb": 28238,
+   "request_median_left_visible_nb": 0.0,
+   "request_median_left_hidden_nb": 42.0,
+   "request_median_excl_reg211": 0.1141,
+   "finger_region_left_median_frac": 0.0,
+   "finger_region_left_sum": 51,
+   "finger_region_voxels_sum": 1262,
+   "paired_diff_median": -0.0084,
+   "paired_lower_equal_higher": [
+    51,
+    27,
+    0
+   ],
+   "freed_all": 9037,
+   "freed_all_by_class": {
+    "apple": 6354,
+    "fruit": 2015,
+    "none": 464,
+    "robot": 204
+   },
+   "freed_all_share_nb_table_crate": 0.223,
+   "freed_all_n_requests_compared": 316,
+   "freed_window": 4994,
+   "freed_window_by_class": {
+    "apple": 2943,
+    "fruit": 1756,
+    "robot": 204,
+    "none": 91
+   },
+   "freed_window_share_nb_table_crate": 0.3516,
+   "freed_window_n_requests_compared": 78,
+   "freed_all_per_run_by_class": {
+    "회귀211": {
+     "apple": 873,
+     "fruit": 2013,
+     "none": 37,
+     "robot": 53
+    },
+    "회귀954": {
+     "none": 10,
+     "apple": 627,
+     "fruit": 1
+    },
+    "회귀119": {
+     "apple": 2446,
+     "none": 406,
+     "robot": 51
+    },
+    "가림121": {
+     "apple": 472,
+     "robot": 13,
+     "none": 4
+    },
+    "가림122": {
+     "apple": 552,
+     "robot": 31
+    },
+    "허들119": {
+     "apple": 329,
+     "robot": 40,
+     "none": 2
+    },
+    "허들954": {
+     "apple": 414,
+     "none": 4,
+     "fruit": 1,
+     "robot": 1
+    },
+    "허들1345": {
+     "apple": 434,
+     "none": 1,
+     "robot": 15
+    },
+    "허들850": {
+     "apple": 207
+    }
+   },
+   "hold_flips_all": {
+    "B0p execute -> HOLD": 2,
+    "B0p HOLD -> execute": 1
+   },
+   "n_hold_all": 3,
+   "n_hold_B0p_all": 2,
+   "refined_identical_all": [
+    223,
+    435
+   ],
+   "origin_differs_all": [
+    0,
+    316,
+    0.0
+   ]
+  },
+  {
+   "arm": "S0",
+   "name": "Target solid, delta 0 mm (tau 5 mm)",
+   "remaining_request_median": 0.1299,
+   "remaining_median_of_run_medians": 0.1554,
+   "remaining_run_median": {
+    "회귀211": 0.2084,
+    "회귀954": 0.1102,
+    "회귀119": 0.1656,
+    "가림121": 0.1424,
+    "가림122": 0.2381,
+    "허들119": 0.1232,
+    "허들954": 0.1765,
+    "허들1345": 0.1554,
+    "허들850": 0.1172
+   },
+   "sum_left_visible_nb": 85,
+   "sum_left_hidden_nb": 4056,
+   "sum_left_nb": 4141,
+   "sum_apple_voxels_nb": 28238,
+   "request_median_left_visible_nb": 0.0,
+   "request_median_left_hidden_nb": 45.0,
+   "request_median_excl_reg211": 0.1271,
+   "finger_region_left_median_frac": 0.05,
+   "finger_region_left_sum": 152,
+   "finger_region_voxels_sum": 1262,
+   "paired_diff_median": 0.0056,
+   "paired_lower_equal_higher": [
+    28,
+    10,
+    40
+   ],
+   "freed_all": 12454,
+   "freed_all_by_class": {
+    "apple": 12098,
+    "fruit": 308,
+    "none": 42,
+    "robot": 6
+   },
+   "freed_all_share_nb_table_crate": 0.0247,
+   "freed_all_n_requests_compared": 316,
+   "freed_window": 2325,
+   "freed_window_by_class": {
+    "apple": 2275,
+    "fruit": 40,
+    "robot": 6,
+    "none": 4
+   },
+   "freed_window_share_nb_table_crate": 0.0172,
+   "freed_window_n_requests_compared": 78,
+   "freed_all_per_run_by_class": {
+    "회귀211": {
+     "apple": 1289,
+     "none": 20,
+     "fruit": 308
+    },
+    "회귀954": {
+     "apple": 1401,
+     "none": 5
+    },
+    "회귀119": {
+     "apple": 2245,
+     "none": 8,
+     "robot": 3
+    },
+    "가림121": {
+     "apple": 1131,
+     "none": 1
+    },
+    "가림122": {
+     "apple": 861,
+     "none": 2
+    },
+    "허들119": {
+     "apple": 648
+    },
+    "허들954": {
+     "apple": 1096,
+     "none": 1,
+     "robot": 1
+    },
+    "허들1345": {
+     "apple": 1137,
+     "none": 5,
+     "robot": 1
+    },
+    "허들850": {
+     "apple": 2290,
+     "robot": 1
+    }
+   },
+   "hold_flips_all": {
+    "B0p execute -> HOLD": 1,
+    "B0p HOLD -> execute": 1
+   },
+   "n_hold_all": 2,
+   "n_hold_B0p_all": 2,
+   "refined_identical_all": [
+    227,
+    435
+   ],
+   "origin_differs_all": [
+    0,
+    316,
+    0.0
+   ]
+  },
+  {
+   "arm": "S5",
+   "name": "Target solid, delta 5 mm (tau 5 mm)",
+   "remaining_request_median": 0.1275,
+   "remaining_median_of_run_medians": 0.1554,
+   "remaining_run_median": {
+    "회귀211": 0.2084,
+    "회귀954": 0.1102,
+    "회귀119": 0.1561,
+    "가림121": 0.1424,
+    "가림122": 0.2381,
+    "허들119": 0.1176,
+    "허들954": 0.1711,
+    "허들1345": 0.1554,
+    "허들850": 0.108
+   },
+   "sum_left_visible_nb": 85,
+   "sum_left_hidden_nb": 3957,
+   "sum_left_nb": 4042,
+   "sum_apple_voxels_nb": 28238,
+   "request_median_left_visible_nb": 0.0,
+   "request_median_left_hidden_nb": 44.5,
+   "request_median_excl_reg211": 0.1232,
+   "finger_region_left_median_frac": 0.05,
+   "finger_region_left_sum": 150,
+   "finger_region_voxels_sum": 1262,
+   "paired_diff_median": 0.0014,
+   "paired_lower_equal_higher": [
+    33,
+    6,
+    39
+   ],
+   "freed_all": 16001,
+   "freed_all_by_class": {
+    "apple": 15169,
+    "none": 458,
+    "fruit": 356,
+    "robot": 18
+   },
+   "freed_all_share_nb_table_crate": 0.0222,
+   "freed_all_n_requests_compared": 316,
+   "freed_window": 3107,
+   "freed_window_by_class": {
+    "apple": 2960,
+    "none": 84,
+    "fruit": 45,
+    "robot": 18
+   },
+   "freed_window_share_nb_table_crate": 0.0145,
+   "freed_window_n_requests_compared": 78,
+   "freed_all_per_run_by_class": {
+    "회귀211": {
+     "apple": 1378,
+     "none": 92,
+     "fruit": 356,
+     "robot": 1
+    },
+    "회귀954": {
+     "apple": 1684,
+     "none": 89
+    },
+    "회귀119": {
+     "apple": 3542,
+     "none": 75,
+     "robot": 8
+    },
+    "가림121": {
+     "apple": 1339,
+     "none": 28
+    },
+    "가림122": {
+     "apple": 1024,
+     "none": 36
+    },
+    "허들119": {
+     "apple": 841,
+     "none": 29,
+     "robot": 1
+    },
+    "허들954": {
+     "apple": 1295,
+     "none": 40,
+     "robot": 5
+    },
+    "허들1345": {
+     "apple": 1412,
+     "none": 40,
+     "robot": 1
+    },
+    "허들850": {
+     "apple": 2654,
+     "none": 29,
+     "robot": 2
+    }
+   },
+   "hold_flips_all": {
+    "B0p execute -> HOLD": 2,
+    "B0p HOLD -> execute": 1
+   },
+   "n_hold_all": 3,
+   "n_hold_B0p_all": 2,
+   "refined_identical_all": [
+    221,
+    435
+   ],
+   "origin_differs_all": [
+    0,
+    316,
+    0.0
+   ]
+  },
+  {
+   "arm": "S0i",
+   "name": "Target solid delta 0, table samples kept in d_N",
+   "remaining_request_median": 0.1299,
+   "remaining_median_of_run_medians": 0.1554,
+   "remaining_run_median": {
+    "회귀211": 0.2084,
+    "회귀954": 0.1102,
+    "회귀119": 0.1656,
+    "가림121": 0.1424,
+    "가림122": 0.2381,
+    "허들119": 0.1232,
+    "허들954": 0.1765,
+    "허들1345": 0.1554,
+    "허들850": 0.1172
+   },
+   "sum_left_visible_nb": 85,
+   "sum_left_hidden_nb": 4079,
+   "sum_left_nb": 4164,
+   "sum_apple_voxels_nb": 28238,
+   "request_median_left_visible_nb": 0.0,
+   "request_median_left_hidden_nb": 45.0,
+   "request_median_excl_reg211": 0.1271,
+   "finger_region_left_median_frac": 0.05,
+   "finger_region_left_sum": 152,
+   "finger_region_voxels_sum": 1262,
+   "paired_diff_median": 0.0056,
+   "paired_lower_equal_higher": [
+    27,
+    11,
+    40
+   ],
+   "freed_all": 12104,
+   "freed_all_by_class": {
+    "apple": 11819,
+    "fruit": 255,
+    "none": 24,
+    "robot": 6
+   },
+   "freed_all_share_nb_table_crate": 0.0211,
+   "freed_all_n_requests_compared": 316,
+   "freed_window": 2230,
+   "freed_window_by_class": {
+    "apple": 2182,
+    "fruit": 38,
+    "robot": 6,
+    "none": 4
+   },
+   "freed_window_share_nb_table_crate": 0.017,
+   "freed_window_n_requests_compared": 78,
+   "freed_all_per_run_by_class": {
+    "회귀211": {
+     "apple": 1270,
+     "none": 4,
+     "fruit": 255
+    },
+    "회귀954": {
+     "apple": 1352,
+     "none": 3
+    },
+    "회귀119": {
+     "apple": 2227,
+     "none": 8,
+     "robot": 3
+    },
+    "가림121": {
+     "apple": 1089,
+     "none": 1
+    },
+    "가림122": {
+     "apple": 834,
+     "none": 2
+    },
+    "허들119": {
+     "apple": 632
+    },
+    "허들954": {
+     "apple": 1077,
+     "none": 1,
+     "robot": 1
+    },
+    "허들1345": {
+     "apple": 1085,
+     "none": 5,
+     "robot": 1
+    },
+    "허들850": {
+     "apple": 2253,
+     "robot": 1
+    }
+   },
+   "hold_flips_all": {
+    "B0p execute -> HOLD": 1,
+    "B0p HOLD -> execute": 2
+   },
+   "n_hold_all": 1,
+   "n_hold_B0p_all": 2,
+   "refined_identical_all": [
+    227,
+    435
+   ],
+   "origin_differs_all": [
+    0,
+    316,
+    0.0
+   ]
+  },
+  {
+   "arm": "S0p",
+   "name": "Target solid delta 0 + real-size palm spheres",
+   "remaining_request_median": 0.1357,
+   "remaining_median_of_run_medians": 0.1411,
+   "remaining_run_median": {
+    "회귀211": 0.2042,
+    "회귀954": 0.1156,
+    "회귀119": 0.1589,
+    "가림121": 0.1411,
+    "가림122": 0.2271,
+    "허들119": 0.1281,
+    "허들954": 0.1178,
+    "허들1345": 0.1582,
+    "허들850": 0.1001
+   },
+   "sum_left_visible_nb": 89,
+   "sum_left_hidden_nb": 3988,
+   "sum_left_nb": 4077,
+   "sum_apple_voxels_nb": 28269,
+   "request_median_left_visible_nb": 0.0,
+   "request_median_left_hidden_nb": 48.0,
+   "request_median_excl_reg211": 0.1312,
+   "finger_region_left_median_frac": 0.0513,
+   "finger_region_left_sum": 152,
+   "finger_region_voxels_sum": 1261,
+   "paired_diff_median": 0.0081,
+   "paired_lower_equal_higher": [
+    31,
+    0,
+    47
+   ],
+   "freed_all": 0,
+   "freed_all_by_class": {},
+   "freed_all_share_nb_table_crate": null,
+   "freed_all_n_requests_compared": 0,
+   "freed_window": 0,
+   "freed_window_by_class": {},
+   "freed_window_share_nb_table_crate": null,
+   "freed_window_n_requests_compared": 0,
+   "freed_all_per_run_by_class": {},
+   "hold_flips_all": {
+    "B0p execute -> HOLD": 3,
+    "B0p HOLD -> execute": 1
+   },
+   "n_hold_all": 4,
+   "n_hold_B0p_all": 2,
+   "refined_identical_all": [
+    77,
+    435
+   ],
+   "origin_differs_all": [
+    316,
+    316,
+    2.3924
+   ]
+  }
+ ],
+ "run_table": [
+  [
+   "Run",
+   "no feature",
+   "P0m hand layer",
+   "solid d0",
+   "solid d5",
+   "solid d0, table in d_N",
+   "solid d0 + palm spheres"
+  ],
+  [
+   "REG211 (touching banana)",
+   "0.1873",
+   "0.1178",
+   "0.2084",
+   "0.2084",
+   "0.2084",
+   "0.2042"
+  ],
+  [
+   "REG954",
+   "0.1180",
+   "0.1114",
+   "0.1102",
+   "0.1102",
+   "0.1102",
+   "0.1156"
+  ],
+  [
+   "REG119",
+   "0.1510",
+   "0.1146",
+   "0.1656",
+   "0.1561",
+   "0.1656",
+   "0.1589"
+  ],
+  [
+   "OCC121",
+   "0.1371",
+   "0.1256",
+   "0.1424",
+   "0.1424",
+   "0.1424",
+   "0.1411"
+  ],
+  [
+   "OCC122",
+   "0.1261",
+   "0.1141",
+   "0.2381",
+   "0.2381",
+   "0.2381",
+   "0.2271"
+  ],
+  [
+   "HUR119",
+   "0.1009",
+   "0.0868",
+   "0.1232",
+   "0.1176",
+   "0.1232",
+   "0.1281"
+  ],
+  [
+   "HUR954",
+   "0.1404",
+   "0.1250",
+   "0.1765",
+   "0.1711",
+   "0.1765",
+   "0.1178"
+  ],
+  [
+   "HUR1345",
+   "0.1484",
+   "0.1257",
+   "0.1554",
+   "0.1554",
+   "0.1554",
+   "0.1582"
+  ],
+  [
+   "HUR850",
+   "0.1193",
+   "0.1151",
+   "0.1172",
+   "0.1080",
+   "0.1172",
+   "0.1001"
+  ]
+ ]
+}

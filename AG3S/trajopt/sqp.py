@@ -1712,6 +1712,12 @@ class TrajectoryOptimizer:
         `collision.palm_shell_margin` is set, `{}` otherwise (the metrics keys as before)."""
         col = self.config.collision
         m = getattr(col, "palm_shell_margin", None)
+        # --- T96b — begin: `palm_cover_margin_m` the same way (only when set, D27)
+        mc = getattr(col, "palm_cover_margin", None)
+        if mc is not None:
+            return {**({"palm_shell_margin_m": float(m)} if m is not None else {}),
+                    "palm_cover_margin_m": float(mc), "obstacle_margin_m": float(col.obstacle_margin)}
+        # --- T96b — end
         if m is None:
             return {}
         return {"palm_shell_margin_m": float(m), "obstacle_margin_m": float(col.obstacle_margin)}

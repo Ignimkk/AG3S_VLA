@@ -517,7 +517,15 @@ class ConstraintRecordWriter:
                             "protected_ijk",
                             # AG3S-PRE-CORE-TO-STEMCAP: only with `esdf.target_stem_cap` on (seeds the cap removed,
                             # apart from `removed_ijk` = the ball_owned removal).
-                            "stem_cap_ijk")
+                            "stem_cap_ijk",
+                            # --- T96 — begin: only with `esdf.surface_solid_owned` on (seeds only the solid path
+                            # removed — S and its δ band; seeds τ kept that some path would have removed)
+                            "solid_removed_ijk", "solid_protected_ijk",
+                            # --- T96 — end
+                            # --- T96c — begin: only with `esdf.surface_solid_shadow_mm` (seeds only the camera-ray
+                            # shadow path removed; shadow seeds τ kept)
+                            "solid_shadow_removed_ijk", "solid_shadow_protected_ijk")
+                            # --- T96c — end
 
     @classmethod
     def _write_exclusion_trace(cls, field, payload: dict[str, Any]) -> dict[str, Any]:

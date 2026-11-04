@@ -1,0 +1,179 @@
+{
+ "definitions": {
+  "fixed_at": "2026-11-04 07:18 KST (2026-11-03 22:18 UTC), before computing any verifier-side number below; replay metrics themselves were computed by lead with T87 README_definitions.md unchanged (hurdle 211 excluded, 9 runs)",
+  "reused_definitions": "outputs/2026-11-03_T87_표면추출위_기능따로재기_HSR5단계/재생_고정입력/README_definitions.md (grasp window, frac_left_nb with 6 mm floor band excluded, freed = B0p<=0 & arm>0 classified by MuJoCo GT 8 mm rule, HOLD flips)",
+  "visible_hidden": "visible = apple surface voxel containing >=1 GT apple surface sample visible in the grasping-hand wrist camera at that request (t84 visible_wrist v3: projects inside image, segmentation = apple geom, render depth >= point depth - 5 mm); hidden = not visible. Sums are lead's replay_metrics.json sum_n_left_visible_nb / sum_n_left_hidden_nb; verifier adds request medians of n_left_visible_nb / n_left_hidden_nb over the same 78 requests (part_w0/w1.json rows)",
+  "scene_request_selection": "per run (REG_ep211_s2113 touching banana, HURDLE_ep1345_s13453 separated): among that run's requests in the 78-request remaining-voxel set, the one with the smallest palm-apple distance (part json palm_apple_mm); tie -> smaller request index",
+  "scene_overlay": "per arm, recomputed from that arm's chunk esdf_free grid at the selected request: band-excluded GT apple surface voxels (same voxel keys as t84 voxel_metric) coloured by hand-layer value d (mm, continuous colormap, clipped [-5, 20]); remaining = d <= 0 (black edge). Neighbour-fruit freed voxels = freed_w*.npz points of class 'fruit' for that request and arm (B0p has none by definition). GT outlines = MuJoCo segmentation boundary of apple and of neighbour fruit geoms in the wrist render; slice = horizontal layer of esdf_free through the voxel containing the GT apple centre, GT samples within +-half voxel of that z drawn as outline points",
+  "supplement_region_excluding_hurdle211": "T97 region criteria recomputed with t97_region_agg.py logic unchanged but rows with run == '허들211_k0' removed (memory rule: hurdle 211 excluded from all tests). Reported as supplement; lead's D30 numbers are the 304-request set including hurdle 211",
+  "supplement_t97_separated": "T97 §2.2 criterion 2 auxiliary: request median of frac_left_nb over the 78-request set minus the 회귀211 run (touching banana), for B0p / P0f / C2f; plus run medians (lead's). Threshold as task: C2f <= P0f + 0.01",
+  "tolerances": "no tolerance: numbers are reported raw (4 decimals as in lead files)"
+ },
+ "colormap": {
+  "quantity": "hand-layer value d (mm), esdf_free_distance",
+  "clip_mm": [
+   -5.0,
+   20.0
+  ]
+ },
+ "scenes": [
+  {
+   "run": "REG_ep211_s2113",
+   "title": "REG ep211: apple touching a banana",
+   "request": 23,
+   "palm_apple_mm": 13.2,
+   "camera": "wrist_cam_l",
+   "apple_centre_base_m": [
+    0.4792,
+    0.2927,
+    0.85
+   ],
+   "arms": {
+    "B0p": {
+     "label": "No feature (surface extraction only)",
+     "chunk": "/mnt/dev/AG3S_VLA-storage/results/development/20261104T045052+0900_054748e6a73c_a02802211ca9/verify/T96/replay/B0p/B0_k0/server_constraints/run_0000/chunk_00023.npz",
+     "voxel_mm": 5.0,
+     "n_apple_voxels_nb": 382,
+     "n_left_nb": 74,
+     "n_left_visible_nb": 7,
+     "n_left_hidden_nb": 67,
+     "frac_left_nb": 0.1937,
+     "freed_vs_B0p_by_class": {},
+     "slice_k": 54,
+     "slice_z_m": 0.8522,
+     "n_left_nb_in_slice": 2
+    },
+    "P0f": {
+     "label": "P0m hand layer (hull fill + contact allowance 10 mm)",
+     "chunk": "/mnt/dev/AG3S_VLA-storage/results/development/20261104T045052+0900_054748e6a73c_a02802211ca9/verify/T96/replay/P0f/B0_k0/server_constraints/run_0000/chunk_00023.npz",
+     "voxel_mm": 5.0,
+     "n_apple_voxels_nb": 382,
+     "n_left_nb": 45,
+     "n_left_visible_nb": 1,
+     "n_left_hidden_nb": 44,
+     "frac_left_nb": 0.1178,
+     "freed_vs_B0p_by_class": {
+      "apple": 109,
+      "fruit": 236,
+      "none": 3,
+      "robot": 7
+     },
+     "slice_k": 54,
+     "slice_z_m": 0.8522,
+     "n_left_nb_in_slice": 0
+    },
+    "S0": {
+     "label": "Target solid, d 0 mm (T96, tau 5 mm)",
+     "chunk": "/mnt/dev/AG3S_VLA-storage/results/development/20261104T045052+0900_054748e6a73c_a02802211ca9/verify/T96/replay/S0/B0_k0/server_constraints/run_0000/chunk_00023.npz",
+     "voxel_mm": 5.0,
+     "n_apple_voxels_nb": 382,
+     "n_left_nb": 103,
+     "n_left_visible_nb": 7,
+     "n_left_hidden_nb": 96,
+     "frac_left_nb": 0.2696,
+     "freed_vs_B0p_by_class": {
+      "apple": 7,
+      "fruit": 6
+     },
+     "slice_k": 54,
+     "slice_z_m": 0.8522,
+     "n_left_nb_in_slice": 5
+    },
+    "C2f": {
+     "label": "P0m hand layer + crease cut + protrusion re-attach + hand freeze 80 mm (T97)",
+     "chunk": "/mnt/dev/AG3S_VLA-storage/results/development/20261104T045052+0900_054748e6a73c_a02802211ca9/verify/T97/replay/C2f/B0_k0/server_constraints/run_0000/chunk_00023.npz",
+     "voxel_mm": 5.0,
+     "n_apple_voxels_nb": 382,
+     "n_left_nb": 47,
+     "n_left_visible_nb": 0,
+     "n_left_hidden_nb": 47,
+     "frac_left_nb": 0.123,
+     "freed_vs_B0p_by_class": {
+      "apple": 135,
+      "fruit": 7,
+      "none": 2
+     },
+     "slice_k": 54,
+     "slice_z_m": 0.8522,
+     "n_left_nb_in_slice": 0
+    }
+   }
+  },
+  {
+   "run": "HURDLE_ep1345_s13453",
+   "title": "HURDLE ep1345: apple separated from neighbours",
+   "request": 20,
+   "palm_apple_mm": 14.1,
+   "camera": "wrist_cam_l",
+   "apple_centre_base_m": [
+    0.5323,
+    0.3226,
+    0.85
+   ],
+   "arms": {
+    "B0p": {
+     "label": "No feature (surface extraction only)",
+     "chunk": "/mnt/dev/AG3S_VLA-storage/results/development/20261104T045052+0900_054748e6a73c_a02802211ca9/verify/T96/replay/B0p/B0_k0/server_constraints/run_0000/chunk_00339.npz",
+     "voxel_mm": 5.0,
+     "n_apple_voxels_nb": 358,
+     "n_left_nb": 62,
+     "n_left_visible_nb": 2,
+     "n_left_hidden_nb": 60,
+     "frac_left_nb": 0.1732,
+     "freed_vs_B0p_by_class": {},
+     "slice_k": 54,
+     "slice_z_m": 0.8517,
+     "n_left_nb_in_slice": 2
+    },
+    "P0f": {
+     "label": "P0m hand layer (hull fill + contact allowance 10 mm)",
+     "chunk": "/mnt/dev/AG3S_VLA-storage/results/development/20261104T045052+0900_054748e6a73c_a02802211ca9/verify/T96/replay/P0f/B0_k0/server_constraints/run_0000/chunk_00339.npz",
+     "voxel_mm": 5.0,
+     "n_apple_voxels_nb": 358,
+     "n_left_nb": 45,
+     "n_left_visible_nb": 0,
+     "n_left_hidden_nb": 45,
+     "frac_left_nb": 0.1257,
+     "freed_vs_B0p_by_class": {
+      "apple": 71
+     },
+     "slice_k": 54,
+     "slice_z_m": 0.8517,
+     "n_left_nb_in_slice": 2
+    },
+    "S0": {
+     "label": "Target solid, d 0 mm (T96, tau 5 mm)",
+     "chunk": "/mnt/dev/AG3S_VLA-storage/results/development/20261104T045052+0900_054748e6a73c_a02802211ca9/verify/T96/replay/S0/B0_k0/server_constraints/run_0000/chunk_00339.npz",
+     "voxel_mm": 5.0,
+     "n_apple_voxels_nb": 358,
+     "n_left_nb": 67,
+     "n_left_visible_nb": 4,
+     "n_left_hidden_nb": 63,
+     "frac_left_nb": 0.1872,
+     "freed_vs_B0p_by_class": {
+      "apple": 27
+     },
+     "slice_k": 54,
+     "slice_z_m": 0.8517,
+     "n_left_nb_in_slice": 3
+    },
+    "C2f": {
+     "label": "P0m hand layer + crease cut + protrusion re-attach + hand freeze 80 mm (T97)",
+     "chunk": "/mnt/dev/AG3S_VLA-storage/results/development/20261104T045052+0900_054748e6a73c_a02802211ca9/verify/T97/replay/C2f/B0_k0/server_constraints/run_0000/chunk_00339.npz",
+     "voxel_mm": 5.0,
+     "n_apple_voxels_nb": 358,
+     "n_left_nb": 43,
+     "n_left_visible_nb": 0,
+     "n_left_hidden_nb": 43,
+     "frac_left_nb": 0.1201,
+     "freed_vs_B0p_by_class": {
+      "apple": 129
+     },
+     "slice_k": 54,
+     "slice_z_m": 0.8517,
+     "n_left_nb_in_slice": 0
+    }
+   }
+  }
+ ]
+}
