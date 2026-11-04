@@ -56,7 +56,7 @@ call 마다 넷을 잰다. 하나라도 `--fidelity-tol-mm`(기본 1 mm) 를 넘
 | `no_rate_terms` (b) | 〃 | `w_continuity = w_deflection_rate = 0` | 〃 |
 | `no_attached` (c) | 〃 | 〃 | 끔 |
 | `no_target_no_rate_terms_no_attached` (a+b+c) | 뺌 | 끔 | 끔 |
-| `action_box` | 〃 | 〃 | 〃 + action 한계 제약 (worktree `wip/sl10-actionbox` 의 옵션이 있을 때만; 없으면 `unavailable`) |
+| `action_box` | 〃 | 〃 | 〃 + action 한계 제약 (`--to-action-box` 와 같은 상자 · QP 예산; `--action-box-margin`) |
 
 변형마다: TrajOpt − reference 편차 (rad, max · p90; 전체 창 · 실행 창), 변환 C 뒤 포화 행 · 성분 수, 계획 − 실현 가능
 차이 (mm, 실행 창 행별 max · p90). 변환 C 는 `adapters/panda/action.py` 를 그대로 부른다.
@@ -112,7 +112,7 @@ VARIANTS: dict[str, Variant] = {v.name: v for v in (
     Variant("no_attached", attached_off=True, label="(c) 부착 구 끔"),
     Variant("no_target_no_rate_terms_no_attached", target_removed=True, rate_terms_off=True, attached_off=True,
             label="(a+b+c)"),
-    Variant("action_box", action_box=True, label="action 한계 제약 켬 (wip/sl10-actionbox)"),
+    Variant("action_box", action_box=True, label="action 한계 제약 켬 (--to-action-box)"),
 )}
 DEFAULT_VARIANTS = tuple(VARIANTS)
 
@@ -519,6 +519,7 @@ class Runtime:
     execution_length: int
     runners: dict = dataclasses.field(default_factory=dict)
     attached_spheres: Optional[dict] = None
+    action_box_margin: float = 0.05
 
 
 def build_runtime(args, *, attached_spheres: Optional[dict] = None) -> Runtime:
@@ -750,7 +751,13 @@ def variant_config(rt: Runtime, variant: Variant, sqp_iterations: int, extra: Op
     overrides: dict[str, Any] = {"sqp": {"time_budget_ms": NO_CLOCK_MS, "max_iterations": max(1, int(sqp_iterations))}}
     for section, values in {**variant_cost_overrides(variant), **(extra or {})}.items():
         overrides[section] = {**overrides.get(section, {}), **values}
-    return rt.to_config.with_overrides(overrides)
+    cfg = rt.to_config.with_overrides(overrides)
+    if variant.action_box:
+        # 상자의 행은 계수가 커서 기본 QP 예산(4000)으로는 첫 QP 가 실패하고 상자가 조용히 꺼진다. 서버와 같은 함수로 올린다.
+        from AG3S.adapters.panda import server as ps
+
+        cfg = ps.action_box_qp_config(cfg)
+    return cfg
 
 
 def solve(rt: Runtime, prep: Prepared, cfg, scene, context: Optional[dict] = None):
@@ -831,41 +838,27 @@ def prepare_call(rt: Runtime, call: Call, *, tol_mm: float) -> tuple[Optional[Pr
 # 변형 실행
 # ======================================================================================
 
-def detect_action_box_overrides(to_config, margin: float = 0.05) -> Optional[dict]:
-    """worktree `wip/sl10-actionbox` 의 옵션이 이 checkout 의 `TrajOptConfig` 에 있나. 있으면 켜는 override, 없으면 `None`.
+def action_box_for(rt: Runtime, prep: Prepared):
+    """이 call 의 action 한계 상자. 서버의 `action_box_kwargs` 와 같은 호출 — 그 call 의 기록된 변환 입력(`prep.conv`:
+    `q_now` · 정책 chunk · `T_world_base` · `prev_step`)에서 만든 변환의 `delta` · `q_now` · `R_world_base` 로, 실행 행 수
+    `rt.execution_length` 행에, 그 call 의 기록된 변환 mode 로."""
+    from AG3S.adapters.panda import action as pa
 
-    이름은 아직 정해지지 않았으므로 config 섹션의 필드 중 `action_box` 가 이름에 든 bool 필드를 찾는다 (margin 필드는
-    `<이름>_margin`). hook 일 뿐이다 — 옵션이 들어오면 필요한 context 키를 `action_box_context` 에 적는다.
-    """
-    for section in ("collision", "cost", "limits", "sqp", "reduction"):
-        sec = getattr(to_config, section, None)
-        if sec is None or not dataclasses.is_dataclass(sec):
-            continue
-        names = {f.name for f in dataclasses.fields(sec)}
-        for name in sorted(names):
-            if "action_box" in name and not name.endswith("margin") and isinstance(getattr(sec, name), bool):
-                vals: dict[str, Any] = {name: True}
-                if f"{name}_margin" in names:
-                    vals[f"{name}_margin"] = float(margin)
-                return {section: vals}
-    return None
+    return pa.action_box_from_conversion(prep.conv, margin=float(rt.action_box_margin), n_rows=int(rt.execution_length),
+                                         mode=prep.conv_mode)
 
 
-def action_box_context(prep: Prepared) -> dict:
-    """action 한계 제약이 context 로 받는 값 (a_k · 응답 모델 상수 …). 옵션이 들어오기 전에는 비어 있다."""
-    return {}
+def action_box_context(rt: Runtime, prep: Prepared) -> dict:
+    """refiner 가 `solve(action_box=)` 로 넘기는 context 키 (`refiner.py`: `context["action_box"]`)."""
+    return {"action_box": action_box_for(rt, prep)}
 
 
 def run_variant(rt: Runtime, prep: Prepared, variant: Variant) -> dict[str, Any]:
     """한 call 에서 한 변형. 결과 dict (`deviation` · `conversion` …) 또는 `{"unavailable": 이유}`."""
     scene = prep.scene
-    extra = None
     context = None
     if variant.action_box:
-        extra = detect_action_box_overrides(rt.to_config)
-        if extra is None:
-            return {"unavailable": "TrajOptConfig has no action-box option (wip/sl10-actionbox not merged here)"}
-        context = {**prep.context, **action_box_context(prep)}
+        context = {**prep.context, **action_box_context(rt, prep)}
     if variant.target_removed:
         if prep.attached:
             return {"unavailable": "held: the held object is carved by the attached path, not the target extent"}
@@ -877,7 +870,8 @@ def run_variant(rt: Runtime, prep: Prepared, variant: Variant) -> dict[str, Any]
         return {"unavailable": "no attached spheres in this call's scene (not held, or held spheres not supplied)"}
     scene = apply_variant_scene(prep.scene, variant, field_without_target=prep._field_wo)
     t0 = time.perf_counter()
-    result = solve(rt, prep, variant_config(rt, variant, prep.sqp_iterations, extra), scene, context)
+    cfg = variant_config(rt, variant, prep.sqp_iterations)
+    result = solve(rt, prep, cfg, scene, context)
     out = variant_metrics(rt.kin, prep.conv, np.asarray(result.chunk, np.float32), prep.recorded_reference(),
                           execution_length=rt.execution_length, mode=prep.conv_mode)
     out.update({"status": result.status.value, "wall_ms": (time.perf_counter() - t0) * 1000.0,
@@ -886,6 +880,12 @@ def run_variant(rt: Runtime, prep: Prepared, variant: Variant) -> dict[str, Any]
                 "returned": result.metrics.get("returned"),
                 "continuity_active": result.metrics.get("continuity_active"),
                 "vs_recorded_refined_mm": ee_mm_diff(rt.kin, result.chunk, prep.recorded_refined)})
+    if variant.action_box:
+        # 기록 키는 서버의 `to.action_box` 와 같다 (on · n_rows · active_rows · max_pred_abs_action · …). on 이 false 면 상자가
+        # 적용되지 않은 것 (reason). QP 상태: 실패한 QP 수와 쓴 max_iter — 실패하면 상자가 조용히 꺼진다.
+        out["action_box"] = dict(result.metrics.get("action_box") or {"on": False, "reason": "no action_box in metrics"})
+        out["qp"] = {"qp_failures": result.metrics.get("qp_failures"),
+                     "max_iter": int(cfg.qp.max_iter), "max_iter_default": int(rt.to_config.qp.max_iter)}
     return out
 
 
@@ -1173,6 +1173,8 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--destination-body", default=None)
     ap.add_argument("--attached-spheres-json", default=None,
                     help='{"parent_link": "panda_hand", "spheres": [[cx, cy, cz, r], ...]} (parent 좌표계). 쥠 call 의 scene 에 쓴다')
+    ap.add_argument("--action-box-margin", type=float, default=0.05,
+                    help="action_box 변형의 상자 여유 (서버 `--to-action-box-margin` 과 같다; 상자는 [-1+m, 1-m])")
     ap.add_argument("--fidelity-tol-mm", type=float, default=1.0)
     ap.add_argument("--no-strict", dest="strict", action="store_false",
                     help="무효 call 만 건너뛰고 나머지를 돈다 (기본: 하나라도 무효면 변형을 하나도 안 돈다)")
@@ -1194,6 +1196,7 @@ def main(argv=None) -> int:
     attached = json.loads(pathlib.Path(args.attached_spheres_json).read_text()) if args.attached_spheres_json else None
     sargs = server_args(run_dir, args.ag3s_version)
     rt = build_runtime(sargs, attached_spheres=attached)
+    rt.action_box_margin = float(args.action_box_margin)
     cfg_path = run_dir / "logs" / "panda_server_config.json"
     server_cfg = json.loads(cfg_path.read_text()) if cfg_path.exists() else {}
     n_rec = ((server_cfg.get("ag3s") or {}).get("n_constraint_spheres"))

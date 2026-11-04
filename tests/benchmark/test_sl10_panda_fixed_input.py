@@ -146,10 +146,20 @@ def test_field_without_target_removes_only_the_target():
     assert wo.distance(p_far)[0] >= both.distance(p_far)[0] - 1e-6            # removal never makes a point closer
 
 
-def test_action_box_hook_is_unavailable_without_the_option():
+def test_action_box_variant_uses_the_servers_qp_budget_and_only_that():
+    """`action_box` 변형의 config 는 서버의 `action_box_qp_config` (qp.max_iter 30000) 와 같고, 다른 변형은 건드리지 않는다."""
+    from AG3S.adapters.panda import server as ps
     from AG3S.trajopt.config import TrajOptConfig
 
-    assert tool.detect_action_box_overrides(TrajOptConfig()) is None
+    rt = types.SimpleNamespace(to_config=TrajOptConfig())
+    base = tool.variant_config(rt, tool.VARIANTS["replay"], 3)
+    abox = tool.variant_config(rt, tool.VARIANTS["action_box"], 3)
+    assert base.qp.max_iter == TrajOptConfig().qp.max_iter != ps.ACTION_BOX_QP_MAX_ITER
+    assert abox.qp.max_iter == ps.ACTION_BOX_QP_MAX_ITER
+    assert ps.action_box_qp_config(base) == abox                       # the server's own function, not a copy
+    for name in ("no_target", "no_rate_terms", "no_attached", "no_target_no_rate_terms_no_attached"):
+        assert tool.variant_config(rt, tool.VARIANTS[name], 3).qp.max_iter == base.qp.max_iter
+    assert tool.build_parser().parse_args(["--run-dir", "x", "--out", "y"]).action_box_margin == 0.05
 
 
 # --------------------------------------------------------------------------------------- 충실도 · valid=false
@@ -422,12 +432,31 @@ def test_synthetic_run_roundtrip_fidelity_and_variants(tmp_path, runtime, monkey
     assert no_t["deviation"]["max_rad"] < 0.5 * rep["deviation"]["max_rad"]      # the obstacle is gone: it pushes far less
     assert tool.run_variant(rt, prep, tool.VARIANTS["no_rate_terms"])["deviation"]["max_rad"] >= 0.0
     assert "unavailable" in tool.run_variant(rt, prep, tool.VARIANTS["no_attached"])
-    assert "unavailable" in tool.run_variant(rt, prep, tool.VARIANTS["action_box"])
+    ab = tool.run_variant(rt, prep, tool.VARIANTS["action_box"])
+    assert "unavailable" not in ab, ab
+    # action 한계 제약: 실행 5행 (index < 5) 의 포화 행은 replay 보다 줄고 (합성에서는 0), 기록 키는 서버의 `to.action_box` 와 같다
+    assert rep["conversion"]["n_saturated_rows_exec"] > 0
+    assert ab["conversion"]["n_saturated_rows_exec"] < rep["conversion"]["n_saturated_rows_exec"]
+    assert ab["conversion"]["n_saturated_rows_exec"] == 0 and not [k for k in ab["conversion"]["saturated_rows"] if k < 5]
+    assert ab["conversion"]["saturated_components_exec"] == 0
+    assert ab["action_box"]["on"] is True and ab["action_box"]["n_rows"] == 6 * rt.execution_length
+    assert ab["action_box"]["rows"] == rt.execution_length and ab["action_box"]["margin"] == 0.05
+    assert {"active_rows", "max_pred_abs_action"} <= set(ab["action_box"])
+    assert ab["action_box"]["max_pred_abs_action"] < 1.0
+    assert ab["qp"]["max_iter"] == 30000 and ab["qp"]["max_iter"] > ab["qp"]["max_iter_default"]
+    assert ab["qp"]["qp_failures"] == 0                                   # a failed QP silently turns the box off
+    assert "action_box" not in rep and "qp" not in rep                    # the other variants carry no such record
+    rt.action_box_margin = 0.2
+    try:
+        wide = tool.run_variant(rt, prep, tool.VARIANTS["action_box"])
+    finally:
+        rt.action_box_margin = 0.05
+    assert wide["action_box"]["margin"] == 0.2
     # the whole driver, strict
     out = tool.run_calls([prep], lambda p, v: tool.run_variant(rt, p, v), list(tool.VARIANTS), tol_mm=1.0)
     assert out["valid"] is True and set(out["results"][prep.id]) == set(tool.VARIANTS)
     s = tool.instrument_summary(out["results"], variants=out["variants_run"])
-    assert s["no_target"]["n"] == 1 and s["action_box"]["n"] == 0
+    assert s["no_target"]["n"] == 1 and s["action_box"]["n"] == 1
 
 
 def test_synthetic_run_with_a_wrong_record_is_invalid(tmp_path, runtime):
@@ -461,7 +490,9 @@ def test_cli_end_to_end_valid_and_invalid(tmp_path, runtime, monkeypatch):
     cid = f"ep0#{SEQ}"
     assert data["targets"] == [cid] and data["target_phases"][cid] == "closing"
     assert set(data["results"][cid]) == set(tool.VARIANTS)
-    assert data["results"][cid]["action_box"]["unavailable"]
+    ab = data["results"][cid]["action_box"]
+    assert "unavailable" not in ab and ab["action_box"]["on"] is True and ab["conversion"]["n_saturated_rows_exec"] == 0
+    assert ab["action_box"]["margin"] == 0.05 and ab["qp"]["max_iter"] == 30000
     assert "rows" in data["j1"][cid] and data["j1"][cid]["voxel_classes"]["unavailable"]
     assert data["instrument_summary"]["no_target"]["reduces_below_half"] is True
     # J1 only: no solve, no fidelity gate
@@ -497,11 +528,15 @@ def test_selection_by_phase_and_deviation(tmp_path, runtime):
 
 # --------------------------------------------------------------------------------------- 서버 불변
 def test_tool_does_not_modify_server_adapter_or_recorder():
-    """도구는 읽기만 한다: 이 branch 가 base 대비 바꾼 파일 중 서버 · adapter · 기록기 · 변환이 없다."""
-    base = subprocess.run(["git", "merge-base", "HEAD", "62c0076f"], cwd=ROOT, capture_output=True, text=True)
-    if base.returncode != 0:
-        pytest.skip("base commit not available")
-    changed = subprocess.run(["git", "diff", "--name-only", base.stdout.strip()], cwd=ROOT, capture_output=True,
+    """도구는 읽기만 한다: 서버 · adapter · 기록기 · 변환은 base (62c0076f) 와 action 한계 제약 구현 (`wip/sl10-actionbox`,
+    54b1d2cc -- 이 branch 에 merge 되어 있다) 에서 이 tool 연결이 더한 변경이 없다. action 한계 제약 쪽 변경 자체는 그 branch 의 것."""
+    ref = "54b1d2cc"
+    if subprocess.run(["git", "cat-file", "-e", ref], cwd=ROOT, capture_output=True).returncode != 0:
+        pytest.skip("action-box commit not available")
+    # 54b1d2cc 가 HEAD 의 조상이어야 이 비교가 '연결이 더한 것' 이 된다
+    if subprocess.run(["git", "merge-base", "--is-ancestor", ref, "HEAD"], cwd=ROOT).returncode != 0:
+        pytest.skip("action-box commit is not merged here")
+    changed = subprocess.run(["git", "diff", "--name-only", ref], cwd=ROOT, capture_output=True,
                              text=True).stdout.split()
     protected = ("AG3S/adapters/panda/", "AG3S/trajopt/serve_safe.py", "AG3S/trajopt/safe_policy.py",
                  "AG3S/ag3s/experiments/sources/constraint_record.py", "AG3S/trajopt/refiner.py", "AG3S/trajopt/sqp.py",
