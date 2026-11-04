@@ -27,7 +27,7 @@ from typing import Any, Optional, Sequence
 
 import numpy as np
 
-__all__ = ["ConstraintRecordWriter", "load_constraint_run", "ESDF_MODES"]
+__all__ = ["ConstraintRecordWriter", "load_constraint_run", "ESDF_MODES", "HELD_RECORD_KEYS"]
 
 #: `esdf_mode` 가 받는 값. 용량과 진단 가능성의 교환이다.
 #:   none      — 격자 메타만. 청크당 수 KB.
@@ -42,6 +42,22 @@ ESDF_MODES = ("none", "occupancy", "full")
 #: `'CuroboEsdfField' object has no attribute 'max_distance'` 로 실패했고, 실패가 `print` 한
 #: 줄이라 실행이 끝까지 갔다. 끝나고 **빈 디렉토리**를 본 것이 그 조용함의 대가다.
 SUPPORTED_ESDF_BACKENDS = ("legacy", "curobo")
+
+#: SL10c — chunk npz keys that only `esdf_mode == "full"` may carry (`record(held_record=)`; definitions, frames and
+#: units in `AG3S/ag3s/docs/handoff/SL10c.rec.impl.md`). The writer refuses any other key under `held_record["arrays"]`
+#: so a typo cannot add a column nobody reads. In `none` / `occupancy` mode none of these keys is written.
+HELD_RECORD_KEYS = (
+    "support_planes",             # (P, 4) float64 [nx, ny, nz, offset]  n.p = offset, base frame, m
+    "held_free_spheres",          # (N, 4) float64 [cx, cy, cz, r]       base frame, m — the spheres whose volume was freed
+    "held_free_first_frame",      # (N,) bool                            the sphere came from `_held_first_free`
+    "held_local_spheres",         # (K, 4) float64 [cx, cy, cz, r]       parent link frame, m — the held spheres' definition
+    "attached_parent_link",       # () str                               parent link of held_local_spheres
+    "attached_query_spheres",     # (K, 4) float64 [cx, cy, cz, r]       base frame, m — at the refined plan's step 0
+    "attached_query_centres",     # (H, K, 3) float64                    base frame, m — along the refined plan
+    "held_capture_spheres",       # (C, 4) float64 [cx, cy, cz, r]       base frame, m — where the object was at the grasp
+    "finger_plan_opening",        # (n_hands, H) float64                 normalised opening the TO window assumed
+    "finger_plan_hands",          # (n_hands,) str                       hand name of each finger_plan_opening row
+)
 
 
 class _DeferredGrid:
@@ -147,7 +163,8 @@ class ConstraintRecordWriter:
                to_result: Optional[Any] = None,
                attention_maps: Optional[dict[str, np.ndarray]] = None,
                occupancy: Optional[np.ndarray] = None,
-               summary_extra: Optional[dict[str, Any]] = None) -> pathlib.Path:
+               summary_extra: Optional[dict[str, Any]] = None,
+               held_record: Optional[dict[str, Any]] = None) -> pathlib.Path:
         """한 청크. `debug` 는 `AG3S.process_multi_debug` 가 돌려준 두 번째 값 그대로.
 
         `occupancy` 는 따로 받는다. `EsdfField` 는 거리장만 들고 있고 세 상태 점유 배열은
@@ -157,6 +174,10 @@ class ConstraintRecordWriter:
         `summary_extra` 는 `summary_json` 에 **그대로 더할** JSON 값들이다 (T18 — `SafePolicy` 가
         `exec_feedback` · `exec_continuity` · `exec_latch_signal` 을 싣는다). 이 기록기가 모르는
         키를 여기서 해석하지 않는다. 이미 있는 키와 겹치면 기록기 쪽 값이 이긴다.
+
+        `held_record` (SL10c) 는 `{"arrays": {key: ndarray}, "summary": json}` — `esdf_mode == "full"` 일 때만 쓰인다
+        (`none` · `occupancy` 에서는 무시되어 키가 하나도 안 생긴다). `arrays` 의 키는 `HELD_RECORD_KEYS` 안이어야 한다.
+        `summary` 는 `summary_json["held_geometry_record"]` 로 들어간다.
         """
         payload: dict[str, Any] = {
             "t_step": np.int64(t_step),
@@ -296,6 +317,14 @@ class ConstraintRecordWriter:
                 "notes": list(getattr(to_result, "notes", ()) or ()),
                 "metrics": {k: _scalar(v) for k, v in (getattr(to_result, "metrics", {}) or {}).items()},
             }
+
+        if held_record and self.esdf_mode == "full":
+            for key, value in (held_record.get("arrays") or {}).items():
+                if key not in HELD_RECORD_KEYS:
+                    raise KeyError(f"held_record key {key!r} is not one of HELD_RECORD_KEYS")
+                payload[key] = np.asarray(value)
+            if held_record.get("summary") is not None:
+                summary["held_geometry_record"] = json.loads(json.dumps(held_record["summary"], default=_scalar))
 
         for key, value in (summary_extra or {}).items():
             summary.setdefault(key, value)

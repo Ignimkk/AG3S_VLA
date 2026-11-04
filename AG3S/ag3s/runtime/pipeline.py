@@ -367,6 +367,12 @@ class AG3S:
         #: the region is where the object stood, which while it is held holds only it or nothing.
         #: `None` (default) = off, bit-identical.
         self.held_free_observed_pad: Optional[float] = None
+        #: SL10c (record only): when True `_held_free_points` stashes what it freed this frame (`held_free_record`).
+        #: The server turns it on with `--record-constraints-esdf full`. Off (default) = nothing is stashed and
+        #: `_held_free_points` runs the statements it ran before; on, the arrays it returns are the same
+        #: (the stash copies; it feeds nothing back).
+        self.record_held_free: bool = False
+        self._held_free_stash: Optional[dict[str, Any]] = None
         #: T32 H1: the held object's spheres join the **self-filter** sphere set while attached
         #: (cuRobo attach semantics) — its pixels are removed like the robot's and never reach the
         #: TSDF. A public switch for ablation/measurement only; the live path keeps it on.
@@ -3677,6 +3683,8 @@ class AG3S:
         update means anything, since a fresh grid has nothing to be incremental against.
         """
         cfg = self.config.esdf
+        if self.record_held_free:
+            self._held_free_stash = None   # SL10c: a frame that frees nothing must not show the last frame's spheres
         if not depth_cameras:
             return None, ["esdf backend requested but no camera depth was supplied; "
                           "the field was not built and the primitive candidates stand alone"]
@@ -4213,6 +4221,8 @@ class AG3S:
         T = _link_pose_numeric(self.constraint_robot_model, np.asarray(robot_state, np.float64),
                                held.parent_link)
         spheres = [(T[:3, :3] @ c + T[:3, 3], r) for c, r in local]
+        n_held_spheres = len(spheres)
+        first_frames_left = int(self._held_first_free_frames)
         if self._held_first_free_frames > 0:
             spheres = spheres + list(self._held_first_free)
             self._held_first_free_frames -= 1
@@ -4222,20 +4232,56 @@ class AG3S:
         z_plane = self._support_plane_z(support_surfaces, spheres[0][0])
         pts = sphere_volume_points(spheres, 0.5 * tsdf_voxel,
                                    z_min=None if z_plane is None else float(z_plane) + pad)
+        n_sphere_points = len(pts)
+        n_observed_points = 0
         if self.held_free_observed_pad is not None and self._held_capture_points is not None:
             # T43 T fix 2: the pre-grasp observation at its place (static), same floor rule.
             obs = points_near(self._held_capture_points, float(self.held_free_observed_pad),
                               0.5 * tsdf_voxel)
             if z_plane is not None:
                 obs = obs[obs[:, 2] >= float(z_plane) + pad]
+            n_observed_points = len(obs)
             pts = np.vstack([pts, obs]) if len(obs) else pts
+        n_before_destination = len(pts)
         if len(pts) and destination_points is not None and len(destination_points):
             from scipy.spatial import cKDTree
 
             d, _ = cKDTree(np.asarray(destination_points, np.float64).reshape(-1, 3)).query(
                 pts, distance_upper_bound=2.0 * pad)
             pts = pts[~np.isfinite(d)]
+        if self.record_held_free:
+            # SL10c (record only): what this call freed, in the frame the TSDF is in (base). `first` marks the spheres
+            # that come from `_held_first_free` (present on the first two held frames only); the held spheres at
+            # `robot_state` come first. Copies — the arrays above are not touched.
+            self._held_free_stash = {
+                "spheres": np.asarray([[*np.asarray(c, np.float64).reshape(3), float(r)] for c, r in spheres],
+                                      np.float64).reshape(-1, 4),
+                "first": np.arange(len(spheres)) >= n_held_spheres,
+                "z_min_m": None if z_plane is None else float(z_plane) + float(pad),
+                "support_plane_z_m": None if z_plane is None else float(z_plane),
+                "guard_pad_m": float(pad),
+                "tsdf_voxel_m": float(tsdf_voxel),
+                "sample_step_m": 0.5 * float(tsdf_voxel),
+                "first_frames_left_before": first_frames_left,
+                "n_held_spheres": int(n_held_spheres),
+                "n_sphere_points_after_floor": int(n_sphere_points),
+                "n_observed_points": int(n_observed_points),
+                "observed_pad_m": (None if self.held_free_observed_pad is None
+                                   else float(self.held_free_observed_pad)),
+                "n_points_before_destination": int(n_before_destination),
+                "destination_exclusion_m": (2.0 * float(pad) if destination_points is not None
+                                            and len(destination_points) else None),
+                "n_points_freed": int(len(pts)),
+            }
         return pts if len(pts) else None
+
+    @property
+    def held_free_record(self) -> Optional[dict[str, Any]]:
+        """SL10c — what `_held_free_points` freed on the latest frame (`record_held_free` on), else None. Read-only copy."""
+        stash = self._held_free_stash
+        if stash is None:
+            return None
+        return {k: (v.copy() if isinstance(v, np.ndarray) else v) for k, v in stash.items()}
 
     def _authorized_links(self, contact_context) -> frozenset:
         """Contact-authorized links for this frame — the **same** set the target-free mask and the
