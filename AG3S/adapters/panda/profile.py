@@ -492,6 +492,16 @@ P0M_SL9_VERSIONS: tuple[str, ...] = tuple(n for n in _SL9 if "-p0m-" in n)
 PC_SL9_VERSIONS: tuple[str, ...] = tuple(n for n in _SL9 if "-pc-" in n)
 SL9_VERSIONS: tuple[str, ...] = P0M_SL9_VERSIONS + PC_SL9_VERSIONS
 PC_LATCH_VERSIONS = PC_LATCH_VERSIONS + PC_SL9_VERSIONS
+#: SL10 §2.2 (task SL10, lead 2026-11-04): the Panda controller's action limit as TrajOpt rows (``--to-action-box``,
+#: margin 0.05; ``AG3S/trajopt/action_box.py``) on pc판 and on pc판 + surface extraction -- the base flags plus this one flag.
+ACTION_BOX_FLAGS: tuple[str, ...] = ("--to-action-box",)
+AG3S_VERSIONS["AG3S-final-panda-v3-e0to-pc-abox"] = tuple(AG3S_VERSIONS["AG3S-final-panda-v3-e0to-pc"]) + ACTION_BOX_FLAGS
+AG3S_VERSIONS["AG3S-final-panda-v3-e0to-pc-surface-abox"] = (
+    tuple(AG3S_VERSIONS["AG3S-final-panda-v3-e0to-pc-surface"]) + ACTION_BOX_FLAGS)
+#: probe-taking pc variants like the SL9 ones; kept apart so that an earlier version's recorded flag values keep their keys
+#: (:func:`version_flag_values` adds ``to_action_box`` only when it is set).
+SL10_VERSIONS: tuple[str, ...] = ("AG3S-final-panda-v3-e0to-pc-abox", "AG3S-final-panda-v3-e0to-pc-surface-abox")
+PC_LATCH_VERSIONS = PC_LATCH_VERSIONS + SL10_VERSIONS
 #: SL6-B B4 — the Panda HSR6 probe (5 classes, no retreat; labels approved by the user 2026-10-29), the default
 #: ``--hsr6-probe`` of the final versions, and its SHA-256 (recorded by the server, checked by the test when present).
 #: SL7 (0.7): found under the shared storage root (``AG3S_STORAGE_ROOT``, default the checkout's sibling
@@ -564,6 +574,7 @@ def version_flag_values(args: argparse.Namespace) -> dict[str, Any]:
     final = [d for d in _version_dests(FINAL_CONFIG_VERSIONS) if d not in set(dests)]
     p0m = [d for d in _version_dests(P0M_VERSIONS) if d not in set(dests) | set(final)]   # SL7: P0m-only options
     sl9 = [d for d in _version_dests(SL9_VERSIONS) if d not in set(dests) | set(final) | set(p0m)]   # SL9: A / B options
+    sl10 = [d for d in _version_dests(SL10_VERSIONS) if d not in set(dests) | set(final) | set(p0m) | set(sl9)]   # SL10
     parser = ss.build_parser()
     actions = parser._option_string_actions
     pinned = {actions[t].dest for t in V11AB_PRE_MERGE_DEFAULTS if t.startswith("--")}   # set on every V11AB argv
@@ -579,6 +590,9 @@ def version_flag_values(args: argparse.Namespace) -> dict[str, Any]:
     # SL9: the A / B options join only when one is set -- every earlier version's record keeps exactly the keys it had
     if any(getattr(args, d, None) != parser.get_default(d) for d in sl9):
         dests = sorted(set(dests) | set(final) | set(p0m) | set(sl9))
+    # SL10: the action-box option joins only when it is set -- every earlier version's record keeps exactly the keys it had
+    if any(getattr(args, d, None) != parser.get_default(d) for d in sl10):
+        dests = sorted(set(dests) | set(final) | set(p0m) | set(sl9) | set(sl10))
     return {d: _jsonable(getattr(args, d, None)) for d in dests}
 
 

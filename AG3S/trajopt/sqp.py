@@ -295,6 +295,9 @@ class TrajectoryOptimizer:
                     result = self._solve(reference, q_now, scene, **kwargs)
                 finally:
                     self.linearizer.end_memo()
+            action_box = kwargs.get("action_box")
+            if action_box is not None:
+                result.metrics["action_box"] = self._abox_record(action_box, result.trajectory, reference, q_now)
             st = self._anchor_state
             if st is not None and np.asarray(result.trajectory).shape[1] >= st["horizon"]:
                 from AG3S.trajopt.grasp_anchor import anchor_record
@@ -343,6 +346,7 @@ class TrajectoryOptimizer:
             return result
         finally:
             self._anchor_state = None
+            self._abox_state = None
 
     @staticmethod
     def _anchor_pose(st: dict[str, Any], trajectory) -> tuple[np.ndarray, Optional[np.ndarray]]:
@@ -352,6 +356,65 @@ class TrajectoryOptimizer:
             p, _, R, _ = st["fk"].pose(traj, st["q_now"])
             return p, R
         return st["fk"](traj, st["q_now"])[0], None
+
+    # --- SL10 §2.2: the controller's action limit (`action_box.py`) -------------------------------------------
+    def _abox_fk(self, link: str, horizon: int):
+        from AG3S.trajopt.grasp_anchor import LinkPoseFK
+
+        cache = self.__dict__.setdefault("_anchor_fk", {})
+        key = (link, "pose")
+        fk = cache.get(key)
+        if fk is None:
+            fk = cache[key] = LinkPoseFK(self.linearizer.robot_model, self.layout, horizon, link)
+        return fk
+
+    def _abox_setup(self, box, reference, q_now) -> Optional[dict[str, Any]]:
+        """This solve's action-box state (FK of the current pose and of the reference, the reference's chained steps),
+        or `None` with the reason in `self._abox_off` (horizon differs from this optimizer's, or the box was built from
+        another `q_now`: then the rows would be about another chunk and are not applied)."""
+        from AG3S.trajopt import action_box as AB
+
+        self._abox_off = None
+        H = int(reference.shape[1])
+        rows = box.rows(H)
+        if H != self.horizon:
+            self._abox_off = f"horizon {H} != {self.horizon}"
+            return None
+        q_arm = q_now[self.layout.q_indices]
+        if np.asarray(box.q_now).shape != q_now.shape or float(np.max(np.abs(np.asarray(box.q_now) - q_now))) > 1e-5:
+            self._abox_off = "q_now of the conversion differs from the solver's"
+            return None
+        fk = self._abox_fk(box.link, H)
+        p_now, _, R_now, _ = fk.pose(np.tile(q_arm[:, None], (1, H)), q_now)
+        p_ref, _, R_ref, _ = fk.pose(reference, q_now)
+        ref_steps = AB.chain_steps(p_ref, R_ref, p_now[0], R_now[0], rows)
+        return {"box": box, "fk": fk, "rows": rows, "now": (p_now[0], R_now[0]), "ref_steps": ref_steps,
+                "weight": float(self.config.cost.w_slack) * AB.ACTION_BOX_SLACK_SCALE}
+
+    def _abox_rows(self, problem, st, iterate, q_now):
+        from AG3S.trajopt import action_box as AB
+
+        pose = st["fk"].pose(iterate, q_now)
+        G, e = AB.linear_rows(st["box"], iterate, pose, st["now"], st["ref_steps"], st["rows"])
+        lo, hi = st["box"].allowed(st["rows"])
+        a = np.asarray(st["box"].actions, np.float64)[:st["rows"], :AB.N_COMP]
+        return AB.add_action_box(problem, G, e, (lo - a).reshape(-1), (hi - a).reshape(-1), st["weight"])
+
+    def _abox_record(self, box, trajectory, reference, q_now) -> dict[str, Any]:
+        """`to.metrics.action_box` of the returned trajectory: the exact (non-linear) prediction of conversion C's
+        action, not the linearisation the QP used."""
+        from AG3S.trajopt import action_box as AB
+
+        reference = np.asarray(reference, np.float64)
+        q_now = np.asarray(q_now, np.float64).reshape(-1)
+        st = self._abox_setup(box, reference, q_now)
+        if st is None:
+            return {"on": False, "reason": self._abox_off, "n_rows": 0, "active_rows": 0,
+                    "max_pred_abs_action": None, "margin": float(box.margin)}
+        traj = np.asarray(trajectory, np.float64)[:, :self.horizon]
+        p, _, R, _ = st["fk"].pose(traj, q_now)
+        corr = AB.exact_correction(box, p, R, st["now"][0], st["now"][1], st["ref_steps"], st["rows"])
+        return AB.record(box, corr, st["rows"])
 
     def _anchor_setup(self, anchor, reference, q_now) -> Optional[dict[str, Any]]:
         """IFG-TOA — this solve's anchor state (palm FK, per-row weights and targets), or `None` (no anchor given, or
@@ -819,6 +882,7 @@ class TrajectoryOptimizer:
         grasp_anchor: Optional[Any] = None,
         window_track_scale: Optional[np.ndarray] = None,
         initial_iterate: Optional[np.ndarray] = None,
+        action_box: Optional[Any] = None,
     ) -> TrajOptResult:
         """Make `reference` safe against `scene`, or report how far short it fell.
 
@@ -851,12 +915,16 @@ class TrajectoryOptimizer:
                 stay start is not tried, and the servo observer is not stepped again (the standard
                 solve of this chunk already did). The cost still tracks `reference`. `None` (default)
                 = as before.
+            action_box: SL10 §2.2. `action_box.ActionBox` — the Panda controller's action limit as soft rows of every
+                QP (`serve_safe --to-action-box`); `None` (default) = no rows, nothing below reads it.
         """
         started = time.perf_counter()
         cfg = self.config
         reference = np.asarray(reference, np.float64)
         q_now = np.asarray(q_now, np.float64).reshape(-1)
         notes: list[str] = []
+        abox = self._abox_setup(action_box, reference, q_now) if action_box is not None else None
+        self._abox_state = abox   # read by `_merit_terms` (the exact excess is part of the step-acceptance merit)
         #: T43 TP — the continuity reference before the look-ahead cut (`warm_start_lookahead`).
         continuity_full = previous_chunk
         if self.lookahead_from is not None and previous_chunk is not None:
@@ -927,7 +995,8 @@ class TrajectoryOptimizer:
                     template=template, geometry_certified=geometry_certified,
                     start_at_rest=start_at_rest, servo_feedback=servo_feedback,
                     grasp_anchor=grasp_anchor, window_track_scale=window_track_scale,
-                    deflection_history=deflection_history, command_history=command_history)
+                    deflection_history=deflection_history, command_history=command_history,
+                    action_box=action_box)
 
         n_path = self.path.n_slack if self.path is not None else 0
         n_slack = self.block.n_rows + n_path
@@ -1123,6 +1192,11 @@ class TrajectoryOptimizer:
                     b = st["box"]
                     problem = add_goal_box(problem, iterate, p_it, J_it, b["rows"], b["goal"], b["r"], b["weight"])
                 timing["anchor"] = timing.get("anchor", 0.0) + (time.perf_counter() - mark) * 1000.0
+            if abox is not None:
+                # SL10 §2.2: the controller's action limit, linearised at this iterate (soft, own slack columns last).
+                mark = time.perf_counter()
+                problem = self._abox_rows(problem, abox, iterate, q_now)
+                timing["action_box"] = timing.get("action_box", 0.0) + (time.perf_counter() - mark) * 1000.0
 
             mark = time.perf_counter()
             qp_extra: dict[str, Any] = {}
@@ -1322,7 +1396,8 @@ class TrajectoryOptimizer:
 
     def _solve_window(self, gate, reference, q_now, scene, *, previous_chunk, template,
                       geometry_certified, start_at_rest, servo_feedback, deflection_history,
-                      command_history, grasp_anchor=None, window_track_scale=None) -> TrajOptResult:
+                      command_history, grasp_anchor=None, window_track_scale=None,
+                      action_box=None) -> TrajOptResult:
         """T43 TA (A) — gate closed: solve exactly as without look-ahead (`execution_length` steps,
         `self.window_optimizer`), and hand back the reference's tail untouched."""
         k = int(self.lookahead_from)
@@ -1337,6 +1412,8 @@ class TrajectoryOptimizer:
             deflection_history=deflection_history, command_history=command_history,
             **({} if grasp_anchor is None else {"grasp_anchor": grasp_anchor}),
             **({} if window_track_scale is None else {"joint_track_scale": window_track_scale}),
+            # SL10 §2.2: the window optimizer carries the action rows of its own (K-step) horizon
+            **({} if action_box is None else {"action_box": action_box}),
             # E2: the window solve is this chunk's standard solve — its multi-seed runs there (top-level solves only).
             **({"multi_seed_index": self._ms_child_index}
                if self.multi_seed > 0 and self._ms_child_index is not None else {}))
@@ -1438,6 +1515,28 @@ class TrajectoryOptimizer:
         return self._merit_terms(trajectory, reference, previous_chunk, q_now, scene, states)[0]
 
     def _merit_terms(
+        self, trajectory, reference, previous_chunk, q_now, scene, states=None
+    ) -> tuple[float, Optional[float]]:
+        """`_merit_terms_base` plus, with an action box in this solve (SL10 §2.2), the box's exact excess at the QP's
+        price (`weight` per action unit, L1 over the rows) of the part beyond the controller's clip -- so a step whose
+        linearised rows hold but whose true action saturates is not accepted, and the trust region shrinks until the linearisation is good. Without a box this is
+        `_merit_terms_base` itself."""
+        merit, violation = self._merit_terms_base(trajectory, reference, previous_chunk, q_now, scene, states=states)
+        st = self.__dict__.get("_abox_state")
+        if st is None:
+            return merit, violation
+        from AG3S.trajopt import action_box as AB
+
+        traj = np.asarray(trajectory, np.float64)
+        p, _, R, _ = st["fk"].pose(traj, np.asarray(q_now, np.float64).reshape(-1))
+        corr = AB.exact_correction(st["box"], p, R, st["now"][0], st["now"][1], st["ref_steps"], st["rows"])
+        raw = np.asarray(st["box"].actions, np.float64)[:st["rows"], :AB.N_COMP] + corr
+        # beyond the controller's own clip only: the QP rows keep `margin` inside it, which is the buffer for the
+        # linearisation error (a true excess over the margin but inside the clip loses nothing)
+        excess = np.maximum(np.abs(raw) - float(st["box"].input_clip), 0.0)
+        return merit + st["weight"] * float(excess.sum()), violation
+
+    def _merit_terms_base(
         self, trajectory, reference, previous_chunk, q_now, scene, states=None
     ) -> tuple[float, Optional[float]]:
         """`(merit, violation_m)` — `_merit` 과 **같은 계산**이고, 위반량을 버리지 않고 돌려줄 뿐이다.
