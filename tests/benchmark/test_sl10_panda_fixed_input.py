@@ -344,7 +344,7 @@ def _write_run(tmp, rt, field, target_points, *, refined=None, rec_conv=None, gr
     refined = ref if refined is None else np.asarray(refined, np.float32)
     rs = np.zeros((n_obs, 9))
     rs[obs, :7] = Q0
-    rs[obs, 7:] = [0.04, -0.04]
+    rs[obs, 7:] = [0.0, 0.0]        # closed fingers: the scene is built around the grip site (finger geometry is tested separately)
     np.savez(run / "episodes" / "ep0.npz", obs_robot0_eef_pos=pos, obs_robot0_eef_quat=quat)
     np.savez(run / "episodes" / "ep0_geom.npz", **{"robot_state/left_wrist": rs, "robot_state/head": rs})
     row = {"seq": SEQ, "obs_index": obs, "grasp": {"state": grasp_state}, "to": {"reference_deviation": 0.0},
@@ -524,6 +524,131 @@ def test_selection_by_phase_and_deviation(tmp_path, runtime):
     assert tool.select_calls(calls, ["held"], min_dev_rad=0.0) == []
     assert tool.select_calls(calls, ["held"], only_deviating=False) == []
     assert tool.select_calls(calls, ["closing"], only_deviating=False) == [c]
+
+
+# --------------------------------------------------------------------------------------- 실제 기록 충실도 (2026-11-05)
+def test_finger_state_follows_the_servers_envelope(runtime):
+    """충실도 B 의 원인: 서버는 손가락 관절을 측정 개도(스텝 0)와 명령 포락선(스텝 k)으로 건다. 도구가 안 걸면 손가락 구가 어긋난다."""
+    from AG3S.adapters.panda import action as pa
+
+    rt = runtime
+    call = types.SimpleNamespace(opening_norm=0.05)
+    ref = np.zeros((10, 8))
+    ref[:, pa.GRIPPER_COLUMN] = [0.0, 0.0, 0.0, 0.5, 0.5, 0.5, 0.9, 0.9, 0.9, 0.9]
+    summary = {"finger_joints": {"source": "state[7]", "opening_norm": {"left": 0.25}}}
+    fs = tool.finger_state_for(rt, call, summary, ref)
+    names = list(rt.robot.param_joint_names)
+    assert fs.source == "state[7]" and fs.opening_norm == {"left": 0.25}
+    assert fs.values["panda_finger_joint1"] == pytest.approx(0.25 * 0.04)
+    row = fs.path[names.index("panda_finger_joint1")]
+    assert row.shape == (rt.lin.horizon,) and row[0] == pytest.approx(0.25 * 0.04)         # step 0 = measured
+    assert row[1] == pytest.approx(0.25 * 0.04) and row[3] == pytest.approx(0.5 * 0.04)    # running max of the command
+    assert row[-1] == pytest.approx(0.9 * 0.04) and np.all(np.diff(row) >= -1e-12)
+    # the model is left in the measured state, and the finger spheres move with the path
+    assert rt.robot.joint_parameters["panda_finger_joint1"] == pytest.approx(0.25 * 0.04)
+    traj = rt.layout.chunk_to_trajectory(ref)[:, :rt.to_config.horizon.planned]
+    tool.apply_finger_state(rt, None)
+    rt.lin.set_joint_parameter_path(None)
+    closed_like = rt.lin.sphere_states(traj, Q0)[0]
+    tool.apply_finger_state(rt, fs)
+    moved = rt.lin.sphere_states(traj, Q0)[0]
+    assert np.abs(moved - closed_like).max() > 1e-3
+    # not in the record: the request's finger qpos (|q1| / 0.04) stands in, and says so
+    fs2 = tool.finger_state_for(rt, types.SimpleNamespace(opening_norm=0.5), {}, ref)
+    assert fs2.opening_norm == {"left": 0.5} and "robot_state" in fs2.source
+    assert tool.finger_state_for(rt, types.SimpleNamespace(opening_norm=None), {}, ref) is None
+    rt.robot.set_joint_parameters(None)
+    rt.lin.set_joint_parameter_path(None)
+
+
+def test_support_planes_are_refit_from_the_recorded_mask():
+    """서버는 RANSAC 평면(법선 · 오프셋)을 기록하지 않는다. 마스크 + 점군에서 두 평면(테이블 + 얇은 두 번째)을 되짚는다."""
+    rng = np.random.default_rng(0)
+    table = np.c_[rng.uniform(0, 1, 3000), rng.uniform(-0.5, 0.5, 3000), -0.0106 + rng.normal(0, 0.001, 3000)]
+    n2 = np.array([0.03, 0.01, 1.0])
+    n2 /= np.linalg.norm(n2)
+    x, y = rng.uniform(0.3, 0.6, 800), rng.uniform(0.0, 0.2, 800)
+    second = np.c_[x, y, (0.02 - n2[0] * x - n2[1] * y) / n2[2] + rng.normal(0, 0.002, 800)]
+    objects = np.c_[rng.uniform(0.3, 0.6, 400), rng.uniform(-0.3, 0.0, 400), rng.uniform(0.1, 0.3, 400)]
+    cloud = np.vstack([table, second, objects]).astype(np.float32)
+    mask = np.r_[np.ones(3800, bool), np.zeros(400, bool)]
+    data = {"support_mask": mask, "filtered_cloud": cloud}
+
+    class Z(dict):
+        @property
+        def files(self):
+            return list(self)
+
+    surfaces, info = tool.support_surfaces_from_record(Z(data))
+    assert len(surfaces) == 2 and info["n_mask_points_left"] == 0
+    assert surfaces[0].normal[2] > 0.9999 and surfaces[0].offset == pytest.approx(-0.0106, abs=1e-3)
+    assert np.dot(surfaces[1].normal, n2) > 0.9999 and surfaces[1].offset == pytest.approx(0.02 / np.linalg.norm([0.03, 0.01, 1.0]), abs=2e-3)
+    # a mask that does not match a recorded cloud (thinned) is refused with a reason, not guessed
+    bad = Z({"support_mask": mask[:100], "filtered_cloud": cloud})
+    s2, i2 = tool.support_surfaces_from_record(bad)
+    assert s2 == [] and "unavailable" in i2
+    s3, i3 = tool.support_surfaces_from_record(Z({"filtered_cloud": cloud}))
+    assert s3 == [] and "unavailable" in i3
+
+
+def test_manipulated_points_come_from_the_last_seen_frame(tmp_path):
+    """가려진 프레임(`has_target: false`)에는 target_points 가 없다. 서버는 마지막으로 본 프레임의 점군을 쓴다."""
+    pts17 = np.random.default_rng(1).normal(size=(151, 3))
+    f17 = tmp_path / "c17.npz"
+    np.savez(f17, target_points=pts17)
+    c17 = tool.Call(stem="s", seq=17, index=0, obs_index=0, phase="closing", row={}, q_now=np.zeros(7), T_world_base=np.eye(4),
+                    prev_step=np.zeros(6), actions_policy=np.zeros((10, 7)), joint_reference=np.zeros((10, 8)),
+                    joint_refined=np.zeros((10, 8)), actions_executed=np.zeros((5, 7)), chunk_path=f17)
+    c18 = dataclasses.replace(c17, seq=18, index=1, chunk_path=tmp_path / "c18.npz")
+    c18.episode = c17.episode = {17: c17, 18: c18}
+    np.savez(c18.chunk_path, summary=np.zeros(1))
+    with np.load(c18.chunk_path) as z:
+        pts, info = tool.manipulated_points_for(c18, {"manipulated": {"state": "occluded", "last_seen_frame": 17, "n_points": 151}}, z)
+    assert np.allclose(pts, pts17) and info["source"] == "target_points of frame 17"
+    with np.load(c18.chunk_path) as z:      # point-count mismatch -> no guess
+        pts, info = tool.manipulated_points_for(c18, {"manipulated": {"last_seen_frame": 17, "n_points": 99}}, z)
+    assert pts is None and "missing" in info
+    with np.load(f17) as z:                 # seen this very frame: its own cloud
+        pts, info = tool.manipulated_points_for(c17, {"manipulated": {"last_seen_frame": 17, "n_points": 151}}, z)
+    assert np.allclose(pts, pts17) and info["source"] == "target_points of this frame"
+
+
+def test_server_scene_additions_follow_flags_and_record(runtime):
+    """grasp_contact / NBC / palm contact 는 서버 flag 가 켜지고 **그 call 의 기록이 active** 일 때만 scene 에 붙는다."""
+    rt = runtime
+    names = [str(n) for n in rt.robot.sphere_link_names]
+    base = types.SimpleNamespace(grasp_contact=None, neighbour_contact=None, neighbour_palm_contact=None,
+                                 placement_contact=None)
+    call = types.SimpleNamespace(row={})
+    auth = ["panda_hand", "panda_leftfinger", "panda_rightfinger"]
+    grasp = {"state": "closing", "evidence": {"checks": {"closed": True, "not_empty": True, "blocked": True}},
+             "neighbour_contact": {"active": True, "links": ["panda_leftfinger", "panda_rightfinger"], "n_spheres": 4},
+             "neighbour_palm_contact": {"active": True, "link": "panda_hand"}}
+    summary = {"grasp": grasp, "manipulated": {"centroid": [0.5, 0.1, 0.03]}, "hsr6": {}}
+
+    @dataclasses.dataclass(frozen=True)
+    class Snap:
+        grasp_contact: object = None
+        neighbour_contact: object = None
+        neighbour_palm_contact: object = None
+        placement_contact: object = None
+
+    scene, info = tool.server_scene_additions(rt, call, summary, Snap(), authorized=auth)
+    args = rt.args
+    col = rt.to_config.collision
+    assert "grasp_contact" in info["applied"] and scene.grasp_contact["closing_exempt"] is True
+    assert scene.grasp_contact["authorized"].sum() == sum(n in auth for n in names)
+    assert float(col.neighbour_contact_depth) > 0 and scene.neighbour_contact is not None
+    assert scene.neighbour_contact["links_mask"].sum() == 4 and scene.neighbour_contact["depth"] == float(col.neighbour_contact_depth)
+    assert np.allclose(scene.neighbour_contact["centre"], [0.5, 0.1, 0.03])
+    assert scene.neighbour_palm_contact["links_mask"].sum() == sum(n == "panda_hand" for n in names)
+    # the record says the window was closed -> nothing attached; blocked False -> not closing-exempt
+    grasp2 = {**grasp, "evidence": {"checks": {"closed": True, "not_empty": True, "blocked": False}},
+              "neighbour_contact": {"active": False}, "neighbour_palm_contact": {"active": False}}
+    scene2, info2 = tool.server_scene_additions(rt, call, {**summary, "grasp": grasp2}, Snap(), authorized=auth)
+    assert scene2.grasp_contact["closing_exempt"] is False
+    assert scene2.neighbour_contact is None and scene2.neighbour_palm_contact is None
+    _ = args
 
 
 # --------------------------------------------------------------------------------------- 서버 불변

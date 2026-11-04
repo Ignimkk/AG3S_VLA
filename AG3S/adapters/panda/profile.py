@@ -502,6 +502,18 @@ AG3S_VERSIONS["AG3S-final-panda-v3-e0to-pc-surface-abox"] = (
 #: (:func:`version_flag_values` adds ``to_action_box`` only when it is set).
 SL10_VERSIONS: tuple[str, ...] = ("AG3S-final-panda-v3-e0to-pc-abox", "AG3S-final-panda-v3-e0to-pc-surface-abox")
 PC_LATCH_VERSIONS = PC_LATCH_VERSIONS + SL10_VERSIONS
+#: SL10b (task SL10b, lead 2026-11-05): "쥔 뒤 변화율 항 끔" -- pc판 / pc판 + surface with the two after-grasp flags removed and the
+#: continuity / deflection-rate terms off in every phase (the P0M_TERMSOFF_FLAGS construction, applied to the pc bases). Before the
+#: grasp both bases already have the terms off, so the difference lives in the grasping / held calls only. Every dest is one an
+#: earlier version already sets, so the recorded flag values keep their keys.
+_AFTER_GRASP_FLAGS = ("--continuity-after-grasp", "--deflection-rate-after-grasp")
+SL10B_VERSIONS: tuple[str, ...] = ("AG3S-final-panda-v3-e0to-pc-termsoff", "AG3S-final-panda-v3-e0to-pc-surface-termsoff")
+for _v in SL10B_VERSIONS:
+    _base = _v[:-len("-termsoff")]
+    assert all(t in AG3S_VERSIONS[_base] for t in _AFTER_GRASP_FLAGS), _base
+    AG3S_VERSIONS[_v] = tuple(t for t in AG3S_VERSIONS[_base] if t not in _AFTER_GRASP_FLAGS) + CONTINUITY_DEFLECTION_OFF_FLAGS
+del _v, _base
+PC_LATCH_VERSIONS = PC_LATCH_VERSIONS + SL10B_VERSIONS
 #: SL6-B B4 — the Panda HSR6 probe (5 classes, no retreat; labels approved by the user 2026-10-29), the default
 #: ``--hsr6-probe`` of the final versions, and its SHA-256 (recorded by the server, checked by the test when present).
 #: SL7 (0.7): found under the shared storage root (``AG3S_STORAGE_ROOT``, default the checkout's sibling
