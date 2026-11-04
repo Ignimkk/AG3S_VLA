@@ -452,6 +452,17 @@ AG3S_VERSIONS["AG3S-final-panda-v3-e0to-pc-l8h2explicit"] = FINAL_CONFIG_V3_E0TO
 AG3S_VERSIONS["AG3S-final-panda-v3-e0to-pc-nonte"] = _drop_flags(
     FINAL_CONFIG_V3_E0TO_PC_FLAGS, {"--nontarget-evidence": 1})
 PC_LATCH_VERSIONS = PC_LATCH_VERSIONS + ("AG3S-final-panda-v3-e0to-pc-l8h2explicit", "AG3S-final-panda-v3-e0to-pc-nonte")
+#: SL8b (user ruling 2026-11-04 15:1x KST, task SL8b): loosen the lock on the first-chosen object, pc판 + (idwin) the
+#: window-vote switch W=5, M=3, (idattn) the seed-attention release K=4, F=0.7, R=15 mm, (idboth) both. Candidates for the
+#: offline replay, then the closed loop; all three flags default off, so pc판 itself is unchanged.
+ID_WINDOW_FLAGS: tuple[str, ...] = ("--identity-switch-window", "5", "--identity-switch-votes", "3")
+ID_ATTENTION_FLAGS: tuple[str, ...] = ("--identity-attention-release", "4", "--identity-attention-off-frac", "0.7",
+                                       "--identity-attention-radius-mm", "15")
+AG3S_VERSIONS["AG3S-final-panda-v3-e0to-pc-idwin"] = FINAL_CONFIG_V3_E0TO_PC_FLAGS + ID_WINDOW_FLAGS
+AG3S_VERSIONS["AG3S-final-panda-v3-e0to-pc-idattn"] = FINAL_CONFIG_V3_E0TO_PC_FLAGS + ID_ATTENTION_FLAGS
+AG3S_VERSIONS["AG3S-final-panda-v3-e0to-pc-idboth"] = FINAL_CONFIG_V3_E0TO_PC_FLAGS + ID_WINDOW_FLAGS + ID_ATTENTION_FLAGS
+PC_LATCH_VERSIONS = PC_LATCH_VERSIONS + ("AG3S-final-panda-v3-e0to-pc-idwin", "AG3S-final-panda-v3-e0to-pc-idattn",
+                                         "AG3S-final-panda-v3-e0to-pc-idboth")
 #: SL6-B B4 — the Panda HSR6 probe (5 classes, no retreat; labels approved by the user 2026-10-29), the default
 #: ``--hsr6-probe`` of the final versions, and its SHA-256 (recorded by the server, checked by the test when present).
 #: SL7 (0.7): found under the shared storage root (``AG3S_STORAGE_ROOT``, default the checkout's sibling
