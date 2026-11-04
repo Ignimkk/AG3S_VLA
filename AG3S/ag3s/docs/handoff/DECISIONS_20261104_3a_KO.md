@@ -93,3 +93,9 @@
 
 - **17:0x KST 사용자:** 수정안 3 가지 (target 닫힌 물체 제외 · 지운 seed 부호 수정 · 실제 크기 손바닥) 를 커밋해 benchmark checkout 으로 보낸다. 세 벤치마크 (LIBERO · SafeLIBERO · LIBERO-safety) 에서 **ablation 으로** 시험하고, 결과로 P0m 유지 / 수정안 반영을 고른다. 채택은 아직 아님 (P0m 이 최종 구성 그대로).
 - 17:1x lead: 이식 지시 `BENCHMARK_T96_T96E_PALM_TRANSFER_20261104_KO.md` (2 × 2 × 2 = 8 판, Panda 확인 사항 6 개 — 특히 손바닥 덮개는 Panda 미이식, 새 flag 는 Panda 서버 flag 목록에 미분류). T97 코드는 같은 커밋에 들어가지만 ablation 대상 아님 (기본 꺼짐).
+- 17:5x KST 사용자: benchmark SL8 (ATS target · 장애물 분할) 에 대한 방법론 제안을 진행한다. → 18:0x lead: `BENCHMARK_SL8_ATS_PROPOSALS_20261104_KO.md` (P1 국소 받침면 · P2 오목 꺾임 끊기 · P3 넓은 cluster 를 다른 물체로 넘기지 않음 · P4 T81 Panda 이식 · P5 일부만 지움 원인 가르기) 를 benchmark-17 에 경로로 보냄. 적용 · 판정은 benchmark 세션.
+- **21:0x KST 사용자 (/clear 뒤, 세션 ag3s-vla-development-13):** "benchmark checkout 세션이 하는 작업과 겹치는 것은 하지 말고, 나머지는 권장안대로 수행하세요."
+  - 21:0x lead — 겹침 판별 (benchmark-17 기록 `SL9.task.md` §7 · `SL9b` · `SL9c` · `SL8c` 확인):
+    - **뺌 — 부호 수정 (T96e) seed 2 반복.** benchmark SL9 가 같은 수정 (수정안 B) 을 지금 closed-loop 로 재고 있고, P0m 유지 / 반영은 SL9 결과로 고르기로 했다 (17:0x 판정). 같은 채택 질문에 두 번째 근거를 만드는 일이라 겹침으로 본다.
+    - **함 — 우선순위 7 (b) 받침면 guard (T98), 우선순위 5 옛 위치 비어 있음 (RB-Y1 closed-loop), 우선순위 8.** benchmark 의 받침면 작업 (SL8c 국소 받침면 · SL9b/c 받침 가중 균형) 은 Panda ATS 분할 · 표면 선택 graph 층이고, 7 (b) 는 RB-Y1 LTE 손 층의 지지면 guard 아래 잔여다 — 층 · 로봇이 다르다. T81 의 Panda 이식 (benchmark 계획 마지막) 과 RB-Y1 최종 편입 확인도 로봇 · 장면이 다르다. 새 기능은 기본 꺼짐 flag 로만 넣어 benchmark 공용 코드의 꺼짐 동작을 바꾸지 않는다.
+  - ADOPTED_KO.md 요약표 A2 · A2 절 제목: "A8 까지만, A9 · P0m 에서는 뺌 (E0, T74 Q1)" 로 고침. `BENCHMARK_SL8_ATS_PROPOSALS_20261104_KO.md` commit.

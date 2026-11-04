@@ -16,7 +16,7 @@
 | # | 채택 | 모듈 | 서버 flag | 상태 |
 |---|---|---|---|---|
 | A1 | BLAS thread 1 | CCR (TrajOpt 시간) | `--blas-threads 1` (기본값) | 채택 · 검증 끝 |
-| A2 | GPU 여러 초기값 + 충돌 검사 줄이기 (지금 serving) | CCR | `--to-gpu-seeds curobo` + 검사 줄이기 (E3 kit) | 채택 · 검증 끝 |
+| A2 | GPU 여러 초기값 + 충돌 검사 줄이기 (**A8 까지만**. A9 · P0m 에서는 뺌 — chunk 마다 표준 SQP 하나 E0, T74 Q1) | CCR | `--to-gpu-seeds curobo` + 검사 줄이기 (E3 kit). A9 · P0m 에서는 금지 | A8 에서 채택 · 검증 끝 → **A9 에서 대체** (2026-10-30, T74 Q1) |
 | A3 | 손바닥 껍질 구 + 껍질 행 여유 5 mm | LTE (로봇 충돌 구) | `--palm-shell on --palm-shell-margin 5` | 채택 · 검증 끝 |
 | A4 | 쥐기 목표 항 (닫는 행만) | CCR (목적함수) | `--grasp-anchor 2000 --grasp-anchor-path-weight 0` | 채택 (사용자 2026-10-28) |
 | A5 | 쥐기 때 꼭지 덮개 | LTE (target 제외) | `--target-stem-cap {in_ball,full}` | 채택 (사용자 2026-10-28) · **closed-loop 검증 전** |
@@ -39,7 +39,9 @@ A5 · A6 은 사용자가 채택을 정했지만 아직 closed-loop 근거가 �
 - **한계:** 없음. 명령이 바뀌지 않는 시간 설정이다.
 - **출처:** `numbers.P0d`, 그림 `AG3S/ag3s/docs/figures/pre-core-to/p0-openblas-threads`. 판정 2026-10-25 ~23:30.
 
-## A2. GPU 여러 초기값 + 충돌 검사 줄이기 (= 지금 serving)
+## A2. GPU 여러 초기값 + 충돌 검사 줄이기 (A8 까지의 serving. A9 · P0m 에서는 뺌)
+
+> **2026-11-04 정정:** 이 절은 A8 시점 기록이다. A9 · P0m 은 `--to-multi-seed` · `--to-gpu-seeds` 를 빼고 chunk 마다 표준 SQP 하나 (E0) 로 푼다 (T74 Q1, 아래 A9 표). 옛 제목 "(= 지금 serving)" 은 A8 시점 표현이다.
 
 - **기능:**
   - 위반이 남은 chunk 에서 cuRobo 로 초기값 16 개를 GPU 에서 한 번에 풀고, 가장 나은 것을 CPU SQP 의 시작점으로 쓴다. VLA 추종 항을 포함한다.
