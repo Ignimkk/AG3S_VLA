@@ -23,6 +23,25 @@
 2. **Panda P0m 의 TrajOpt 정의:** 제안대로 — benchmark 가 같은 LIBERO 9 episode 로 (c) 연속성 · 꺾임 변화율 항만 끈 판, (b) pc판의 Panda 보정을 얹은 판 (target 범위 · 단계 판정은 P0m 그대로, HSR6 끔), (d) 충돌 없으면 VLA 그대로 통과 (`--passthrough-when-clear`) 를 붙인 판을 돌려 포화 원인을 가른다. 성공이 비슷하면 보정이 적은 쪽. SafeLIBERO closed loop 전에 "지운 voxel 0 call 41 %" 원인을 기록으로 확인.
 3. **(03:2x KST) SL7b 결과 (c) · (b) · (d) 모두 1/9 → TrajOpt 는 원인 아님, 표면 영역 채택 call 10 % (기각 영역은 ATS target 점에서 약 150 mm) → 다음 진단 승인:** ① P0m 에서 target 범위만 공 방식으로 되돌린 판을 같은 LIBERO 9 episode 로 돌린다 — **원인 확인용만, 채택 후보 아님** (표면 추출은 최종에 반드시 포함). ② SafeLIBERO 재생 기록의 기각 call 을 카메라 영상 위에 표면 영역 · ATS target 점 · attention · 정답 윤곽으로 겹쳐, 어긋남이 attention head (L8H6) · 가짜 세 번째 view · 표면 graph 값 중 어디서 오는지 가른다 (offline, ① 과 동시). 둘 다 benchmark-78 이 수행, SafeLIBERO closed loop 은 표면 추출을 고친 뒤. 결과 · 출처: `/mnt/dev/AG3S_VLA-benchmark/outputs/2026-11-04_SL7b_P0m_TrajOpt대조_LIBERO_표면기각/README.md`.
 
+## 0.3 사용자 판정 (2026-11-04 04:3x KST, 세션 ag3s-vla-development-3a) — 우선순위 목록 1–8 의 착수 순서
+
+1. **첫 STEP = T96: 우선순위 1 (실제 크기 손바닥 구 `--palm-cover on` + target 에 한한 접촉 허용) 과 2 (target 을 닫힌 물체로 제외 — 받침면까지 내린 convex 부피, 이웃 관측 표면 τ 띠 보호) 를 한 쌍으로.** 기본 꺼짐 flag. 재생 기준 (잔여 < 5 % · 이웃 과다 삭제 ≤ 5 %) 통과 뒤 closed-loop (1345 오렌지 · 기둥 두 개 · 9 run). hull 채우기 · 접촉 여유 10 mm (11-04 확정) 를 대체하는 후보이므로 채택은 다시 사용자 판정. `T96.task.md`.
+2. **우선순위 3 (맞닿은 물체 경계) 을 범위 안으로 — 오목 꺾임 + 돌출 보존 (T97).** 2026-11-01 "맞닿은 물체 범위 밖" 판정을 바꾼다. attention 경계 판정은 계속 금지. `T97.task.md`.
+3. **우선순위 4 (hidden probe 확인자) 보류** — 1 · 2 · 5 · 7 뒤에 다시 묻는다.
+4. **우선순위 6: 단계 출처는 latch 유지** (D23 그대로). P0m 으로 serving 학습 요소는 이미 VLA 뿐 → 우선순위 6 은 끝난 것으로 기록. T91c 는 손목 카메라 benchmark 선택지.
+
+### lead 가 기록에서 확인한 것 (우선순위 목록 본문과 다른 점)
+
+- 기둥 두 개 장면 (라운드 6) 의 껍질 구 실패 원인은 "손바닥 구가 target 에 걸림" 이 아니라 "작은 기둥이 손바닥 들어갈 자리를 막아 접촉 없이 쥘 자세 없음 (GIK 와 같은 결론)" 으로 기록돼 있다 (`outputs/2026-10-28_기둥두개장면_손바닥접촉_4구성x3_closedloop/README.md`). VLA 단독도 3 / 3 접촉. → T96 §3.0 에서 쥘 자세 유무를 먼저 확인하고, 없으면 그 장면은 쥐기 성공 조건에서 뺀다.
+- 1345 palm cover 기록은 두 원인이 함께 있다: 손바닥 URDF 굵기에서 요청 13 손바닥–target 0.6 mm (target 잔여) + 손바닥 mesh–오렌지 0.76 mm (`AG3S-PALM-COVER-1345.verify.json`).
+- 우선순위 3 의 "꼭지 · 잎 2.5 %p 손실로 보류" 는 T78c (다시 붙이기 없음) 값이다. T78d (다시 붙이기 R 0.25) 는 영역 판정을 통과했다 (떨어진 장면 덮음 0.992). T78d 가 멈춘 이유는 손 층에서 손이 가까울 때 사과 지움 77.0 → 73.2 % (`outputs/2026-11-01_T78d_T78e_…/README.md`). → T97 은 돌출 보존 (크기 비율 대신) + 손 가까울 때 영역 유지를 시험한다.
+
+| # | 판정 (lead) | 왜 | 다른 선택지 | 틀렸으면 |
+|---|---|---|---|---|
+| D24 | **T96 재생은 T87 재생 입력 (B0 = HSR5 구성 closed-loop 요청, 허들 211 제외) 을 쓴다.** P0m 의 `--record-inputs` 기록을 새로 만들지 않는다. | 우선순위 2 의 검증 조건이 "T87 과 같은 기준" — 같은 입력 · 같은 정의여야 T87 수치와 바로 비교된다. 재생은 손 층 기능 비교용이고 HSR 차이는 쥐기 창 정의 (MuJoCo 정답) 에 들어가지 않는다 | P0m 9 run 을 `--record-inputs` 로 다시 돌려 입력을 만듦 (약 1 시간) | P0m 입력으로 재생만 다시 |
+| D25 | **T96 의 P0m 9 run 기준은 T92b 결과를 재사용** (꺼짐 bit 동일 test + snapshot 차이 = T96 · T97 블록뿐일 때만). | 같은 장면 · seed · 서버 인자, 꺼짐 = bit 동일이면 결과가 같다 (D5 와 같은 논리) | P0m 18 run 다시 (약 1 시간) | P0m 18 run 다시 |
+| D26 | **T96 · T97 구현을 implementer 2 개로 동시에.** closed-loop 은 순서대로 (T96 먼저). | 주 파일이 다르다 (T96: `fields/curobo_builder.py` · `pipeline.py` 의 손 층 / T97: `attention_surface*.py`). 공유 파일은 begin/end 블록 + SendMessage | 순서대로 구현 | — |
+
 ## 1. 판정 목록
 
 | # | 판정 | 왜 | 다른 선택지 | 틀렸으면 다시 돌릴 것 |
