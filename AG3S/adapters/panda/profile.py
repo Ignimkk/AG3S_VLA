@@ -514,6 +514,15 @@ for _v in SL10B_VERSIONS:
     AG3S_VERSIONS[_v] = tuple(t for t in AG3S_VERSIONS[_base] if t not in _AFTER_GRASP_FLAGS) + CONTINUITY_DEFLECTION_OFF_FLAGS
 del _v, _base
 PC_LATCH_VERSIONS = PC_LATCH_VERSIONS + SL10B_VERSIONS
+#: SL10d (task SL10d, lead 2026-11-05): "쥔 물체 비우기 = 충돌 구" -- pc판 / pc판 + surface plus ``--held-free-query-spheres`` (the held
+#: volume the TSDF frees also covers the spheres the solver is queried with). The base flags plus this one flag; the dest is a new one,
+#: so :func:`version_flag_values` adds it only when it is set.
+HELD_FREE_QUERY_FLAGS: tuple[str, ...] = ("--held-free-query-spheres",)
+SL10D_VERSIONS: tuple[str, ...] = ("AG3S-final-panda-v3-e0to-pc-hfq", "AG3S-final-panda-v3-e0to-pc-surface-hfq")
+for _v in SL10D_VERSIONS:
+    AG3S_VERSIONS[_v] = tuple(AG3S_VERSIONS[_v[:-len("-hfq")]]) + HELD_FREE_QUERY_FLAGS
+del _v
+PC_LATCH_VERSIONS = PC_LATCH_VERSIONS + SL10D_VERSIONS
 #: SL6-B B4 — the Panda HSR6 probe (5 classes, no retreat; labels approved by the user 2026-10-29), the default
 #: ``--hsr6-probe`` of the final versions, and its SHA-256 (recorded by the server, checked by the test when present).
 #: SL7 (0.7): found under the shared storage root (``AG3S_STORAGE_ROOT``, default the checkout's sibling
@@ -587,6 +596,7 @@ def version_flag_values(args: argparse.Namespace) -> dict[str, Any]:
     p0m = [d for d in _version_dests(P0M_VERSIONS) if d not in set(dests) | set(final)]   # SL7: P0m-only options
     sl9 = [d for d in _version_dests(SL9_VERSIONS) if d not in set(dests) | set(final) | set(p0m)]   # SL9: A / B options
     sl10 = [d for d in _version_dests(SL10_VERSIONS) if d not in set(dests) | set(final) | set(p0m) | set(sl9)]   # SL10
+    sl10d = [d for d in _version_dests(SL10D_VERSIONS) if d not in set(dests) | set(final) | set(p0m) | set(sl9) | set(sl10)]   # SL10d
     parser = ss.build_parser()
     actions = parser._option_string_actions
     pinned = {actions[t].dest for t in V11AB_PRE_MERGE_DEFAULTS if t.startswith("--")}   # set on every V11AB argv
@@ -605,6 +615,9 @@ def version_flag_values(args: argparse.Namespace) -> dict[str, Any]:
     # SL10: the action-box option joins only when it is set -- every earlier version's record keeps exactly the keys it had
     if any(getattr(args, d, None) != parser.get_default(d) for d in sl10):
         dests = sorted(set(dests) | set(final) | set(p0m) | set(sl9) | set(sl10))
+    # SL10d: the held-free option joins only when it is set (it is the only new dest of those versions)
+    if any(getattr(args, d, None) != parser.get_default(d) for d in sl10d):
+        dests = sorted(set(dests) | set(final) | set(p0m) | set(sl9) | set(sl10) | set(sl10d))
     return {d: _jsonable(getattr(args, d, None)) for d in dests}
 
 
@@ -923,6 +936,8 @@ def build_panda_ag3s(*, esdf_bounds: str = "panda", extra_overrides: Optional[Ma
         ag3s.held_free_observed_pad = float(kw["held_free_observed_pad"])
     if kw.get("reach_at_capture"):
         ag3s.reach_at_capture = True
+    if kw.get("held_free_query_spheres"):   # SL10d -- key in `info` only when on
+        ag3s.held_free_query_spheres = True
     if getattr(ag3s.config.esdf, "target_extent", "estimated") == "attention_surface":
         # SL7 -- the surface selection needs head / left_wrist / right_wrist views; the Panda has no right wrist
         # (pi05_libero's third image is a masked zero image), so that view is a dummy (attention_surface.dummy_view).
@@ -941,6 +956,8 @@ def build_panda_ag3s(*, esdf_bounds: str = "panda", extra_overrides: Optional[Ma
         info["target_exclusion"] = _jsonable(target_exclusion)
     if ag3s.surface_pad_missing_cameras:   # SL7 -- key only with the attention-surface extent
         info["surface_pad_missing_cameras"] = True
+    if ag3s.held_free_query_spheres:   # SL10d -- key only when on
+        info["held_free_query_spheres"] = True
     if getattr(models.constraint, "palm_shell_report", None) is not None:
         info["palm_shell"] = _jsonable(models.constraint.palm_shell_report)
     return ag3s, info
