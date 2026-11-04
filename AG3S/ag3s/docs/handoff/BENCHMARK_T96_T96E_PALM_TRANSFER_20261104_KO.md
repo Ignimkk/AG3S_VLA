@@ -88,6 +88,6 @@ P0m 11.5 % / 22.3 % → 닫힌 물체 11.8 % / 6.4 % (부호 수정과 함께: P
 ## 5. 커밋
 
 - 코드 · test: `d5a1142e` (feature/ag3s-development)
-- 문서 · figure: (아래 커밋 뒤 기입)
-- main merge: (기입)
+- 문서 · figure: `ff2edfec`
+- main merge: `ca952f58` (이 SHA 기입 줄만 다음 docs commit 과 그 main merge 로 따라감). benchmark 는 main 을 `feature/panda-benchmark` 로 `merge --no-ff` — 시험 merge → 회귀 test 비교 → merge 는 benchmark 쪽 기존 절차대로.
 - development 단위 test (2026-11-04 17:0x KST, `.venv-openpi-live`, 한 파일씩, CPU): `test_t96_solid_owned` 31 · `test_t96c_solid_shadow` 15 · `test_t96d_dn_ever_target` 12 · `test_t96e_removed_sign_free` 11 · `test_t97_crease_protrusion` 12 (+1 skip) · `tests/trajopt/test_t96b_palm_cover_margin` 12 · `test_scm_palm_shell_margin` 12 · `test_t78b_reattach_hull_fill` 14 · `test_t78f_contact_allowance` 9 — 전부 passed.
