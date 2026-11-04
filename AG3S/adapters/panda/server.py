@@ -318,8 +318,9 @@ def surface_call_record(safe) -> Optional[dict]:
     solve): the scalars of ``AG3S._surface_frame`` (``applied``, ``why``, ...) and of its ``t78`` ``region`` /
     ``target_check`` / ``hold`` / ``hull`` / ``seed_ats_gate`` parts. ``state`` = ``"surface"`` (a region was applied
     this frame) / ``"fallback"`` (no region: the version's fallback -- ball with keep-last off, nothing with keep-last +
-    no-ball) / ``"none"`` (no surface record yet this episode). ``None`` when the version does not use the
-    attention-surface extent (no key)."""
+    no-ball) / ``"none"`` (no surface record yet this episode). SL9: with the development proposals A / B on, also
+    ``solid`` / ``removed_sign_free`` / ``hand_voxel_m`` (:func:`_solid_sign_free_record`). ``None`` when the version
+    does not use the attention-surface extent (no key)."""
     ag3s = getattr(safe, "ag3s", None)
     esdf = getattr(getattr(ag3s, "config", None), "esdf", None)
     if ag3s is None or getattr(esdf, "target_extent", None) != "attention_surface":
@@ -336,7 +337,53 @@ def surface_call_record(safe) -> Optional[dict]:
     for part in ("region", "target_check", "hold", "hull", "seed_ats_gate"):
         if isinstance(t78.get(part), dict):
             rec[part] = keep(t78[part])
+    rec.update(_solid_sign_free_record(ag3s, keep))   # SL9 -- keys only with the A / B flags (else nothing is added)
     return _jsonable(rec)
+
+
+def _solid_sign_free_record(ag3s, keep) -> dict:
+    """SL9 -- scalar summaries of the development proposals' records, read (logging only) from the last ESDF field's
+    ``stats["target_free"]`` (``AG3S._last_esdf_field``, set by every field build): A ``solid`` = the pipeline's
+    ``attention_surface.solid`` (``applied`` / ``why``, ``volume_cm3``, ``n_projected`` = the R-perp points projected on
+    the support plane, ``shadow`` / ``dn_ever_target`` parts) + ``voxels`` (the builder's removed-seed counts per path,
+    the tau-protected counts, ``n_removed_shadow`` and ``n_removed_shadow_by_camera``); B ``removed_sign_free`` =
+    ``oracle_split.removed_sign_free`` (``applied``, ``n_flipped`` ...); ``hand_voxel_m`` = the voxel size of the
+    target-free hand layer tier. ``{}`` when neither record exists (flags off, no field yet, or none this frame)."""
+    stats = getattr(getattr(ag3s, "_last_esdf_field", None), "stats", None)
+    tf = stats.get("target_free") if isinstance(stats, dict) else None
+    if not isinstance(tf, dict):
+        return {}
+    ints = lambda d: ({str(k): v for k, v in d.items() if isinstance(v, (bool, int, float))}
+                      if isinstance(d, dict) else None)
+    out: dict = {}
+    sol = (tf.get("attention_surface") or {}).get("solid") if isinstance(tf.get("attention_surface"), dict) else None
+    if isinstance(sol, dict):
+        s = keep(sol)
+        for part in ("shadow", "dn_ever_target"):
+            if isinstance(sol.get(part), dict):
+                s[part] = keep(sol[part])
+                if part == "shadow" and isinstance(sol[part].get("cameras"), dict):
+                    s[part]["target_px_by_camera"] = ints(sol[part]["cameras"])
+        vox = sol.get("voxels")
+        if isinstance(vox, dict):
+            s["voxels"] = keep(vox)
+            if isinstance(vox.get("n_removed_shadow_by_camera"), dict):
+                s["voxels"]["n_removed_shadow_by_camera"] = ints(vox["n_removed_shadow_by_camera"])
+        out["solid"] = s
+    split = tf.get("oracle_split")
+    rsf = split.get("removed_sign_free") if isinstance(split, dict) else None
+    if isinstance(rsf, dict):
+        out["removed_sign_free"] = keep(rsf)
+    if out:
+        tiers = tf.get("tiers")
+        tier = next((t for t in tiers if isinstance(t, dict) and t.get("name") == "fine"),
+                    tiers[0] if tiers and isinstance(tiers[0], dict) else None) if isinstance(tiers, list) else None
+        if tier is not None and isinstance(tier.get("voxel_size"), (int, float)):
+            out["hand_voxel_m"] = float(tier["voxel_size"])
+        seq = (tf.get("geometry_version") or {}).get("request_seq") if isinstance(tf.get("geometry_version"), dict) else None
+        if seq is not None:
+            out["field_request_seq"] = int(seq)
+    return out
 
 
 def _replace_horizon_limits(to_config):
@@ -388,6 +435,12 @@ UNPORTED_FINAL_CONFIG_DESTS: tuple[str, ...] = (
     # needs an EE-delta -> IK Jacobian map on the Panda). The phase from the grasp latch (T92) is ported (SL7).
     'subtask_from_phase_machine', 'fm_guide', 'fm_guide_scale', 'fm_guide_steps',
     'fm_guide_max_step_rad', 'fm_guide_sweep',
+) + (
+    # main 4ecf8d61 (T96-T97, 2026-11-04; transfer note BENCHMARK_T96_T96E_PALM_TRANSFER_20261104_KO.md): T97 crease
+    # protrusion / hand freeze is not ablated in SL9 (task SL9 §1); the real-size palm cover is not applicable on the
+    # Panda (SL9 §4-1: the Panda palm shell at its 5 mm margin leaves 0 of the panda_hand mesh samples uncovered).
+    'surface_crease_protrusion', 'surface_crease_protrusion_area', 'surface_crease_hand_freeze_mm',
+    'palm_cover_margin',
 )
 #: SL6-A A10 — the final-configuration options this server now applies (A1-A9, A12); listed for the record and the test.
 #: SL6-H: + ``hsr6_placement_contact`` (HSR6 ⑤, an HSR6 use flag: refused without ``--hsr6-probe`` like the others).
@@ -411,6 +464,10 @@ PORTED_FINAL_CONFIG_DESTS: tuple[str, ...] = (
     # SL7f (lead self-ruling 2026-11-04, user autonomous window): ATS gate of the surface seed map (esdf key via
     # serve_safe.target_exclusion_section, like the other surface flags)
     'surface_seed_ats_gate',
+    # SL9 (lead ruling 2026-11-04, task SL9): the development proposals A (target as a closed solid: T96 / T96c / T96d) and
+    # B (removed-seed sign fix: T96e); esdf keys via serve_safe.target_exclusion_section like surface_seed_ats_gate
+    'surface_solid_owned', 'surface_solid_protect_mm', 'surface_solid_dilate_mm', 'surface_solid_shadow_mm',
+    'surface_solid_dn_ever_target', 'surface_solid_dn_support', 'surface_removed_sign_free',
 )
 
 

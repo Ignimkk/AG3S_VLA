@@ -463,6 +463,35 @@ AG3S_VERSIONS["AG3S-final-panda-v3-e0to-pc-idattn"] = FINAL_CONFIG_V3_E0TO_PC_FL
 AG3S_VERSIONS["AG3S-final-panda-v3-e0to-pc-idboth"] = FINAL_CONFIG_V3_E0TO_PC_FLAGS + ID_WINDOW_FLAGS + ID_ATTENTION_FLAGS
 PC_LATCH_VERSIONS = PC_LATCH_VERSIONS + ("AG3S-final-panda-v3-e0to-pc-idwin", "AG3S-final-panda-v3-e0to-pc-idattn",
                                          "AG3S-final-panda-v3-e0to-pc-idboth")
+#: SL9 (task SL9 §1-2, lead 2026-11-04; benchmark user ruling 17:3x-17:5x KST): the development proposals A (target as a
+#: closed solid, T96 / T96c / T96d) and B (removed-seed sign fix, T96e) as ablations on the three bases. A replaces hull
+#: fill + the 10 mm contact allowance (the config refuses it together with them, so it cannot sit on the fallback base);
+#: B is one flag on any attention-surface base. C (real-size palm cover) is not applicable on the Panda (task SL9 §4-1).
+SOLID_REMOVED_FLAGS: dict[str, int] = {"--surface-hull-fill": 0, "--surface-contact-allowance-mm": 1}
+SOLID_FLAGS: tuple[str, ...] = ("--surface-solid-owned", "--surface-solid-protect-mm", "5", "--surface-solid-dilate-mm", "0",
+                                "--surface-solid-dn-ever-target", "--surface-solid-shadow-mm", "80")
+SIGN_FREE_FLAGS: tuple[str, ...] = ("--surface-removed-sign-free",)
+_SL9 = {
+    # name: (base flags, A, B)
+    "AG3S-final-panda-p0m-B": (P0M_FLAGS, False, True),
+    "AG3S-final-panda-p0m-A": (P0M_FLAGS, True, False),
+    "AG3S-final-panda-p0m-AB": (P0M_FLAGS, True, True),
+    "AG3S-final-panda-v3-e0to-pc-surface-fb-B": (PC_SURFACE_FALLBACK_FLAGS, False, True),
+    "AG3S-final-panda-v3-e0to-pc-surface-B": (PC_SURFACE_FLAGS, False, True),
+    "AG3S-final-panda-v3-e0to-pc-surface-A": (PC_SURFACE_FLAGS, True, False),
+    "AG3S-final-panda-v3-e0to-pc-surface-AB": (PC_SURFACE_FLAGS, True, True),
+}
+for _n, (_base, _a, _b) in _SL9.items():
+    AG3S_VERSIONS[_n] = ((_drop_flags(_base, SOLID_REMOVED_FLAGS) + SOLID_FLAGS) if _a else tuple(_base)) \
+        + (SIGN_FREE_FLAGS if _b else ())
+del _n, _base, _a, _b
+#: kept apart from :data:`P0M_VERSIONS` / the pc lists' dest scan so that an older version's recorded flag values keep
+#: exactly the keys they had (:func:`version_flag_values` adds the SL9 dests only when one is set); same handling otherwise:
+#: the P0m ones take no HSR6 probe, the pc-surface ones take it like their base.
+P0M_SL9_VERSIONS: tuple[str, ...] = tuple(n for n in _SL9 if "-p0m-" in n)
+PC_SL9_VERSIONS: tuple[str, ...] = tuple(n for n in _SL9 if "-pc-" in n)
+SL9_VERSIONS: tuple[str, ...] = P0M_SL9_VERSIONS + PC_SL9_VERSIONS
+PC_LATCH_VERSIONS = PC_LATCH_VERSIONS + PC_SL9_VERSIONS
 #: SL6-B B4 — the Panda HSR6 probe (5 classes, no retreat; labels approved by the user 2026-10-29), the default
 #: ``--hsr6-probe`` of the final versions, and its SHA-256 (recorded by the server, checked by the test when present).
 #: SL7 (0.7): found under the shared storage root (``AG3S_STORAGE_ROOT``, default the checkout's sibling
@@ -478,8 +507,8 @@ FINAL_RUN_PARAMETERS: tuple[str, ...] = ("hsr6_probe", "attention_source")
 
 def is_final_version(version: str) -> bool:
     """A version on the final-configuration base argv: the SL6 final versions and (SL7) the P0m versions."""
-    return (str(version) in FINAL_CONFIG_VERSIONS or str(version) in P0M_VERSIONS
-            or str(version) in PC_LATCH_VERSIONS or str(version) in PC_NOPROBE_VERSIONS)   # SL7d / SL7e
+    return (str(version) in FINAL_CONFIG_VERSIONS or str(version) in P0M_VERSIONS or str(version) in P0M_SL9_VERSIONS
+            or str(version) in PC_LATCH_VERSIONS or str(version) in PC_NOPROBE_VERSIONS)   # SL7d / SL7e / SL9
 
 
 def version_server_flags(version: str, *, hsr6_probe: Optional[str] = None,
@@ -493,7 +522,7 @@ def version_server_flags(version: str, *, hsr6_probe: Optional[str] = None,
         if hsr6_probe is not None or attention_source is not None:
             raise ValueError(f"{version}: --hsr6-probe / --attention-source apply to {list(FINAL_CONFIG_VERSIONS)} only")
         return flags
-    if version in P0M_VERSIONS or version in PC_NOPROBE_VERSIONS:   # SL7 / SL7e: no HSR6 rule -> no probe
+    if version in P0M_VERSIONS or version in P0M_SL9_VERSIONS or version in PC_NOPROBE_VERSIONS:   # SL7 / SL7e / SL9: no HSR6 rule -> no probe
         if hsr6_probe is not None:
             raise ValueError(f"{version}: the P0m versions use no HSR6 rule, so --hsr6-probe has nothing to feed")
         if attention_source is not None:
@@ -534,6 +563,7 @@ def version_flag_values(args: argparse.Namespace) -> dict[str, Any]:
     dests = _version_dests(family)
     final = [d for d in _version_dests(FINAL_CONFIG_VERSIONS) if d not in set(dests)]
     p0m = [d for d in _version_dests(P0M_VERSIONS) if d not in set(dests) | set(final)]   # SL7: P0m-only options
+    sl9 = [d for d in _version_dests(SL9_VERSIONS) if d not in set(dests) | set(final) | set(p0m)]   # SL9: A / B options
     parser = ss.build_parser()
     actions = parser._option_string_actions
     pinned = {actions[t].dest for t in V11AB_PRE_MERGE_DEFAULTS if t.startswith("--")}   # set on every V11AB argv
@@ -546,6 +576,9 @@ def version_flag_values(args: argparse.Namespace) -> dict[str, Any]:
     # record keeps exactly the keys it had
     if any(getattr(args, d, None) != parser.get_default(d) for d in p0m):
         dests = sorted(set(dests) | set(final) | set(p0m))
+    # SL9: the A / B options join only when one is set -- every earlier version's record keeps exactly the keys it had
+    if any(getattr(args, d, None) != parser.get_default(d) for d in sl9):
+        dests = sorted(set(dests) | set(final) | set(p0m) | set(sl9))
     return {d: _jsonable(getattr(args, d, None)) for d in dests}
 
 
