@@ -178,6 +178,30 @@ def _crease_reattach_cpu(geo, sub, sel_sub, crease_state, crease, rec) -> np.nda
 # --- T78d — end
 
 
+# --- T97 — begin
+def _crease_protrude_cpu(geo, sub, sel_sub, crease_state, crease, rec) -> np.ndarray:
+    """T97 — the protrusion re-attach (`attention_surface_crease.protrude`) on `g_and_top1`'s ROI sub-graph `sub`
+    (local ids, the same mapping as `_crease_reattach_cpu`). Returns the added sub nodes; writes
+    `rec["crease"]["protrusion"]`."""
+    from AG3S.ag3s.runtime import attention_surface_crease as CR
+
+    t = time.perf_counter()
+    roi = crease_state["roi"]
+    loc = np.full(len(geo.pos), -1, np.int64)
+    loc[np.flatnonzero(roi)] = np.arange(int(roi.sum()))
+    cut = loc[crease_state["cut"]]
+    if len(cut) and (cut < 0).any():
+        raise RuntimeError("T97: a cut edge lies outside the solve ROI")
+    if int(roi.sum()) != len(sub.pos):
+        raise RuntimeError(f"T97: crease ROI {int(roi.sum())} nodes, solve ROI {len(sub.pos)}")
+    add, pr = CR.protrude(len(sub.pos), sub.edges, cut.reshape(-1, 2), sub.support, sel_sub, sub.pos,
+                          float(crease.protrusion_area), crease.voxel_m)
+    pr["ms"] = round((time.perf_counter() - t) * 1e3, 3)
+    rec["crease"]["protrusion"] = pr
+    return add & ~sel_sub
+# --- T97 — end
+
+
 #: T78 B — the devices `select_target_surface(device=…)` / `config.ATTENTION_SURFACE_DEVICE` accept.
 DEVICES = ("cpu", "cuda")
 
@@ -214,6 +238,8 @@ def select_target_surface(views: Sequence[SurfaceView], *, cfg=None, class_map=N
     `crease` (T78d, `attention_surface_crease.CreaseParams`; None = default = everything above unchanged, no new
     record key): the graph is built at `crease.voxel_mm` and its concave creases inside the seed ROI are cut before
     the selection; `crease.reattach_ratio` re-attaches small cut-off components. The record gains ``crease``.
+    T97: `crease.protrusion` re-attaches instead the cut-off components that rise above the region's top on its body
+    (`attention_surface_crease.protrude`; record ``crease.protrusion``).
     """
     from AG3S.ag3s.experiments.studies import ifg_graph as G
     from AG3S.ag3s.experiments.studies import ifg_round_ns as RNS
@@ -299,6 +325,11 @@ def select_target_surface(views: Sequence[SurfaceView], *, cfg=None, class_map=N
         add = _crease_reattach_cpu(geo, sub, sel_sub, crease_state, crease, rec)
         sel = np.concatenate([sel, np.searchsorted(geo.node_eval, sub.node_eval[add])])
     # --- T78d — end
+    # --- T97 — begin: protrusion re-attach (one pass, whole components; refused together with the ratio rule)
+    if crease is not None and crease.protrusion and len(sel):
+        add = _crease_protrude_cpu(geo, sub, sel_sub, crease_state, crease, rec)
+        sel = np.concatenate([sel, np.searchsorted(geo.node_eval, sub.node_eval[add])])
+    # --- T97 — end
     rec["n_selected_nodes"] = int(len(sel))
     if not len(sel):
         rec["why"] = "no_region"

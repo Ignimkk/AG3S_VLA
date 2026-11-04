@@ -504,6 +504,9 @@ class SafePolicy:
             if getattr(self.to_config.collision, "palm_shell_margin", None) is not None:
                 # AG3S-PRE-CORE-TO SCM — 같은 규약 (켰을 때만).
                 meta["palm_shell_margin_m"] = float(self.to_config.collision.palm_shell_margin)
+            if getattr(self.to_config.collision, "palm_cover_margin", None) is not None:
+                # T96b (D27) — 같은 규약 (켰을 때만).
+                meta["palm_cover_margin_m"] = float(self.to_config.collision.palm_cover_margin)
         # T46c A12 (W1) — 같은 규약: 켰을 때만 키가 생긴다 (placed · home 의 `no_seed` 인증).
         clustering = getattr(getattr(self.ag3s, "config", None), "clustering", None)
         if getattr(clustering, "placed_no_seed_certify", False) is True:
