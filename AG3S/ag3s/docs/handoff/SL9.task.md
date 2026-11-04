@@ -101,3 +101,15 @@ T97(`--surface-crease-protrusion*`, `--surface-crease-hand-freeze-mm`)은 꺼 �
   - 판별 성공 grid
   - 대표 영상: 기준 대 수정안이 갈린 episode
   - README
+
+## 7. smoke 뒤 사용자 판정 (2026-11-04 20:xx KST, 결과 실행 전)
+
+smoke(`outputs/2026-11-04_SL9_smoke_수정안AB_기록키/`) 결과:
+- A(닫힌 물체)는 Panda에서 0회 적용됐다. 채택 표면 영역이 노드 1–2개라 hull이 퇴화했고, 받침면 guard도 없었다.
+- B는 P0m · `-pc-surface`에서는 작동하고, fb에서는 경로가 없다.
+
+사용자 판정: "추천대로 진행" →
+1. **지금은 B만 closed loop로 돌린다.** `AG3S-final-panda-p0m`, `-p0m-B`, `-v3-e0to-pc-surface`, `-pc-surface-B`, 4판 × §3의 세 벤치마크.
+2. **fb · fb-B는 뺀다.** fb에서 B는 기록이 0이라 fb와 같은 판이다.
+3. **A 판(p0m-A · AB, pc-surface-A · AB)은 보류한다.** 표면 영역이 1–2 노드로 줄어드는 원인을 먼저 진단한다(`SL9a.task.md`). 고친 뒤 이 문서에 덧붙여 돌린다.
+4. 판정 규칙(§5)은 B 짝(1→2, 각 기준)에만 적용한다.
