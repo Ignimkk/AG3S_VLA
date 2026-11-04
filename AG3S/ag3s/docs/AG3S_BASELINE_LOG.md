@@ -37,6 +37,10 @@
 | ~~BL-5 (이름 미정)~~ → **BL-6** CLOSED-LOOP-METHODS | methods closed-loop 연결 → benchmark 고유 지표(TSR · CAR · ETS 등) | ~~미착수~~ ~~**진행 중** (implementer I → verifier V3). 이 기록은 verify.json 이 나온 뒤 쓴다~~ → **구현 · GPU smoke 완료 (2026-10-24 KST, commit `16d0eea1`), 사용자 판정 대기.** 8 arm 1 episode smoke 까지만 했다. ~~**pilot(20 episode × 8 arm)은 아직 돌리지 않았다**~~ → pilot 은 pilot 전 수정(BL-7) 뒤에 BL-7 에서 돌렸다. 이 STEP 의 issue 1 · 3 · 4 · 5 는 BL-7 이 다룬다 | [BL-6](#bl-6--closed-loop-methods-methods-를-safelibero-closed-loop-에-연결--gpu-smoke-2026-10-24). 원본 [`handoff/CLOSED-LOOP-METHODS.task.md`](handoff/CLOSED-LOOP-METHODS.task.md). `benchmark/runners` 는 고치지 않고 `Baseline/paper_baselines/closed_loop/` 의 새 server · launcher 로 붙였다 |
 | **BL-7** CLOSED-LOOP-FIX | pilot 전 3 arm(lan_o3dp · knows · omniguide) 수정 → 수정 3 arm GPU smoke 재확인 → SafeLIBERO spatial L I dev 20 episode × 8 arm pilot | **구현 · smoke · pilot 측정 완료 (2026-10-24 KST, commit `b95c1c87`), 사용자 판정 대기.** 8 job 모두 rc 0 · 160 episode · fallback 0. 20 episode pilot 이라 p 값 · CI 는 있는 그대로만 적고 해석하지 않는다 | [BL-7](#bl-7--closed-loop-fix-pilot-전-3-arm-수정--smoke-재확인--pilot-20-episode--8-arm-2026-10-24). 원본 [`handoff/CLOSED-LOOP-FIX.task.md`](handoff/CLOSED-LOOP-FIX.task.md) |
 | **BL-8** BASELINE-BENCH-READY | 인식 경로 depth trim · CFM action box · privileged GT 장애물 변형 · benchmark job 생성 · GPU smoke(L_smoke 9 job · gt_smoke 9 job · suite_smoke 36 job) | **구현 · GPU smoke 완료 (2026-10-25 KST, commit `a63f2864` · `98004d0d`), 사용자 판정 대기.** 54 job 모두 rc 0 · fallback 0. **모든 수치는 n = 1(`t0e0`)이다. 성능 비교가 아니라 배선 · 입력 기록 확인이다.** 시뮬레이션의 GT 탁자 높이와의 비교, impl V6 step 1 CPU 재확인은 하지 않았다 | [BL-8](#bl-8--baseline-bench-ready-인식-경로-depth-trim--cfm-action-box--privileged-gt-장애물-변형--benchmark-job-생성--gpu-smoke-2026-10-25). 원본 [`handoff/BASELINE-BENCH-READY.task.md`](handoff/BASELINE-BENCH-READY.task.md). 전체 benchmark 실험은 benchmark 단계에서 한다(사용자 지시) |
+| **BL-9** SEG-BASELINE-3D | 외부 segmenter 의 3D target 분할 진단: Spatial 40 episode 873 frame · mask 경계 오류 통제 · Object 281 frame 의 target 단서 × robot mask · init 5·6 552 frame (2026-11-01) | **측정 완료, 사후 기록 (자체 보고, `verify.json` 없음), 사용자 판정 대기.** 개발 자료 | BL-9 (아래) |
+| **BL-10** MULTIBENCH-2D | LIBERO · SafeLIBERO · LIBERO-Safety 정적 80 장면의 2D 분할 · 상자 가림 · 정답 위치 단서 · 가림 추적 (2026-11-01) | **측정 완료, 사후 기록 (자체 보고), 사용자 판정 대기.** ATS 는 평가하지 않음 | BL-10 (아래) |
+| **BL-11** CBF-QP-SAFELIBERO | SafeLIBERO Level I dev 20 episode closed loop, Multi-link CBF-QP · KNOWS × GT / detector 장애물 (2026-11-03) | **측정 완료 4 arm (README 자체 보고), 사용자 판정 대기.** AEGIS-style 2 arm 은 **미실행** | BL-11 (아래) |
+| **BL-12** SAFELIBERO-SEG-ATS | SafeLIBERO 20 episode 796 frame 에서 외부 segmenter 10 arm 대 실제 ATS 4 arm 의 target · obstacle 분할 (2026-11-03) | **측정 완료 (README 자체 보고), 사용자 판정 대기.** 외부 mask 를 서버에 넣은 closed loop 는 하지 않음 | BL-12 (아래) |
 
 ### 사용자 · lead 결정 기록
 
@@ -199,6 +203,12 @@
 | **S / F · `coll` · `no coll`** | suite_smoke 표의 칸. S / F = 그 1 episode 의 official success 여부, `coll` / `no coll` = SafeLIBERO 의 충돌 판정(LIBERO 4 suite 는 충돌 지표가 없다) |
 | **`T_world_base`** | world frame 에서 robot base 의 pose. `support_z`(base frame)에 base 의 z 를 더하면 world z 다(표의 값으로 확인) |
 | **LIBERO problem class (`Tabletop` · `LivingRoom` · `Floor`)** | LIBERO suite 의 장면 종류. 탁자 · 바닥 높이 상수(`table_offset`, `floor_offset`)가 problem class 마다 정해져 있다 |
+| **이웃 FP (BL-9)** | 예측 영역 안에서 다른 물체 · destination 으로 잘못 들어간 5 mm voxel mass. 비율이나 mm³ 가 아니며 예측 크기와 장면 표면 구성에 따라 달라진다 |
+| **abstain (BL-9)** | attention surface selector 가 최종 후보(점수 ≥ 0.5 인 region)를 못 내서 그 frame 을 빈 target 예측으로 점수화한 것. `no_region` 이 그 사유 |
+| **oracle-assisted target-name 조건 (BL-9)** | 외부 segmenter 의 `phrase` 입력이 BDDL goal 의 정답 객체 이름을 문구로 바꾼 것. GT mask 는 아니지만 정답 이름을 참조한다. Spatial 40/40 episode 에서 지시문만으로 뽑은 문구와 달랐다 |
+| **FK sphere mask (BL-9)** | Panda 관절값 · camera calibration · self-filter 기하 모델로 만든 robot 구(球) mask. GT segmentation 은 쓰지 않는다. `GT robot` 은 simulator 가 준 특권 mask |
+| **가려짐 비율 (BL-10)** | 1 − visible target pixel / target-only in-frame target pixel. 화면 밖 잘림 · 물체 뒷면은 포함하지 않는다 |
+| **target 지움 · 남김 · obstacle 잘못 지움 (BL-12)** | 지움 = 그 arm 의 voxel 이 덮는 GT target 비율(recall), 남김 = 1 − 지움(target 이 장애물로 남는 위험), obstacle 잘못 지움 = 장애물 voxel 이 거리장에서 사라지는 비율(충돌 방향의 위험) |
 
 ---
 
@@ -2912,3 +2922,283 @@ pod working set(`memory.current − inactive_file`)을 phase 안에서는 60 s, 
 ### 판정
 
 **사용자 판정 대기.**
+
+
+---
+
+## BL-9 — 외부 segmenter 의 3D target 분할 진단: LIBERO Spatial · Object 개발 자료 (2026-11-01)
+
+> **기록 경위 (2026-11-04 작성).** 이 절은 2026-11-01 에 한 실험을 사후에 옮긴 것이다. 수치는 `outputs/segmentation_baseline_20261101/` 의 요약 파일과 개발 문서(`doc/active/experiments/AG3S_SEGMENTATION_BASELINES_20261101_KO.md`, `AG3S_SEGMENTATION_FACTORIAL_RESULTS_20261101_KO.md`)에서만 가져왔다. 출처 유형은 모두 **"자체 보고"** 이며 이 기록에서 verifier 가 다시 재계산하지 않았다(`verify.json` 없음).
+> **시각.** 이 폴더에 README 는 없다. `provenance.json`/`final_provenance.json` 의 UTC(+9 h)와 파일 수정 시각(UTC+9, 근사)으로 적는다: 첫 산출물 2026-11-01 03:38 KST 경, 최종 provenance 04:29 KST, phrase 출처 감사(audit) 18:21 KST. 코드 commit 은 `96fda38a`(working tree 에 untracked 실험 스크립트가 있어 `final_provenance.json` 에 source SHA-256 을 따로 남겼다).
+> **판정:** 사용자 판정 대기. 개발 자료이며 AG3S 확정 구성이나 held-out test 가 아니다.
+> **영상:** 이 실험은 영상이 없다. 그림은 아래 "그림".
+
+### 무엇을 했나
+
+질문은 "지시된 target 을 이웃 물체와 분리해 관측된 3D 표면으로 복원할 수 있는가" 하나다. 충돌 회피나 성공률은 재지 않았다.
+
+| 항목 | 내용 |
+|---|---|
+| 실험 A·B·C 표본 | LIBERO Spatial 10 task × init 1–4 = **40 episode, 873 policy-call frame**, head · wrist 2 camera. 2026-10-24 의 π0.5 단독 rollout 기록을 다시 평가(새 rollout 아님) |
+| 실험 D 표본 | LIBERO Object task 0–9 × init 0 = **10 episode, 281 frame** (π0.5 로 새로 수집) |
+| 확인 표본 | LIBERO Object 10 task × init 5·6 = **20 episode, 552 frame** (수집 전 규약을 먼저 작성) |
+| 정답(GT) | simulator 의 target geom 과 촬영 시점에 다시 렌더한 segmentation. **평가용이며 배포 입력이 아니다** |
+| 지표 | 5 mm voxel 위의 **3D soft IoU** · target recall · **이웃 FP**(예측 영역 안에서 다른 물체·destination 으로 잘못 포함된 voxel mass; 비율이 아니다). frame → episode → task → task 평균, 95% 구간은 10 task 를 재표집한 탐색적 bootstrap |
+| 비교 방법 | Grounded-SAM(v1) · Grounded-SAM-2(per-frame / causal track) · YOLOE · localization heads(+SAM point) · TokenCut, 그리고 π0.5 noun attention + depth 로 만든 target surface 후보(RB-Y1 용 graph 설정을 Panda 2 camera 에 채운 **시험 adapter**, 정식 serving 과 parity 미확인) |
+| 입력 조건 정정 | 외부 segmenter 의 `phrase` 는 BDDL goal 의 정답 객체 이름을 문구로 바꿔 준 **oracle-assisted target-name 조건**이다(GT mask 는 아님). 사후에 지시문만으로 문구를 뽑아 대조하니 Object 개발 10/10 · init 5·6 20/20 episode 는 문자열이 같았으나 **Spatial 40/40 episode 는 달랐다**(`phrase_source_audit_spatial.json`). 따라서 Spatial 의 phrase 결과는 "지시문만 쓴 end-to-end 비교"로 해석하지 않는다. `instruction` 은 기록된 작업 지시문 전체를 준 조건 |
+
+### 결과 1 — Spatial 873 frame, 같은 RGB-D 의 3D 비교
+
+출처: `outputs/segmentation_baseline_20261101/image_instant_all873/summary.md` (자체 보고). Δ 는 Grounded-SAM-2 per-frame(instruction) 대비 task 평균 차이 [10 task bootstrap 95%].
+
+| 방법 | 3D IoU | recall | 이웃 FP | Δ IoU [95%] |
+|---|---:|---:|---:|---:|
+| 이미지 시점 GT mask (특권 oracle) | 0.970 | 1.000 | 1.3 | +0.442 [+0.331, +0.560] |
+| 기록 시점(return-time) GT mask (특권) | 0.963 | 0.998 | 1.7 | +0.435 [+0.324, +0.554] |
+| Grounded-SAM v1, instruction | 0.535 | 0.745 | 360.6 | +0.007 [-0.014, +0.024] |
+| Grounded-SAM-2 per-frame, instruction | 0.528 | 0.699 | 303.4 | 0 (기준) |
+| Grounded-SAM-2 per-frame, phrase | 0.519 | 0.721 | 351.4 | -0.009 [-0.035, +0.018] |
+| Grounded-SAM-2 causal track, instruction | 0.450 | 0.569 | 220.4 | -0.078 [-0.177, +0.025] |
+| YOLOE, phrase | 0.355 | 0.458 | 255.5 | -0.174 [-0.255, -0.087] |
+| attention surface 후보, robot mask 없음 | 0.263 | 0.442 | 46.2 | -0.265 [-0.423, -0.071] |
+| attention surface 후보, GT robot mask (특권) | 0.412 | 0.437 | 41.8 | -0.117 [-0.307, +0.114] |
+| attention surface 후보, GT target patch + GT robot (특권) | 0.479 | 0.507 | 0.5 | -0.050 [-0.256, +0.188] |
+| localization heads + SAM point | 0.216 | 0.403 | 195.6 | -0.313 [-0.433, -0.179] |
+| TokenCut foreground | 0.078 | 0.746 | 466.7 | -0.451 [-0.565, -0.330] |
+
+같은 점군에서 점 단위로 맞춘 비교(V11AB 가 기록한 filtered cloud 를 평가 단위로 고정, 40 episode · 873 frame): V11AB 의 action-query cell `L8H2` 는 **point IoU 0.290 / recall 0.300**, Grounded-SAM-2 per-frame instruction 은 **0.467 / 0.641**, Δ = -0.177 [-0.316, -0.044]; oracle 0.849 (`cloud_dev40_v2/task_summary.md`). 결과 파일의 옛 arm 이름 `ats_v11ab|noun_attention` 은 잘못된 라벨이고 실제 사용된 것은 `L8H2` 다(문서 정정). point IoU 와 voxel IoU 는 지표가 달라 서로 뺄 수 없다.
+
+### 결과 2 — mask 경계 오류가 3D 영역에 미치는 영향 (통제 실험)
+
+GT mask 에 2/4/8 px 팽창·침식 등을 주입, 40 episode 에서 episode 당 5 frame 고정 간격 = **200 frame**. 출처: `perturbation_dev40/summary.md` (자체 보고). 기준 mask 는 return-time GT 라 위 표의 이미지 시점 GT 와 다르다.
+
+| 주입한 오류 | 3D IoU | target recall | 비 target FP | target FN | 이웃 FP |
+|---|---:|---:|---:|---:|---:|
+| 없음 (oracle) | 0.971 | 1.000 | 20.9 | -0.0 | 1.9 |
+| 팽창 2 px | 0.747 | 1.000 | 236.3 | -0.0 | 25.8 |
+| 팽창 4 px | 0.630 | 1.000 | 410.4 | -0.0 | 46.8 |
+| 팽창 8 px | 0.473 | 1.000 | 785.2 | -0.0 | 95.7 |
+| 침식 2 px | 0.840 | 0.844 | 2.9 | 103.3 | 0.2 |
+| 침식 4 px | 0.702 | 0.703 | 1.2 | 198.8 | 0.1 |
+| 침식 8 px | 0.481 | 0.481 | 0.1 | 353.0 | 0.0 |
+| head camera mask 제거 | 0.635 | 0.648 | 13.2 | 223.3 | 0.7 |
+| left wrist camera mask 제거 | 0.606 | 0.615 | 10.1 | 275.1 | 1.4 |
+
+(FP/FN 은 voxel mass 이며 `-0.0` 은 원본 표기다.) 이 실험은 관측 3D 영역의 오류만 재며 충돌이나 작업 실패를 입증하지 않는다.
+
+### 결과 3 — Object 개발 281 frame: target 단서 × robot mask
+
+출처: `factorial_summary/summary.md` (자체 보고). 같은 두 camera · graph 에서 target 단서(noun attention `L8H6` 대 **특권** GT target patch)와 robot mask(없음 / Panda 관절값으로 만든 FK sphere / **특권** GT robot)를 교차했다. abstain = selector 가 후보를 못 내 빈 예측으로 점수화한 frame 수(분모 281).
+
+| target 단서 | robot mask | IoU | recall | 이웃 FP | abstain |
+|---|---|---:|---:|---:|---:|
+| noun attention | 없음 | 0.189 | 0.434 | 167.3 | 17/281 |
+| noun attention | FK sphere | 0.359 | 0.374 | 176.6 | 23/281 |
+| noun attention | GT robot (특권) | 0.410 | 0.431 | 173.9 | 22/281 |
+| GT target patch (특권) | 없음 | 0.360 | 0.784 | 2.4 | 1/281 |
+| GT target patch (특권) | FK sphere | 0.656 | 0.684 | 1.5 | 1/281 |
+| GT target patch (특권) | GT robot (특권) | 0.743 | 0.783 | 1.5 | 1/281 |
+
+- 같은 개발 문서(자체 보고): noun 조건에서 FK − 없음 = IoU **+0.170** [+0.108, +0.232]이나 recall 은 0.434 → 0.374 로 줄었다. robot FP voxel mass 는 task 평균 475.1 → 0.2, target FN 은 215.1 → 237.6.
+- 같은 281 frame 의 Grounded-SAM-2 per-frame phrase 는 IoU 0.205 / recall 0.279. FK 후보 − 그 baseline = +0.153 [+0.012, +0.282] (`baseline_contrast.json`, task 6 에서는 후보가 낮았다; baseline 결과를 본 뒤 한 탐색 비교).
+- FK mask 자체의 pixel 오류(`robot_validity.json`, frame 합산 micro 비율): head 의 robot precision 0.795 · recall 0.992 · **target 삭제율 0.106**, left wrist 는 0.797 · 0.550 · **0.300**. graph 가 쓰는 유효 depth(z 0.05–3 m, radial ≤ 2 m)만 보면 robot recall 은 head 0.9963, wrist 0.9998. 즉 wrist 의 낮은 전체 이미지 recall 은 graph 입력의 robot 누락이 아니라 depth 범위 밖 pixel 이다. 문제는 오히려 **FK mask 가 target 표면을 함께 지우는 것**이다.
+- 접촉 여부로 나눈 wrist target 삭제율(개발 문서, 자체 보고): 개발 init 0 비접촉 122 frame 8.3% / 접촉 159 frame 36.0%, 새 init 5·6 비접촉 225 frame 6.9% / 접촉 327 frame 38.4%. frame 이 episode 안에서 상관돼 있어 접촉의 인과 효과가 아니다.
+- init 5·6 (20 episode · 552 frame, 개발 문서 자체 보고): noun attention 3D IoU 없음 0.164 / FK 0.318 / GT robot 0.373. Grounded-SAM-2 phrase 0.207, instruction 0.129, YOLOE(confidence 0.25) 0.057, YOLOE(confidence 0.05, 결과를 본 뒤 추가한 탐색 조건) 0.116. FK 후보 − Grounded-SAM-2 phrase = +0.111 [+0.010, +0.207], 10 task 중 3 task 에서 후보가 낮았다.
+
+### 그림
+
+![고정한 3 task 의 2D 분할 예시](figures/baselines/2026-11-01_segmentation-baseline/fixed_segmentation_examples.png)
+![Object 두 camera 분할 예시 (task 0·4·9 첫 frame)](figures/baselines/2026-11-01_segmentation-baseline/factorial_fixed_examples.png)
+
+초록 = GT 만, 빨강 = 예측만, 노랑 = 겹침. 설명용 고정 예시이며 대표 표본이 아니다.
+
+### 해석 (한 문단)
+
+Spatial 개발 자료에서 외부 segmenter 중 Grounded-SAM 계열 4개 arm 은 3D IoU 0.450–0.535 로 서로 비슷했고(task 구간이 겹친다) YOLOE · localization heads · TokenCut 은 낮았다. attention surface 후보(robot mask 없음)는 IoU 0.263 으로 Grounded-SAM-2 보다 낮았지만 이웃 FP 가 46.2 대 303.4 로 훨씬 작았다. 특권 정보를 하나씩 넣은 진단(GT robot · GT target patch)은 IoU 를 0.412 · 0.479 까지 올렸으나 모두 배포 불가능한 조건이다. 통제 실험은 mask 가 2 px 만 부풀어도 3D IoU 가 0.971 → 0.747 로 내려가는 것을 보여, 3D 거리장 입력에서는 경계 정확도가 중요함을 시사한다. 한편 phrase 입력은 정답 이름을 참조했고(특히 Spatial 40/40 에서 지시문과 다름) head 선택을 같은 dev 에서 했으므로(in-sample) 모두 개발 단계 관찰이며 확증 비교가 아니다. **측정하지 않은 것:** 충돌 · 작업 성공, 최종 AG3S 의 fallback · temporal tracking, held-out test, 가려진 부분의 전체 3D 형상.
+
+---
+
+## BL-10 — LIBERO · SafeLIBERO · LIBERO-Safety 정적 장면의 2D 분할과 가려짐, 정답 위치 단서, 가림 추적 (2026-11-01)
+
+> **기록 경위 (2026-11-04 작성).** 출처는 `outputs/multibench_segmentation_20261101/` 의 `verification.json` · `baseline_extension_verification.json` · `provenance.json` 과 개발 문서(`MULTIBENCH_SEGMENTATION_OCCLUSION_RESULTS_20261101_KO.md`, `BASELINE_SEGMENTATION_FOLLOWUP_RESULTS_20261101_KO.md`)다. 표의 수치는 후자 문서의 **자체 보고**를 옮긴 것이고, 이 기록에서 원시 `summary.json` 을 다시 열어 대조하지는 않았다.
+> **시각.** README 없음. `provenance.json` 의 UTC 2026-11-01 10:49 = **19:49 KST**, 폴더 수정 시각 기준 작업 구간은 2026-11-01 19:31–21:14 KST(근사). commit `96fda38a`.
+> **영상 없음.** 정적 장면의 한 상태에서 렌더한 이미지만 쓴다. **판정:** 사용자 판정 대기.
+
+### 무엇을 했나
+
+외부 baseline 이 지시된 객체의 **현재 보이는 2D 표면**을 얼마나 분할하는지를 3개 benchmark 의 정적 시작 장면에서 쟀다. ATS 는 이 단계에서 **평가하지 않았다**(사용자 지시; ATS = Attention-based Target Segmentation, VLA attention 과 depth 로 target 을 고르는 단계).
+
+| 항목 | 내용 |
+|---|---|
+| 표본 | 자연 초기 배치 **80 장면 · 160 camera 영상**(init 0 의 40 장면 + 가려짐 사례가 적어 init 1 에서 사후 추가한 40 장면). LIBERO 16(Spatial/Object 각 4 task × init 0·1) · SafeLIBERO 16(Spatial/Object × Level I·II × 2 task × init 0·1) · LIBERO-Safety 48(4 suite × Level 0·1·2 × 2 task × init 0·1) |
+| GT | 한 고정 상태에서 RGB 와 instance segmentation, 같은 상태에서 대상 geom 만 보이게 다시 렌더(target-only). **가려짐 비율 = 1 − visible target pixel / target-only in-frame target pixel**(화면 밖 잘림 · 물체 뒷면은 포함하지 않음) |
+| 모델 | Grounded-SAM(v1, box/text threshold 0.3/0.25) · Grounded-SAM-2 per-frame(0.4/0.3) · YOLOE-11L, 모두 공개 demo 기본 설정, 최고 점수 instance 1개. 입력 = RGB + 지시문에서 추출한 구절(`phrase`) 또는 전체 지시문(`instruction`). 정답 이름 · mask 는 주지 않았다 |
+| 지표 | target 이 보이는 camera 영상의 **2D IoU 평균**(보이는데 예측이 비면 0). 화면에 target 이 없는 영상은 IoU 에서 제외하고 따로 센다 |
+| 실행 오류 | 모델 오류 0. 고정 정규식이 `get ...`/`grasp ...` 형태의 LIBERO-Safety **4 장면(8 camera)** 의 구절을 못 뽑아 세 모델의 phrase 조건에서 제외(정답 이름으로 대체하지 않음). instruction 조건은 80 장면 전부 |
+
+### 결과 1 — benchmark 별 2D IoU (phrase 조건)
+
+출처: `BASELINE_SEGMENTATION_FOLLOWUP_RESULTS_20261101_KO.md` (자체 보고; 원시 `summary_natural_three_baselines/summary.json`). 같은 task 의 init · level · 두 camera 는 독립 표본이 아니다.
+
+| benchmark | target 이 보이는 영상 | Grounded-SAM v1 | Grounded-SAM-2 | YOLOE |
+|---|---:|---:|---:|---:|
+| LIBERO | 29 | 0.472 | 0.371 | 0.067 |
+| SafeLIBERO | 30 | 0.307 | 0.225 | 0.127 |
+| LIBERO-Safety | 87 | 0.497 | 0.380 | 0.226 |
+| 전체 | 146 | 0.453 | 0.347 | 0.174 |
+
+instruction 조건(Grounded-SAM-2 / YOLOE, LIBERO · SafeLIBERO · LIBERO-Safety 순, 보이는 영상 29/30/95): SAM2 0.235 / 0.159 / 0.370, YOLOE 0.002 / 0.000 / 0.131. LIBERO-Safety 의 분모가 phrase 와 다르므로 prompt 효과로 단정하지 않는다. v1 이 높게 나왔으나 threshold 설정이 달라 SAM 버전만의 효과가 아니다.
+
+| 화면 내 가려짐 | target 이 보이는 영상 | Grounded-SAM v1 | Grounded-SAM-2 | YOLOE |
+|---|---:|---:|---:|---:|
+| 0–<10% | 120 | 0.498 | 0.406 | 0.212 |
+| 10–<50% | 22 | 0.292 | 0.085 | 0.000 |
+| 50–<100% | 4 | 0.002 | 0.000 | 0.000 |
+
+160 영상 전체의 가려짐 분포는 <10% 128 · 10–<50% 22 · 50–<100% 4 · 화면 안에 대상 없음 6. 구간마다 물체 · 시점이 다르고 50% 이상은 4개뿐이라 가려짐의 인과 효과를 말하지 않는다. target 이 없는 phrase 영상 6개 중 비어 있지 않은 예측: SAM2 4개, YOLOE 1개(오검출 진단).
+
+### 결과 2 — 상자로 target 을 가린 통제 장면 · 정답 위치 단서 · 추적
+
+- **통제 가림:** SafeLIBERO 원본 8 장면에서 simulator 상자를 head camera–target 사이 두 위치로 옮겨 **16 장면**(부분 가림 8 · 완전 가림 8; 부분 가림은 59.3–80.9%). 인위적 스트레스 조건이라 자연 분포와 합치지 않는다. Grounded-SAM-2 의 IoU 는 0.365 → 0.000, YOLOE 는 0.238 → 0.000, Grounded-SAM v1 은 0.365 → 0.000. 완전 가림에서 비어 있지 않은 예측: SAM2 6/8, YOLOE 2/8, v1 6/8. 원본 상태에서도 IoU > 0 이던 것은 SAM2 3/8, YOLOE 2/8 이므로 8개 모두가 가림 때문에 실패로 바뀐 것은 아니다.
+- **SAM2 에 정답 위치를 알려 준 진단**(box/point 는 **특권** 입력): 자연 장면 146 영상에서 자동 Grounded-SAM2 0.347, SAM2 + GT box **0.973**, SAM2 + GT point **0.719**. 50% 이상 가려진 자연 4 영상은 0.000 / 0.959 / 0.936. 자동 조건은 44 영상에서 빈 mask, 50 영상에서 target 과 겹치지 않는 mask 를 냈고 GT box 조건은 146/146 에서 IoU ≥ 0.5 였다. 곧 낮은 점수는 mask 생성보다 **target 탐지 · instance 선택**에서 생긴다. GT box 는 detector 불확실성을 포함하지 않는다.
+- **가림 추적**(SafeLIBERO 8 장면마다 원본 → 부분 가림 → 완전 가림 → 원본 재등장 4개 관측을 이어 붙인 **불연속 시퀀스**):
+
+| 외부 baseline | 초기 IoU | 부분 가림 IoU | 완전 가림 중 비어 있지 않은 mask | 재등장 IoU |
+|---|---:|---:|---:|---:|
+| Grounded-SAM-2 per-frame | 0.365 | 0.000 | 6/8 | 0.365 |
+| Grounded-SAM-2 causal track | 0.365 | 0.344 | 3/8 | 0.364 |
+| SAM2 track + 빈 mask 후 재검출 | 0.365 | 0.344 | 3/8 | 0.365 |
+| YOLOE per-frame | 0.238 | 0.000 | 2/8 | 0.238 |
+
+초기 IoU ≥ 0.5 인 SAM2 시퀀스는 3/8 이었고 causal track 은 그 3개 모두 부분 가림 · 재등장에서 IoU ≥ 0.5 였다. 나머지 5개는 처음부터 target 을 못 찾았다. per-frame 의 재등장 값은 최초 이미지의 기존 예측을 재사용한 것이라 재탐지 능력의 독립 증거가 아니다.
+
+검증(`verification.json`, `baseline_extension_verification.json`, 자체 보고): 자연 · 통제 96 장면에서 768 행 중 752 행을 저장 mask 와 GT 로 다시 계산해 일치했고 phrase 파싱 실패 16 행을 확인; 확장 검증은 oracle prompt 점수 352 · 적용 불가 32 · Grounded-SAM 점수 376 · parser 실패 8 · tracking 128 행. 2D 지표 기존 test 6 passed.
+
+### 그림
+
+![자연 장면 예시 init 0 (benchmark 별 가려짐이 큰 사례)](figures/baselines/2026-11-01_multibench-segmentation/natural_examples_init0.png)
+![자연 장면 예시 init 1](figures/baselines/2026-11-01_multibench-segmentation/natural_examples_init1.png)
+![같은 SafeLIBERO 장면의 가림 전 · 후](figures/baselines/2026-11-01_multibench-segmentation/controlled_occlusion_example.png)
+![언어 기반 탐지 대 정답 위치 단서](figures/baselines/2026-11-01_multibench-segmentation/sam2_prompt_comparison_example.png)
+![per-frame 대 tracking, 4 관측](figures/baselines/2026-11-01_multibench-segmentation/occlusion_tracking_example.png)
+
+초록 = GT 만, 빨강 = 예측만, 노랑 = 겹침, 파랑 윤곽 = target-only 의 화면 내 윤곽(모델에 주지 않음). 모두 고정한 설명용 예시다.
+
+### 해석 (한 문단)
+
+정적 장면에서 Grounded-SAM v1 · Grounded-SAM-2 의 2D IoU 는 benchmark 에 따라 0.225–0.497 이고 YOLOE 는 0.067–0.226 이다. target 이 많이 가려진 소수 사례(50% 이상 4 영상)에서는 세 모델 모두 0 에 가까웠고, 상자로 가린 통제 장면에서는 부분 가림 8개의 평균 IoU 가 세 모델 모두 0.000 으로 내려갔다. 정답 위치(box)만 주면 SAM2 가 146/146 에서 IoU ≥ 0.5 를 냈으므로, 실패의 중심은 분할 자체가 아니라 가림이 있을 때 **올바른 instance 를 고르지 못하는 것**이다. causal tracking 은 올바르게 초기화된 3/8 시퀀스에서만 가림을 넘겼다. **측정하지 않은 것:** 실제 연속 rollout 의 가림, 3D IoU(정적 수집에 RGB-D 와 camera pose 를 함께 보존하지 않아 붙이지 않음), 다른 threshold · prompt 최적화, ATS.
+
+---
+
+## BL-11 — SafeLIBERO 에서 단순 CBF-QP safety filter 의 충돌 회피 (2026-11-03 야간)
+
+> **출처.** `outputs/2026-11-03_CBF-QP_충돌회피_SafeLIBERO/` 의 `README.md` · `cbf_arms.md` · `cbf_arms.json` (모두 **README 자체 보고**; 이 기록에서 storage 원시 run 을 다시 열지 않았다). 서버 시간 · 개입 비율 수치도 `cbf_arms.json` 에서 옮겼다.
+> **시각 (KST).** 4 개 run 의 시작 시각을 run id 에서 읽었다(`create_run` id 의 시각은 KST, 위 머리말 규칙): multi-link(GT) 2026-11-03 03:31:55, multi-link(detector) 05:20:09, KNOWS(GT) 06:24:06, KNOWS(detector) 07:21:52. README 의 마감은 08:00 KST. 결과 파일 수정 시각 07:56 KST(UTC+9, 근사). 코드 commit `96fda38a`(run id 의 `96fda38abd1b`).
+> **판정:** 사용자 판정 대기. **영상은 만들지 않았다**(야간 시간 제약). 그림만 있다.
+
+### 무엇을 했나
+
+SafeLIBERO spatial Level I dev, task 0–3 × init 0–4 = **20 episode (seed 7)** 를 π0.5 정책 위에 기존 baseline 의 안전 필터를 얹어 closed loop 로 돌렸다. 필터가 action chunk 를 고친다. 장애물 입력은 두 가지다: **GT 장애물**(SafeLIBERO 가 놓은 active 장애물의 실제 위치, 특권 정보)과 **detector 장애물**(Grounding DINO 가 찾은 물체에서 target 을 뺀 것, 비특권). 비교 기준은 같은 20 episode 의 VLA 단독 기록이다. 필터는 **TrajOpt 가 아니다**(AG3S 의 TrajOpt 충돌은 `benchmark/docs/AG3S_FINAL_CONFIG_PANDA_KO.md` 의 SL6 판을 따로 본다; 같은 20 episode 로 다시 재지 않았다).
+
+- **주 지표(결과 전 고정):** 공식 SafeLIBERO 규칙 — active 장애물이 대기 후 합계 1 mm 넘게 움직이면 충돌 episode. 공식 성공, 안전 성공(성공 ∧ 충돌 없음). 필터가 개입한 행 비율과 서버 시간(p50)은 참고.
+- **arm:** BL-2 의 Multi-link CBF-QP(Control Barrier Function 을 제약으로 둔 quadratic program) 2개와 BL-2 에서 `methods/` 로 옮긴 KNOWS 필터 2개(각각 GT 장애물 · detector 장애물).
+- **미실행:** AEGIS-style 필터 GT · detector 2 arm — development 의 GPU exclusive 점유로 시작하지 못해 08:00 KST 마감에 대기 요청을 직접 종료(야간 판정 B19, `OVERNIGHT_AUTONOMOUS_DECISIONS_20261103_KO.md`). **미측정.**
+
+### 결과
+
+출처: `cbf_arms.md` (원본 `cbf_arms.json`), README 자체 보고. 충돌 회피율 = 1 − 충돌 episode / 20.
+
+| arm | 공식 성공 | 충돌 episode | 안전 성공 | 충돌 회피율 | 개입한 행 비율 | 기준 대비 충돌 해소 / 새 충돌 | 성공 얻음 / 잃음 | 서버 ms (p50) |
+|---|---:|---:|---:|---:|---:|---|---|---:|
+| VLA 단독 (기준, 같은 20 episode) | 11/20 | 18/20 | 2/20 | 0.10 | - | - / - | - / - | - |
+| Multi-link CBF-QP (GT 장애물) | 13/20 | 7/20 | 10/20 | 0.65 | 0.49 | 11 / 0 | 5 / 3 | 237 |
+| Multi-link CBF-QP (detector 장애물) | 8/20 | 15/20 | 3/20 | 0.25 | 0.56 | 3 / 0 | 2 / 5 | 245 |
+| KNOWS (GT 장애물) | 14/20 | 11/20 | 8/20 | 0.45 | 0.27 | 7 / 0 | 6 / 3 | 205 |
+| KNOWS (detector 장애물) | 4/20 | 19/20 | 0/20 | 0.05 | 0.56 | 1 / 2 | 2 / 9 | 357 |
+
+개입 비율 · 서버 시간은 `cbf_arms.json` 값(0.4923 · 236.6 ms 등)을 표에서 반올림한 것이다. 같은 json 의 `h_neg_steps`(Multi-link GT 248, detector 617, KNOWS GT 773, detector 3408)는 정의를 README 가 설명하지 않아 해석하지 않았다(**미확인**).
+
+![arm 별 공식 성공 · 충돌 · 안전 성공](figures/baselines/2026-11-03_cbf-qp-safelibero/fig_cbf_arms.png)
+
+### 해석 (한 문단)
+
+특권 GT 장애물을 주면 Multi-link CBF-QP 는 충돌 episode 를 18/20 → 7/20, 안전 성공을 2/20 → 10/20 으로 바꿨고 VLA 단독이 충돌한 18개 중 11개를 해소하면서 새 충돌은 없었다. KNOWS(GT)는 11/20, 안전 성공 8/20 으로 개입 행이 27% 로 적은 대신 감소 폭도 작았다. 같은 필터에 detector 장애물을 주면 충돌은 Multi-link 15/20, KNOWS 19/20 으로 거의 줄지 않았고 공식 성공은 11/20 에서 8/20, 4/20 으로 떨어졌다(KNOWS 는 2개를 얻고 9개를 잃음). 곧 필터 자체보다 **장애물이 어디 있다고 아는가(인식)** 가 결과를 가른다. README 는 이를 근거로 ATS(Attention-based Target Segmentation, VLA attention 과 depth 로 target 을 고르는 단계)가 "target 을 제외한 3D 정보"를 정확히 만드는 일이 중요하고, 분할 비교(BL-12)의 "target 을 장애물로 남기는" 오류가 이 closed loop 의 성공 감소로 나타났을 수 있다고 쓴다 — **추정이며 이 실험은 원인을 가르지 않았다.** 한계: 20 episode 한 번(4 task × 5 init), 순위 · 일반화 주장 아님, detector 는 Grounding DINO 한 설정.
+
+---
+
+## BL-12 — SafeLIBERO 에서 외부 segmenter 의 target · obstacle 분할과 실제 ATS 비교 (2026-11-03 새벽)
+
+> **출처.** `outputs/2026-11-03_SafeLIBERO_baseline분할_ATS비교/` 의 `README.md` · `table_all_frames.md` · `table_by_obstacle_distance.md` · `table_pre_collision.md` · `figures.json` · `attention_on_gt.json`(모두 **README 자체 보고**), 해석 문단은 `doc/active/experiments/BASELINE_SAFELIBERO_TARGET_OBSTACLE_SEGMENTATION_RESULTS_20261103_KO.md`(자체 보고)에서 옮겼다. 규약은 결과 전에 작성(`..._PROTOCOL_20261102_KO.md`).
+> **시각 (KST).** baseline 10 arm 완료 2026-11-03 04:16 KST(README: 2026-11-02 19:16 UTC), 표 · 그림 갱신 같은 시각. 원시 run 이름의 접두 `20261102T1430`(KST 규칙상 11-02 14:30 시작). commit `96fda38a`.
+> **영상 없음.** 그림만 있다. **판정:** 사용자 판정 대기. 야간 자율 판정 B5 · B8 · B9(OVERNIGHT_AUTONOMOUS_DECISIONS)가 걸려 있다.
+
+### 무엇을 했나
+
+SafeLIBERO spatial Level I dev 의 VLA 단독 기록 **20 episode, policy call 796 frame × head · wrist** (4 task × 5 init)를 저장 상태로 다시 렌더해 GT 를 만들었다(두 camera 의 RGB 가 저장 관측과 모든 frame 에서 bit 일치). class = target · destination(plate) · **obstacle**(active 장애물) · other_object · fixture · support · robot. 모델 입력은 RGB 와 지시문에서 뽑은 문구뿐이다.
+
+| arm | 내용 |
+|---|---|
+| 외부 segmenter 8 + 2 | Grounded-SAM v1(`gsam_v1`) · Grounded-SAM-2 per-frame(`gsam2_frame`) · SAM 2 causal track(`gsam2_track`) × {phrase, instruction}, YOLOE confidence 0.05(`yoloe005`) · 0.25(`yoloe025`) × {phrase, instruction} = **10 arm**. 외부 mask 는 depth 로 올린 5 mm voxel 을 그대로 거리장에서 지우는 정책이다(AG3S 의 ball-owned 확장은 적용 안 함, 판정 B5) |
+| 실제 ATS(Attention-based Target Segmentation) 4 | AG3S 서버의 Panda 최종 구성(attention `noun_target:L8H6`)을 저장 관측으로 재생. 단계 신호는 HSR(작업 단계 · 쥠 판단) probe 없이 **그리퍼 물리 신호**(직전 chunk 의 마지막 gripper 명령이 닫힘이면 target identity 고정) = `physical`, 그 신호가 없는 대조 = `none`. 표현은 `target_cluster`(ATS 가 고른 target cluster 의 voxel)와 `erased_extent`(서버가 거리장에서 실제로 지운 voxel) |
+| 지표 | 3D IoU · 3D recall · **대상 선택**(예측 voxel precision ≥ 0.5, 그리고 예측 voxel mass 가 가장 큰 class 가 target 인 비율; 후자는 결과를 본 뒤 추가, 판정 B9) · 무출력 비율 · **target 지움** = 그 arm 의 voxel 이 덮는 GT target 비율(= recall) · **target 남김** = 1 − 지움(target 이 장애물로 남아 접근을 막는 위험) · **obstacle 잘못 지움**(장애물이 거리장에서 사라져 충돌하는 위험) · obstacle 이 예측에 포함된 frame 비율. 4 task 동일 가중 |
+| 한계 | SafeLIBERO run 에는 policy_records 가 없어 ATS 의 attention 요청을 저장 관측에서 **재구성**했다(서버가 받은 원본과 bit 비교 못 함, 판정 B8). 쥠 신호는 서버의 증거 기반 latch 가 아니다. 순위 · 일반화 주장 아님, frame 은 독립 표본 아님 |
+
+### 결과 1 — 전체 frame
+
+출처: `table_all_frames.md` (README 자체 보고).
+
+| arm | 3D IoU | 3D recall | 대상 선택 (precision≥0.5) | 대상 선택 (최대 class) | 무출력 | target 남김 | obstacle 잘못 지움 | obstacle 포함 frame |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| `gsam2_track__instruction` | 0.333 | 0.416 | 0.478 | 0.482 | 0.015 | 0.584 | 0.001 | 0.179 |
+| `gsam2_frame__phrase` | 0.330 | 0.462 | 0.395 | 0.444 | 0.079 | 0.538 | 0.046 | 0.206 |
+| `gsam_v1__phrase` | 0.322 | 0.512 | 0.369 | 0.424 | 0.001 | 0.488 | 0.075 | 0.277 |
+| `gsam_v1__instruction` | 0.311 | 0.473 | 0.370 | 0.414 | 0.002 | 0.527 | 0.065 | 0.239 |
+| `gsam2_frame__instruction` | 0.311 | 0.426 | 0.390 | 0.433 | 0.080 | 0.574 | 0.033 | 0.193 |
+| `gsam2_track__phrase` | 0.302 | 0.399 | 0.429 | 0.436 | 0.014 | 0.601 | 0.025 | 0.229 |
+| `yoloe005__phrase` | 0.163 | 0.260 | 0.229 | 0.236 | 0.122 | 0.740 | 0.050 | 0.267 |
+| `yoloe005__instruction` | 0.121 | 0.271 | 0.122 | 0.139 | 0.102 | 0.729 | 0.055 | 0.279 |
+| ATS physical, `target_cluster` | 0.038 | 0.046 | 0.144 | 0.404 | 0.096 | 0.954 | 0.002 | 0.033 |
+| ATS none, `target_cluster` | 0.037 | 0.044 | 0.141 | 0.421 | 0.096 | 0.956 | 0.003 | 0.051 |
+| ATS none, `erased_extent` | 0.034 | 0.104 | 0.001 | 0.429 | 0.108 | 0.896 | 0.005 | 0.068 |
+| ATS physical, `erased_extent` | 0.034 | 0.104 | 0.001 | 0.475 | 0.110 | 0.896 | 0.003 | 0.039 |
+| `yoloe025__phrase` | 0.030 | 0.050 | 0.048 | 0.048 | 0.604 | 0.950 | 0.034 | 0.193 |
+| `yoloe025__instruction` | 0.017 | 0.036 | 0.026 | 0.026 | 0.631 | 0.964 | 0.028 | 0.193 |
+
+### 결과 2 — 충돌 직전 구간 · 장애물 거리별
+
+공식 규칙(active 장애물이 대기 후 위치에서 합계 1 mm 넘게 움직임)을 저장 상태에 다시 적용하니 20 episode 중 **18 개에서 충돌이 시작**됐다(기존 공식 충돌 18/20 과 일치; 시작은 대부분 관측 36–45번). 시작 직전 20 step(policy call 4개) 구간 **72 frame**(18 episode 의 구간, 상관이 큼):
+
+| arm (대표) | 구간 3D IoU | target 지움 | obstacle 잘못 지움 | obstacle 포함 frame |
+|---|---:|---:|---:|---:|
+| `gsam2_track__instruction` | 0.360 | 0.554 | 0.001 | 0.138 |
+| `gsam2_frame__phrase` | 0.421 | 0.655 | 0.033 | 0.258 |
+| `gsam_v1__phrase` | 0.430 | 0.693 | 0.043 | 0.283 |
+| `yoloe005__phrase` | 0.181 | 0.264 | 0.042 | 0.392 |
+| ATS physical, `erased_extent` | 0.078 | 0.174 | 0.000 | 0.037 |
+| ATS physical, `target_cluster` | 0.062 | 0.065 | 0.000 | 0.025 |
+
+출처: `table_pre_collision.md`(전체 14 arm 은 그 파일). target–obstacle 최소 거리 층(<30 / 30–60 / ≥60 mm, frame 수 414 / 98 / 226)별 값은 `table_by_obstacle_distance.md`. 예: `gsam2_track__instruction` IoU 0.327 / 0.349 / 0.263, ATS physical `erased_extent` 0.023 / 0.080 / 0.013.
+
+attention 자체 진단(`attention_on_gt.json`, 개발 문서 자체 보고): 같은 `L8H6` 의 top-1 patch 가 GT target 위에 있는 비율은 wrist 54.3% · head 33.3%(`attention_on_gt.json` 의 `top1_patch_class.target`), head 에서 obstacle 위가 24.2%. V11AB 가 쓰던 action-query cell `L8H2` 는 head 에서 obstacle 38% · target 2% (개발 문서 수치).
+
+### 그림
+
+![arm 별 막대 (10 baseline + ATS 4)](figures/baselines/2026-11-03_safelibero-seg-ats/fig1_arms.png)
+![target–obstacle 거리 층별](figures/baselines/2026-11-03_safelibero-seg-ats/fig2_obstacle_distance.png)
+![실제 head 영상 위 GT 와 각 arm 결과](figures/baselines/2026-11-03_safelibero-seg-ats/fig3_scene_overlays.png)
+![거리장에서 target 을 지우고(초록) 남기는(빨강) 지도, obstacle 을 잘못 지움(검정) / 남김(주황)](figures/baselines/2026-11-03_safelibero-seg-ats/fig4_erase_keep_maps.png)
+
+fig3 의 6 개 panel 은 `figures.json` 에 task 0–3 의 고정 episode · step 으로 기록돼 있다(예: `safelibero_spatial_t0_e0` step 30).
+
+### 해석 (관찰과 추정을 구분)
+
+**관찰.** (1) 어느 arm 도 대상 bowl 을 안정적으로 고르지 못했다. 최고인 `gsam2_track__instruction` 의 대상 선택(최대 class)이 0.482 다. 장면에 같은 검은 bowl 이 둘 있고 지시문은 위치 관계("between the plate and the ramekin")로 구분하기 때문이라고 개발 문서는 쓴다. (2) 외부 segmenter 중 SAM 2 track · Grounded-SAM v1 · Grounded-SAM-2 frame 이 3D IoU 0.30–0.33 으로 비슷하고, YOLOE 0.25 는 mask 를 거의 내지 않는다(무출력 0.604 · 0.631). (3) 실제 ATS 의 3D IoU 는 0.034–0.038 로 외부 segmenter 보다 낮지만, 예측 voxel 의 최대 class 가 target 인 비율은 0.404–0.475 로 Grounded-SAM v1(0.414–0.424)·SAM 2 track(0.482)과 비슷하다. 곧 ATS 의 낮은 IoU 는 identity 선택보다 **덮는 범위가 작은 것**(target cluster 는 target 의 4.6%, 서버가 지우는 voxel 은 10.4%)에서 온다. (4) 위험 방향이 arm 마다 다르다. ATS 는 obstacle 을 거의 지우지 않지만(0.2–0.5%) target 도 거의 못 지운다(남김 0.896–0.956). Grounded-SAM v1 은 target 을 절반 지우는 대신 obstacle 도 6.5–7.5% 지운다. (5) 충돌 직전 구간에서도 모든 arm 에서 장애물 voxel 의 대부분이 거리장에 남았다(잘못 지움 0.000–0.056; 개발 문서는 "0–4.9%, 95% 이상"이라 쓰나 `table_pre_collision.md` 의 `gsam2_track__phrase` 는 0.056 이므로 이 기록은 표의 값을 따른다). 개발 문서의 해석은 "VLA 단독이 장애물을 치는 것은 장애물이 거리장에서 사라졌기 때문이 아니라 회피 제어가 없기 때문이고, 인식이 만드는 위험은 주로 target 을 장애물로 남겨 접근을 막는 방향"이다. (6) 쥠 신호 `physical` 대 `none` 의 효과는 작다(3D IoU 0.034–0.038 로 거의 같고 obstacle 포함 frame 비율만 0.051 → 0.033, `target_cluster`).
+
+**추정(확인 안 됨).** ATS 의 작은 extent 는 cluster 선택과 ball-owned 분할 단계의 손실일 수 있다. 원인 층(선택 대 extent)을 가르려면 attention 을 정답 위치에 주는 대조(GT seed)나 extent 변형 실험이 필요하다. **측정하지 않은 것:** 외부 mask 를 AG3S 서버 target 입력에 넣은 closed loop, 접촉 · 성공(이 문서의 "지움"은 voxel 집합과 GT class 의 겹침이다), 쥠 신호의 서버 latch 재현. 4 task × 5 init 의 VLA 단독 1개 정책 기록이라 순위 · 일반화 주장이 아니다.
+
+---
+
+## 기록 범위 메모 — smoke 폴더 두 곳 (2026-11-04 확인)
+
+- `outputs/paper_baselines_smoke/`: BL-0 이 이미 "implementer smoke 는 이 폴더에 둔다"고 적었다(공통 고정 사항 표). smoke 는 배선 확인이며 이 파일의 규칙상 수치를 옮기지 않으므로 새 절을 만들지 않았다.
+- `outputs/baseline_eval_smoke/1ep/`: 파일 수정 시각 2026-10-23 18:39–18:51 UTC = 2026-10-24 03:39–03:51 KST(근사)의 1 episode(`libero_spatial_t0_e0`, cloud labeling 21 call) 배선 smoke 로그 (`cloud.log` · `native.log` · `filters.log` · `guidance.log` · `summarize.log`)다. BASELINE-EVAL(BL-3) 시기의 것으로 보이나 누가 어떤 STEP 으로 돌렸는지는 **미확인**이다. 이 로그에 이전에 언급이 없었으므로 여기에 존재만 적는다. smoke 수치는 측정이 아니어서 옮기지 않았다.
