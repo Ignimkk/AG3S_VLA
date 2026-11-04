@@ -21,7 +21,8 @@
 | `AG3S/ag3s/runtime/pipeline.py:2901-2903` | `_admissibility_frame_record`의 `decision`에 `identity` 키 (규칙이 켜졌을 때만) | 기존 decision record 경로 (`mode`/`reason`은 원래 거기 있음) |
 | `AG3S/trajopt/serve_safe.py` `identity_rules_section` · `reject_identity_rules_flags` (`:1022-1060`), argparse (`:2762-2780`), `t43t_identity_section` 에 병합, `t43t_ag3s` 목록 | `--identity-switch-window W` `--identity-switch-votes M` `--identity-attention-release K` `--identity-attention-off-frac F` `--identity-attention-radius-mm R`; 문턱만 주면 거절, 범위 밖이면 거절 | 2.3. `assert_ag3s_config`가 키 생존을 확인 |
 | `AG3S/adapters/panda/profile.py:453-466` | `ID_WINDOW_FLAGS` (W=5, M=3) · `ID_ATTENTION_FLAGS` (K=4, F=0.7, R=15) 와 세 판, 모두 `PC_LATCH_VERSIONS`에 | 2.3 |
-| `tests/ag3s/test_sl8b_identity_rules.py` (신규, 17개) | 단위 테스트 | 2.4 |
+| `tests/trajopt/_sl5a_golden.py` (`PB_DEFAULT_OFF`) | 새 flag 5개의 꺼진 값 | serve_safe golden 비교에서 꺼진 option은 제외하는 기존 방식 |
+| `tests/ag3s/test_sl8b_identity_rules.py` (신규, 18개) | 단위 테스트 | 2.4 |
 | `tests/benchmark/test_sl8b_identity_versions.py` (신규, 8개) | 세 판 parse · clustering override · server build | 2.4 |
 
 ## 정확한 의미 (모호한 곳을 어떻게 풀었는지 포함)
@@ -59,9 +60,10 @@ MUJOCO_GL=osmesa PYTHONPATH=$PWD .venv-ag3s/bin/python -m pytest tests/ag3s/test
 MUJOCO_GL=osmesa PYTHONPATH=$PWD .venv-ag3s/bin/python -m pytest tests/ag3s -q -p no:cacheprovider
 MUJOCO_GL=osmesa PYTHONPATH=$PWD .venv-openpi-live/bin/python -m pytest tests/benchmark -q -p no:cacheprovider
 ```
-- 새 테스트: 17 + 8 = 25 passed.
+- 새 테스트: 18 + 8 = 26 passed.
 - `tests/ag3s` 전체 (`.venv-ag3s`): 2002 passed, 52 skipped, **3 failed** — `test_t55_perception.py::test_real_t53_prefix_regrounded_with_serving_attention`, `test_t55_resim.py::test_out_root_refusals`, `test_t55_resim.py::test_real_t53_prefix_parity_and_park`. 셋 모두 `Output must be inside .../results/benchmark: .../results/development/...` (development 기록을 이 checkout의 출력 규칙이 거절) 이며 이번 변경과 무관한 환경 문제다.
-- `tests/benchmark`: BENCHMARK_RESULT_PLACEHOLDER
+- `tests/benchmark` (`.venv-openpi-live`): 390 passed, 1 failed → `test_panda_sl5a.py::test_rby1_golden_identity`: 새 argparse dest 5개가 serve_safe golden의 namespace에 "only in current"로 나옴. `tests/trajopt/_sl5a_golden.py`의 `PB_DEFAULT_OFF`에 꺼진 값(None)을 추가해 고쳤다(다른 꺼진 option과 같은 방식; 켜지면 여전히 차이로 보인다). 고친 뒤 `tests/benchmark/test_panda_sl5a.py` 14 passed, golden `identical: true` (RB-Y1 path · serve_safe 둘 다).
+- `--help`에 `50%`가 있어 argparse가 깨지던 것(`tests/trajopt/test_no_collision_ablation.py::test_the_help_says_it_is_not_no_safe`)을 `50%%`로 고쳤고, `--help` 렌더 test를 추가했다 (신규 테스트 총 18 + 8).
 - default-off bit 동일 확인 (커밋 안 한 일회성 스크립트): HEAD의 `target_grounding.py`와 작업본의 `TargetConfirm`에 같은 무작위 열(300 시퀀스 × 60 호출, 점수 · freeze · latched 무작위, mode first/hold/keep/occluded/switch 모두 등장)을 넣어 `(mode, rank, streak, frames, reason, state, manipulated_id, age, frozen, n_admissible, latched_hold)` 를 비교: 불일치 0/300.
 
 ## verifier 가 알아야 할 것
