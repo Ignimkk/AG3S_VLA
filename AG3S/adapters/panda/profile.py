@@ -532,6 +532,15 @@ for _v in SL10E_VERSIONS:
     AG3S_VERSIONS[_v] = tuple(AG3S_VERSIONS[_v[:-len("-plift")]]) + PLACEMENT_LIFT_FLAGS
 del _v
 PC_LATCH_VERSIONS = PC_LATCH_VERSIONS + SL10E_VERSIONS
+#: SL10f (task SL10f, lead 2026-11-05): "미인증 HOLD 풀기 진단" -- pc판 plus the existing serve_safe flag ``--allow-uncertified``
+#: (``safety.require_certified_geometry=False``: an uncertified call is ``uncertified_waived`` -> execute instead of HOLD). Diagnostic
+#: only, not a candidate. No new code path; the dest is new to the version records, so :func:`version_flag_values` adds it only when set.
+UNCERTIFIED_WAIVE_FLAGS: tuple[str, ...] = ("--allow-uncertified",)
+SL10F_VERSIONS: tuple[str, ...] = ("AG3S-final-panda-v3-e0to-pc-uncwaive",)
+for _v in SL10F_VERSIONS:
+    AG3S_VERSIONS[_v] = tuple(AG3S_VERSIONS[_v[:-len("-uncwaive")]]) + UNCERTIFIED_WAIVE_FLAGS
+del _v
+PC_LATCH_VERSIONS = PC_LATCH_VERSIONS + SL10F_VERSIONS
 #: SL6-B B4 — the Panda HSR6 probe (5 classes, no retreat; labels approved by the user 2026-10-29), the default
 #: ``--hsr6-probe`` of the final versions, and its SHA-256 (recorded by the server, checked by the test when present).
 #: SL7 (0.7): found under the shared storage root (``AG3S_STORAGE_ROOT``, default the checkout's sibling
@@ -608,6 +617,8 @@ def version_flag_values(args: argparse.Namespace) -> dict[str, Any]:
     sl10d = [d for d in _version_dests(SL10D_VERSIONS) if d not in set(dests) | set(final) | set(p0m) | set(sl9) | set(sl10)]   # SL10d
     sl10e = [d for d in _version_dests(SL10E_VERSIONS)
              if d not in set(dests) | set(final) | set(p0m) | set(sl9) | set(sl10) | set(sl10d)]   # SL10e
+    sl10f = [d for d in _version_dests(SL10F_VERSIONS)
+             if d not in set(dests) | set(final) | set(p0m) | set(sl9) | set(sl10) | set(sl10d) | set(sl10e)]   # SL10f
     parser = ss.build_parser()
     actions = parser._option_string_actions
     pinned = {actions[t].dest for t in V11AB_PRE_MERGE_DEFAULTS if t.startswith("--")}   # set on every V11AB argv
@@ -632,6 +643,9 @@ def version_flag_values(args: argparse.Namespace) -> dict[str, Any]:
     # SL10e: the placement-contact-lift option joins only when it is set (it is the only new dest of those versions)
     if any(getattr(args, d, None) != parser.get_default(d) for d in sl10e):
         dests = sorted(set(dests) | set(final) | set(p0m) | set(sl9) | set(sl10) | set(sl10d) | set(sl10e))
+    # SL10f: the uncertified-waive option joins only when it is set (it is the only new dest of that version)
+    if any(getattr(args, d, None) != parser.get_default(d) for d in sl10f):
+        dests = sorted(set(dests) | set(final) | set(p0m) | set(sl9) | set(sl10) | set(sl10d) | set(sl10e) | set(sl10f))
     return {d: _jsonable(getattr(args, d, None)) for d in dests}
 
 
