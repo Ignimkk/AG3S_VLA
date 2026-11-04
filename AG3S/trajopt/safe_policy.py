@@ -1743,7 +1743,8 @@ class SafePolicy:
         latch = getattr(self._latch.phase, "value", str(self._latch.phase))
         ev = getattr(self._latch.last_grasp, "evidence", None) or {}
         checks = ev.get("checks") or {}
-        on = placement_contact_ok(phase, latch=latch, checks=checks)
+        lift = bool(getattr(self.hsr6, "placement_contact_lift", False))   # SL10e (off: the call as before)
+        on = placement_contact_ok(phase, latch=latch, checks=checks, **({"lift": True} if lift else {}))
         pts = getattr(snapshot, "attached_points", None)
         attached = pts is not None and len(pts) > 0
         applied = bool(on and attached and getattr(snapshot, "esdf", None) is not None)
@@ -1751,6 +1752,10 @@ class SafePolicy:
                                "blocked": checks.get("blocked"), "attached": bool(attached), "applied": applied,
                                "n_held_rows": int(len(pts)) if attached else 0,
                                "rows_released": 0, "held_rows_released": 0}
+        if lift:   # SL10e -- key only when the flag is on
+            from AG3S.trajopt.hsr6 import PLACEMENT_LIFT_RULE
+
+            rec["phase_rule"] = PLACEMENT_LIFT_RULE
         if on and not attached:
             rec["reason"] = "no attached held object: no held rows to release"
         elif on and not applied:

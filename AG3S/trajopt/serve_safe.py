@@ -2231,6 +2231,10 @@ def build_parser() -> argparse.ArgumentParser:
                          "attach 되어 있으면, 쥔 물체의 질의 구 행만 그 아래 표면 (지지면 · 발자국 아래 물체, 예: plate) 에 "
                          "막히지 않는다 (거리장 기울기가 위로 45° 안 ∧ 최근접 표면점이 쥔 물체 xy 발자국 안). 손 · 손가락 · 팔 행과 "
                          "옆 · 위 표면은 그대로. 기본 off")
+    ap.add_argument("--hsr6-placement-contact-lift", action="store_true",
+                    help="SL10e (benchmark branch, Panda) — --hsr6-placement-contact (⑤) 의 단계 조건을 'HSR6 = placement' 에서 "
+                         "'placement ∨ lift' 로 넓힌다 (latch 조건 · 기하 조건은 그대로, transport 는 넣지 않는다). 기록 "
+                         "hsr6.detail.placement_contact.phase_rule. --hsr6-placement-contact 와 함께만. RB-Y1 서버는 거절. 기본 off")
     ap.add_argument("--hsr6-objective-scope", choices=("all", "nbc"), default="all",
                     help="SL6-A A9 — --hsr6-objective 가 거두는 범위. all (기본, AG3S-CORE-EVAL-HSR6 그대로) = 손가락 이웃 접촉 "
                          "허용 · A4 · G1 닫는 행 목표 모두 HSR6 = grasp 일 때만. nbc = 손가락 이웃 접촉 허용에만 적용하고 A4 · "
@@ -3532,7 +3536,8 @@ def hsr6_flags_from_args(args):
                       target_exempt=bool(getattr(args, "hsr6_target_exempt", False)),
                       objective=bool(getattr(args, "hsr6_objective", False)),
                       placement_contact=bool(getattr(args, "hsr6_placement_contact", False)),
-                      objective_window=bool(getattr(args, "hsr6_objective_window", False)))
+                      objective_window=bool(getattr(args, "hsr6_objective_window", False)),
+                      placement_contact_lift=bool(getattr(args, "hsr6_placement_contact_lift", False)))
     return flags if flags.on else None
 
 
@@ -3560,6 +3565,8 @@ def reject_hsr6_flags(ap: argparse.ArgumentParser, args) -> None:
     if _label_unavailable(args):
         ap.error("--hsr6-* 는 attention 서버가 싣는 kv_L4 feature 와 SafePolicy 가 필요합니다 (--no-safe · "
                  "--no-attention · --no-perception 과 함께 줄 수 없습니다)")
+    if flags.placement_contact_lift and not flags.placement_contact:
+        ap.error("--hsr6-placement-contact-lift 는 --hsr6-placement-contact (⑤) 의 단계 조건을 넓힙니다 — 함께 주십시오")
     if flags.objective_window and not flags.objective:
         ap.error("--hsr6-objective-window 는 --hsr6-objective (④) 의 시점을 넓힙니다 — 함께 주십시오")
     if flags.objective_window and getattr(args, "hsr6_objective_scope", "all") != "all":
@@ -3838,6 +3845,9 @@ def reject_panda_only_flags(ap: argparse.ArgumentParser, args) -> None:
     if getattr(args, "to_action_box", False) or getattr(args, "to_action_box_margin", None) is not None:
         ap.error("--to-action-box · --to-action-box-margin 는 Panda 의 OSC action 한계를 TrajOpt 행으로 넣는 flag 입니다 "
                  "(--robot panda 만). RB-Y1 서버는 그 변환이 없어 아무 일도 하지 않으므로 거절합니다")
+    if getattr(args, "hsr6_placement_contact_lift", False):   # SL10e
+        ap.error("--hsr6-placement-contact-lift 는 Panda 서버의 ⑤ 단계 조건입니다 (--robot panda 만). RB-Y1 서버는 "
+                 "거절합니다")
 
 
 def reject_bad_flag_combinations(ap: argparse.ArgumentParser, args, *, seed_map_labels=None) -> None:
