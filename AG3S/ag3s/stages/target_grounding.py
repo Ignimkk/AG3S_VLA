@@ -163,6 +163,16 @@ SUBTASK_GATED = "subtask_gated"
 #: T81 (`clustering.target_vacancy_release`): `ConfirmDecision.reason` of the request whose vacancy
 #: evidence released the manipulated object (the old place is empty) — the re-pick's mode is `first`.
 VACANCY_RELEASED = "vacancy_released"
+#: SL8b (`clustering.target_switch_window`): `ConfirmDecision.reason` of a `switch` that a window vote earned.
+WINDOW_VOTE = "window_vote"
+#: SL8b (`clustering.identity_attention_release`): `reason` of a `switch` to the cluster the seed attention
+#: points at, after the held object had been off-attention for K calls.
+ATTENTION_RELEASE = "attention_release"
+#: SL8b: `reason` of a call with no target because the held object was released and no admissible cluster
+#: holds half of the seed attention mass (mode `no_admissible`); also the reason of a refused `first`.
+ATTENTION_RELEASE_NONE = "attention_release_none"
+#: SL8b: the share of the frame's seed attention mass a cluster needs to be adopted after / by a release.
+ATTENTION_RELEASE_MIN_SHARE = 0.5
 
 
 # ----------------------------------------------------------------------------- clustering
@@ -745,6 +755,26 @@ class TargetConfirm:
         self._refused_release_pending = False
         #: The id released by the latest call under 3(b), with its refusal count; None otherwise.
         self._refused_released: Optional[dict] = None
+        # --- SL8b (both off by default; off = not read anywhere) ---
+        sw = getattr(cfg, "target_switch_window", None)
+        #: Window-vote switch: the last `switch_window` select calls' challenger centroids (None = no vote).
+        self.switch_window: Optional[int] = None if sw is None else int(sw)
+        self.switch_votes = int(getattr(cfg, "target_switch_votes", 3))
+        self._votes: list[Optional[np.ndarray]] = []
+        ar = getattr(cfg, "identity_attention_release", None)
+        #: Attention release: the number of calls averaged (None = off), the off-held share that releases, the
+        #: distance under which a seed counts as on the held object (m).
+        self.attn_release: Optional[int] = None if ar is None else int(ar)
+        self.attn_off_frac = float(getattr(cfg, "identity_attention_off_frac", 0.7))
+        self.attn_radius = float(getattr(cfg, "identity_attention_radius", 0.015))
+        #: The last K off-held shares (pre-grasp calls with a measurable share).
+        self._attn_shares: list[float] = []
+        #: This frame's seeds (`note_seeds`): (points, attention, cloud indices or None); consumed by `select`.
+        self._seeds: Optional[tuple] = None
+        #: A release left nothing held: the next `first` needs a cluster with >= half of the seed attention.
+        self._attn_pending = False
+        #: This call's record (None when no SL8b rule ran this call).
+        self.identity_record: Optional[dict[str, Any]] = None
         # --- T81 vacancy release (off by default; off = not read anywhere) ---
         self.vacancy_release = bool(getattr(cfg, "target_vacancy_release", False))
         self.vacancy_delta = float(getattr(cfg, "target_vacancy_delta", 0.02))
@@ -933,6 +963,8 @@ class TargetConfirm:
         self._support, self.last_support = None, None
         self._views, self._vacancy_streak, self._vacancy_reselect = None, 0, None   # T81
         self.vacancy_record = None
+        self._votes, self._attn_shares, self._seeds = [], [], None   # SL8b
+        self._attn_pending, self.identity_record = False, None
         self.destinations.reset(destination_points)
 
     def inject_destination(self, points: np.ndarray) -> None:
@@ -1100,6 +1132,7 @@ class TargetConfirm:
         """No manipulated object from here on (ids keep counting). B3 and T43 T 3(b)."""
         self._held = self._challenger = None
         self._streak = 0
+        self._votes, self._attn_shares = [], []   # SL8b
         self._id = None
         self._switched_from = None
         self._geometry = None
@@ -1223,6 +1256,23 @@ class TargetConfirm:
         """`ground_target` reports this frame's split decisions (T31b); see `ManipulatedIdentity.split`."""
         self._split = record
 
+    @property
+    def identity_rules_on(self) -> bool:
+        """SL8b: a window vote or the attention release is configured (both default off)."""
+        return self.switch_window is not None or self.attn_release is not None
+
+    def note_seeds(self, points: np.ndarray, attention: np.ndarray,
+                   indices: Optional[np.ndarray] = None) -> None:
+        """SL8b: this frame's seed points `(n, 3)` and their attention `(n,)`, given by `ground_target`
+        before `select` and consumed by it. `indices` (into the cloud `select` gets) says which cluster each
+        seed belongs to; without it the seeds are matched to the cloud by coordinate. Stored only with
+        `clustering.identity_attention_release`; off, the call does nothing."""
+        if self.attn_release is None:
+            return
+        self._seeds = (np.asarray(points, np.float64).reshape(-1, 3),
+                       np.asarray(attention, np.float64).reshape(-1),
+                       None if indices is None else np.asarray(indices, np.int64).reshape(-1))
+
     # --- one frame -------------------------------------------------------------------------
     def select(self, clusters: "Sequence[ClusterInfo]",
                points: Optional[np.ndarray] = None) -> ConfirmDecision:
@@ -1245,6 +1295,8 @@ class TargetConfirm:
         self.follow_record = None   # IFG-FOLLOW: per frame
         self._supersede = False
         self._subtask_blocked = self._subtask_would = None
+        self.identity_record = None   # SL8b: per call
+        seeds, self._seeds = self._seeds, None
         self._release_if_placed_home()
         if self.refused_release_frames is not None:
             self._release_if_refused()
@@ -1262,6 +1314,13 @@ class TargetConfirm:
         # grasp is in progress (frozen): then the latch decides, whatever the label says.
         subtask_gated = self.subtask.gated and not self.frozen
 
+        if self.attn_release is not None and self._held is not None:
+            # SL8b: the first-chosen object is let go when the seed attention keeps pointing elsewhere.
+            released = self._attention_release_step(seeds, clusters, candidates, adm, points,
+                                                    gated=self.subtask_gate and subtask_gated)
+            if released is not None:
+                return released
+
         if self._held is None:
             self._challenger, self._streak = None, 0
             if not candidates:
@@ -1277,6 +1336,13 @@ class TargetConfirm:
                     self._subtask_blocked = "first"
                     return self._record(None, -1, SUBTASK_GATED, reason=SUBTASK_GATED)
             first = candidates[0] if reselect is None else self._vacancy_pick(clusters, candidates)
+            if self._attn_pending and reselect is None:
+                # SL8b: after an attention release a new object is adopted only where the seeds are.
+                first = self._seed_majority(clusters, candidates, seeds, points)
+                if first is None:
+                    return self._record(None, -1, NO_ADMISSIBLE, reason=ATTENTION_RELEASE_NONE)
+                self._adopt(clusters[first], switched_from=None, adm=_at(adm, first))
+                return self._record(clusters[first], first, "first", reason=ATTENTION_RELEASE)
             if first is None:
                 # T81: no admissible candidate near the released place — no target (nothing excluded);
                 # the near-only re-pick stays pending for the next requests.
@@ -1347,6 +1413,8 @@ class TargetConfirm:
             # leading again after a gap has to start the count over.
             self._seen(clusters[held_rank], _at(adm, held_rank))
             self._challenger, self._streak = None, 0
+            if self.switch_window is not None:
+                self._vote(None)   # SL8b: a call without a vote ages the window, it does not clear it
             return self._record(clusters[held_rank], held_rank, "keep", reason=reason)
 
         challenger = clusters[lead] if lead is not None else None
@@ -1363,13 +1431,19 @@ class TargetConfirm:
             if self.subtask_gate:
                 self._subtask_blocked = "switch"
                 counts = False
-        if counts:
+        if counts and self.switch_window is not None:
+            # SL8b: votes for this challenger's place among the last W calls (not a consecutive run).
+            self._streak = self._vote(challenger.centroid)
+            self._challenger = np.asarray(challenger.centroid, np.float64).reshape(3)
+        elif counts:
             if self._challenger is not None and self._within(challenger.centroid, self._challenger):
                 self._streak += 1
             else:
                 self._streak = 1
             self._challenger = np.asarray(challenger.centroid, np.float64).reshape(3)
         else:
+            if self.switch_window is not None:
+                self._vote(None)   # SL8b: no vote this call; earlier votes age out of the window
             # A challenger under the minimum does not count, and it breaks the run: "N frames
             # running at or above the minimum" is the rule, so a sub-minimum frame is a gap. No
             # admissible challenger at all is a gap too, and so is a frozen (grasping) frame, a
@@ -1377,10 +1451,11 @@ class TargetConfirm:
             # (SUBTASK-c).
             self._challenger, self._streak = None, 0
 
-        if self._streak >= self.frames:
+        if self._streak >= (self.frames if self.switch_window is None else self.switch_votes):
             self._adopt(challenger, switched_from=self._id, adm=_at(adm, lead))
             self._challenger, self._streak = None, 0
-            return self._record(challenger, lead, "switch")
+            return self._record(challenger, lead, "switch",
+                                reason=None if self.switch_window is None else WINDOW_VOTE)
 
         if held_rank is None:
             # The held object produced no (admissible) cluster this frame. It is not replaced by
@@ -1405,6 +1480,7 @@ class TargetConfirm:
         self._frame += 1
         self.last_admissibility = None
         self._subtask_blocked = self._subtask_would = None
+        self.identity_record, self._seeds = None, None   # SL8b
         self._release_if_placed_home()
         if self.refused_release_frames is not None:
             self._release_if_refused()
@@ -1732,6 +1808,7 @@ class TargetConfirm:
     def _adopt(self, cluster: "ClusterInfo", *, switched_from: Optional[int],
                adm: Optional[Admissibility] = None) -> None:
         self._keep_anchor = False  # a new object has no anchor to keep
+        self._votes, self._attn_shares, self._attn_pending = [], [], False   # SL8b: a new object, new evidence
         self._id = self._next_id
         self._next_id += 1
         self._switched_from = switched_from
@@ -1757,7 +1834,8 @@ class TargetConfirm:
         if admissibility is None and adm is not None and cluster is not None and rank >= 0:
             admissibility = adm[rank]
         self.last = ConfirmDecision(
-            cluster, int(rank), mode, self._streak, self.frames,
+            cluster, int(rank), mode, self._streak,
+            self.frames if self.switch_window is None else self.switch_votes,   # SL8b: the vote threshold
             state="none" if self.state is None else str(self.state),
             manipulated_id=self._id, age_frames=int(self._age), reason=reason, admissibility=admissibility,
             n_admissible=None if adm is None else sum(1 for a in adm if a.admissible),
@@ -1766,6 +1844,93 @@ class TargetConfirm:
             subtask_label=self.subtask.label, subtask_blocked=self._subtask_blocked,
             latched_hold=bool(self._latched_hold))
         return self.last
+
+    # --- SL8b ------------------------------------------------------------------------------
+    def _vote(self, centroid) -> int:
+        """Window vote: push this call (a challenger centroid, or None = no vote), keep the last W calls, and
+        return how many of them voted for a challenger within `tolerance` of `centroid` (0 for None)."""
+        self._votes.append(None if centroid is None else np.asarray(centroid, np.float64).reshape(3))
+        del self._votes[:-int(self.switch_window)]
+        if centroid is None:
+            return 0
+        return sum(1 for v in self._votes if v is not None and self._within(v, centroid))
+
+    def _seed_shares(self, clusters, candidates, seeds, points) -> Optional[dict[int, float]]:
+        """Each admissible cluster's share of this frame's seed attention mass (`{rank: share}`), or None
+        when there are no seeds / no mass / no way to say which cluster a seed is in."""
+        if seeds is None:
+            return None
+        pts, att, idx = seeds
+        total = float(att.sum())
+        if len(att) == 0 or not total > 0.0:
+            return None
+        if idx is None:
+            if points is None:
+                return None
+            from scipy.spatial import cKDTree
+
+            cloud = np.asarray(points, np.float64).reshape(-1, 3)
+            dist, idx = cKDTree(cloud).query(pts)
+            idx = np.where(dist <= 1e-9, idx, -1)
+        return {i: float(att[np.isin(idx, np.asarray(clusters[i].point_indices, np.int64))].sum() / total)
+                for i in candidates}
+
+    def _seed_majority(self, clusters, candidates, seeds, points) -> Optional[int]:
+        """The admissible cluster holding >= `ATTENTION_RELEASE_MIN_SHARE` of the seed attention mass (the
+        largest share), or None. Recorded in `identity_record`."""
+        shares = self._seed_shares(clusters, candidates, seeds, points)
+        best = None if not shares else max(shares, key=lambda i: (shares[i], -i))
+        ok = best is not None and shares[best] >= ATTENTION_RELEASE_MIN_SHARE
+        self.identity_record = {"rule": "attention_release", "pending": True,
+                                "best_share": None if best is None else round(shares[best], 4),
+                                "adopted": bool(ok)}
+        return best if ok else None
+
+    def _attention_release_step(self, seeds, clusters, candidates, adm, points, *, gated: bool):
+        """SL8b 2.2 (see `clustering.identity_attention_release`). Returns the call's decision when it
+        released the held object (a `switch` or nothing held), None when the call goes on as usual."""
+        rec: dict[str, Any] = {"rule": "attention_release", "applies": False}
+        self.identity_record = rec
+        if self.frozen or self._latched:
+            self._attn_shares = []   # a grasp has begun: the evidence from before it is not carried over
+            rec["why"] = "frozen" if self.frozen else "latched"
+            return None
+        geom = self._geometry
+        if geom is None or seeds is None or gated:
+            rec["why"] = "gated" if gated else "no_geometry" if geom is None else "no_seeds"
+            return None
+        pts, att, _ = seeds
+        total = float(att.sum())
+        if len(att) == 0 or not total > 0.0:
+            rec["why"] = "no_seed_mass"
+            return None
+        from scipy.spatial import cKDTree
+
+        dist, _i = cKDTree(np.asarray(geom.points, np.float64).reshape(-1, 3)).query(pts)
+        off = float(att[dist > self.attn_radius].sum() / total)
+        self._attn_shares.append(off)
+        del self._attn_shares[:-int(self.attn_release)]
+        mean = float(np.mean(self._attn_shares))
+        rec.update({"applies": True, "off_share": round(off, 4), "mean_off_share": round(mean, 4),
+                    "n_calls": len(self._attn_shares), "decision": "keep"})
+        if len(self._attn_shares) < self.attn_release or mean < self.attn_off_frac:
+            return None
+        self._attn_shares = []
+        shares = self._seed_shares(clusters, candidates, seeds, points)
+        best = None if not shares else max(shares, key=lambda i: (shares[i], -i))
+        rec["best_share"] = None if best is None else round(shares[best], 4)
+        if best is not None and shares[best] >= ATTENTION_RELEASE_MIN_SHARE:
+            if best == self._nearest(clusters, self._held):
+                rec["decision"] = "same_object"   # the seeds are on the held object's own cluster
+                return None
+            rec["decision"] = "switch"
+            self._adopt(clusters[best], switched_from=self._id, adm=_at(adm, best))
+            self._challenger, self._streak = None, 0
+            return self._record(clusters[best], best, "switch", reason=ATTENTION_RELEASE)
+        rec["decision"] = "none"
+        self._forget_manipulated()
+        self._attn_pending = True
+        return self._record(None, -1, NO_ADMISSIBLE, reason=ATTENTION_RELEASE_NONE)
 
     def _within(self, a, b) -> bool:
         return float(np.linalg.norm(np.asarray(a, np.float64).reshape(3)
@@ -1991,6 +2156,8 @@ def ground_target(
     # what every direct caller gets and what makes this function reproducible from one frame. With
     # one, a challenger has to lead `target_confirm_frames` frames running before the target moves.
     with substage.part("grounding.confirm"):
+        if confirm is not None:
+            confirm.note_seeds(points[seeds], attention[seeds], seeds)   # SL8b (off: returns at once)
         decision = confirm.select(clusters, points=points) if confirm is not None else None
     if decision is not None and decision.mode == NO_ADMISSIBLE:
         # Nothing held yet and no cluster may become the manipulated object (T26) — e.g. the crate
@@ -2068,6 +2235,7 @@ def ground_target(
             **_association_metrics(None if decision is None else decision.association),
             **_split_metrics(chosen),
             **_hand_metrics(decision),
+            **_identity_metrics(confirm, decision),
         },
     )
     if confirm is not None:
@@ -2195,6 +2363,18 @@ def _follow_metrics(confirm: Optional["TargetConfirm"]) -> dict[str, float]:
     return out
 
 
+def _identity_metrics(confirm: Optional["TargetConfirm"], decision: Optional[ConfirmDecision]) -> dict[str, float]:
+    """SL8b: which identity rule moved the target on this call (flat metrics; none with both rules off)."""
+    if confirm is None or decision is None or not confirm.identity_rules_on:
+        return {}
+    out = {"identity_window_vote": float(decision.reason == WINDOW_VOTE),
+           "identity_attention_release": float(decision.reason == ATTENTION_RELEASE)}
+    rec = confirm.identity_record
+    if rec is not None and rec.get("off_share") is not None:
+        out["identity_attention_off_share"] = float(rec["off_share"])
+    return out
+
+
 def _hand_metrics(decision: Optional[ConfirmDecision]) -> dict[str, float]:
     """T32b S3: hand gap to the standing geometry and whether the hand hid it (flat metrics)."""
     if decision is None or decision.hand_gap_m is None:
@@ -2306,6 +2486,9 @@ __all__ = [
     "INADMISSIBLE_MATCH",
     "SUBTASK_GATED",
     "NO_ADMISSIBLE",
+    "WINDOW_VOTE",
+    "ATTENTION_RELEASE",
+    "ATTENTION_RELEASE_NONE",
     "UNCHECKED",
     "ClusterInfo",
     "ConfirmDecision",

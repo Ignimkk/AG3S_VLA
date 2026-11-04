@@ -2898,7 +2898,10 @@ class AG3S:
                    if self._target_confirm.latched_identity_hold else {}),
                 **({"refused_streak": self._target_confirm.refused_streak,
                     "refused_released": self._target_confirm.refused_released}
-                   if self._target_confirm.refused_release_frames is not None else {})},
+                   if self._target_confirm.refused_release_frames is not None else {}),
+                # SL8b — keys only when a window vote / attention release is configured.
+                **({"identity": self._target_confirm.identity_record}
+                   if self._target_confirm.identity_rules_on else {})},
             **({"support": self._target_confirm.last_support}
                if self._target_confirm.supported_max_bottom is not None else {}),
             "destination_streak": self._target_confirm.destinations.streak,

@@ -405,7 +405,10 @@ PB_DEFAULT_OFF = {"reach_at_capture": False, "minimal_intervention_mm": None, "l
                   # SL6-A A9 (2026-10-29): --hsr6-objective-scope, default `all` = AG3S-CORE-EVAL-HSR6 as before
                   "hsr6_objective_scope": "all",
                   # SL6-H (2026-10-30): --hsr6-placement-contact (HSR6 ⑤), default off
-                  "hsr6_placement_contact": False}
+                  "hsr6_placement_contact": False,
+                  # SL8b (2026-11-04): window-vote switch / attention release of the first-chosen object, default off
+                  "identity_switch_window": None, "identity_switch_votes": None, "identity_attention_release": None,
+                  "identity_attention_off_frac": None, "identity_attention_radius_mm": None}
 
 
 def _drop_sqp_default_off(cfg: dict) -> dict:

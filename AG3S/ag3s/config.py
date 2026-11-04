@@ -402,6 +402,22 @@ class ClusteringConfig:
     target_vacancy_frames: int = 2
     target_vacancy_near: float = 0.2
     # T81 — end
+    #: **SL8b — window-vote target switch** (default `None` = off, bit-identical). An integer W = a
+    #: challenger takes the target when it earned a vote on at least `target_switch_votes` of the last W
+    #: `select` calls (same challenger = within `target_identity_tolerance`; a vote needs what a
+    #: counted frame needs today). A call without a vote does not restart the count, it only ages out.
+    #: Off = the `target_confirm_frames` consecutive-streak rule.
+    target_switch_window: int | None = None
+    target_switch_votes: int = 3
+    #: **SL8b — attention release of the first-chosen object** (default `None` = off, bit-identical).
+    #: An integer K = before a grasp (something held, not frozen, not grasp-latched), when the share of this
+    #: frame's seed attention that lies farther than `identity_attention_radius` from the held object's
+    #: last observed geometry averaged `identity_attention_off_frac` or more over the last K calls, the
+    #: hold is released: the target moves to the admissible cluster holding >= 50% of the frame's seed
+    #: attention mass, or nothing is held (no target) until one does.
+    identity_attention_release: int | None = None
+    identity_attention_off_frac: float = 0.7
+    identity_attention_radius: float = 0.015
     #: **T43 T 3(b) — release an identity the exclusion gate keeps refusing.** An integer N = when
     #: `AG3S._exclusion_gate` refuses the manipulated object because it overlaps the destination on
     #: N consecutive grounding calls (and nothing is frozen), the identity is let go at the start of
@@ -588,6 +604,26 @@ class ClusteringConfig:
             val = getattr(self, name)
             if isinstance(val, bool) or not isinstance(val, int) or val < 1:
                 raise AG3SConfigError(f"clustering.{name} must be an integer >= 1, got {val!r}")
+        for name in ("target_switch_window", "identity_attention_release"):   # SL8b
+            val = getattr(self, name)
+            if val is not None and (isinstance(val, bool) or not isinstance(val, (int, float))
+                                    or not float(val).is_integer() or val < 1):
+                raise AG3SConfigError(f"clustering.{name} must be null (off) or an integer >= 1, got {val!r}")
+        tv = self.target_switch_votes
+        if isinstance(tv, bool) or not isinstance(tv, int) or tv < 1 or (
+                self.target_switch_window is not None and tv > self.target_switch_window):
+            raise AG3SConfigError(
+                f"clustering.target_switch_votes must be an integer in [1, target_switch_window], got {tv!r} "
+                f"(window {self.target_switch_window!r})")
+        fr = self.identity_attention_off_frac
+        if isinstance(fr, bool) or not (isinstance(fr, (int, float)) and 0.0 < float(fr) <= 1.0):
+            raise AG3SConfigError(
+                f"clustering.identity_attention_off_frac must be a fraction in (0, 1], got {fr!r}")
+        rad = self.identity_attention_radius
+        if isinstance(rad, bool) or not (isinstance(rad, (int, float)) and math.isfinite(float(rad))
+                                         and float(rad) > 0.0):
+            raise AG3SConfigError(
+                f"clustering.identity_attention_radius must be a finite length > 0 in metres, got {rad!r}")
         if not isinstance(self.held_slip_detach, bool):
             raise AG3SConfigError(
                 f"clustering.held_slip_detach must be true or false, got {self.held_slip_detach!r}")

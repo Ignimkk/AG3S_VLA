@@ -1020,6 +1020,42 @@ def target_vacancy_section(args) -> dict:
 # T81 — end
 
 
+# SL8b — begin
+def identity_rules_section(args) -> dict:
+    """SL8b — `clustering` keys of the window-vote switch and the attention release, for the given flags only
+    (none = `{}`, config as is = both off). Merged into `t43t_identity_section`, so `assert_ag3s_config`
+    checks that they survived `with_overrides`."""
+    out: dict = {}
+    if getattr(args, "identity_switch_window", None) is not None:
+        out["target_switch_window"] = int(args.identity_switch_window)
+        if getattr(args, "identity_switch_votes", None) is not None:
+            out["target_switch_votes"] = int(args.identity_switch_votes)
+    if getattr(args, "identity_attention_release", None) is not None:
+        out["identity_attention_release"] = int(args.identity_attention_release)
+        if getattr(args, "identity_attention_off_frac", None) is not None:
+            out["identity_attention_off_frac"] = float(args.identity_attention_off_frac)
+        if getattr(args, "identity_attention_radius_mm", None) is not None:
+            out["identity_attention_radius"] = float(args.identity_attention_radius_mm) / 1000.0
+    return out
+
+
+def reject_identity_rules_flags(ap, args) -> None:
+    """SL8b — a threshold without its rule, and out-of-range values, are refused at start."""
+    if getattr(args, "identity_switch_window", None) is None and getattr(args, "identity_switch_votes", None) is not None:
+        ap.error("--identity-switch-votes 는 --identity-switch-window 의 문턱입니다 — 함께 주십시오")
+    if getattr(args, "identity_attention_release", None) is None and any(
+            getattr(args, f, None) is not None for f in ("identity_attention_off_frac", "identity_attention_radius_mm")):
+        ap.error("--identity-attention-off-frac · --identity-attention-radius-mm 는 --identity-attention-release 의 "
+                 "문턱입니다 — 함께 주십시오")
+    try:
+        from AG3S.ag3s.config import ClusteringConfig
+
+        ClusteringConfig(**identity_rules_section(args)).validate()   # the config's own range checks
+    except Exception as exc:  # AG3SConfigError
+        ap.error(f"identity rule flags: {exc}")
+# SL8b — end
+
+
 def t43t_identity_section(args) -> dict:
     """T43 T fix 3 — `clustering` keys for the given flags only (none given = `{}`, config as is)."""
     out = {}
@@ -1030,6 +1066,7 @@ def t43t_identity_section(args) -> dict:
     if getattr(args, "latched_identity_hold", False):
         out["latched_identity_hold"] = True
     out.update(target_vacancy_section(args))   # T81 (off: {})
+    out.update(identity_rules_section(args))   # SL8b (off: {})
     if getattr(args, "refused_identity_release", None) is not None:
         out["refused_identity_release_frames"] = int(args.refused_identity_release)
     if getattr(args, "supported_max_bottom_mm", None) is not None:
@@ -2723,6 +2760,23 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--target-vacancy-samples", type=int, default=None, metavar="N",
                     help="T81 — 옛 위치 표본 점 수 상한 (기본 config 값)")
     # T81 — end
+    # SL8b — begin
+    ap.add_argument("--identity-switch-window", type=int, default=None, metavar="W",
+                    help="SL8b — target 교체를 '같은 도전자가 연속 N 프레임' 대신 '최근 W 번의 grounding 호출 중 "
+                         "--identity-switch-votes 번 이상 1위' 로 센다 (표를 못 얻은 호출은 count 를 0 으로 만들지 "
+                         "않고 창에서 밀려 난다). 기본 off = 연속 규칙")
+    ap.add_argument("--identity-switch-votes", type=int, default=None, metavar="M",
+                    help="SL8b — 창 투표의 교체 표 수 (--identity-switch-window 필요, 기본 config 값 3)")
+    ap.add_argument("--identity-attention-release", type=int, default=None, metavar="K",
+                    help="SL8b — 쥐기 전 (유지 중 · 동결 아님 · latch 아님) 이번 frame seed 의 attention 이 유지 물체의 "
+                         "마지막 형상에서 --identity-attention-radius-mm 밖에 있는 비율의 최근 K 호출 평균이 "
+                         "--identity-attention-off-frac 이상이면 고정을 푼다: seed attention 질량의 50%% 이상을 가진 "
+                         "admissible cluster 로 교체, 없으면 target 없음. 기본 off")
+    ap.add_argument("--identity-attention-off-frac", type=float, default=None, metavar="F",
+                    help="SL8b — 해제 문턱 (--identity-attention-release 필요, 기본 config 값 0.7)")
+    ap.add_argument("--identity-attention-radius-mm", type=float, default=None, metavar="MM",
+                    help="SL8b — seed 가 유지 물체 위라고 보는 거리 (--identity-attention-release 필요, 기본 15)")
+    # SL8b — end
     ap.add_argument("--refused-identity-release", type=int, default=None, metavar="N",
                     help="T43 T 3(b) — exclusion 관문이 조작 대상을 목적지 겹침으로 N 프레임 연속 "
                          "거절하면 그 정체를 놓고 first 로 다시 고른다. 기본 off")
@@ -3831,6 +3885,8 @@ def reject_bad_flag_combinations(ap: argparse.ArgumentParser, args, *, seed_map_
         ("--target-volume-exempt", getattr(args, "target_volume_exempt", False)),
         ("--latched-identity-hold", getattr(args, "latched_identity_hold", False)),
         ("--target-vacancy-release", getattr(args, "target_vacancy_release", False)),   # T81
+        ("--identity-switch-window", getattr(args, "identity_switch_window", None) is not None),   # SL8b
+        ("--identity-attention-release", getattr(args, "identity_attention_release", None) is not None),   # SL8b
         ("--refused-identity-release", getattr(args, "refused_identity_release", None) is not None),
         ("--supported-max-bottom-mm", getattr(args, "supported_max_bottom_mm", None) is not None),
         ("--held-slip-detach", getattr(args, "held_slip_detach", False)),
@@ -3845,6 +3901,7 @@ def reject_bad_flag_combinations(ap: argparse.ArgumentParser, args, *, seed_map_
             getattr(args, f, None) is not None for f in _T81_THRESHOLDS):   # T81
         ap.error("--target-vacancy-delta-mm · -p-empty · -p-present · -min-points · -samples 는 "
                  "--target-vacancy-release 의 문턱입니다 — 함께 주십시오")
+    reject_identity_rules_flags(ap, args)   # SL8b
     if t43t_ag3s and (args.no_safe or getattr(args, "no_perception", False)):
         ap.error(f"{', '.join(t43t_ag3s)} 는 AG3S / SafePolicy 의 flag 입니다 (--no-safe · "
                  "--no-perception 은 그것을 안 만듭니다) — 빼고 띄우십시오")
