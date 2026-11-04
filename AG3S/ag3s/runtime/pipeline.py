@@ -373,6 +373,15 @@ class AG3S:
         #: (the stash copies; it feeds nothing back).
         self.record_held_free: bool = False
         self._held_free_stash: Optional[dict[str, Any]] = None
+        #: SL10d (benchmark branch, 2026-11-05): ``False`` (default) = `_held_free_points` frees the held spheres of
+        #: `self._attached` (the J1-lifted fit sphere) -- bit-identical to before. ``True`` = it also frees the spheres
+        #: the solver is **queried** with this frame (`_frame_held_attached`: with `held_body_cover` the body-cover
+        #: segments, lifted or not by the frame's near-support rule), moved from the parent link to base at the same
+        #: `robot_state`. Union, nothing is removed; floor rule, destination exclusion and the first-frame capture
+        #: spheres are the ones they were. Why: with `held_body_cover` the two definitions part (the fit sphere is
+        #: lifted ~47 mm, the query segments are not), so the query spheres sit 45-60 % inside voxels nobody freed
+        #: and the bowl's own surface there reads as an obstacle (`SL10d.task.md`).
+        self.held_free_query_spheres: bool = False
         #: T32 H1: the held object's spheres join the **self-filter** sphere set while attached
         #: (cuRobo attach semantics) — its pixels are removed like the robot's and never reach the
         #: TSDF. A public switch for ablation/measurement only; the live path keeps it on.
@@ -3803,7 +3812,8 @@ class AG3S:
         held_free = None
         if cfg.backend == "curobo" and self._attached is not None and robot_state is not None \
                 and self.free_held_traces and self.constraint_robot_model is not None:
-            held_free = self._held_free_points(robot_state, support_surfaces, destination_points)
+            held_free = self._held_free_points(robot_state, support_surfaces, destination_points,
+                                               execution_path=execution_path)
         # AG3S-DYNAMIC-FIELD D2: the volume the robot body occupies now → free (off: None, the call as before).
         robot_free = None
         if cfg.backend == "curobo" and bool(getattr(cfg, "robot_occupied_free", False)) \
@@ -4193,7 +4203,7 @@ class AG3S:
                 else np.asarray(destination_points, np.float64).reshape(-1, 3))
         return {"centres": c, "radii": r, "z_min": z_min, "destination": dest, "dest_pad": 2.0 * pad}
 
-    def _held_free_points(self, robot_state, support_surfaces, destination_points):
+    def _held_free_points(self, robot_state, support_surfaces, destination_points, execution_path=None):
         """Points whose TSDF voxels are set **free** this frame (T32 H3), or None.
 
         The held spheres at `robot_state` (every held frame), plus on the first held frames the
@@ -4226,6 +4236,15 @@ class AG3S:
         if self._held_first_free_frames > 0:
             spheres = spheres + list(self._held_first_free)
             self._held_first_free_frames -= 1
+        n_before_query = len(spheres)
+        if self.held_free_query_spheres:
+            # SL10d: + the spheres the solver is queried with this frame (same definition, same `robot_state`).
+            # Appended after the first-frame spheres; the floor / destination rules below apply to them too.
+            query_held = self._frame_held_attached(robot_state, support_surfaces, execution_path)
+            query_local = held_spheres_of(query_held) or []
+            Tq = _link_pose_numeric(self.constraint_robot_model, np.asarray(robot_state, np.float64),
+                                    query_held.parent_link)
+            spheres = spheres + [(Tq[:3, :3] @ c + Tq[:3, 3], r) for c, r in query_local]
         cfg = self.config.esdf
         tsdf_voxel = float(getattr(cfg, "tsdf_voxel_size", None) or cfg.voxel_size)
         pad = self._guard_pad()
@@ -4256,7 +4275,7 @@ class AG3S:
             self._held_free_stash = {
                 "spheres": np.asarray([[*np.asarray(c, np.float64).reshape(3), float(r)] for c, r in spheres],
                                       np.float64).reshape(-1, 4),
-                "first": np.arange(len(spheres)) >= n_held_spheres,
+                "first": (np.arange(len(spheres)) >= n_held_spheres) & (np.arange(len(spheres)) < n_before_query),
                 "z_min_m": None if z_plane is None else float(z_plane) + float(pad),
                 "support_plane_z_m": None if z_plane is None else float(z_plane),
                 "guard_pad_m": float(pad),
@@ -4272,6 +4291,8 @@ class AG3S:
                 "destination_exclusion_m": (2.0 * float(pad) if destination_points is not None
                                             and len(destination_points) else None),
                 "n_points_freed": int(len(pts)),
+                # SL10d: only with the switch on (off: the keys the record always had)
+                **({"query_spheres_added": int(len(spheres) - n_before_query)} if self.held_free_query_spheres else {}),
             }
         return pts if len(pts) else None
 

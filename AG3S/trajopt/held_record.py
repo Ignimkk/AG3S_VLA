@@ -19,7 +19,7 @@ from typing import Any, Optional
 
 import numpy as np
 
-__all__ = ["build_held_record"]
+__all__ = ["build_held_record", "query_freed_fraction"]
 
 
 def _plain(d: dict[str, Any]) -> dict[str, Any]:
@@ -74,6 +74,11 @@ def build_held_record(*, constraint_set, snapshot, linearizer, trajectory, q_now
         summary["attached"] = {"parent_link": parent, "n": int(len(pts)),
                                "radii_given": getattr(snapshot, "attached_radii", None) is not None}
         _query_spheres(arrays, summary, linearizer, trajectory, q_now, radii, len(pts), parent)
+        # SL10d: only when `held_free_query_spheres` is on (its stash carries `query_spheres_added`); off: the keys SL10c wrote.
+        if (held_free is not None and "query_spheres_added" in held_free and "attached_query_spheres" in arrays
+                and "held_free_spheres" in arrays):
+            summary["attached_query"]["freed"] = query_freed_fraction(
+                arrays["attached_query_spheres"], arrays["held_free_spheres"], held_free.get("z_min_m"))
     else:
         summary["attached"] = None
 
@@ -114,3 +119,34 @@ def _query_spheres(arrays, summary, linearizer, trajectory, q_now, radii, n, par
         except Exception as exc:  # noqa: BLE001 — a record must not kill the policy; say why instead
             note = f"{type(exc).__name__}: {exc}"
     summary["attached_query"] = {"available": note is None, **({} if note is None else {"why_not": note})}
+
+
+def query_freed_fraction(query_spheres, free_spheres, z_min=None, *, n_axis: int = 9) -> dict[str, Any]:
+    """SL10d -- how much of the volume of the solver's query spheres lies inside the spheres the TSDF freed (both base frame).
+
+    Each query sphere is sampled on an `n_axis`^3 lattice (the points inside it); a point counts as freed if it is inside any
+    freed sphere. `fraction` is over all sampled points (the SL10c lead measure: 0.45-0.60 without the switch);
+    `fraction_above_floor` over the points at or above `z_min` (the floor rule of `_held_free_points`: below it nothing is
+    freed whatever the spheres say). The destination exclusion is not modelled. Pure function of its two arrays.
+    """
+    q = np.asarray(query_spheres, np.float64).reshape(-1, 4)
+    f = np.asarray(free_spheres, np.float64).reshape(-1, 4)
+    per, per_floor = [], []
+    n_all = n_in = n_fl = n_fl_in = 0
+    for cx, cy, cz, r in q:
+        axis = np.linspace(-r, r, int(n_axis))
+        g = np.stack(np.meshgrid(axis, axis, axis, indexing="ij"), -1).reshape(-1, 3)
+        g = g[np.einsum("ij,ij->i", g, g) <= r * r] + np.array([cx, cy, cz])
+        inside = np.zeros(len(g), bool)
+        for fx, fy, fz, fr in f:
+            inside |= np.einsum("ij,ij->i", g - [fx, fy, fz], g - [fx, fy, fz]) <= fr * fr
+        above = np.ones(len(g), bool) if z_min is None else g[:, 2] >= float(z_min)
+        per.append(round(float(inside.mean()), 4))
+        per_floor.append(None if not above.any() else round(float(inside[above].mean()), 4))
+        n_all += len(g)
+        n_in += int(inside.sum())
+        n_fl += int(above.sum())
+        n_fl_in += int((inside & above).sum())
+    return {"fraction": None if n_all == 0 else round(n_in / n_all, 4),
+            "fraction_above_floor": None if n_fl == 0 else round(n_fl_in / n_fl, 4),
+            "per_sphere": per, "per_sphere_above_floor": per_floor, "n_sample_points": int(n_all)}

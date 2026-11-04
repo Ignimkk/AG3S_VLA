@@ -1382,7 +1382,9 @@ def ag3s_from_args(args, *, plan_horizon_steps, rows_per_step):
                       # IFG-S2SERVE — 켰을 때만 (기본 off = None, AG3S 호출이 예전 그대로).
                       confidence_gate=confidence_gate_from_args(args),
                       # V11AB-pb1 (benchmark branch) — off by default.
-                      reach_at_capture=bool(getattr(args, "reach_at_capture", False)))
+                      reach_at_capture=bool(getattr(args, "reach_at_capture", False)),
+                      # SL10d (benchmark branch) -- off by default.
+                      held_free_query_spheres=bool(getattr(args, "held_free_query_spheres", False)))
 
 
 def build_ag3s(model_xml: str, *, voxel: float, range_max: float, links: str,
@@ -1408,6 +1410,7 @@ def build_ag3s(model_xml: str, *, voxel: float, range_max: float, links: str,
                identity: dict | None = None,
                held_free_observed_pad: float | None = None,
                reach_at_capture: bool = False,
+               held_free_query_spheres: bool = False,
                target_exclusion: dict | None = None,
                contact: dict | None = None,
                confidence_gate=None):
@@ -1796,6 +1799,10 @@ def build_ag3s(model_xml: str, *, voxel: float, range_max: float, links: str,
         logging.warning("AG3S held_free: + the manipulated object's last pre-grasp observation "
                         "(%.1f mm pad, at its place) on every held frame (T43 T fix 2)",
                         ag3s.held_free_observed_pad * 1000.0)
+    if held_free_query_spheres:
+        # SL10d -- the held frees also the spheres the solver is queried with (pipeline.held_free_query_spheres).
+        ag3s.held_free_query_spheres = True
+        logging.warning("AG3S held_free: + the spheres the solver is queried with this frame (SL10d)")
     return ag3s
 
 
@@ -3047,6 +3054,11 @@ def build_parser() -> argparse.ArgumentParser:
                     help="T43 T fix 2 — 쥔 동안 매 프레임, 파지 직전 관측한 조작 대상 점들의 **그 자리** "
                          "(base frame, 손을 따라가지 않음) 에서 MM 안의 TSDF voxel 을 비운다 (받침면 + 1 "
                          "voxel 위만, 목적지 근처 제외). cuRobo backend 만. 기본 off. 근거값 15")
+    ap.add_argument("--held-free-query-spheres", action="store_true",
+                    help="SL10d (benchmark branch): 쥔 동안 TSDF 에서 비우는 구에 solver 가 그 프레임 충돌 질의에 쓰는 "
+                         "부착 구 (--held-body-cover 의 몸통 구, q_now 에서 parent link 로 옮긴 것) 를 더한다 "
+                         "(합집합; 받침면 아래·목적지 근처 제외·첫 프레임 capture 구는 그대로). cuRobo backend + "
+                         "--held-body-cover 와 함께만. 기본 off")
     ap.add_argument("--static-geometry", default="none", metavar="none|auto|PATH",
                     help="아는 고정 기하(벽·선반·테이블·바닥)를 해석적 채널에 싣는다 — 거리장이 "
                          "min(복셀, 해석적) 을 답해 미관측·격자 밖의 낙관을 없앤다 (E4·N2). "
@@ -4216,7 +4228,8 @@ def reject_bad_flag_combinations(ap: argparse.ArgumentParser, args, *, seed_map_
         ("--latch-carry-from-closing", getattr(args, "latch_carry_from_closing", False)),  # IFG-HSR2
         ("--held-cover-cap-mm", getattr(args, "held_cover_cap_mm", None) is not None),
         ("--hold-follow-to", getattr(args, "hold_follow_to", None) is not None),
-        ("--held-free-observed-mm", getattr(args, "held_free_observed_mm", None) is not None))
+        ("--held-free-observed-mm", getattr(args, "held_free_observed_mm", None) is not None),
+        ("--held-free-query-spheres", getattr(args, "held_free_query_spheres", False)))   # SL10d
         if on]
     if not getattr(args, "target_vacancy_release", False) and any(
             getattr(args, f, None) is not None for f in _T81_THRESHOLDS):   # T81
@@ -4266,6 +4279,11 @@ def reject_bad_flag_combinations(ap: argparse.ArgumentParser, args, *, seed_map_
     if (getattr(args, "held_free_observed_mm", None) is not None
             and getattr(args, "esdf_backend", None) != "curobo"):
         ap.error("--held-free-observed-mm 는 cuRobo TSDF 의 voxel 을 비웁니다 (--esdf-backend curobo)")
+    if getattr(args, "held_free_query_spheres", False) and (
+            getattr(args, "esdf_backend", None) != "curobo" or not getattr(args, "held_body_cover", False)):
+        ap.error("--held-free-query-spheres 는 cuRobo TSDF 의 voxel 을 비웁니다 (--esdf-backend curobo) 그리고 "
+                 "질의 구가 쥔 몸통 구일 때만 기존 구와 다릅니다 (--held-body-cover). 그대로 띄우면 효과가 "
+                 "있었다고 믿게 됩니다 — 함께 주십시오")
     if getattr(args, "held_body_cover", False) and (args.no_safe
                                                     or getattr(args, "no_perception", False)):
         ap.error("--held-body-cover 는 AG3S 의 쥔 물체 질의 구를 고치는 flag 입니다 "
