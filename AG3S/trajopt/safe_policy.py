@@ -217,6 +217,9 @@ class SafePolicy:
     _last_grasp_corridor: dict = {}
     #: T72 — same reason (test doubles built without `__init__` read "grasp set off").
     _grasp_set: Any = None
+    #: SL10 §2.2 — `() -> ActionBox | None` of this chunk (Panda adapter), or None = no action-limit rows; class default
+    #: for test doubles built without `__init__`.
+    action_box_fn: Any = None
 
     def __init__(self, policy, *, ag3s, to_config: Optional[TrajOptConfig] = None,
                  attention_fn: Optional[Callable[[dict, dict], dict]] = None,
@@ -247,7 +250,8 @@ class SafePolicy:
                  hsr5: Any = None,
                  subtask_from_latch: bool = False,   # T92
                  subtask_from_phase_machine: bool = False,   # T91c
-                 fm_guide: Any = None):   # T93
+                 fm_guide: Any = None,   # T93
+                 action_box_fn: Any = None):   # SL10 §2.2
         # SL5a — robot injection points (`layout`, `gripper_columns`, `finger_map`, `hands`). All None
         # (default) = the RB-Y1 behaviour below, unchanged: `ChunkLayout.rby1(model.joint_names)`,
         # `wire.gripper_columns(nq_opt // 2)`, `FingerJointMap` from the RB-Y1 client convention, and the
@@ -256,6 +260,9 @@ class SafePolicy:
         self._hands: Optional[dict[str, int]] = None if hands is None else {
             str(h): int(i) for h, i in dict(hands).items()}
         self._policy = policy
+        #: SL10 §2.2 — see the class default. Called once per request after the policy ran (the adapter's conversion of
+        #: this request's chunk is then the latest one); the box goes to the refiner as `context["action_box"]`.
+        self.action_box_fn = action_box_fn
         #: AG3S-CORE-EVAL-HSR6 — the four uses of the 6-phase probe (`hsr6.Hsr6Flags`, `serve_safe --hsr6-*`). None or
         #: every flag off = off: no `result["hsr6"]` is read, every decision / record as before.
         self.hsr6 = hsr6 if (hsr6 is not None and bool(getattr(hsr6, "on", False))) else None
@@ -846,6 +853,10 @@ class SafePolicy:
         self._last_ta_history = {}
         history = self._ta_history(feedback)
         context.update(history)
+        if self.action_box_fn is not None:
+            box = self.action_box_fn()
+            if box is not None:
+                context["action_box"] = box
         t = time.monotonic()
         refined = self.refiner.refine(chunk, context)
         timing["trajopt"] = (time.monotonic() - t) * 1000.0 - timing.get("ag3s", 0.0)
@@ -1149,6 +1160,8 @@ class SafePolicy:
             # V11AB-pb2 — minimal intervention gate (only when on).
             **({"minimal_intervention": _jsonable(metrics["minimal_intervention"])}
                if "minimal_intervention" in metrics else {}),
+            # SL10 §2.2 — the Panda controller's action limit rows (only with `--to-action-box`).
+            **({"action_box": _jsonable(metrics["action_box"])} if "action_box" in metrics else {}),
             "reference_deviation": round(
                 float(getattr(result, "reference_deviation", 0.0) or 0.0), 6),
         }

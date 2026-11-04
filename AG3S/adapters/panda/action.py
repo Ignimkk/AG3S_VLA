@@ -328,6 +328,30 @@ def joint_chunk_to_delta_chunk(kin: PandaKinematics, conv: Conversion, refined: 
     return out, rec
 
 
+def action_box_from_conversion(conv: Conversion, *, margin: float, n_rows: int, mode: str = "C",
+                               response: Optional[dict] = None):
+    """SL10 §2.2 -- the TrajOpt action-limit rows of this chunk (``AG3S.trajopt.action_box.ActionBox``).
+
+    Every constant is this module's own (never copied): the response model ``RESPONSE`` (fit json), the OSC scales and the
+    input clip. Reverse modes A and C invert the lag, ``Dx = (Dy - alpha Dy_prev) / beta``; mode B adds ``Dy`` unchanged
+    (``alpha = 0``, ``beta = 1``)."""
+    from AG3S.trajopt.action_box import ActionBox
+
+    if mode not in CONVERSION_MODES:
+        raise ValueError(f"conversion mode {mode!r} not in {sorted(CONVERSION_MODES)}")
+    resp = response or RESPONSE
+    (ap, bp), (ar, br) = resp["pos"], resp["rot"]
+    if mode == "B":
+        ap = ar = 0.0
+        bp = br = 1.0
+    A = np.asarray(conv.delta, np.float64)[:, :6]
+    return ActionBox(link=EE_LINK, actions=np.clip(A, -OSC_INPUT_CLIP, OSC_INPUT_CLIP),
+                     R_world_base=np.asarray(conv.R_world_base, np.float64), q_now=np.asarray(conv.q_now, np.float64),
+                     alpha=np.array([ap] * 3 + [ar] * 3), beta=np.array([bp] * 3 + [br] * 3),
+                     scale=np.array([OSC_POS_SCALE] * 3 + [OSC_ORI_SCALE] * 3), margin=float(margin),
+                     n_rows=int(n_rows), input_clip=OSC_INPUT_CLIP, mode=mode)
+
+
 def apply_deferred_close(actions: np.ndarray, refined: np.ndarray, reference: np.ndarray) -> tuple[np.ndarray, dict]:
     """SL6-A A8 — the geometric grasp (G1, ``geo_grasp.close_gate``) deferred the policy's close on this chunk: the
     refined joint chunk keeps the gripper column (7) open from the close row, but the reverse conversion sends the
