@@ -7,13 +7,18 @@ specific -- ``client_argv`` (client script ``libero_safety_client.py`` under ``.
 calls the launcher's own ``run_mode`` / ``paired_summary`` (GPU lock, server lifetime, manifests unchanged).
 When the shared launcher gains these hooks (BM-SETUP-B.impl.md "hook requests") this file goes away.
 
+``--record-constraints {none,occupancy,full}`` (SL10g, default ``none``) is the shared launcher's option: ``lp.run_mode``
+appends ``--record-constraints <run_dir>/server_constraints --record-constraints-esdf <value>`` to the vla_v11ab server
+and writes ``settings.record_constraints`` / ``launcher_result.record_constraints``; ``none`` leaves argv unchanged.
+
 Refusals (before any run directory is allocated):
   * ``--policy-checkpoint pi05_libero_safety`` while openpi has no ``pi05_libero_safety`` TrainConfig (its norm
     stats live under ``assets/lerobot``; ``pi05_libero`` reads ``assets/physical-intelligence/libero``) -- hook H1;
   * ``vla_v11ab`` with ``pi05_libero_safety``: the Panda conversion (``AG3S/adapters/panda/action.py``) models the
     robosuite 1.4.1 OSC (0.05 m / 0.5 rad per unit, kp 150) but this policy emits actions for the LIBERO-Safety
     fork (2.0 / 2.0, kp 750) -- hook H2;
-  * dev split = init states 0-4 (user decision 2026-10-23); anything else needs ``--data-split test`` (5-49).
+  * dev split = init states 0-4 (user decision 2026-10-23); anything else needs ``--data-split test`` (5-49);
+  * ``--record-constraints`` other than ``none`` together with the ``vla_only`` mode.
 
     source scripts/setup/env.sh
     .venv-ag3s/bin/python benchmark/runners/launch_libero_safety_paired.py --task-suite-name human_safety --level 0 \
@@ -172,6 +177,10 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--allow-unscaled-v11ab", action="store_true",
                     help="diagnostic only: run vla_v11ab with pi05_libero_safety although the Panda conversion "
                          "assumes the robosuite 1.4.1 OSC scale")
+    ap.add_argument("--record-constraints", choices=lp.RECORD_CONSTRAINTS_CHOICES, default="none",
+                    help="SL10g -- vla_v11ab server only: serve_safe --record-constraints <run_dir>/server_constraints "
+                         "--record-constraints-esdf <value> (per-call constraint npz; same as launch_libero_paired.py). "
+                         "none = argv and settings unchanged")
     ap.add_argument("--dry-run", action="store_true")
     ap.add_argument("--host", default="127.0.0.1")
     return ap
@@ -182,18 +191,22 @@ def main(argv=None) -> int:
     for name, value in (("resize_size", 224), ("replan_steps", 5), ("num_steps_wait", lsc.NUM_STEPS_WAIT)):
         setattr(args, name, value)
     args.safety_level = None  # SafeLIBERO field of the shared launcher; LIBERO-Safety uses --level
-    args.record_constraints = "none"
     if os.environ.get("AG3S_PROJECT_ROOT") != str(PROJECT_ROOT):
         raise RuntimeError("source scripts/setup/env.sh of this checkout first")
     modes = [m for m in args.modes.split(",") if m]
     check(args, modes)
+    if args.record_constraints != "none" and "vla_only" in modes:   # same refusal as launch_libero_paired.main
+        raise ValueError(f"--record-constraints {args.record_constraints} cannot run with the vla_only mode "
+                         "(--no-safe server, no constraints); pass --modes vla_v11ab")
     install_hooks(args)
     identity = checkpoint_identity(args.policy_checkpoint, require=True)
     args.data_split = SPLIT_TEXT[args.data_split]
     run_id = args.run_id
     args.run_id = f"{run_id}-{args.task_suite_name}-L{args.level}-{args.policy_checkpoint}"
     if args.dry_run:
-        print(json.dumps({m: lp.server_argv(m, identity["path"], 0, args.ag3s_version) for m in modes}, indent=1))
+        print(json.dumps({m: lp.server_argv(m, identity["path"], 0, args.ag3s_version)
+                          + lp.record_constraints_argv(m, lp.RUN_DIR_TOKEN, args.record_constraints) for m in modes},
+                         indent=1))
         print(json.dumps(lp.client_argv("<run>", 0, args)))
         print(json.dumps({"run_id": args.run_id, "protocol": protocol_settings(args),
                           "runtime_schedule": runtime_schedule(args), "checkpoint": identity}, default=str))
