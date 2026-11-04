@@ -1167,6 +1167,8 @@ GEOM_CLASSES = ("target", "support", "destination", "other", "robot", "ghost")
 ROBOT_BODY_PREFIX = ("robot0_", "gripper0_", "mount0_")
 SUPPORT_BODIES = ("world", "table")
 GHOST_MM = 30.0
+#: 서버 verdict 의 대표 위반 점(쥔 물체 부착 구 등; 구 반지름 · margin 이 기록에 없다) 주변에서 점유 voxel 을 찾는 반경.
+VERDICT_POINT_RADIUS_M = 0.06
 
 
 def geom_signed_distance(points: np.ndarray, xpos, xmat, size, gtype) -> np.ndarray:
@@ -1198,8 +1200,17 @@ def geom_signed_distance(points: np.ndarray, xpos, xmat, size, gtype) -> np.ndar
     return out
 
 
-def classify_points(points_world: np.ndarray, snap: dict, *, target_body: Optional[str],
-                    destination_body: Optional[str], ghost_m: float = GHOST_MM / 1000.0) -> dict[str, Any]:
+def _body_set(x) -> frozenset:
+    """body 이름 하나(str) · 이름 모음 · None → frozenset."""
+    if x is None:
+        return frozenset()
+    if isinstance(x, str):
+        return frozenset([x])
+    return frozenset(str(b) for b in x)
+
+
+def classify_points(points_world: np.ndarray, snap: dict, *, target_body, destination_body,
+                    ghost_m: float = GHOST_MM / 1000.0) -> dict[str, Any]:
     """world 좌표의 점들을 MuJoCo geom class 로 센다. `snap` 은 `load_geom_snapshot` 의 dict (한 프레임).
 
     가장 가까운 collision geom 의 body 로 가른다: target body → `target`, `world` · `table` → `support`,
@@ -1208,6 +1219,7 @@ def classify_points(points_world: np.ndarray, snap: dict, *, target_body: Option
     contype = np.asarray(snap["geom_contype"]) | np.asarray(snap["geom_conaffinity"])
     cols = np.flatnonzero(contype > 0)
     names = [str(n) for n in snap["body_names"]]
+    target_set, dest_set = _body_set(target_body), _body_set(destination_body)
     out = {k: 0 for k in GEOM_CLASSES}
     if not len(points_world):
         return {"counts": out, "geom_of_point": []}
@@ -1220,11 +1232,11 @@ def classify_points(points_world: np.ndarray, snap: dict, *, target_body: Option
     for b, dist in zip(body, near_d):
         if dist > ghost_m:
             c = "ghost"
-        elif target_body and b == target_body:
+        elif b in target_set:
             c = "target"
         elif b in SUPPORT_BODIES:
             c = "support"
-        elif destination_body and b == destination_body:
+        elif b in dest_set:
             c = "destination"
         elif b.startswith(ROBOT_BODY_PREFIX):
             c = "robot"
@@ -1245,7 +1257,15 @@ def load_geom_snapshot(path: pathlib.Path, obs_index: int) -> Optional[dict]:
     snap = {k: z[k] for k in ("geom_type", "geom_size", "geom_bodyid", "geom_contype", "geom_conaffinity",
                               "body_names", "geom_names")}
     snap.update(geom_xpos=z["geom_xpos"][i], geom_xmat=z["geom_xmat"][i])
+    for key in ("target_bodies", "destination_bodies"):      # panda_geom_snapshot.py 가 BDDL 에서 적는다 (없으면 추정)
+        if key in z.files:
+            snap[key] = [str(b) for b in z[key]]
     return snap
+
+
+def geom_snapshot_dir_path(directory, stem: str) -> pathlib.Path:
+    """`panda_geom_snapshot.py` 가 쓰는 `<dir>/<stem>_geomsnap.npz`."""
+    return pathlib.Path(directory) / f"{stem}_geomsnap.npz"
 
 
 def geom_snapshot_from_mujoco(model, sim_states: np.ndarray, obs_indices: Sequence[int], path) -> None:
@@ -1254,29 +1274,17 @@ def geom_snapshot_from_mujoco(model, sim_states: np.ndarray, obs_indices: Sequen
     `sim_states` = `<stem>_geom.npz` 의 `sim_state_image[obs_index]` (robosuite `sim.get_state().flatten()` =
     `[time, qpos, qvel]`). 모델은 기록에 없으므로 **호출자가 env 를 만들어** 넘긴다 (.venv-libero). py3.8 에서도 돈다.
     """
-    import mujoco
+    from AG3S.trajopt.experiments.panda_geom_snapshot import snapshot_arrays, write_snapshot
 
-    data = mujoco.MjData(model)
-    xpos, xmat = [], []
-    for s in np.asarray(sim_states, np.float64):
-        data.time = float(s[0])
-        data.qpos[:] = s[1:1 + model.nq]
-        data.qvel[:] = s[1 + model.nq:1 + model.nq + model.nv]
-        mujoco.mj_kinematics(model, data)
-        xpos.append(data.geom_xpos.copy())
-        xmat.append(data.geom_xmat.copy())
-    names = [mujoco.mj_id2name(model, mujoco.mjtObj.mjOBJ_BODY, i) or "" for i in range(model.nbody)]
-    gnames = [mujoco.mj_id2name(model, mujoco.mjtObj.mjOBJ_GEOM, i) or "" for i in range(model.ngeom)]
-    np.savez_compressed(str(path), obs_index=np.asarray(list(obs_indices), np.int64), geom_xpos=np.asarray(xpos),
-                        geom_xmat=np.asarray(xmat), geom_type=model.geom_type.copy(), geom_size=model.geom_size.copy(),
-                        geom_bodyid=model.geom_bodyid.copy(), geom_contype=model.geom_contype.copy(),
-                        geom_conaffinity=model.geom_conaffinity.copy(), body_names=np.asarray(names),
-                        geom_names=np.asarray(gnames))
+    write_snapshot(path, snapshot_arrays(model, sim_states, obs_indices))
 
 
-def neighbour_voxels(field, centre_base: np.ndarray, radius_m: float, *, layer: int = -1) -> np.ndarray:
-    """`centre_base` 에서 `radius_m` 이내인 **점유 voxel**(`d < 0`) 의 중심들 (base 좌표, (N, 3)). 기본은 미세 계층."""
-    lay = field.layers[layer]
+def neighbour_voxels(field, centre_base: np.ndarray, radius_m: float, *, layer: int = -1, lay=None,
+                     max_d: float = 0.0) -> np.ndarray:
+    """`centre_base` 에서 `radius_m` 이내인 **점유 voxel**(`d < max_d`, 기본 0) 의 중심들 (base 좌표, (N, 3)). 기본은 미세 계층.
+
+    `lay` (field 계층 하나)를 직접 주면 `field.layers[layer]` 대신 그것을 쓴다 (target 없는 계층 등)."""
+    lay = field.layers[layer] if lay is None else lay
     g = lay.grid
     d = np.asarray(lay.distance_grid)
     lo = np.floor((np.asarray(centre_base) - radius_m - g.origin) / g.voxel_size).astype(int)
@@ -1285,17 +1293,65 @@ def neighbour_voxels(field, centre_base: np.ndarray, radius_m: float, *, layer: 
     if np.any(hi <= lo):
         return np.zeros((0, 3))
     sub = d[lo[0]:hi[0], lo[1]:hi[1], lo[2]:hi[2]]
-    ijk = np.argwhere(sub < 0.0) + lo
+    ijk = np.argwhere(sub < max_d) + lo
     if not len(ijk):
         return np.zeros((0, 3))
     pts = g.origin + ijk * g.voxel_size
     return pts[np.linalg.norm(pts - centre_base, axis=1) <= radius_m]
 
 
+def _classify_near(lay, centre_base: np.ndarray, radius_m: float, T: np.ndarray, snap: dict, target_body,
+                   destination_body, *, fallback=None) -> Optional[dict[str, Any]]:
+    """`centre_base` 근처(`radius_m`)의 점유 voxel 들의 MuJoCo geom class 개수와, 중심에 가장 가까운 점유 voxel 의 class · body.
+
+    찾는 순서 (`layer` 에 적는다): ① `lay` 의 점유 voxel(`d < 0`) → ② `fallback` 계층의 점유 voxel(미세 계층 격자가 닿지 않는 곳)
+    → ③ `lay` 의 표면 근처 voxel(`d < 1 voxel`; TSDF 의 얇은 표면은 음수 voxel 이 없을 수 있다) → ④ `fallback` 의 표면 근처.
+    모두 비면 `None`."""
+    attempts = [("occupied", lay, 0.0), ("coarse_occupied", fallback, 0.0),
+                ("surface", lay, None), ("coarse_surface", fallback, None)]
+    for which, layer, max_d in attempts:
+        if layer is None:
+            continue
+        thresh = float(layer.grid.voxel_size) if max_d is None else max_d
+        vox = neighbour_voxels(None, centre_base, radius_m, lay=layer, max_d=thresh)
+        if not len(vox):
+            continue
+        world = (T[:3, :3] @ vox.T).T + T[:3, 3]
+        cls = classify_points(world, snap, target_body=target_body, destination_body=destination_body)
+        near = int(np.argmin(np.linalg.norm(vox - centre_base, axis=1)))
+        return {"counts": cls["counts"], "nearest_class": cls["geom_of_point"][near][0], "layer": which,
+                "nearest_body": cls["geom_of_point"][near][1],
+                "nearest_dist_mm": float(np.linalg.norm(vox[near] - centre_base) * 1000.0), "n_voxels": int(len(vox))}
+    return None
+
+
+def verdict_collision_rows(row: dict) -> list[dict[str, Any]]:
+    """call 의 `verdict_reasons` 중 `collision` 의 대표 row (서버가 `hold` 로 판정한 최악 위반 한 행씩)."""
+    out = []
+    for v in row.get("verdict_reasons") or []:
+        if v.get("kind") != "collision":
+            continue
+        ev = v.get("evidence") or {}
+        r = dict(ev.get("row") or {})
+        out.append({"action": v.get("action"), "detail": v.get("detail"), "link": r.get("link"), "block": r.get("block"),
+                    "why": r.get("why"), "tier": r.get("tier"), "step": r.get("step"),
+                    "clearance_mm": None if r.get("clearance_m") is None else float(r["clearance_m"]) * 1000.0,
+                    "object_distance_mm": None if r.get("object_distance_m") is None else float(r["object_distance_m"]) * 1000.0,
+                    "point_m": r.get("point_m"), "n_violating": ev.get("n_violating"),
+                    "residual_violation_mm": None if ev.get("residual_violation_m") is None else float(ev["residual_violation_m"]) * 1000.0,
+                    "is_attached": str(r.get("link") or "").startswith("attached")})
+    return out
+
+
 def j1_for_call(rt: Runtime, call: Call, *, band_m: float, geom_snapshot: Optional[pathlib.Path] = None,
                 target_body: Optional[str] = None, destination_body: Optional[str] = None,
                 max_rows: int = 64) -> dict[str, Any]:
-    """한 call 의 J1: 위반 / margin 안 (step, sphere) 의 종류별 개수와, 근처 점유 voxel 의 MuJoCo geom class."""
+    """한 call 의 J1: 위반 / margin 안 (step, sphere) 의 종류별 개수와, 근처 점유 voxel 의 MuJoCo geom class.
+
+    `voxel_classes` 는 기록 clearance 가 잰 장(미세 계층, target 포함)의 점유 voxel, `voxel_classes_target_free` 는 target 없는 계층이 있을 때
+    같은 행의 그 계층 점유 voxel 이다. `verdict_collision` 은 서버가 `hold` 로 판정한 대표 위반 행(쥔 물체 부착 구 포함: 기록 `clearance` 에는
+    로봇 구만 있으므로)이고, snapshot 이 있으면 그 점 근처 점유 voxel 의 class 도 붙는다.
+    """
     from AG3S.trajopt.experiments.fixed_input_ablation import build_field
 
     if call.chunk_path is None:
@@ -1303,10 +1359,12 @@ def j1_for_call(rt: Runtime, call: Call, *, band_m: float, geom_snapshot: Option
     z = np.load(call.chunk_path, allow_pickle=False)
     summary = json.loads(str(z["summary_json"]))
     names = summary.get("sphere_link_names") or [str(n) for n in rt.robot.sphere_link_names]
-    out: dict[str, Any] = {"id": call.id, "phase": call.phase,
+    out: dict[str, Any] = {"id": call.id, "phase": call.phase, "trajopt_status": call.row.get("trajopt_status"),
                            "rows": select_rows(np.asarray(z["clearance"]), names, band_m=band_m)}
     out["held_spheres"] = ("unavailable: the held (attached) spheres' clearance is not in the record"
                            if (call.row.get("grasp") or {}).get("attached") else None)
+    out["verdict_collision"] = verdict_collision_rows(call.row)
+    out["verdict_kinds"] = [str(v.get("kind")) for v in (call.row.get("verdict_reasons") or [])]
     if geom_snapshot is None:
         out["voxel_classes"] = {"unavailable": "no --geom-snapshot: the MuJoCo model is not in the record"}
         return out
@@ -1319,29 +1377,59 @@ def j1_for_call(rt: Runtime, call: Call, *, band_m: float, geom_snapshot: Option
     traj = rt.layout.chunk_to_trajectory(np.asarray(z["refined_chunk"], np.float64))[:, :rt.to_config.horizon.planned]
     centres = rt.lin.sphere_states(traj, call.q_now)[0]
     T = np.asarray(call.T_world_base, np.float64)
+    target_src = "argument" if target_body else None
+    dest_src = "argument" if destination_body else None
+    if target_body is None and snap.get("target_bodies"):
+        target_body, target_src = snap["target_bodies"], "snapshot (BDDL target instance)"
+    if destination_body is None and snap.get("destination_bodies"):
+        destination_body, dest_src = snap["destination_bodies"], "snapshot (BDDL destination instance)"
     if target_body is None and "target_centroid" in z.files:
         target_body = _nearest_free_body(snap, T @ np.append(np.asarray(z["target_centroid"], np.float64), 1.0))
-    totals = {k: 0 for k in GEOM_CLASSES}
+        target_src = "guess (nearest object body to target_centroid)"
+    voxel = field.layers[-1].grid.voxel_size
+    free_layers = tuple(getattr(field, "target_free_layers", ()) or ())
+    layers = {"voxel_classes": field.layers[-1]}
+    coarse = {"voxel_classes": field.layers[0] if len(field.layers) > 1 else None}
+    if free_layers:
+        layers["voxel_classes_target_free"] = free_layers[-1]
+        coarse["voxel_classes_target_free"] = free_layers[0] if len(free_layers) > 1 else None
     rows = out["rows"]["rows"][:max_rows]
-    dominant = {k: 0 for k in GEOM_CLASSES}
-    for r in rows:
-        c = centres[r["step"], r["sphere"]]
-        vox = neighbour_voxels(field, c, float(rt.lin.robot_radii[r["sphere"]]) + band_m + 2 * field.layers[-1].grid.voxel_size)
-        if not len(vox):
-            r["voxel_class"] = None
+    for key, lay in layers.items():
+        totals = {k: 0 for k in GEOM_CLASSES}
+        dominant = {k: 0 for k in GEOM_CLASSES}
+        bodies: dict[str, int] = {}
+        n_empty = n_fallback = 0
+        for r in rows:
+            c = centres[r["step"], r["sphere"]]
+            res = _classify_near(lay, c, float(rt.lin.robot_radii[r["sphere"]]) + float(rt.esdf_margin) + band_m + 2 * voxel, T, snap, target_body,
+                                 destination_body, fallback=coarse[key])
+            suffix = "_target_free" if key == "voxel_classes_target_free" else ""
+            if res is None:
+                n_empty += 1
+                r["voxel_class" + suffix] = None
+                continue
+            for k, v in res["counts"].items():
+                totals[k] += v
+            r["voxel_class" + suffix] = res["nearest_class"]
+            r["voxel_body" + suffix] = res["nearest_body"]
+            r["voxel_layer" + suffix] = res["layer"]
+            n_fallback += res["layer"] != "occupied"
+            dominant[res["nearest_class"]] += 1
+            bodies[res["nearest_body"]] = bodies.get(res["nearest_body"], 0) + 1
+        out[key] = {"target_body": target_body, "target_body_source": target_src,
+                    "destination_body": destination_body, "destination_body_source": dest_src,
+                    "voxel_counts": totals, "rows_by_nearest_voxel_class": dominant, "rows_by_nearest_voxel_body": bodies,
+                    "n_rows_without_occupied_voxel": n_empty, "n_rows_not_from_occupied_fine": int(n_fallback), "n_rows_classified": len(rows) - n_empty,
+                    "n_rows_total": len(out["rows"]["rows"]), "ghost_mm": GHOST_MM}
+    # 서버가 hold 로 판정한 대표 위반 행 근처 (쥔 물체 부착 구 포함)
+    for vr in out["verdict_collision"]:
+        pt = vr.get("point_m")
+        if pt is None:
             continue
-        world = (T[:3, :3] @ vox.T).T + T[:3, 3]
-        cls = classify_points(world, snap, target_body=target_body, destination_body=destination_body)
-        for k, v in cls["counts"].items():
-            totals[k] += v
-        # 이 행의 가장 가까운 점유 voxel 의 class
-        near = int(np.argmin(np.linalg.norm(vox - c, axis=1)))
-        r["voxel_class"] = cls["geom_of_point"][near][0]
-        dominant[r["voxel_class"]] += 1
-    out["voxel_classes"] = {"target_body": target_body, "destination_body": destination_body,
-                            "voxel_counts": totals, "rows_by_nearest_voxel_class": dominant,
-                            "n_rows_classified": len(rows), "n_rows_total": len(out["rows"]["rows"]),
-                            "ghost_mm": GHOST_MM}
+        key = "voxel_classes_target_free" if vr.get("tier") == "target_free" and "voxel_classes_target_free" in layers else "voxel_classes"
+        res = _classify_near(layers[key], np.asarray(pt, np.float64), VERDICT_POINT_RADIUS_M + 2 * voxel, T, snap, target_body, destination_body,
+                             fallback=coarse[key])
+        vr["voxel"] = None if res is None else {k: res[k] for k in ("nearest_class", "nearest_body", "nearest_dist_mm", "n_voxels", "counts", "layer")}
     return out
 
 
@@ -1403,7 +1491,10 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--variants", nargs="+", default=list(DEFAULT_VARIANTS), choices=list(VARIANTS))
     ap.add_argument("--j1-only", action="store_true", help="재풀이 없이 J1 만 (clearance 기록 분석)")
     ap.add_argument("--j1-band-mm", type=float, default=20.0, help="J1 의 margin 안 문턱 (기록 clearance < 이 값)")
-    ap.add_argument("--geom-snapshot", default=None, help="geom_snapshot_from_mujoco 가 쓴 npz (voxel class 용)")
+    ap.add_argument("--geom-snapshot", default=None, help="geom_snapshot_from_mujoco 가 쓴 npz (voxel class 용; episode 하나일 때)")
+    ap.add_argument("--geom-snapshot-dir", default=None,
+                    help="panda_geom_snapshot.py 가 쓴 <stem>_geomsnap.npz 들의 디렉터리 (call 의 episode 마다 고른다)")
+    ap.add_argument("--j1-max-rows", type=int, default=64, help="call 당 voxel class 를 매기는 (step, sphere) 행 수 상한")
     ap.add_argument("--target-body", default=None)
     ap.add_argument("--destination-body", default=None)
     ap.add_argument("--attached-spheres-json", default=None,
@@ -1463,8 +1554,15 @@ def main(argv=None) -> int:
                            "support-plane normal/offset (refit from support_mask)"],
     }
     # J1 (재풀이 없이, 기록만으로)
-    out["j1"] = {c.id: j1_for_call(rt, c, band_m=args.j1_band_mm / 1000.0, geom_snapshot=args.geom_snapshot,
-                                   target_body=args.target_body, destination_body=args.destination_body)
+    def _snap_for(c: Call):
+        if args.geom_snapshot_dir:
+            path = geom_snapshot_dir_path(args.geom_snapshot_dir, c.stem)
+            return path if path.exists() else None
+        return args.geom_snapshot
+
+    out["j1"] = {c.id: j1_for_call(rt, c, band_m=args.j1_band_mm / 1000.0, geom_snapshot=_snap_for(c),
+                                   target_body=args.target_body, destination_body=args.destination_body,
+                                   max_rows=args.j1_max_rows)
                  for c in targets}
     if args.j1_only:
         out.update(valid=True, j2="skipped (--j1-only)", elapsed_s=round(time.time() - started, 1))

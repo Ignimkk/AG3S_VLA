@@ -652,18 +652,75 @@ def test_server_scene_additions_follow_flags_and_record(runtime):
 
 
 # --------------------------------------------------------------------------------------- 서버 불변
+TOOL_FILES = ("AG3S/trajopt/experiments/panda_fixed_input_ablation.py", "AG3S/trajopt/experiments/panda_geom_snapshot.py",
+              "tests/benchmark/test_sl10_panda_fixed_input.py", "tests/benchmark/test_sl10_geom_snapshot.py")
+PROTECTED = ("AG3S/adapters/panda/", "AG3S/trajopt/serve_safe.py", "AG3S/trajopt/safe_policy.py",
+             "AG3S/ag3s/experiments/sources/constraint_record.py", "AG3S/trajopt/refiner.py", "AG3S/trajopt/sqp.py",
+             "AG3S/trajopt/linearize.py", "robots/panda/")
+
+
+def _git(*args):
+    return subprocess.run(["git", *args], cwd=ROOT, capture_output=True, text=True)
+
+
+def protected_paths_touched_by_tool_commits(base: str) -> dict:
+    """`base..HEAD` 에서 도구 파일을 건드린 (merge 가 아닌) commit 마다, 그 commit 이 바꾼 보호 경로. 비어 있어야 한다.
+
+    예전에는 `git diff <기준 commit>` 전체를 봤으나, 그 뒤에 들어온 다른 branch 의 정당한 변경(예: SL10b 가 `profile.py` 에 판 등록을 더함)에도
+    실패했다. 이 guard 의 뜻은 '재풀이 도구를 만든 commit 들이 서버 · adapter · 기록기 동작을 바꾸지 않는다' 이므로 도구 파일을 만든 commit 의
+    변경만 본다. 아직 commit 하지 않은 작업 트리의 변경도 같이 본다."""
+    out = {}
+    for h in _git("log", "--no-merges", "--format=%H", f"{base}..HEAD", "--", *TOOL_FILES).stdout.split():
+        files = _git("show", "--name-only", "--format=", h).stdout.split()
+        bad = [f for f in files if f.startswith(PROTECTED)]
+        if bad:
+            out[h[:8]] = bad
+    dirty = [line[3:].strip().strip('"') for line in _git("status", "--porcelain").stdout.splitlines()]
+    bad = [f for f in dirty if f.startswith(PROTECTED)]
+    if bad:
+        out["working-tree"] = bad
+    return out
+
+
 def test_tool_does_not_modify_server_adapter_or_recorder():
-    """도구는 읽기만 한다: 서버 · adapter · 기록기 · 변환은 base (62c0076f) 와 action 한계 제약 구현 (`wip/sl10-actionbox`,
-    54b1d2cc -- 이 branch 에 merge 되어 있다) 에서 이 tool 연결이 더한 변경이 없다. action 한계 제약 쪽 변경 자체는 그 branch 의 것."""
-    ref = "54b1d2cc"
-    if subprocess.run(["git", "cat-file", "-e", ref], cwd=ROOT, capture_output=True).returncode != 0:
-        pytest.skip("action-box commit not available")
-    # 54b1d2cc 가 HEAD 의 조상이어야 이 비교가 '연결이 더한 것' 이 된다
-    if subprocess.run(["git", "merge-base", "--is-ancestor", ref, "HEAD"], cwd=ROOT).returncode != 0:
-        pytest.skip("action-box commit is not merged here")
-    changed = subprocess.run(["git", "diff", "--name-only", ref], cwd=ROOT, capture_output=True,
-                             text=True).stdout.split()
-    protected = ("AG3S/adapters/panda/", "AG3S/trajopt/serve_safe.py", "AG3S/trajopt/safe_policy.py",
-                 "AG3S/ag3s/experiments/sources/constraint_record.py", "AG3S/trajopt/refiner.py", "AG3S/trajopt/sqp.py",
-                 "AG3S/trajopt/linearize.py", "robots/panda/")
-    assert [f for f in changed if f.startswith(protected)] == []
+    """도구는 읽기만 한다: 도구 파일(재풀이 도구 · geom snapshot 도구와 그 test)을 건드린 commit 들이 서버 · adapter · 기록기 · 변환을
+    바꾸지 않는다. base = 62c0076f (도구 이전)."""
+    base = "62c0076f"
+    if _git("cat-file", "-e", base).returncode != 0:
+        pytest.skip("base commit not available")
+    if _git("merge-base", "--is-ancestor", base, "HEAD").returncode != 0:
+        pytest.skip("base commit is not an ancestor of HEAD")
+    assert protected_paths_touched_by_tool_commits(base) == {}
+
+
+def test_guard_sees_a_tool_commit_that_touches_a_protected_path(tmp_path):
+    """guard 자체의 시험: 임시 repo 에서 도구 파일과 보호 경로를 같이 바꾼 commit 은 잡히고, 보호 경로만 바꾼 commit 은 안 잡힌다."""
+    def run(*a):
+        subprocess.run(["git", *a], cwd=tmp_path, check=True, capture_output=True)
+
+    run("init", "-q")
+    run("config", "user.email", "t@t")
+    run("config", "user.name", "t")
+    (tmp_path / "AG3S/adapters/panda").mkdir(parents=True)
+    (tmp_path / "AG3S/trajopt/experiments").mkdir(parents=True)
+    (tmp_path / "AG3S/adapters/panda/profile.py").write_text("a\n")
+    run("add", "-A")
+    run("commit", "-qm", "base")
+    run("tag", "base")
+    (tmp_path / "AG3S/adapters/panda/profile.py").write_text("b\n")        # 다른 branch 의 변경: 도구 파일 아님
+    run("commit", "-qam", "other branch registers a version")
+    (tmp_path / "AG3S/trajopt/experiments/panda_fixed_input_ablation.py").write_text("x\n")
+    run("add", "-A")
+    run("commit", "-qm", "tool")
+    global ROOT
+    saved, ROOT = ROOT, tmp_path
+    try:
+        assert protected_paths_touched_by_tool_commits("base") == {}
+        (tmp_path / "AG3S/adapters/panda/profile.py").write_text("c\n")
+        (tmp_path / "AG3S/trajopt/experiments/panda_geom_snapshot.py").write_text("y\n")
+        run("add", "-A")
+        run("commit", "-qm", "tool + adapter")
+        bad = protected_paths_touched_by_tool_commits("base")
+        assert list(bad.values()) == [["AG3S/adapters/panda/profile.py"]]
+    finally:
+        ROOT = saved
