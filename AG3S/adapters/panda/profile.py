@@ -666,6 +666,22 @@ AG3S_VERSIONS[SL15_NTM_VERSION] = tuple(AG3S_VERSIONS["AG3S-final-panda-v3-e0to-
 AG3S_VERSIONS[SL15_OPENRULE_NTM_VERSION] = tuple(AG3S_VERSIONS[SL14_OPENRULE_VERSION]) + NONAUTHORIZED_TARGET_MARGIN_FLAGS
 
 
+#: SL15 sfhand (task SL15, lead 2026-11-05): "자기 손이 self-filter 를 새어 나간다" -- the constraint-recorded run
+#: (``sl15-DREC``) shows that, during the CLOSING latch phase, most robot rows near occupied voxels are ``panda_hand`` rows whose
+#: nearest MuJoCo body is the robot's own hand (``gripper0_right_gripper``): hand surface the inflation-0 self-filter let into the
+#: field, so TrajOpt avoids its own hand. ``-pc-sfhand`` = ``-pc`` + a per-link self-filter margin on ``panda_hand`` only
+#: (``--self-filter-inflation-link panda_hand=<m>``, ``pointcloud.self_filter_inflation_by_link``; the other links stay at the
+#: default 0). The value is the p95 leak distance of the hand points, rounded up to 1 mm and capped at 15 mm
+#: (``AG3S/trajopt/experiments/panda_sfhand_leak.py``; ``AG3S/ag3s/docs/handoff/SL15.sfhand.impl.md``).
+#: Like the other SL14 / SL15 versions it is not in :data:`PC_LATCH_VERSIONS`, has no ``-lsfork`` twin, and the record dest
+#: (``self_filter_inflation_link``) joins a record only when set (:func:`version_flag_values`).
+SL15_SFHAND_PANDA_HAND_M: float = 0.004
+SELF_FILTER_HAND_FLAGS: tuple[str, ...] = ("--self-filter-inflation-link", f"panda_hand={SL15_SFHAND_PANDA_HAND_M:g}")
+SL15_SFHAND_VERSION = "AG3S-final-panda-v3-e0to-pc-sfhand"
+SL15_SFHAND_VERSIONS: tuple[str, ...] = (SL15_SFHAND_VERSION,)
+AG3S_VERSIONS[SL15_SFHAND_VERSION] = tuple(AG3S_VERSIONS["AG3S-final-panda-v3-e0to-pc"]) + SELF_FILTER_HAND_FLAGS
+
+
 def needs_oracle_grasp(version: str) -> bool:
     """SL14: whether the version's server runs ``--oracle-latch`` (the client must send ``ag3s/oracle_grasp``, ``--oracle-grasp``)."""
     return "--oracle-latch" in AG3S_VERSIONS.get(str(version), ())
@@ -696,7 +712,8 @@ def is_final_version(version: str) -> bool:
     return (str(version) in FINAL_CONFIG_VERSIONS or str(version) in P0M_VERSIONS or str(version) in P0M_SL9_VERSIONS
             or str(version) in PC_LATCH_VERSIONS or str(version) in PC_NOPROBE_VERSIONS   # SL7d / SL7e / SL9
             or str(version) in SL12_VERSIONS or str(version) in SL13_VERSIONS   # SL12 / SL13
-            or str(version) in SL14_VERSIONS or str(version) in SL15_NTM_VERSIONS)   # SL14 / SL15
+            or str(version) in SL14_VERSIONS or str(version) in SL15_NTM_VERSIONS
+            or str(version) in SL15_SFHAND_VERSIONS)   # SL14 / SL15
 
 
 def version_server_flags(version: str, *, hsr6_probe: Optional[str] = None,
@@ -773,6 +790,8 @@ def version_flag_values(args: argparse.Namespace) -> dict[str, Any]:
               if d not in set(dests) | set(final) | set(p0m) | set(sl9) | set(sl10) | set(sl10d) | set(sl10e) | set(sl10f) | set(sl11) | set(sl11gap) | set(sl12) | set(sl13) | set(sl14)]   # SL14 KS
     sl15 = [d for d in _version_dests(SL15_NTM_VERSIONS)
             if d not in set(dests) | set(final) | set(p0m) | set(sl9) | set(sl10) | set(sl10d) | set(sl10e) | set(sl10f) | set(sl11) | set(sl11gap) | set(sl12) | set(sl13) | set(sl14) | set(sl14ks)]   # SL15
+    sl15sf = [d for d in _version_dests(SL15_SFHAND_VERSIONS)
+              if d not in set(dests) | set(final) | set(p0m) | set(sl9) | set(sl10) | set(sl10d) | set(sl10e) | set(sl10f) | set(sl11) | set(sl11gap) | set(sl12) | set(sl13) | set(sl14) | set(sl14ks) | set(sl15)]   # SL15 sfhand
     parser = ss.build_parser()
     actions = parser._option_string_actions
     pinned = {actions[t].dest for t in V11AB_PRE_MERGE_DEFAULTS if t.startswith("--")}   # set on every V11AB argv
@@ -823,6 +842,9 @@ def version_flag_values(args: argparse.Namespace) -> dict[str, Any]:
     # SL15: the nonauthorized-target-margin dest joins only when it is set -- the -pc / -openrule records keep their keys
     if any(getattr(args, d, None) != parser.get_default(d) for d in sl15):
         dests = sorted(set(dests) | set(sl15))
+    # SL15 sfhand: the self-filter inflation dest joins only when it is set -- the other records keep their keys
+    if any(getattr(args, d, None) != parser.get_default(d) for d in sl15sf):
+        dests = sorted(set(dests) | set(sl15sf))
     return {d: _jsonable(getattr(args, d, None)) for d in dests}
 
 
@@ -1144,6 +1166,14 @@ def build_panda_ag3s(*, esdf_bounds: str = "panda", extra_overrides: Optional[Ma
         lost = {k: getattr(ag3s.config.contact, k) for k, v in contact.items() if getattr(ag3s.config.contact, k) != v}
         if lost:
             raise RuntimeError(f"AG3S contact config is not what the server asked for: {lost}, asked {contact}")
+    self_filter = dict(kw.get("self_filter") or {})
+    if self_filter:
+        # SL15 sfhand -- survival check for the `pointcloud` self-filter keys a flag gave (--self-filter-inflation-link,
+        # --self-filter-target-guard): the server must run the filter it was asked for, with the per-link table that
+        # reaches `robot_sphere_mask` (``AG3S.self_filter_settings``; a link name the Panda self-filter model lacks already raised).
+        lost = {k: getattr(ag3s.config.pointcloud, k) for k, v in self_filter.items() if getattr(ag3s.config.pointcloud, k) != v}
+        if lost:
+            raise RuntimeError(f"AG3S pointcloud config is not what the server asked for: {lost}, asked {self_filter}")
     if kw.get("held_body_cover"):
         ag3s.held_body_cover = True
     if kw.get("held_free_observed_pad") is not None:
@@ -1170,6 +1200,8 @@ def build_panda_ag3s(*, esdf_bounds: str = "panda", extra_overrides: Optional[Ma
         info["target_exclusion"] = _jsonable(target_exclusion)
     if contact:   # SL15 -- key only when a flag gave a contact option
         info["contact"] = _jsonable(contact)
+    if self_filter:   # SL15 sfhand -- key only when a flag gave a self-filter option: the table the filter actually applies
+        info["self_filter"] = _jsonable({"asked": self_filter, "applied": ag3s.self_filter_settings()})
     if ag3s.surface_pad_missing_cameras:   # SL7 -- key only with the attention-surface extent
         info["surface_pad_missing_cameras"] = True
     if ag3s.held_free_query_spheres:   # SL10d -- key only when on
