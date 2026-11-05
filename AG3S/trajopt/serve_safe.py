@@ -2367,6 +2367,13 @@ def build_parser() -> argparse.ArgumentParser:
                          "한다 (Dy 는 EE Jacobian 으로 선형화; 상수는 osc_response_fit.json). 기본 꺼짐 = 서버·기록 그대로. "
                          "RB-Y1 서버는 거절한다. --to-multi-seed · --to-gpu-seeds · look-ahead gate 와 함께 쓸 수 없다. "
                          "기록 to.action_box = {on, n_rows, active_rows, max_pred_abs_action}")
+    ap.add_argument("--response-model", choices=("robosuite141", "libero_safety_fork"), default="robosuite141",
+                    help="SL11 — Panda 만. 변환 C (정 · 역) 가 쓰는 컨트롤러 지연 모델 y_t = alpha y_{t-1} + beta x_t. "
+                         "robosuite141 (기본) = osc_response_fit.json (LIBERO env), 지금 그대로. libero_safety_fork = "
+                         "osc_response_fit_libero_safety_fork.json (LIBERO-Safety fork OSC, VLA 단독 기록에서 맞춤; beta 는 "
+                         "client 의 libero_to_safety 축척을 넣은 LIBERO-scale 값). LIBERO-Safety client + action_adapter "
+                         "libero_to_safety 에서만 쓴다 (client 요청 panda/action_adapter 가 다르면 서버가 거절). "
+                         "RB-Y1 서버는 거절한다")
     ap.add_argument("--to-action-box-margin", type=float, default=None, metavar="M",
                     help="SL10 §2.2 — --to-action-box 의 여유 (action 단위, 기본 0.05, 0 <= M < 1). --to-action-box 가 필요하다")
     ap.add_argument("--to-gpu-seeds", choices=("off", "curobo"), default="off",
@@ -3855,6 +3862,9 @@ def reject_panda_only_flags(ap: argparse.ArgumentParser, args) -> None:
     if getattr(args, "to_action_box", False) or getattr(args, "to_action_box_margin", None) is not None:
         ap.error("--to-action-box · --to-action-box-margin 는 Panda 의 OSC action 한계를 TrajOpt 행으로 넣는 flag 입니다 "
                  "(--robot panda 만). RB-Y1 서버는 그 변환이 없어 아무 일도 하지 않으므로 거절합니다")
+    if getattr(args, "response_model", "robosuite141") != "robosuite141":   # SL11
+        ap.error("--response-model 은 Panda 변환 C 의 컨트롤러 지연 모델입니다 (--robot panda 만). RB-Y1 서버는 그 변환이 "
+                 "없어 아무 일도 하지 않으므로 거절합니다")
     if getattr(args, "hsr6_placement_contact_lift", False):   # SL10e
         ap.error("--hsr6-placement-contact-lift 는 Panda 서버의 ⑤ 단계 조건입니다 (--robot panda 만). RB-Y1 서버는 "
                  "거절합니다")
@@ -4445,6 +4455,8 @@ def reject_bad_flag_combinations(ap: argparse.ArgumentParser, args, *, seed_map_
             ap.error("--to-action-box 는 --to-multi-seed · --to-gpu-seeds 와 함께 쓸 수 없습니다 (seed 풀이는 action "
                      "행 없이 풀리고 그 결과가 고를 수 있다)")
     # --- SL10 §2.2 — end
+    if getattr(args, "response_model", "robosuite141") != "robosuite141" and args.no_safe:   # SL11
+        ap.error("--response-model 은 TO 결과를 action 으로 되돌리는 변환의 모델입니다 (--no-safe 는 변환을 안 합니다)")
     if getattr(args, "to_gpu_seeds", "off") != "off":   # AG3S-PRE-CORE-TO E3-b
         if args.no_safe or int(getattr(args, "to_multi_seed", 0) or 0) <= 0:
             ap.error("--to-gpu-seeds curobo 는 --to-multi-seed N (> 0) 의 seed 를 GPU 에서 푸는 flag 입니다 (TO 가 있고 "

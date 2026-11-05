@@ -65,7 +65,7 @@ def test_new_version_is_the_pc_version_plus_the_one_flag():
 def test_every_other_version_is_unchanged():
     from AG3S.adapters.panda import profile as pf
 
-    old = {k: list(v) for k, v in pf.AG3S_VERSIONS.items() if k != NEW and k not in pf.SL11_VERSIONS}   # SL11 comes later
+    old = {k: list(v) for k, v in pf.AG3S_VERSIONS.items() if k != NEW and k not in pf.SL11_VERSIONS and not k.endswith("-lsfork")}   # SL11 comes later
     assert len(old) == OLD_REGISTRY_SIZE
     assert hashlib.sha256(json.dumps(old, sort_keys=True).encode()).hexdigest() == OLD_REGISTRY_SHA256
     assert pf.PC_LATCH_VERSIONS.count(NEW) == 1 and NEW in pf.PC_LATCH_VERSIONS[:-len(pf.SL11_VERSIONS)]         # the others keep their place

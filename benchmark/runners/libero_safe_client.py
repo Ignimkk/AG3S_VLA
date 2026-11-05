@@ -205,8 +205,9 @@ def _rotvec_between(q1_xyzw, q0_xyzw):
 class SafeClient(object):
     """Wraps the websocket policy client; one instance per episode (``policy_for``)."""
 
-    def __init__(self, ws_client, seed, task_id, episode_idx, replan_steps, emit_privileged=False):
+    def __init__(self, ws_client, seed, task_id, episode_idx, replan_steps, emit_privileged=False, request_extra=None):
         self.ws = ws_client
+        self.request_extra = dict(request_extra or {})  # SL11: extra request keys (LIBERO-Safety: panda/action_adapter)
         self.emit_privileged = bool(emit_privileged)
         self.env = None                # set by the observer only with emit_privileged
         self.obstacle_tables = None
@@ -254,6 +255,7 @@ class SafeClient(object):
             fb, osc = self._confirmed_feedback(rs9)
             req["ag3s/exec_feedback"] = fb
             req["panda/exec_applied_osc"] = osc
+        req.update(self.request_extra)
         req["panda/robot_state"] = rs9
         req["panda/T_world_base"] = np.asarray(frames[self.geometry.cameras[0]]["T_world_base"], np.float64)
         if len(self.eef) >= 2:

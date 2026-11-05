@@ -1,0 +1,84 @@
+{
+ "model": "y_t = alpha*y_{t-1} + beta*x_t (world frame, per component, shared coefficients); x = fork env action = gains * LIBERO-scale policy action (libero_to_safety), y = realised EE step",
+ "response_model": "libero_safety_fork",
+ "data": {
+  "runs_glob": "*sl7-liberosafety-vla30-*vla_only",
+  "runs": [
+   "20261104T090614_ef847e8c619d_sl7-liberosafety-vla30-affordance-affordance-L0-pi05_libero-vla_only",
+   "20261104T091826_ef847e8c619d_sl7-liberosafety-vla30-human_safety-human_safety-L0-pi05_libero-vla_only",
+   "20261104T094623_ef847e8c619d_sl7-liberosafety-vla30-obstacle_avoidance-obstacle_avoidance-L0-pi05_libero-vla_only"
+  ],
+  "episodes": 30,
+  "recorded_action": "policy action (LIBERO scale, before adapt_action); env_action = gains * action (action_adapter libero_to_safety, run manifest)"
+ },
+ "pos": {
+  "alpha": 0.6655182134374573,
+  "beta": 0.32409290494156784,
+  "r2": 0.9729316600489942,
+  "n": 36147,
+  "rmse": 0.0005588281758807215,
+  "steady_state_gain": 0.9689403667454034,
+  "trim": {
+   "on": true,
+   "sigma": 4.0,
+   "iters": 6,
+   "steps_total": 12560,
+   "steps_kept": 12049,
+   "dropped_fraction": 0.040684713375796155,
+   "r2_all_steps": 0.8778017166983094,
+   "rmse_all_steps": 0.0012992590549704146,
+   "ols": {
+    "alpha": 0.7089585226516586,
+    "beta": 0.2784629512040434,
+    "r2": 0.8786698477144497,
+    "steady_state_gain": 0.9567809844187843
+   }
+  }
+ },
+ "rot": {
+  "alpha": 0.8334826936053712,
+  "beta": 0.15651140814268633,
+  "r2": 0.9422891001135834,
+  "n": 35508,
+  "rmse": 0.0010208710997087953,
+  "steady_state_gain": 0.9399107608176802,
+  "trim": {
+   "on": true,
+   "sigma": 4.0,
+   "iters": 6,
+   "steps_total": 12560,
+   "steps_kept": 11836,
+   "dropped_fraction": 0.05764331210191087,
+   "r2_all_steps": 0.6742728140144032,
+   "rmse_all_steps": 0.003248446209440356,
+   "ols": {
+    "alpha": 0.7087574877368037,
+    "beta": 0.24076017514438294,
+    "r2": 0.6857441638419538,
+    "steady_state_gain": 0.8266656308980318
+   }
+  }
+ },
+ "libero_scale": {
+  "gains_libero_to_safety": {
+   "pos": 0.012471860484086557,
+   "rot": 0.1242244497534561
+  },
+  "pos": {
+   "alpha": 0.6655182134374573,
+   "beta": 0.08084082988627121
+  },
+  "rot": {
+   "alpha": 0.8334826936053712,
+   "beta": 0.038885087113327596
+  },
+  "meaning": "(alpha, beta) in the convention of action.py: x = 0.05*a (pos) / 0.5*a (rot) of the LIBERO-scale action a the server returns; beta = beta_fork * gains / scale. The client multiplies a by gains (libero_to_safety) before the fork sees it."
+ },
+ "provenance": {
+  "script": "AG3S/adapters/panda/fit_response.py (fit)",
+  "date": "2026-11-05",
+  "data_split": "LIBERO-Safety L0 VLA-only pi05_libero (3 categories x 10 episodes, sl7-liberosafety-vla30)",
+  "controller": "LIBERO-Safety robosuite-1.4 fork OSC_POSE (kp 750, output_max +-2), control_freq 20 Hz",
+  "use": "AG3S/adapters/panda/action.py via server --response-model libero_safety_fork (conversion C forward + inverse)"
+ }
+}

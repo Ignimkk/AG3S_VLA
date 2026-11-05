@@ -612,7 +612,8 @@ def main(argv=None):
     ws, connector = base.make_policy_client(args.host, args.port)
 
     def policy_for(task_id, episode_idx):
-        client = sc.SafeClient(ws, args.seed, task_id, episode_idx, args.replan_steps)
+        client = sc.SafeClient(ws, args.seed, task_id, episode_idx, args.replan_steps,
+                               request_extra={"panda/action_adapter": str(args.action_adapter)})  # SL11: server --response-model check
         return client, connector, dict(extra)
 
     def observer_for(client, geometry, task_id, episode_idx):

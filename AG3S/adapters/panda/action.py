@@ -61,10 +61,37 @@ import pathlib as _pathlib
 OSC_RESPONSE_FIT = _pathlib.Path(__file__).resolve().parents[3] / "robots/panda/description/osc_response_fit.json"
 
 
-def load_response_model(path=OSC_RESPONSE_FIT) -> dict:
+def load_response_model(path=OSC_RESPONSE_FIT, variant: Optional[str] = None) -> dict:
+    """``{"pos": (alpha, beta), "rot": (alpha, beta), "path"}`` in the convention of this module (``x = 0.05 a`` /
+    ``0.5 a`` of the action ``a`` the server returns). ``variant=None``: the fit's own ``pos`` / ``rot`` (robosuite 1.4.1).
+    ``variant="libero_safety_fork"`` (SL11): the fork fit's ``libero_scale`` block -- its fork-unit ``beta`` re-expressed for
+    the LIBERO-scale action the client rescales with ``libero_to_safety`` (``fit_response.server_units``)."""
     fit = _json.loads(_pathlib.Path(path).read_text())
-    return {"pos": (float(fit["pos"]["alpha"]), float(fit["pos"]["beta"])),
-            "rot": (float(fit["rot"]["alpha"]), float(fit["rot"]["beta"])), "path": str(path)}
+    if variant is None:
+        return {"pos": (float(fit["pos"]["alpha"]), float(fit["pos"]["beta"])),
+                "rot": (float(fit["rot"]["alpha"]), float(fit["rot"]["beta"])), "path": str(path)}
+    if variant != "libero_safety_fork" or "libero_scale" not in fit:
+        raise ValueError(f"{path}: no response variant {variant!r}")
+    ls = fit["libero_scale"]
+    return {"pos": (float(ls["pos"]["alpha"]), float(ls["pos"]["beta"])),
+            "rot": (float(ls["rot"]["alpha"]), float(ls["rot"]["beta"])), "path": str(path), "variant": variant}
+
+
+#: SL11 -- server option ``--response-model``. ``robosuite141`` (default) is the module's ``RESPONSE``.
+RESPONSE_MODELS = ("robosuite141", "libero_safety_fork")
+RESPONSE_FORK_FIT = _pathlib.Path(__file__).resolve().parents[3] / "robots/panda/description/osc_response_fit_libero_safety_fork.json"
+#: The client request key that names the env's action adapter; the fork model needs ``libero_to_safety`` (see server).
+ACTION_ADAPTER_KEY = "panda/action_adapter"
+FORK_REQUIRED_ADAPTER = "libero_to_safety"
+
+
+def response_for(name: Optional[str]) -> Optional[dict]:
+    """``None`` for the default (callers then use ``RESPONSE``: bit-identical to before SL11), else the named model."""
+    if name in (None, "robosuite141"):
+        return None
+    if name == "libero_safety_fork":
+        return load_response_model(RESPONSE_FORK_FIT, variant="libero_safety_fork")
+    raise ValueError(f"response model {name!r} not in {RESPONSE_MODELS}")
 
 
 RESPONSE = load_response_model()
@@ -162,6 +189,7 @@ class Conversion:
     ik: list                     # per-row IK record
     targets_base: list           # per-row (p, R) in the base frame (predicted with the response model)
     prev_step_world: tuple = (np.zeros(3), np.zeros(3))  # last realised (pos, rotvec) step, world frame
+    response: Optional[dict] = None  # SL11: this conversion's response model (None = ``RESPONSE``, robosuite 1.4.1)
 
     def record(self) -> dict:
         pe = [r["pos_err_m"] for r in self.ik]
@@ -204,7 +232,8 @@ def delta_chunk_to_joint_chunk(kin: PandaKinematics, delta: np.ndarray, q_now: n
         iks.append(rec)
         targets.append((p.copy(), R.copy()))
     return Conversion(delta=A, q_now=np.asarray(q_now, np.float64), R_world_base=R_wb,
-                      joint_chunk=np.asarray(rows, np.float64), ik=iks, targets_base=targets, prev_step_world=prev)
+                      joint_chunk=np.asarray(rows, np.float64), ik=iks, targets_base=targets, prev_step_world=prev,
+                      response=response)
 
 
 def applied_command_rows(kin: PandaKinematics, conv: Conversion, applied: np.ndarray) -> np.ndarray:
@@ -222,7 +251,8 @@ def applied_command_rows(kin: PandaKinematics, conv: Conversion, applied: np.nda
         return np.zeros((0, ARM_DOF), np.float64)
     T = np.eye(4)
     T[:3, :3] = conv.R_world_base
-    rows = delta_chunk_to_joint_chunk(kin, a, conv.q_now, T, prev_step_world=conv.prev_step_world)
+    rows = delta_chunk_to_joint_chunk(kin, a, conv.q_now, T, prev_step_world=conv.prev_step_world,
+                                      response=conv.response)
     return rows.joint_chunk[:, :ARM_DOF]
 
 
@@ -248,7 +278,7 @@ def joint_chunk_to_delta_chunk(kin: PandaKinematics, conv: Conversion, refined: 
     """``(actions (H, 7) in the policy's dtype, record)``. See the module docstring for the rule."""
     if mode not in CONVERSION_MODES:
         raise ValueError(f"conversion mode {mode!r} not in {sorted(CONVERSION_MODES)}")
-    resp = response or RESPONSE
+    resp = response or conv.response or RESPONSE
     (ap, bp), (ar, br) = resp["pos"], resp["rot"]
     Qs = np.asarray(refined)[:, :ARM_DOF]
     Qr = np.asarray(reference)[:, :ARM_DOF]
@@ -339,7 +369,7 @@ def action_box_from_conversion(conv: Conversion, *, margin: float, n_rows: int, 
 
     if mode not in CONVERSION_MODES:
         raise ValueError(f"conversion mode {mode!r} not in {sorted(CONVERSION_MODES)}")
-    resp = response or RESPONSE
+    resp = response or conv.response or RESPONSE
     (ap, bp), (ar, br) = resp["pos"], resp["rot"]
     if mode == "B":
         ap = ar = 0.0
@@ -371,7 +401,7 @@ def apply_deferred_close(actions: np.ndarray, refined: np.ndarray, reference: np
 
 def predict_ee_path(kin: PandaKinematics, conv: Conversion, actions: np.ndarray, response: Optional[dict] = None):
     """EE positions (base frame, (H, 3)) the response model predicts for ``actions`` from the chunk's start state."""
-    resp = response or RESPONSE
+    resp = response or conv.response or RESPONSE
     (ap, bp), (ar, br) = resp["pos"], resp["rot"]
     R_bw = conv.R_world_base.T
     yp, yr = (np.asarray(conv.prev_step_world[0], np.float64).copy(), np.asarray(conv.prev_step_world[1], np.float64).copy())

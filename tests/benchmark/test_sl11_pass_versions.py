@@ -92,14 +92,14 @@ def test_each_new_version_is_the_base_plus_exactly_its_flags():
         assert pf.version_server_flags(v)[-2:] == ["--hsr6-probe", pf.PANDA_HSR6_PROBE]     # takes the HSR6 probe like pc
     # the new flags belong to no other version
     for flag in ("--smooth-on-deviation", "--observe-only"):
-        assert [n for n, f in reg.items() if flag in f] == ([SDEV] if flag == "--smooth-on-deviation" else [OBS])
+        assert [n for n, f in reg.items() if flag in f and not n.endswith("-lsfork")] == ([SDEV] if flag == "--smooth-on-deviation" else [OBS])
     assert "--minimal-intervention-mm" not in reg[PC]
 
 
 def test_every_other_version_is_unchanged():
     from AG3S.adapters.panda import profile as pf
 
-    old = {k: list(v) for k, v in pf.AG3S_VERSIONS.items() if k not in NEW}
+    old = {k: list(v) for k, v in pf.AG3S_VERSIONS.items() if k not in NEW and not k.endswith("-lsfork")}   # SL11 fork merge adds -lsfork
     assert len(old) == OLD_REGISTRY_SIZE
     assert hashlib.sha256(json.dumps(old, sort_keys=True).encode()).hexdigest() == OLD_REGISTRY_SHA256
     assert list(pf.PC_LATCH_VERSIONS[-3:]) == list(NEW)                                      # the others keep their place
