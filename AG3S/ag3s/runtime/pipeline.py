@@ -791,6 +791,8 @@ class AG3S:
             max_dist_voxels=float(getattr(cfg, "oracle_max_dist_voxels", 6.0)),
             # the support guard = the ball's z_min (the same table protection as `ball` / `ball_owned`)
             z_floor=None if ball is None else float(ball.z_min))
+        if bool(getattr(cfg, "oracle_target_volume", False)) and ev is not None:   # SL13 (off: the evidence as is)
+            ev = dataclasses.replace(ev, target_volume=True)
         return ev, {**dict(self._oracle_frame or {}), **rec}
 
     def _surface_memory_evidence(self, geometry, support_surfaces, ball):
@@ -3975,6 +3977,18 @@ class AG3S:
                 stats["target_free"]["oracle"] = oracle_record
                 if extent == "attention_surface":   # IFG-CL1
                     stats["target_free"]["attention_surface"] = dict(self._surface_frame or {})
+        # --- SL13 — begin: the GT target volume's numbers into the oracle record (only with `esdf.oracle_target_volume`)
+        if bool(getattr(cfg, "oracle_target_volume", False)) and oracle_record is not None:
+            stats = getattr(field, "stats", None)
+            tv = ((stats.get("target_free") or {}).get("target_volume") if isinstance(stats, dict) else None) or {}
+            oracle_record["volume_applied"] = bool(tv.get("applied", False)) and oracle_evidence is not None
+            oracle_record["volume_n_removed"] = int(tv.get("n_extra_removed", 0))
+            oracle_record["volume_n_voxels"] = int(tv.get("n_volume_voxels", 0))
+            oracle_record["volume_n_seeds"] = int(tv.get("n_seeds_in_volume", 0))
+            oracle_record["volume_degenerate_hull"] = bool(tv.get("degenerate_hull", False))
+            oracle_record["volume_bbox_lo"] = tv.get("bbox_lo")
+            oracle_record["volume_bbox_hi"] = tv.get("bbox_hi")
+        # --- SL13 — end
         # --- T78f — begin: the builder's allowance count into `target_exclusion.oracle` (only when on)
         if oracle_record is not None and "allowance_mm" in oracle_record:
             stats = getattr(field, "stats", None)

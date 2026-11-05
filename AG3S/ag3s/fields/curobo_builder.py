@@ -97,6 +97,7 @@ __all__ = ["CuroboFieldBuilder", "TargetBall", "OwnedEvidence", "OWNED_CLASSES",
            "WINDOW_PLACEMENTS", "NONTARGET_EVIDENCES", "nontarget_surface_evidence",
            "OracleVisibleEvidence", "oracle_candidates", "oracle_visible_split", "oracle_cell_keys",
            "HullFill", "hull_fill_split",   # T78b
+           "target_volume_split",   # SL13
            "SolidOwned", "solid_candidates", "solid_facet_value",   # T96
            "SolidShadow", "ShadowCamera", "shadow_box_voxels", "shadow_hits",   # T96c
            "SurfaceProtectEvidence", "surface_protect_split",   # IFG-CL2
@@ -994,6 +995,9 @@ class OracleVisibleEvidence:
     #: shadow paths); `d_o` (surface · band paths) keeps `other_points`. None (default) = `d_N` from `other_points`.
     dn_other_points: Optional[np.ndarray] = None
     # --- T96d — end
+    #: SL13 (`esdf.oracle_target_volume`): also remove every seed inside the GT target volume (`target_volume_split`) whoever
+    #: owns it. False (default) = the oracle split as before.
+    target_volume: bool = False
 
     def __post_init__(self) -> None:
         object.__setattr__(self, "target_points",
@@ -1106,6 +1110,61 @@ def hull_fill_split(hull: HullFill, origin: np.ndarray, voxel_size: float, shape
         protected = np.isin(key(cand), np.unique(key(pk[ok])))
     return {"cand": cand, "fill": above & ~protected, "protected": protected, "above": above}
 # --- T78b — end
+
+
+# --- SL13 — begin: the GT target volume of the fine target-free tier (`esdf.oracle_target_volume`) ----------------------
+def target_volume_split(target_points: np.ndarray, origin: np.ndarray, voxel_size: float, shape,
+                        z_floor: Optional[float] = None) -> dict:
+    """SL13 -- the grid voxels (centre test) inside the GT target volume (pure numpy; the server and the unit test share it).
+
+    xy: the convex hull of the target samples' xy, dilated by one voxel (every facet pushed out by `voxel_size`; a hull that is
+    a point or a line -- `scipy` cannot build it -- falls back to the xy AABB +- one voxel, `degenerate` True). z: from `z_floor`
+    (None -> the lowest target sample minus one voxel) up to the highest target sample plus one voxel.
+
+    `{"cand" (K, 3) int64 -- the voxels, "applied" bool, "bbox_lo" · "bbox_hi" (3,) -- the dilated hull's AABB (m) | None,
+    "degenerate" bool, "n_points" int, "z_lo" · "z_hi" m | None}`; nothing (cand empty, applied False) when there is no sample."""
+    vs = float(voxel_size)
+    nx, ny, nz = (int(v) for v in shape)
+    org = np.asarray(origin, np.float64).reshape(3)
+    tp = np.asarray(target_points, np.float64).reshape(-1, 3)
+    out = {"cand": np.zeros((0, 3), np.int64), "applied": False, "bbox_lo": None, "bbox_hi": None,
+           "degenerate": False, "n_points": int(len(tp)), "z_lo": None, "z_hi": None}
+    if not len(tp):
+        return out
+    z_hi = float(tp[:, 2].max()) + vs
+    z_lo = float(tp[:, 2].min()) - vs if z_floor is None else float(z_floor)
+    xy = tp[:, :2]
+    eq = None
+    if len(np.unique(np.round(xy, 6), axis=0)) >= 3:
+        try:
+            from scipy.spatial import ConvexHull
+
+            eq = ConvexHull(xy).equations      # (F, 3): n . x + b <= 0 inside, |n| = 1
+        except Exception:                      # QhullError: collinear
+            eq = None
+    out["degenerate"] = eq is None
+    lo_xy, hi_xy = xy.min(axis=0) - vs, xy.max(axis=0) + vs
+    out["bbox_lo"] = np.array([lo_xy[0], lo_xy[1], z_lo])
+    out["bbox_hi"] = np.array([hi_xy[0], hi_xy[1], z_hi])
+    out["z_lo"], out["z_hi"] = z_lo, z_hi
+    out["applied"] = True
+    if z_hi < z_lo:
+        return out
+    lo = np.maximum(np.floor((out["bbox_lo"] - org) / vs).astype(np.int64), 0)
+    hi = np.minimum(np.ceil((out["bbox_hi"] - org) / vs).astype(np.int64) + 1, np.array([nx, ny, nz]))
+    if np.any(hi <= lo):
+        return out
+    ax = [np.arange(int(lo[i]), int(hi[i]), dtype=np.int64) for i in range(3)]
+    grid = np.stack(np.meshgrid(*ax, indexing="ij"), axis=-1).reshape(-1, 3)
+    c = org[None, :] + grid.astype(np.float64) * vs
+    inside = (c[:, 2] >= z_lo - 1e-9) & (c[:, 2] <= z_hi + 1e-9)   # 1e-9: a centre exactly on a face counts
+    if eq is not None:
+        inside &= (c[:, :2] @ eq[:, :2].T + eq[:, 2][None, :]).max(axis=1) <= vs + 1e-9
+    else:
+        inside &= np.all((c[:, :2] >= lo_xy - 1e-9) & (c[:, :2] <= hi_xy + 1e-9), axis=1)
+    out["cand"] = grid[inside]
+    return out
+# --- SL13 — end
 
 
 # --- T96 — begin: target solid ownership of the fine target-free tier (`esdf.surface_solid_owned`) -------------------
@@ -2807,6 +2866,9 @@ class CuroboFieldBuilder:
                 if oracle.hull_fill is not None:   # T78b (None = the call as before)
                     n_ball, ball_idx, excl = self._hull_fill_exclusion(itg, oracle, org, vs, shape,
                                                                        n_ball, ball_idx, excl)
+                if oracle.target_volume:   # SL13 (False = the call as before)
+                    n_ball, ball_idx, excl = self._volume_exclusion(itg, oracle, org, vs, shape,
+                                                                    n_ball, ball_idx, excl)
                 if ball_idx is not None:
                     att_idx = (ball_idx if att_idx is None
                                else np.unique(np.vstack([att_idx, ball_idx]), axis=0))
@@ -2928,6 +2990,8 @@ class CuroboFieldBuilder:
                 out["oracle_split"] = dict(ex["oracle"])
             if "hull_fill" in ex:   # T78b (surface_hull_fill 이 걸린 frame 만)
                 out["hull_fill"] = dict(ex["hull_fill"])
+            if "target_volume" in ex:   # SL13 (oracle_target_volume 일 때만)
+                out["target_volume"] = dict(ex["target_volume"])
             if "surface_protect" in ex:   # IFG-CL2 (attention_surface_hybrid 이고 보호가 걸린 frame 만)
                 out["surface_protect"] = dict(ex["surface_protect"])
             if "stem_cap" in ex:   # AG3S-PRE-CORE-TO-STEMCAP (target_stem_cap 이 켜졌을 때만)
@@ -3903,6 +3967,46 @@ class CuroboFieldBuilder:
             counts["n_sign_candidates"] = int(0 if sign_idx is None else len(sign_idx))
         rec["ms"] = round((time.monotonic() - t0) * 1e3, 3)
         counts["hull_fill"] = rec
+        counts["classify_ms"] = round(float(counts.get("classify_ms", 0.0)) + rec["ms"], 3)
+        return n_removed, (sign_idx if sign_idx is not None and len(sign_idx) else None), {"counts": counts,
+                                                                                             "trace": trace}
+
+    def _volume_exclusion(self, itg, oracle: OracleVisibleEvidence, origin: np.ndarray, voxel_size: float, shape,
+                          n_removed: int, sign_idx, excl):
+        """SL13 -- after `_oracle_exclusion` (and the hull fill): clear **every seed still inside the GT target volume**
+        (`target_volume_split`), whoever the nearest sample is. The unit is the seed (a `site_index >= 0` fine voxel), the one
+        `_oracle_exclusion` removes. The volume's voxels join the sign correction set as the hull fill's do (`_force_sign_on_pure_voxels`
+        flips only voxels with nothing else near). Same contract `(n_removed, sign_idx | None, excl)`; the extra seeds join
+        `trace["removed_ijk"]` and `counts["n_removed"]`; `counts["target_volume"]` says how many."""
+        t0 = time.monotonic()
+        split = target_volume_split(oracle.target_points, origin, voxel_size, shape, z_floor=oracle.z_floor)
+        cand = split["cand"]
+        rec = {"applied": bool(split["applied"]), "n_target_points": int(split["n_points"]),
+               "degenerate_hull": bool(split["degenerate"]), "n_volume_voxels": int(len(cand)),
+               "n_seeds_in_volume": 0, "n_extra_removed": 0, "n_sign_extra": 0, "n_sign_added": 0,
+               "z_floor_m": None if oracle.z_floor is None else float(oracle.z_floor),
+               "bbox_lo": None if split["bbox_lo"] is None else [round(float(v), 6) for v in split["bbox_lo"]],
+               "bbox_hi": None if split["bbox_hi"] is None else [round(float(v), 6) for v in split["bbox_hi"]]}
+        counts, trace = excl["counts"], excl["trace"]
+        if len(cand):
+            seed = self._seed_mask(itg, cand)          # seeds `_oracle_exclusion` (and the hull fill) left
+            rec["n_seeds_in_volume"] = int(seed.sum())
+            extra = cand[seed]
+            n = 0
+            if len(extra):
+                n, _ = self._clear_seeds(itg, extra, shape)
+            rec["n_extra_removed"] = int(n)
+            old = np.zeros((0, 3), np.int64) if sign_idx is None else np.asarray(sign_idx, np.int64)
+            merged = np.unique(np.vstack([old, cand]), axis=0)
+            rec["n_sign_added"] = int(len(merged) - len(old))
+            sign_idx = merged
+            n_removed = int(n_removed) + int(n)
+            counts["n_removed"] = int(counts.get("n_removed", 0)) + int(n)
+            if len(extra):
+                trace["removed_ijk"] = np.vstack([np.asarray(trace["removed_ijk"], np.int64).reshape(-1, 3), extra])
+            counts["n_sign_candidates"] = int(len(sign_idx))
+        rec["ms"] = round((time.monotonic() - t0) * 1e3, 3)
+        counts["target_volume"] = rec
         counts["classify_ms"] = round(float(counts.get("classify_ms", 0.0)) + rec["ms"], 3)
         return n_removed, (sign_idx if sign_idx is not None and len(sign_idx) else None), {"counts": counts,
                                                                                              "trace": trace}

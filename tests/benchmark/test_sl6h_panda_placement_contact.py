@@ -56,7 +56,7 @@ def test_every_head_version_keeps_its_argv(gpu_ok):
     from AG3S.adapters.panda import profile as pf
 
     old = _head_module("AG3S/adapters/panda/profile.py", "_panda_profile_head")
-    assert set(old.AG3S_VERSIONS) == set(pf.AG3S_VERSIONS) - {PC} - set(pf.P0M_VERSIONS) - set(pf.P0M_SL9_VERSIONS) - set(pf.PC_LATCH_VERSIONS) - set(pf.PC_NOPROBE_VERSIONS) - set(pf.LSFORK_VERSIONS) - set(pf.SL12_VERSIONS)   # SL12 -oraclegt; SL7 P0m, SL7d/e pc variants, SL9 P0m A/B, SL11 -lsfork
+    assert set(old.AG3S_VERSIONS) == set(pf.AG3S_VERSIONS) - {PC} - set(pf.P0M_VERSIONS) - set(pf.P0M_SL9_VERSIONS) - set(pf.PC_LATCH_VERSIONS) - set(pf.PC_NOPROBE_VERSIONS) - set(pf.LSFORK_VERSIONS) - set(pf.SL12_VERSIONS) - set(pf.SL13_VERSIONS)   # SL12 -oraclegt; SL7 P0m, SL7d/e pc variants, SL9 P0m A/B, SL11 -lsfork
     assert pf.FINAL_CONFIG_VERSIONS == old.FINAL_CONFIG_VERSIONS + (PC,)
     for name, flags in old.AG3S_VERSIONS.items():
         assert pf.AG3S_VERSIONS[name] == flags, name
