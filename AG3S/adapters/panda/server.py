@@ -192,10 +192,14 @@ class ChunkToJointPolicy:
 class PandaSafeServer:
     """Outside ``SafePolicy``: refined joint chunk -> EE-delta chunk (``action.joint_chunk_to_delta_chunk``)."""
 
-    def __init__(self, safe, chunk_policy: ChunkToJointPolicy, mode: str = "A"):
+    def __init__(self, safe, chunk_policy: ChunkToJointPolicy, mode: str = "A", observe_only: bool = False):
         self._policy = safe
         self.chunk_policy = chunk_policy
         self.mode = mode
+        #: SL11 ``--observe-only`` (diagnostic): everything is computed and recorded as without it, but the response the
+        #: client executes is the policy's own chunk, bit for bit, with ``safe`` True (never a HOLD). Off: the code below
+        #: is not reached and the response is the one of the earlier versions.
+        self.observe_only = bool(observe_only)
         self._sent = {}  # seq -> (Conversion, refined, reference) of the chunks sent, for the next exec_feedback
 
     @property
@@ -298,7 +302,29 @@ class PandaSafeServer:
         surface = surface_call_record(self._policy)
         if surface is not None:   # SL7i — key only with the attention-surface extent on (V11AB / pb / pc responses unchanged)
             response["panda/surface"] = surface
+        if self.observe_only:     # SL11 — key and the policy chunk only with --observe-only
+            self._observe_only_response(response, conv, actions)
         return response
+
+    @staticmethod
+    def _observe_only_response(response: dict, conv: pa.Conversion, would_be: np.ndarray) -> None:
+        """SL11 ``--observe-only``: replace the executable part of ``response`` by the policy's own chunk.
+
+        ``actions`` becomes ``conv.delta`` (the chunk as received, its dtype, bit for bit) and ``safe`` True, so the client
+        executes the policy and never holds. What the server would have sent -- the converted actions and the verdict --
+        stays in the record: ``panda/would_be_actions`` (the converted chunk), ``panda/observe`` (``would_be_safe`` /
+        ``would_be_hold``, the rows that differ from the policy, the largest difference). The other verdict keys
+        (``verdict_reasons``, ``trajopt_status``, ``max_violation_m``, ``notes``) are the server's own, unchanged."""
+        policy = np.array(conv.delta, copy=True)
+        would = np.asarray(would_be)
+        diff = np.abs(would.astype(np.float64) - policy.astype(np.float64))
+        would_safe = bool(response.get("safe", True))
+        response["panda/would_be_actions"] = np.array(would, copy=True)
+        response["panda/observe"] = {"observe_only": True, "would_be_safe": would_safe, "would_be_hold": not would_safe,
+                                     "would_be_rows_changed": [int(k) for k in np.flatnonzero(np.any(diff > 0.0, axis=1))],
+                                     "would_be_max_abs_action_change": float(diff.max()) if diff.size else 0.0}
+        response["actions"] = policy
+        response["safe"] = True
 
 
 def hsr6_call_record(safe) -> Optional[dict]:
@@ -850,6 +876,11 @@ def build_safe_server(policy, args, *, attention_model=None, gpu_warm_up: bool =
         info["record_constraints"] = {"dir": str(args.record_constraints), "run_dir": str(recorder.run_dir),
                                       "esdf_mode": recorder.esdf_mode, "background": recorder.background,
                                       "ag3s_version": recorder.meta.get("ag3s_version")}
+    if getattr(args, "observe_only", False):   # SL11 (off: the constructor call is the one of the earlier versions)
+        info["observe_only"] = True
+        logging.warning("!!! --observe-only: the client gets the policy's action bit for bit and is never held; the "
+                        "verdict and the converted actions the server computed are recorded (panda/observe) !!!")
+        return PandaSafeServer(safe, chunk_policy, mode=mode, observe_only=True), info
     return PandaSafeServer(safe, chunk_policy, mode=mode), info
 
 

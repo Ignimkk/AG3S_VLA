@@ -345,10 +345,16 @@ def build_problem(
         )
 
     P_q = sp.diags(2.0 * diag, format="csc")
+    q_smooth = None
     if cost.w_smooth > 0.0 and horizon > 2:
         D2 = difference_operator(nq, horizon, 2)
         P_q = (P_q + 2.0 * cost.w_smooth * (D2.T @ D2)).tocsc()
+        if getattr(cost, "smooth_on_deviation", False):
+            # SL11: w ‖D2 (Q − R)‖² = w (QᵀDᵀD Q − 2 RᵀDᵀD Q + const) -- the P above, plus this linear part.
+            q_smooth = -2.0 * cost.w_smooth * (D2.T @ (D2 @ reference.T.reshape(-1)))
     q_q = 2.0 * linear
+    if q_smooth is not None:
+        q_q = q_q + q_smooth
     w_rate = float(getattr(cost, "w_deflection_rate", 0.0) or 0.0)
     if w_rate > 0.0:
         # T43 TA (B): w ‖M vec(Q − R) − c‖², c = [D_prev; 0] — expanded into P and q.
@@ -534,7 +540,9 @@ def objective(
              else np.asarray(joint_track_scale, np.float64).reshape(-1, 1))   # IFG-TOW
     value = float(cost.w_track * np.sum(decay * np.sum(scale * (Q - reference) ** 2, axis=0)))
     if cost.w_smooth > 0.0 and Q.shape[1] > 2:
-        value += float(cost.w_smooth * np.sum(np.diff(Q, n=2, axis=1) ** 2))
+        # SL11: `smooth_on_deviation` -- the second difference of the deviation from the policy chunk (off: of the path)
+        path = Q - reference if getattr(cost, "smooth_on_deviation", False) else Q
+        value += float(cost.w_smooth * np.sum(np.diff(path, n=2, axis=1) ** 2))
     if previous_chunk is not None and cost.w_continuity > 0.0:
         previous_chunk = np.asarray(previous_chunk, np.float64)
         overlap = min(previous_chunk.shape[1], Q.shape[1])
