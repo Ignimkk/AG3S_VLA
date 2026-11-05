@@ -89,7 +89,7 @@ LOG_ONLY_BUILD_KEYWORDS = ("plan_horizon_steps", "rows_per_step")
 #: non-authorised target margin, confidence gate).
 #: SL6-A A10 (2026-10-29): ``palm_shell`` (A5) and ``target_exclusion`` (A2: target exclusion, ROI carve, non-target
 #: evidence) are ported -- :func:`v11ab_config_dict` / :func:`build_panda_ag3s` apply them as ``build_ag3s`` does.
-UNPORTED_BUILD_KEYWORDS = ("palm_cover", "wrist_cover", "contact", "confidence_gate")
+UNPORTED_BUILD_KEYWORDS = ("palm_cover", "wrist_cover", "confidence_gate")   # SL15: ``contact`` (T44e A9) is ported
 
 #: Panda grasp links per hand (``safe_policy.DEFAULT_GRASP_LINKS`` shape): reach is measured from the
 #: first finger, the pair is the two fingers.
@@ -650,6 +650,22 @@ AG3S_VERSIONS[SL14_REARM_VERSION] = tuple(AG3S_VERSIONS["AG3S-final-panda-v3-e0t
 AG3S_VERSIONS[SL14_OPENRULE_VERSION] = tuple(AG3S_VERSIONS["AG3S-final-panda-v3-e0to-pc"]) + OPENING_RULE_FLAGS
 
 
+#: SL15 (task SL15, lead 2026-11-05): "비권한 link 의 target 여유" -- ``--nonauthorized-target-margin obstacle`` (T44e A9) on the two pc
+#: versions that carry a grasp-latch repair: the links that may not touch the target (``panda_link1..7`` with ``--links arms``) keep the
+#: obstacle rows' clearance from the target instead of ``geometry.safety_margin`` (50 mm). Contact permission itself is unchanged.
+#:   ``-pc-ntm``           = ``-pc``           + the flag.
+#:   ``-pc-openrule-ntm``  = ``-pc-openrule``  + the flag.
+#: Like SL14 they are not in :data:`PC_LATCH_VERSIONS`, have no ``-lsfork`` twin, and the record dest (``nonauthorized_target_margin``)
+#: joins a record only when set (:func:`version_flag_values`). The flag was refused by the Panda server until SL15 (it is now in
+#: ``server.PORTED_FINAL_CONFIG_DESTS``; the config reaches AG3S through ``v11ab_config_dict`` as ``contact.nonauthorized_target_margin``).
+NONAUTHORIZED_TARGET_MARGIN_FLAGS: tuple[str, ...] = ("--nonauthorized-target-margin", "obstacle")
+SL15_NTM_VERSION = "AG3S-final-panda-v3-e0to-pc-ntm"
+SL15_OPENRULE_NTM_VERSION = "AG3S-final-panda-v3-e0to-pc-openrule-ntm"
+SL15_NTM_VERSIONS: tuple[str, ...] = (SL15_NTM_VERSION, SL15_OPENRULE_NTM_VERSION)
+AG3S_VERSIONS[SL15_NTM_VERSION] = tuple(AG3S_VERSIONS["AG3S-final-panda-v3-e0to-pc"]) + NONAUTHORIZED_TARGET_MARGIN_FLAGS
+AG3S_VERSIONS[SL15_OPENRULE_NTM_VERSION] = tuple(AG3S_VERSIONS[SL14_OPENRULE_VERSION]) + NONAUTHORIZED_TARGET_MARGIN_FLAGS
+
+
 def needs_oracle_grasp(version: str) -> bool:
     """SL14: whether the version's server runs ``--oracle-latch`` (the client must send ``ag3s/oracle_grasp``, ``--oracle-grasp``)."""
     return "--oracle-latch" in AG3S_VERSIONS.get(str(version), ())
@@ -680,7 +696,7 @@ def is_final_version(version: str) -> bool:
     return (str(version) in FINAL_CONFIG_VERSIONS or str(version) in P0M_VERSIONS or str(version) in P0M_SL9_VERSIONS
             or str(version) in PC_LATCH_VERSIONS or str(version) in PC_NOPROBE_VERSIONS   # SL7d / SL7e / SL9
             or str(version) in SL12_VERSIONS or str(version) in SL13_VERSIONS   # SL12 / SL13
-            or str(version) in SL14_VERSIONS)   # SL14
+            or str(version) in SL14_VERSIONS or str(version) in SL15_NTM_VERSIONS)   # SL14 / SL15
 
 
 def version_server_flags(version: str, *, hsr6_probe: Optional[str] = None,
@@ -755,6 +771,8 @@ def version_flag_values(args: argparse.Namespace) -> dict[str, Any]:
             if d not in set(dests) | set(final) | set(p0m) | set(sl9) | set(sl10) | set(sl10d) | set(sl10e) | set(sl10f) | set(sl11) | set(sl11gap) | set(sl12) | set(sl13)]   # SL14
     sl14ks = [d for d in _version_dests((SL14_OPENRULE_VERSION,))
               if d not in set(dests) | set(final) | set(p0m) | set(sl9) | set(sl10) | set(sl10d) | set(sl10e) | set(sl10f) | set(sl11) | set(sl11gap) | set(sl12) | set(sl13) | set(sl14)]   # SL14 KS
+    sl15 = [d for d in _version_dests(SL15_NTM_VERSIONS)
+            if d not in set(dests) | set(final) | set(p0m) | set(sl9) | set(sl10) | set(sl10d) | set(sl10e) | set(sl10f) | set(sl11) | set(sl11gap) | set(sl12) | set(sl13) | set(sl14) | set(sl14ks)]   # SL15
     parser = ss.build_parser()
     actions = parser._option_string_actions
     pinned = {actions[t].dest for t in V11AB_PRE_MERGE_DEFAULTS if t.startswith("--")}   # set on every V11AB argv
@@ -802,6 +820,9 @@ def version_flag_values(args: argparse.Namespace) -> dict[str, Any]:
     # SL14 KS: the opening-rule dest joins only when it is set -- the oracle-latch / rearm records keep their keys
     if any(getattr(args, d, None) != parser.get_default(d) for d in sl14ks):
         dests = sorted(set(dests) | set(sl14ks))
+    # SL15: the nonauthorized-target-margin dest joins only when it is set -- the -pc / -openrule records keep their keys
+    if any(getattr(args, d, None) != parser.get_default(d) for d in sl15):
+        dests = sorted(set(dests) | set(sl15))
     return {d: _jsonable(getattr(args, d, None)) for d in dests}
 
 
@@ -944,6 +965,9 @@ def v11ab_config_dict(kw: Mapping[str, Any]) -> tuple[dict, Optional[dict]]:
         "esdf": esdf,
         **({"timing": timing} if timing else {}),
         **({"constraint": constraint_section} if constraint_section else {}),
+        # SL15 -- `build_ag3s`'s ``contact`` section (T44e A9, only the key a flag gave; none = as before). `panda_overrides`
+        # later replaces only ``contact.contact_links``, so the two do not collide.
+        **({"contact": dict(kw["contact"])} if kw.get("contact") else {}),
         **ss.subtask_config_section(kw.get("subtask_gate"), kw.get("subtask_probe_path")),
     }
     return data, (dict(kw["identity"]) if kw.get("identity") else None)
@@ -1114,6 +1138,12 @@ def build_panda_ag3s(*, esdf_bounds: str = "panda", extra_overrides: Optional[Ma
                 if getattr(ag3s.config.esdf, k) != v}
         if lost:
             raise RuntimeError(f"AG3S esdf config is not what the server asked for: {lost}, asked {target_exclusion}")
+    contact = dict(kw.get("contact") or {})
+    if contact:
+        # SL15 -- `build_ag3s`'s survival check for the `contact` section (T44e A9).
+        lost = {k: getattr(ag3s.config.contact, k) for k, v in contact.items() if getattr(ag3s.config.contact, k) != v}
+        if lost:
+            raise RuntimeError(f"AG3S contact config is not what the server asked for: {lost}, asked {contact}")
     if kw.get("held_body_cover"):
         ag3s.held_body_cover = True
     if kw.get("held_free_observed_pad") is not None:
@@ -1138,6 +1168,8 @@ def build_panda_ag3s(*, esdf_bounds: str = "panda", extra_overrides: Optional[Ma
     # SL6-A — keys only when on (the V11AB / pb panda_server_config.json is unchanged)
     if target_exclusion:
         info["target_exclusion"] = _jsonable(target_exclusion)
+    if contact:   # SL15 -- key only when a flag gave a contact option
+        info["contact"] = _jsonable(contact)
     if ag3s.surface_pad_missing_cameras:   # SL7 -- key only with the attention-surface extent
         info["surface_pad_missing_cameras"] = True
     if ag3s.held_free_query_spheres:   # SL10d -- key only when on

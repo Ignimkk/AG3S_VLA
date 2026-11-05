@@ -200,7 +200,7 @@ def test_fixture_only_goal_and_obj_of_interest_fallback():
 def test_every_earlier_version_is_unchanged():
     from AG3S.adapters.panda import profile as pf
 
-    old = {k: list(v) for k, v in pf.AG3S_VERSIONS.items() if k not in NEW and k not in pf.SL13_VERSIONS and k not in pf.SL14_VERSIONS}   # SL13 adds the -oraclevol pair
+    old = {k: list(v) for k, v in pf.AG3S_VERSIONS.items() if k not in NEW and k not in pf.SL13_VERSIONS and k not in pf.SL14_VERSIONS and k not in pf.SL15_NTM_VERSIONS}   # SL13 adds the -oraclevol pair
     assert len(old) == 59
     assert hashlib.sha256(json.dumps(old, sort_keys=True).encode()).hexdigest() == OLD_REGISTRY_SHA256
     assert pf.SL12_VERSIONS == NEW
