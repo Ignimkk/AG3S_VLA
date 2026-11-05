@@ -602,6 +602,31 @@ SL11_GAP_VERSIONS: tuple[str, ...] = ("AG3S-final-panda-v3-e0to-pc-gap", "AG3S-f
 AG3S_VERSIONS["AG3S-final-panda-v3-e0to-pc-gap"] = tuple(AG3S_VERSIONS["AG3S-final-panda-v3-e0to-pc"]) + GAP_OPENING_FLAGS
 AG3S_VERSIONS["AG3S-final-panda-v3-e0to-pc-mi10-gap"] = tuple(AG3S_VERSIONS["AG3S-final-panda-v3-e0to-pc-mi10"]) + GAP_OPENING_FLAGS
 PC_LATCH_VERSIONS = PC_LATCH_VERSIONS + SL11_GAP_VERSIONS
+#: SL12 (task SL12, lead 2026-11-05): "정답 target 진단" -- the RB-Y1 T46e visible-target oracle on the Panda (diagnostic, not a
+#: candidate). ``-pc-oraclegt`` = pc판, ``-pc-mi10-oraclegt`` = ``-pc-mi10``, each with ``--target-extent oracle-visible
+#: --oracle-extent-identity gt``: the fine target-free layer removes the GT target's visible surface (+ truncation band) from the
+#: client's MuJoCo code image (``benchmark/adapters/libero_panda/oracle_codes.py``; the LIBERO / LIBERO-Safety clients send it
+#: with ``--oracle-segmentation``, which the launchers pass for these versions). One more change, forced by the config:
+#: ``--nontarget-evidence surface`` is removed (the oracle replaces the ball-owned split it acts on; the config refuses both).
+#: The ATS cell (``--attention-source`` default ``action:last:L8H2``), HSR6 rules and probe, the ball for the coarse layer and the
+#: permission, and everything else are the base version's -- no RB-Y1-specific attention prerequisite applies (oracle-visible reads
+#: no attention). ``--oracle-extent-identity gt``: the removed object is always the GT target (the ATS pick only decides the
+#: manipulated geometry / latch, recorded as ``identity_matches_gt``). Its dests join a record only when set.
+ORACLE_GT_FLAGS: tuple[str, ...] = ("--target-extent", "oracle-visible", "--oracle-extent-identity", "gt")
+SL12_ORACLE_SUFFIX = "-oraclegt"
+SL12_ORACLE_BASES: tuple[str, ...] = ("AG3S-final-panda-v3-e0to-pc", "AG3S-final-panda-v3-e0to-pc-mi10")
+SL12_VERSIONS: tuple[str, ...] = tuple(b + SL12_ORACLE_SUFFIX for b in SL12_ORACLE_BASES)
+for _b in SL12_ORACLE_BASES:
+    AG3S_VERSIONS[_b + SL12_ORACLE_SUFFIX] = _drop_flags(tuple(AG3S_VERSIONS[_b]), {"--nontarget-evidence": 1}) + ORACLE_GT_FLAGS
+del _b
+
+
+def needs_oracle_segmentation(version: str) -> bool:
+    """SL12: whether the version's server runs ``--target-extent oracle-visible`` (the client must send the GT code image)."""
+    flags = AG3S_VERSIONS.get(str(version), ())
+    return "--target-extent" in flags and flags[list(flags).index("--target-extent") + 1] == "oracle-visible"
+
+
 #: SL6-B B4 — the Panda HSR6 probe (5 classes, no retreat; labels approved by the user 2026-10-29), the default
 #: ``--hsr6-probe`` of the final versions, and its SHA-256 (recorded by the server, checked by the test when present).
 #: SL7 (0.7): found under the shared storage root (``AG3S_STORAGE_ROOT``, default the checkout's sibling
@@ -619,7 +644,8 @@ def is_final_version(version: str) -> bool:
     """A version on the final-configuration base argv: the SL6 final versions and (SL7) the P0m versions."""
     version = _lsfork_base(version)   # SL11: X-lsfork is as final as X
     return (str(version) in FINAL_CONFIG_VERSIONS or str(version) in P0M_VERSIONS or str(version) in P0M_SL9_VERSIONS
-            or str(version) in PC_LATCH_VERSIONS or str(version) in PC_NOPROBE_VERSIONS)   # SL7d / SL7e / SL9
+            or str(version) in PC_LATCH_VERSIONS or str(version) in PC_NOPROBE_VERSIONS   # SL7d / SL7e / SL9
+            or str(version) in SL12_VERSIONS)   # SL12
 
 
 def version_server_flags(version: str, *, hsr6_probe: Optional[str] = None,
@@ -686,6 +712,8 @@ def version_flag_values(args: argparse.Namespace) -> dict[str, Any]:
             if d not in set(dests) | set(final) | set(p0m) | set(sl9) | set(sl10) | set(sl10d) | set(sl10e) | set(sl10f)]   # SL11
     sl11gap = [d for d in _version_dests(SL11_GAP_VERSIONS)
                if d not in set(dests) | set(final) | set(p0m) | set(sl9) | set(sl10) | set(sl10d) | set(sl10e) | set(sl10f) | set(sl11)]   # SL11 §5
+    sl12 = [d for d in _version_dests(SL12_VERSIONS)
+            if d not in set(dests) | set(final) | set(p0m) | set(sl9) | set(sl10) | set(sl10d) | set(sl10e) | set(sl10f) | set(sl11) | set(sl11gap)]   # SL12
     parser = ss.build_parser()
     actions = parser._option_string_actions
     pinned = {actions[t].dest for t in V11AB_PRE_MERGE_DEFAULTS if t.startswith("--")}   # set on every V11AB argv
@@ -717,6 +745,9 @@ def version_flag_values(args: argparse.Namespace) -> dict[str, Any]:
     # (minimal_intervention_mm is a V11AB dest)
     if any(getattr(args, d, None) != parser.get_default(d) for d in sl11):
         dests = sorted(set(dests) | set(final) | set(p0m) | set(sl9) | set(sl10) | set(sl10d) | set(sl10e) | set(sl10f) | set(sl11))
+    # SL12: the oracle identity / reach dests join only when one is set (target_extent itself is a P0m dest)
+    if any(getattr(args, d, None) != parser.get_default(d) for d in sl12):
+        dests = sorted(set(dests) | set(final) | set(p0m) | set(sl12))
     # SL11 §5: the gap-opening dest joins only when it is set -- no other version's record gains a key
     if any(getattr(args, d, None) != parser.get_default(d) for d in sl11gap):
         dests = sorted(set(dests) | set(sl11gap))

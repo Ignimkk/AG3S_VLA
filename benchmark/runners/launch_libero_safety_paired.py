@@ -207,7 +207,7 @@ def main(argv=None) -> int:
         print(json.dumps({m: lp.server_argv(m, identity["path"], 0, args.ag3s_version)
                           + lp.record_constraints_argv(m, lp.RUN_DIR_TOKEN, args.record_constraints) for m in modes},
                          indent=1))
-        print(json.dumps(lp.client_argv("<run>", 0, args)))
+        print(json.dumps(lp.client_argv("<run>", 0, args) + lp.oracle_client_argv("vla_v11ab", args)))   # SL12 (else unchanged)
         print(json.dumps({"run_id": args.run_id, "protocol": protocol_settings(args),
                           "runtime_schedule": runtime_schedule(args), "checkpoint": identity}, default=str))
         return 0

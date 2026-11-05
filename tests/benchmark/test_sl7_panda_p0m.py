@@ -248,7 +248,7 @@ def test_p0m_passes_check_unported_flags_without_a_probe(version, gpu_ok):
     ("surface_split", True), ("surface_crease_cut", True), ("surface_memory_target_sticky", True),
     ("hsr_gt_stage", True), ("subtask_from_phase_machine", True),
     ("robot_mask", "render"), ("target_free_coarse", True), ("grasp_corridor_allow", True),
-    ("target_extent", "oracle-visible"), ("target_extent", "attention-surface-hybrid")])
+    ("target_extent", "attention-surface-hybrid")])   # SL12: oracle-visible is ported (test_sl12_oracle_panda.py)
 def test_p0m_still_refuses_what_is_not_ported(dest, value, gpu_ok):
     from AG3S.adapters.panda import server as ps
 
