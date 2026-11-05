@@ -128,8 +128,8 @@ def build_jobs(*, suites, version, conversion, split, task_ids=None, episode_ids
     from AG3S.adapters.panda import profile
 
     profile.version_server_flags(version)  # unknown version -> ValueError
-    if conversion not in ("A", "B", "C"):
-        raise ValueError("conversion must be A, B or C")
+    if conversion not in ("A", "B", "C", "D", "E"):
+        raise ValueError("conversion must be A, B, C, D or E")
     jobs = []
     for suite, level in suites:
         tasks = list(task_ids) if task_ids is not None else list(range(int(reg.suite(suite)["n_tasks"])))
@@ -510,7 +510,7 @@ def main(argv=None) -> int:
     sub = ap.add_subparsers(dest="command", required=True)
     p = sub.add_parser("plan")
     p.add_argument("--version", required=True, help="AG3S_VERSIONS key (AG3S/adapters/panda/profile.py)")
-    p.add_argument("--conversion", required=True, choices=("A", "B", "C"))
+    p.add_argument("--conversion", required=True, choices=("A", "B", "C", "D", "E"))
     p.add_argument("--suites", default="all", help="all | libero | safelibero | suite[:I|II],...")
     p.add_argument("--split", required=True, choices=reg.SPLITS)
     p.add_argument("--tasks", default=None, help="task ids (default: every task of each suite)")

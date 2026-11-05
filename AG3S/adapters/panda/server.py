@@ -54,7 +54,7 @@ PANDA_HORIZON = {"horizon": 10, "execution_length": 5, "control_hz": 20.0, "plan
 FRANKA_ACCEL_LIMITS = (15.0, 7.5, 10.0, 12.5, 15.0, 20.0, 20.0)
 PANDA_DEFAULT_ACCELERATION = min(FRANKA_ACCEL_LIMITS)
 ATTENTION_ALIAS = {"cam_high": "head", "cam_left_wrist": "left_wrist"}
-#: Reverse-conversion mode of this server (``action.CONVERSION_MODES``): env ``AG3S_PANDA_CONVERSION`` (A | B).
+#: Reverse-conversion mode of this server (``action.CONVERSION_MODES``): env ``AG3S_PANDA_CONVERSION`` (A | B | C | D | E; default A).
 ENV_CONVERSION = "AG3S_PANDA_CONVERSION"
 GRIPPER_CALIBRATION = pm.DESCRIPTION_DIR / "gripper_calibration.json"
 #: SL11 §5: thresholds of the latch when its opening is the two-finger gap (read only with ``--gripper-gap-opening``).

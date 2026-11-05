@@ -173,7 +173,7 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--server-timeout", type=float, default=1800.0)
     ap.add_argument("--busy-gpu-wait", type=float, default=1800.0)
     ap.add_argument("--ag3s-version", default="V11AB")
-    ap.add_argument("--conversion", choices=("A", "B", "C"), required=True)
+    ap.add_argument("--conversion", choices=("A", "B", "C", "D", "E"), required=True)
     ap.add_argument("--allow-unscaled-v11ab", action="store_true",
                     help="diagnostic only: run vla_v11ab with pi05_libero_safety although the Panda conversion "
                          "assumes the robosuite 1.4.1 OSC scale")
