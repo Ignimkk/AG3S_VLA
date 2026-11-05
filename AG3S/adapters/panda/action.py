@@ -34,6 +34,11 @@ sent on the wire) **and** whose previous row did too is returned as the **origin
 chunk V11AB leaves alone is executed exactly as VLA-only would. Clipping to ``[-1, 1]`` after the correction
 is recorded per component (``saturated``). The gripper column is the original, except on a chunk where the geometric
 grasp (G1) deferred the close (SL6-A A8, ``apply_deferred_close``).
+
+Modes ``D`` / ``E`` (SL15, 2026-11-06, off unless ``--conversion D|E``): the steady-state inverse of the same lag,
+``Dx_k = Dy_k (1 - alpha) / beta`` (gain 4.01 position / 4.03 rotation instead of C's dead-beat 1/beta = 14 / 32), row by row,
+no cumulative tracking and no carry-over; an action that would leave ``[-1, 1]`` is scaled back along the correction
+direction instead of clipped per axis. ``E`` adds a deadband (tiny refined changes keep the policy's bits).
 """
 from __future__ import annotations
 
@@ -267,7 +272,21 @@ def applied_command_rows(kin: PandaKinematics, conv: Conversion, applied: np.nda
 #: ``D^_k = D^_{k-1} + d^_k``. A clipped row's deficit carries into the next rows, and once the refined rows rejoin the
 #: reference the lag tail is stopped (rows stay corrected until ``d^`` and ``D* - D^`` are zero). Without clipping and
 #: with every row corrected it equals A; a chunk without any change passes the policy's bits.
-CONVERSION_MODES = {"A": "lag_inverse", "B": "command_offset", "C": "lag_inverse_tracking"}
+#: ``D`` / ``lag_steady`` (SL15): B's per-row change ``Dy_k`` (and B's ``unchanged`` pass-through rule), but the commanded
+#: change is the *steady-state* inverse of the lag, ``Dx_k = Dy_k (1 - alpha) / beta`` (position and rotation separately):
+#: a constant ``Dx`` then realises ``Dy`` once the lag has settled, within a few steps, with a gain of about 4 instead of
+#: C's ~14 / ~32. The corrected action is ``a_pol + s corr`` with the largest ``s in [0, 1]`` that keeps every axis in
+#: ``[-1, 1]`` (direction preserving; ``s < 1`` lists the row in ``saturated_rows``). No cumulative state, no carry-over.
+#: ``E`` / ``lag_steady_deadband`` (SL15): D, except that a changed row passes the policy's bits when its own change is
+#: below ``DEADBAND_POS_M`` and ``DEADBAND_ROT_RAD`` (norms) and the cumulative change up to and including that row is below
+#: ``DEADBAND_CUM_POS_M`` and ``DEADBAND_CUM_ROT_RAD``. Those rows are listed in ``passthrough_rows`` and ``deadband_rows``.
+CONVERSION_MODES = {"A": "lag_inverse", "B": "command_offset", "C": "lag_inverse_tracking",
+                    "D": "lag_steady", "E": "lag_steady_deadband"}
+#: E: deadband thresholds (own change per row / cumulative change from the chunk start), world-frame norms.
+DEADBAND_POS_M = 0.0005
+DEADBAND_ROT_RAD = float(np.radians(0.3))
+DEADBAND_CUM_POS_M = 0.001
+DEADBAND_CUM_ROT_RAD = float(np.radians(0.5))
 #: C: a row is "back on the reference" when the predicted deviation state is below this (m / rad).
 TRACKING_EPS = 1e-9
 
@@ -297,6 +316,9 @@ def joint_chunk_to_delta_chunk(kin: PandaKinematics, conv: Conversion, refined: 
     star_Dp, star_Dr = np.zeros(3), np.zeros(3)
     passthrough, corrected, sat_rows = [], [], []
     max_corr = 0.0
+    # D / E: cumulative change from the chunk start (deadband test of E), smallest direction-preserving scale used
+    cum_dp, cum_dr = np.zeros(3), np.zeros(3)
+    deadband, min_s = [], 1.0
     for k in range(H):
         (ps0, Rs0), (ps1, Rs1) = fk_s[k], fk_s[k + 1]
         (pr0, Rr0), (pr1, Rr1) = fk_r[k], fk_r[k + 1]
@@ -327,6 +349,34 @@ def joint_chunk_to_delta_chunk(kin: PandaKinematics, conv: Conversion, refined: 
             hat_dr = ar * hat_dr + br * OSC_ORI_SCALE * eff[3:]
             hat_Dp, hat_Dr = hat_Dp + hat_dp, hat_Dr + hat_dr
             continue
+        if mode in ("D", "E"):
+            if unchanged[k] and (k == 0 or bool(unchanged[k - 1])):
+                passthrough.append(k)
+                continue  # identical chain: exactly no change, the policy's bits
+            cum_dp, cum_dr = cum_dp + dyp, cum_dr + dyr
+            if (mode == "E" and np.linalg.norm(dyp) < DEADBAND_POS_M and np.linalg.norm(dyr) < DEADBAND_ROT_RAD
+                    and np.linalg.norm(cum_dp) < DEADBAND_CUM_POS_M and np.linalg.norm(cum_dr) < DEADBAND_CUM_ROT_RAD):
+                passthrough.append(k)
+                deadband.append(k)
+                continue
+            dxp = dyp * (1.0 - ap) / bp
+            dxr = dyr * (1.0 - ar) / br
+            corr = np.concatenate([dxp / OSC_POS_SCALE, dxr / OSC_ORI_SCALE])
+            a_pol = np.clip(np.asarray(conv.delta[k, :6], np.float64), -OSC_INPUT_CLIP, OSC_INPUT_CLIP)
+            s = 1.0
+            for a_i, c_i in zip(a_pol, corr):  # largest s in [0, 1] with |a_i + s c_i| <= clip on every axis
+                if c_i > 0.0:
+                    s = min(s, (OSC_INPUT_CLIP - a_i) / c_i)
+                elif c_i < 0.0:
+                    s = min(s, (-OSC_INPUT_CLIP - a_i) / c_i)
+            s = max(s, 0.0)
+            if s < 1.0:
+                sat_rows.append(k)
+            min_s = min(min_s, s)
+            out[k, :6] = np.clip(a_pol + s * corr, -OSC_INPUT_CLIP, OSC_INPUT_CLIP).astype(out.dtype)  # clip: ulp only
+            corrected.append(k)
+            max_corr = max(max_corr, float(np.max(np.abs(corr))))
+            continue
         if unchanged[k] and (k == 0 or bool(unchanged[k - 1])):
             passthrough.append(k)
             dyp, dyr = np.zeros(3), np.zeros(3)  # identical chain: exactly no change
@@ -348,6 +398,9 @@ def joint_chunk_to_delta_chunk(kin: PandaKinematics, conv: Conversion, refined: 
     if mode == "C":
         rec_track = {"tracking_residual_mm": float(1000 * np.linalg.norm(star_Dp - hat_Dp)),
                      "tracking_residual_rad": float(np.linalg.norm(star_Dr - hat_Dr))}
+    elif mode in ("D", "E"):
+        rec_track = {"gain_pos": float((1.0 - ap) / bp), "gain_rot": float((1.0 - ar) / br), "min_scale_s": float(min_s),
+                     **({"deadband_rows": deadband} if mode == "E" else {})}
     else:
         rec_track = {}
     rec = {"mode": mode, "mode_name": CONVERSION_MODES[mode], **rec_track,
@@ -364,7 +417,12 @@ def action_box_from_conversion(conv: Conversion, *, margin: float, n_rows: int, 
 
     Every constant is this module's own (never copied): the response model ``RESPONSE`` (fit json), the OSC scales and the
     input clip. Reverse modes A and C invert the lag, ``Dx = (Dy - alpha Dy_prev) / beta``; mode B adds ``Dy`` unchanged
-    (``alpha = 0``, ``beta = 1``)."""
+    (``alpha = 0``, ``beta = 1``). Modes D and E (SL15) apply the steady gain ``Dx = Dy (1 - alpha) / beta`` row by row, which
+    in the box's form ``g (dy_k - alpha_box dy_{k-1})`` is ``alpha_box = 0`` and ``beta_box = beta / (1 - alpha)`` (B's
+    structure with D's gain). The box keeps its per-axis ``|a + corr| <= 1 - margin`` rows: that is sufficient for D's
+    direction-preserving scale to be 1, so the box needs no scale-back. E's deadband is not modelled: a deadband row passes
+    the policy's bits, which is inside the box whenever the policy action is.
+    """
     from AG3S.trajopt.action_box import ActionBox
 
     if mode not in CONVERSION_MODES:
@@ -374,6 +432,9 @@ def action_box_from_conversion(conv: Conversion, *, margin: float, n_rows: int, 
     if mode == "B":
         ap = ar = 0.0
         bp = br = 1.0
+    elif mode in ("D", "E"):
+        bp, br = bp / (1.0 - ap), br / (1.0 - ar)
+        ap = ar = 0.0
     A = np.asarray(conv.delta, np.float64)[:, :6]
     return ActionBox(link=EE_LINK, actions=np.clip(A, -OSC_INPUT_CLIP, OSC_INPUT_CLIP),
                      R_world_base=np.asarray(conv.R_world_base, np.float64), q_now=np.asarray(conv.q_now, np.float64),

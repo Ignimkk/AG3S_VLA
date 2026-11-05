@@ -426,7 +426,7 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--attention-source", default=None, metavar="SPEC",
                     help="SL6-A — replace the final-configuration version's --attention-source cell (SL6-B head "
                          "re-selection); final versions only")
-    ap.add_argument("--conversion", choices=("A", "B", "C"), required=True,
+    ap.add_argument("--conversion", choices=("A", "B", "C", "D", "E"), required=True,
                     help="Panda reverse conversion for VLA+V11AB (AG3S/adapters/panda/action.py CONVERSION_MODES)")
     ap.add_argument("--record-constraints", choices=RECORD_CONSTRAINTS_CHOICES, default="none",
                     help="vla_v11ab server only: serve_safe --record-constraints <run_dir>/server_constraints "
