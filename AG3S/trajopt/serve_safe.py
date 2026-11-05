@@ -1151,6 +1151,8 @@ def target_exclusion_section(args) -> dict:
         v = getattr(args, flag, None)
         if v is not None:
             out[key] = v
+    if getattr(args, "oracle_target_volume", False):   # SL13 (given flag only: absent = config default off, bit-identical)
+        out["oracle_target_volume"] = True
     if getattr(args, "target_extent", None) not in (None, "estimated"):
         out["target_extent"] = str(args.target_extent).replace("-", "_")
     if getattr(args, "robot_mask", None) not in (None, "spheres"):   # IFG-CL1 (given flag only)
@@ -2537,6 +2539,11 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--oracle-max-dist-voxels", type=float, default=None, metavar="V",
                     help="T46e — oracle-visible: seed 후보 = target 표본에서 V 미세 voxel 안 (기본 6.0 = 30 mm = "
                          "미세 TSDF truncation). --target-extent oracle-visible · attention-surface 와 함께만")
+    ap.add_argument("--oracle-target-volume", action="store_true",
+                    help="SL13 (benchmark branch, Panda 서버만) — 진단: --target-extent oracle-visible 의 지우기에 더해, 정답 target 부피 "
+                         "(xy = 이 episode 의 target 표본 xy 볼록 껍질을 미세 voxel 1칸 팽창, z = z_floor 부터 target 표본 최고 z + 1칸) "
+                         "안의 seed 를 가장 가까운 표본이 누구든 모두 미세 target-free 층에서 지운다 (탁자에 닿는 아래쪽 seed 포함). "
+                         "target 표본이 없으면 아무것도 더하지 않는다. --target-extent oracle-visible 과 함께만. RB-Y1 서버는 거절. 기본 off")
     # T46e A13 — end
     # IFG-CL2 — begin
     ap.add_argument("--hybrid-identity", choices=("both", "instance", "centre"), default=None,
@@ -3874,6 +3881,9 @@ def reject_panda_only_flags(ap: argparse.ArgumentParser, args) -> None:
     if getattr(args, "hsr6_placement_contact_lift", False):   # SL10e
         ap.error("--hsr6-placement-contact-lift 는 Panda 서버의 ⑤ 단계 조건입니다 (--robot panda 만). RB-Y1 서버는 "
                  "거절합니다")
+    if getattr(args, "oracle_target_volume", False):   # SL13
+        ap.error("--oracle-target-volume 은 Panda LIBERO client 의 정답 segmentation 진단입니다 (--robot panda 만). RB-Y1 서버는 "
+                 "거절합니다")
     if getattr(args, "gripper_gap_opening", False):   # SL11 §5
         ap.error("--gripper-gap-opening 은 Panda 손가락 두 관절 (finger_joint1 · finger_joint2) 의 간격으로 latch 개도를 재는 flag 입니다 "
                  "(--robot panda 만). RB-Y1 gripper 는 관절이 하나라 거절합니다")
@@ -4011,6 +4021,9 @@ def reject_bad_flag_combinations(ap: argparse.ArgumentParser, args, *, seed_map_
     oracle_given = [flag for flag, v in (("--oracle-extent-identity", getattr(args, "oracle_extent_identity", None)),
                                          ("--oracle-max-dist-voxels", getattr(args, "oracle_max_dist_voxels", None)))
                     if v is not None]
+    if getattr(args, "oracle_target_volume", False) and extent != "oracle-visible":   # SL13
+        ap.error("--oracle-target-volume 은 --target-extent oracle-visible 에서만 읽힙니다 (attention-surface 포함 다른 extent 는 "
+                 "정답 target 표본이 없거나 다른 경로입니다) — 그대로 띄우면 효과가 있었다고 믿게 됩니다")
     if oracle_given and not oracle_on:
         ap.error(f"{', '.join(oracle_given)} 는 --target-extent oracle-visible · attention-surface 에서만 읽힙니다 — "
                  "그대로 띄우면 효과가 있었다고 믿게 됩니다")

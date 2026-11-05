@@ -621,6 +621,18 @@ for _b in SL12_ORACLE_BASES:
 del _b
 
 
+#: SL13 (task SL13, lead 2026-11-05): "정답 target 부피 지우기" -- ``-pc-oraclevol`` = ``-pc-oraclegt`` + ``--oracle-target-volume``,
+#: ``-pc-mi10-oraclevol`` = ``-pc-mi10-oraclegt`` + the flag: the oracle-visible removal also takes every seed of the fine target-free
+#: layer inside the GT target volume (convex hull of the code-1 samples' xy + one voxel, ``z_floor`` .. top + one voxel), whoever owns it.
+#: Diagnostic, not a candidate. Their record dest (``oracle_target_volume``) joins a record only when set (:func:`version_flag_values`).
+ORACLE_VOLUME_FLAGS: tuple[str, ...] = ("--oracle-target-volume",)
+SL13_ORACLE_VOLUME_SUFFIX = "-oraclevol"
+SL13_VERSIONS: tuple[str, ...] = tuple(b + SL13_ORACLE_VOLUME_SUFFIX for b in SL12_ORACLE_BASES)
+for _b in SL12_ORACLE_BASES:
+    AG3S_VERSIONS[_b + SL13_ORACLE_VOLUME_SUFFIX] = tuple(AG3S_VERSIONS[_b + SL12_ORACLE_SUFFIX]) + ORACLE_VOLUME_FLAGS
+del _b
+
+
 def needs_oracle_segmentation(version: str) -> bool:
     """SL12: whether the version's server runs ``--target-extent oracle-visible`` (the client must send the GT code image)."""
     flags = AG3S_VERSIONS.get(str(version), ())
@@ -645,7 +657,7 @@ def is_final_version(version: str) -> bool:
     version = _lsfork_base(version)   # SL11: X-lsfork is as final as X
     return (str(version) in FINAL_CONFIG_VERSIONS or str(version) in P0M_VERSIONS or str(version) in P0M_SL9_VERSIONS
             or str(version) in PC_LATCH_VERSIONS or str(version) in PC_NOPROBE_VERSIONS   # SL7d / SL7e / SL9
-            or str(version) in SL12_VERSIONS)   # SL12
+            or str(version) in SL12_VERSIONS or str(version) in SL13_VERSIONS)   # SL12 / SL13
 
 
 def version_server_flags(version: str, *, hsr6_probe: Optional[str] = None,
@@ -714,6 +726,8 @@ def version_flag_values(args: argparse.Namespace) -> dict[str, Any]:
                if d not in set(dests) | set(final) | set(p0m) | set(sl9) | set(sl10) | set(sl10d) | set(sl10e) | set(sl10f) | set(sl11)]   # SL11 §5
     sl12 = [d for d in _version_dests(SL12_VERSIONS)
             if d not in set(dests) | set(final) | set(p0m) | set(sl9) | set(sl10) | set(sl10d) | set(sl10e) | set(sl10f) | set(sl11) | set(sl11gap)]   # SL12
+    sl13 = [d for d in _version_dests(SL13_VERSIONS)
+            if d not in set(dests) | set(final) | set(p0m) | set(sl9) | set(sl10) | set(sl10d) | set(sl10e) | set(sl10f) | set(sl11) | set(sl11gap) | set(sl12)]   # SL13
     parser = ss.build_parser()
     actions = parser._option_string_actions
     pinned = {actions[t].dest for t in V11AB_PRE_MERGE_DEFAULTS if t.startswith("--")}   # set on every V11AB argv
@@ -748,6 +762,10 @@ def version_flag_values(args: argparse.Namespace) -> dict[str, Any]:
     # SL12: the oracle identity / reach dests join only when one is set (target_extent itself is a P0m dest)
     if any(getattr(args, d, None) != parser.get_default(d) for d in sl12):
         dests = sorted(set(dests) | set(final) | set(p0m) | set(sl12))
+    # SL13: the target-volume dest joins only when it is set -- no other version's record gains a key (the oracle dests of its
+    # base version join as SL12's do)
+    if any(getattr(args, d, None) != parser.get_default(d) for d in sl13):
+        dests = sorted(set(dests) | set(final) | set(p0m) | set(sl12) | set(sl13))
     # SL11 §5: the gap-opening dest joins only when it is set -- no other version's record gains a key
     if any(getattr(args, d, None) != parser.get_default(d) for d in sl11gap):
         dests = sorted(set(dests) | set(sl11gap))

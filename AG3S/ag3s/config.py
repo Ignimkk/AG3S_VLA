@@ -1381,6 +1381,10 @@ class EsdfConfig:
     #: | `"gt"` | 늘 GT target 물체 — identity 와 extent 둘 다 GT 인 미세 target-free 계층 (상한). 공 · 창 · 권한 · 거친 계층의 identity 는 그대로 AG3S 의 것 |
     oracle_extent_identity: str = "pipeline"
     ORACLE_EXTENT_IDENTITIES = ("pipeline", "gt")
+    #: SL13 (진단, 기본 꺼짐) — `oracle_visible` 일 때 지우기에 더해 **정답 target 부피 안의 seed 를 주인 판정과 상관없이 모두** 지운다
+    #: (`curobo_builder.target_volume_split`): xy = 이 episode 의 target 표본 xy 볼록 껍질을 미세 voxel 1칸 팽창, z = `z_floor`
+    #: 부터 target 표본 최고 z + 1칸. target 표본이 없으면 아무것도 더하지 않는다. `target_extent == "oracle_visible"` 와 함께만.
+    oracle_target_volume: bool = False
     # T78 갈래 A — begin: post-processing of the `attention_surface` region (`runtime.attention_surface_post`,
     # `runtime.pipeline.AG3S._attention_surface_update`). All off by default = IFG-CL1 / T76 as is (same calls, same
     # record keys); each is read only with `target_extent == "attention_surface"` (refused otherwise).
@@ -1683,6 +1687,12 @@ class EsdfConfig:
             raise AG3SConfigError(
                 f"esdf.oracle_extent_identity 는 {self.ORACLE_EXTENT_IDENTITIES} 중 하나여야 합니다: "
                 f"{self.oracle_extent_identity!r}")
+        if not isinstance(self.oracle_target_volume, bool):
+            raise AG3SConfigError(f"esdf.oracle_target_volume 는 true 또는 false 여야 합니다: {self.oracle_target_volume!r}")
+        if self.oracle_target_volume and self.target_extent != "oracle_visible":
+            raise AG3SConfigError(
+                "esdf.oracle_target_volume 은 target_extent='oracle_visible' 에서만 읽힙니다 — 그대로 두면 효과가 있었다고 믿게 됩니다 "
+                f"(받은 값 target_extent={self.target_extent!r})")
         if self.robot_mask not in self.ROBOT_MASKS:
             raise AG3SConfigError(
                 f"esdf.robot_mask 는 {self.ROBOT_MASKS} 중 하나여야 합니다: {self.robot_mask!r}")

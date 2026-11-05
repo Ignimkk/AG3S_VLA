@@ -435,6 +435,9 @@ def oracle_call_record(safe) -> Optional[dict]:
         rec["field"] = scalars(orc)
         if isinstance(orc.get("pipeline_instance"), dict):
             rec["field"]["pipeline_instance"] = scalars(orc["pipeline_instance"])
+        for k in ("volume_bbox_lo", "volume_bbox_hi"):   # SL13 (keys only with --oracle-target-volume)
+            if isinstance(orc.get(k), (list, tuple)):
+                rec["field"][k] = [float(v) for v in orc[k]]
     return _jsonable(rec)
 
 
@@ -1106,7 +1109,8 @@ def final_config_record(args, safe, to_config, attn_rec: dict, gpu: Optional[dic
            else {}),
         **({"oracle_visible": {"target_extent": "oracle_visible", "identity": getattr(args, "oracle_extent_identity", None) or "pipeline",
                                "needs_client_flag": "--oracle-segmentation (metadata oracle_segmentation_required)",
-                               "cameras": ["head", "left_wrist"], "code_table": "0 robot/none, 1 target, 2 static, >=3 other objects"}}
+                               "cameras": ["head", "left_wrist"], "code_table": "0 robot/none, 1 target, 2 static, >=3 other objects",
+                               **({"target_volume": True} if getattr(args, "oracle_target_volume", False) else {})}}
            if getattr(args, "target_extent", None) == "oracle-visible" else {}),
         **({"subtask_from_latch": subtask_latch_record(safe)} if ss.subtask_from_latch_on(args) else {}),
         "inert_on_panda": inert,
