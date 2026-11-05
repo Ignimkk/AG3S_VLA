@@ -577,6 +577,7 @@ def build_parser():
     parser.add_argument("--action-adapter", choices=ACTION_ADAPTERS, default=None,
                         help="default: the checkpoint's (pi05_libero -> libero_to_safety)")
     parser.add_argument("--max-steps", type=int, default=None, help="override MAX_STEPS[suite] (recorded)")
+    sc.add_oracle_argument(parser)   # SL12
     return parser
 
 
@@ -592,6 +593,8 @@ def resolve_defaults(args):
 def main(argv=None):
     args = resolve_defaults(build_parser().parse_args(argv))
     args.capture_geometry = True  # the request carries the camera geometry in both modes (as libero_safe_client)
+    if args.oracle_segmentation:
+        args.capture_segmentation = True  # SL12: the code image is made from the geom-id segmentation
     base.check_geometry_arguments(args)
     run_dir = base.validate_run_dir(args.run_dir)
     extra = {"libero_safety_env": activate_libero_safety(), "level": args.level,
@@ -610,10 +613,15 @@ def main(argv=None):
             raise ValueError("task id {} outside level of {} tasks".format(task_id, task_suite.n_tasks))
     max_steps = args.max_steps or MAX_STEPS[args.task_suite_name]
     ws, connector = base.make_policy_client(args.host, args.port)
+    sc.check_oracle_pairing(args, ws)   # SL12
+    if args.oracle_segmentation:
+        extra["oracle_segmentation"] = sc.oc.settings_record()["oracle_segmentation"]
 
     def policy_for(task_id, episode_idx):
         client = sc.SafeClient(ws, args.seed, task_id, episode_idx, args.replan_steps,
-                               request_extra={"panda/action_adapter": str(args.action_adapter)})  # SL11: server --response-model check
+                               request_extra={"panda/action_adapter": str(args.action_adapter)},  # SL11: server --response-model check
+                               oracle=args.oracle_segmentation,
+                               oracle_info={"suite": args.task_suite_name, "task_id": task_id})
         return client, connector, dict(extra)
 
     def observer_for(client, geometry, task_id, episode_idx):

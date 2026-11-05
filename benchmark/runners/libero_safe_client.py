@@ -35,6 +35,11 @@ import numpy as np
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 import libero_pi05_client as base  # noqa: E402
 
+ROOT_FOR_IMPORT = str(pathlib.Path(__file__).resolve().parents[2])
+if ROOT_FOR_IMPORT not in sys.path:
+    sys.path.append(ROOT_FOR_IMPORT)  # appended, so it never shadows an installed package (as base._geometry_adapter)
+from benchmark.adapters.libero_panda import oracle_codes as oc  # noqa: E402  (SL12, numpy only)
+
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 PHASE = "approach"            # V11AB client: --safe-phase approach (profile.v11ab_client_phase)
 MANIPULATORS = ["left"]       # Panda = V11AB left manipulator (SL2)
@@ -205,8 +210,14 @@ def _rotvec_between(q1_xyzw, q0_xyzw):
 class SafeClient(object):
     """Wraps the websocket policy client; one instance per episode (``policy_for``)."""
 
-    def __init__(self, ws_client, seed, task_id, episode_idx, replan_steps, emit_privileged=False, request_extra=None):
+    def __init__(self, ws_client, seed, task_id, episode_idx, replan_steps, emit_privileged=False, request_extra=None,
+                 oracle=False, oracle_info=None):
         self.ws = ws_client
+        #: SL12 ``--oracle-segmentation`` (diagnostic, default off = no key added): the request also carries the GT code image
+        #: per camera (``oracle_codes``); the labeller is made on the first observation (it needs the env's BDDL problem).
+        self.oracle = bool(oracle)
+        self.oracle_info = dict(oracle_info or {})
+        self.labeler = None
         self.request_extra = dict(request_extra or {})  # SL11: extra request keys (LIBERO-Safety: panda/action_adapter)
         self.emit_privileged = bool(emit_privileged)
         self.env = None                # set by the observer only with emit_privileged
@@ -231,6 +242,10 @@ class SafeClient(object):
 
         def observe(env, obs):
             geometry.observe(env, obs)
+            if self.oracle and self.labeler is None:
+                self.labeler = oc.OracleLabeler.from_env(env, geometry.tables, **self.oracle_info)
+                logging.info("SL12 oracle target: %s (%s); codes %s", self.labeler.target, self.labeler.rule,
+                             self.labeler.codes)
             self.eef.append((np.array(obs["robot0_eef_pos"], np.float64), np.array(obs["robot0_eef_quat"], np.float64)))
             if self.emit_privileged:
                 self.env = env
@@ -256,6 +271,8 @@ class SafeClient(object):
             req["ag3s/exec_feedback"] = fb
             req["panda/exec_applied_osc"] = osc
         req.update(self.request_extra)
+        if self.labeler is not None:
+            req.update(self.labeler.request_keys(frames))
         req["panda/robot_state"] = rs9
         req["panda/T_world_base"] = np.asarray(frames[self.geometry.cameras[0]]["T_world_base"], np.float64)
         if len(self.eef) >= 2:
@@ -347,6 +364,10 @@ class SafeClient(object):
             # (row["observe"], arrays["would_be_actions"]). Absent (every other version): the row keeps its keys.
             row["observe"] = base._jsonable(resp.get("panda/observe"))
             self.arrays["would_be_actions"].append(np.asarray(resp["panda/would_be_actions"], np.float64))
+        if "panda/oracle" in resp:
+            # SL12 -- the server's oracle-extent record of this call (applied / why / identity matches GT / sample counts);
+            # logging only. Absent (every version without --target-extent oracle-visible): the row keeps its keys.
+            row["oracle"] = base._jsonable(resp.get("panda/oracle"))
         if "panda/surface" in resp:
             # SL7i — the server's attention-surface record of this call (surface applied / fallback / why);
             # logging only. Absent (versions without the attention-surface extent): the row keeps its keys.
@@ -382,9 +403,12 @@ class SafeClient(object):
         base._exclusive_publish(tmp, episodes_dir / (stem + "_calls.npz"))
         holds = sum(1 for r in self.calls if r["hold"])
         changed = [r.get("max_abs_action_change_executed", 0.0) for r in self.calls]
-        return {"calls_log": str(path.name), "calls_npz": stem + "_calls.npz", "policy_seed": self.seed,
-                "server_mode": self.calls[0]["mode"] if self.calls else None, "hold_calls": holds,
-                "calls": len(self.calls), "max_abs_action_change_executed": float(max(changed) if changed else 0.0)}
+        out = {"calls_log": str(path.name), "calls_npz": stem + "_calls.npz", "policy_seed": self.seed,
+               "server_mode": self.calls[0]["mode"] if self.calls else None, "hold_calls": holds,
+               "calls": len(self.calls), "max_abs_action_change_executed": float(max(changed) if changed else 0.0)}
+        if self.labeler is not None:   # SL12 (key only with --oracle-segmentation)
+            out["oracle"] = self.labeler.record()
+        return out
 
 
 def build_parser():
@@ -400,12 +424,42 @@ def build_parser():
     parser.add_argument("--emit-privileged-obstacles", action="store_true",
                         help="SafeLIBERO only: also send ag3s/privileged/* (obstacle names, poses, geom sizes; GT "
                              "segmentation with --capture-segmentation) for the privileged baseline arms")
+    add_oracle_argument(parser)
     return parser
+
+
+def add_oracle_argument(parser):
+    """SL12 (shared with ``libero_safety_client``): default off = nothing rendered or sent, request and outputs unchanged."""
+    parser.add_argument(oc.CLIENT_FLAG, dest="oracle_segmentation", action="store_true",
+                        help="SL12 diagnostic: send the MuJoCo GT code image per camera (0 robot, 1 target, 2 static, >=3 other "
+                             "movable objects; target = the BDDL goal's first object) for a server run with --target-extent "
+                             "oracle-visible. Implies --capture-segmentation (one extra render per camera and observation)")
+
+
+def check_oracle_pairing(args, ws):
+    """SL12: the flag and the server's ``oracle_segmentation_required`` metadata must agree -- a run is an oracle run on both
+    ends or on neither (an oracle server without the code images silently falls back to the estimated extent)."""
+    meta = {}
+    get = getattr(ws, "get_server_metadata", None)
+    if callable(get):
+        try:
+            meta = dict(get() or {})
+        except Exception:  # noqa: BLE001 -- an unreadable metadata is not a pairing proof either way
+            meta = {}
+    required = bool(meta.get(oc.SERVER_REQUIRES_KEY, False))
+    if required and not args.oracle_segmentation:
+        raise RuntimeError("the server runs the visible-target oracle (--target-extent oracle-visible) and needs the GT code "
+                           "image in every request: start the client with " + oc.CLIENT_FLAG)
+    if args.oracle_segmentation and not required:
+        raise RuntimeError(oc.CLIENT_FLAG + " but the server does not run the visible-target oracle (no " + oc.SERVER_REQUIRES_KEY
+                           + " in its metadata): refusing a run whose images the server would ignore")
 
 
 def main(argv=None):
     args = build_parser().parse_args(argv)
     args.capture_geometry = True  # the request carries the camera geometry in both modes
+    if args.oracle_segmentation:
+        args.capture_segmentation = True  # SL12: the code image is made from the geom-id segmentation
     base.check_geometry_arguments(args)
     run_dir = base.validate_run_dir(args.run_dir)
     safelibero = args.task_suite_name in SAFELIBERO_TOTAL_STEPS
@@ -444,10 +498,14 @@ def main(argv=None):
         task_suite = benchmark.get_benchmark_dict()[args.task_suite_name]()
         max_steps = base.MAX_STEPS[args.task_suite_name]
     ws, connector = base.make_policy_client(args.host, args.port)
+    check_oracle_pairing(args, ws)
+    if args.oracle_segmentation:
+        extra["oracle_segmentation"] = oc.settings_record()["oracle_segmentation"]
 
     def policy_for(task_id, episode_idx):
         client = SafeClient(ws, args.seed, task_id, episode_idx, args.replan_steps,
-                            emit_privileged=args.emit_privileged_obstacles)
+                            emit_privileged=args.emit_privileged_obstacles, oracle=args.oracle_segmentation,
+                            oracle_info={"suite": args.task_suite_name, "task_id": task_id})
         client.collision = CollisionMonitor(args.num_steps_wait) if safelibero else None
         return client, connector, dict(extra)
 

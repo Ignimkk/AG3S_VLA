@@ -365,6 +365,9 @@ class PandaSafeServer:
         hsr6 = hsr6_call_record(self._policy)
         if hsr6 is not None:   # SL6-H H2 — key only with an HSR6 use flag on (V11AB / pb responses unchanged)
             response["panda/hsr6"] = hsr6
+        oracle = oracle_call_record(self._policy)
+        if oracle is not None:    # SL12 -- key only with --target-extent oracle-visible (every other response unchanged)
+            response["panda/oracle"] = oracle
         surface = surface_call_record(self._policy)
         if surface is not None:   # SL7i — key only with the attention-surface extent on (V11AB / pb / pc responses unchanged)
             response["panda/surface"] = surface
@@ -403,6 +406,36 @@ def hsr6_call_record(safe) -> Optional[dict]:
     from AG3S.trajopt.safe_policy import _jsonable
 
     return _jsonable(getattr(safe, "_last_hsr6", None) or {})
+
+
+def oracle_call_record(safe) -> Optional[dict]:
+    """SL12 -- this call's visible-target-oracle record for the client's ``*_calls.jsonl`` (logging only, read after the solve):
+    the scalars of ``AG3S._oracle_frame`` (segmentation present, cameras, target, memory counts) and of the target-free layer's
+    ``oracle`` stats (``applied`` / ``why``, ``identity_mode``, ``pipeline_code``, ``identity_matches_gt`` = the AG3S-chosen
+    manipulated object is the GT target, ``n_target_samples`` / ``n_other_samples``, ``n_band_cells``). ``None`` when the version
+    does not use ``--target-extent oracle-visible`` (no key)."""
+    ag3s = getattr(safe, "ag3s", None)
+    esdf = getattr(getattr(ag3s, "config", None), "esdf", None)
+    if ag3s is None or getattr(esdf, "target_extent", None) != "oracle_visible":
+        return None
+    from AG3S.trajopt.safe_policy import _jsonable
+
+    scalars = lambda d: ({k: v for k, v in d.items() if isinstance(v, (bool, int, float, str)) or v is None}
+                         if isinstance(d, dict) else {})
+    frame = getattr(ag3s, "_oracle_frame", None)
+    rec = scalars(frame)
+    if isinstance(frame, dict):
+        rec["cameras"] = list(frame.get("cameras") or [])
+        if isinstance(frame.get("memory"), dict):
+            rec["memory"] = scalars(frame["memory"])
+    stats = getattr(getattr(ag3s, "_last_esdf_field", None), "stats", None)
+    tf = stats.get("target_free") if isinstance(stats, dict) else None
+    orc = tf.get("oracle") if isinstance(tf, dict) else None
+    if isinstance(orc, dict):
+        rec["field"] = scalars(orc)
+        if isinstance(orc.get("pipeline_instance"), dict):
+            rec["field"]["pipeline_instance"] = scalars(orc["pipeline_instance"])
+    return _jsonable(rec)
 
 
 def surface_call_record(safe) -> Optional[dict]:
@@ -569,6 +602,11 @@ def _hidden_probe_source(args) -> bool:
     return spec is not None and str(spec).strip().split(":", 1)[0] == "hidden_probe"
 
 
+#: SL12: options of ``--target-extent oracle-visible`` (the oracle's identity and candidate reach). They stay in
+#: :data:`UNPORTED_FINAL_CONFIG_DESTS` (refused with any other extent, attention-surface included) and are accepted only there.
+SL12_ORACLE_DESTS: tuple[str, ...] = ("oracle_extent_identity", "oracle_max_dist_voxels")
+
+
 def check_unported_flags(args, ap) -> None:
     """Refuse a final-configuration option the Panda server would not apply as the RB-Y1 server does, and (SL6-A)
     the ported ones in a form the Panda cannot run: an HSR6 flag without ``--hsr6-probe`` (the default probe is the
@@ -576,8 +614,10 @@ def check_unported_flags(args, ap) -> None:
     from AG3S.trajopt import serve_safe as ss
 
     parser = ap if ap is not None else ss.build_parser()
+    oracle_ported = getattr(args, "target_extent", None) == "oracle-visible"   # SL12: the identity / reach options are read there
     bad = sorted(d for d in UNPORTED_FINAL_CONFIG_DESTS
-                 if hasattr(args, d) and getattr(args, d) != parser.get_default(d))
+                 if hasattr(args, d) and getattr(args, d) != parser.get_default(d)
+                 and not (oracle_ported and d in SL12_ORACLE_DESTS))
     message = None
     if bad:
         message = ("--robot panda: not ported to the Panda server yet (AG3S final-configuration merge 2026-10-29): "
@@ -585,11 +625,12 @@ def check_unported_flags(args, ap) -> None:
     elif ss.hsr6_flags_from_args(args) is not None and not getattr(args, "hsr6_probe", None):
         message = ("--robot panda: --hsr6-* needs --hsr6-probe FILE (the Panda probe, SL6-B B4); the default probe is "
                    "the RB-Y1 one (kv_L4 of another policy and robot)")
-    elif getattr(args, "target_extent", None) not in (None, "estimated", "attention-surface"):
-        # SL7: the extent flag itself is ported, but only the attention-surface one (oracle-visible reads the client's
-        # GT segmentation, the hybrid needs the RB-Y1 ball-owned split protection and a rendered-robot mask)
-        message = (f"--robot panda: --target-extent {args.target_extent} is not ported (SL7 ported attention-surface "
-                   "only; oracle-visible needs the client's GT segmentation, attention-surface-hybrid is RB-Y1's)")
+    elif getattr(args, "target_extent", None) not in (None, "estimated", "attention-surface", "oracle-visible"):
+        # SL7: the extent flag itself is ported, but only the attention-surface one (the hybrid needs the RB-Y1 ball-owned
+        # split protection and a rendered-robot mask). SL12: oracle-visible too -- a diagnostic that reads the LIBERO clients'
+        # GT code image (``--oracle-segmentation``, ``benchmark/adapters/libero_panda/oracle_codes.py``)
+        message = (f"--robot panda: --target-extent {args.target_extent} is not ported (SL7 ported attention-surface, SL12 "
+                   "oracle-visible; attention-surface-hybrid is RB-Y1's)")
     elif _hidden_probe_source(args):
         # main 02fe59e6 merge: the hidden-probe target map is a probe trained on RB-Y1 16D hidden states (3 cameras)
         message = ("--robot panda: --attention-source hidden_probe is an RB-Y1-trained probe (not ported; needs a "
@@ -1063,6 +1104,10 @@ def final_config_record(args, safe, to_config, attn_rec: dict, gpu: Optional[dic
         # SL7 (P0m) — keys only with the option on (the earlier versions' dump is unchanged)
         **({"attention_surface": surface_record(args, safe.ag3s)} if getattr(args, "target_extent", None) == "attention-surface"
            else {}),
+        **({"oracle_visible": {"target_extent": "oracle_visible", "identity": getattr(args, "oracle_extent_identity", None) or "pipeline",
+                               "needs_client_flag": "--oracle-segmentation (metadata oracle_segmentation_required)",
+                               "cameras": ["head", "left_wrist"], "code_table": "0 robot/none, 1 target, 2 static, >=3 other objects"}}
+           if getattr(args, "target_extent", None) == "oracle-visible" else {}),
         **({"subtask_from_latch": subtask_latch_record(safe)} if ss.subtask_from_latch_on(args) else {}),
         "inert_on_panda": inert,
         "request_count_rules_unchanged": "hold_follow_to / geo_close_timeout / geo_carry_requests / HSR6 raw argmax are "

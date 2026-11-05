@@ -125,6 +125,25 @@ def client_argv(run_dir: str, port: int, args) -> list[str]:
                 ["--safelibero-step-budget", budget] if budget != SAFELIBERO_DEFAULT_STEP_BUDGET else [])
 
 
+def oracle_client_argv(mode: str, args) -> list[str]:
+    """SL12: ``--oracle-segmentation`` for the vla_v11ab client of an ``-oraclegt`` version (the server runs ``--target-extent
+    oracle-visible`` and needs the GT code image); ``[]`` for every other version and for the vla_only client."""
+    from AG3S.adapters.panda import profile
+
+    if mode == "vla_v11ab" and profile.needs_oracle_segmentation(getattr(args, "ag3s_version", "V11AB")):
+        from benchmark.adapters.libero_panda import oracle_codes
+        return [oracle_codes.CLIENT_FLAG]
+    return []
+
+
+def oracle_settings(mode: str, args) -> dict:
+    """SL12: the manifest entry that says what the oracle is and how its target is chosen ({} when the client has no oracle)."""
+    if not oracle_client_argv(mode, args):
+        return {}
+    from benchmark.adapters.libero_panda import oracle_codes
+    return oracle_codes.settings_record()
+
+
 def _is_safelibero(args) -> bool:
     return args.task_suite_name.startswith("safelibero")
 
@@ -272,11 +291,11 @@ def run_mode(mode: str, args, identity: dict, shared: dict) -> Path:
                 "safety_level": args.safety_level,
                 "policy_seed_rule": "seed*100000 + task_id*1000 + episode_idx (libero_safe_client.episode_seed)",
                 "checkpoint": identity, "server_argv": s_argv + record_constraints_argv(mode, RUN_DIR_TOKEN, record),
-                "data_split": args.data_split, **rec_settings, **shared}
+                "data_split": args.data_split, **rec_settings, **oracle_settings(mode, args), **shared}
     run_dir = create_run(run_id=f"{args.run_id}-{run_tag(mode, args)}", settings=settings, checkpoint=identity["path"])
     print(f"[{mode}] {run_dir}", flush=True)
     s_argv = s_argv + record_constraints_argv(mode, run_dir, record)
-    c_argv = client_argv(str(run_dir), port, args)
+    c_argv = client_argv(str(run_dir), port, args) + oracle_client_argv(mode, args)   # SL12 (else unchanged)
     logs = run_dir / "logs"
     result = {"role": "launcher_result", "mode": mode, "port": port}
     server = None
@@ -435,12 +454,15 @@ def main(argv=None) -> int:
     if args.record_constraints != "none" and "vla_only" in modes:
         raise ValueError(f"--record-constraints {args.record_constraints} cannot run with the vla_only mode "
                          "(--no-safe server, no constraints); pass --modes vla_v11ab")
+    if _is_safelibero(args) and oracle_client_argv("vla_v11ab", args):
+        raise ValueError("SL12: the oracle versions run on LIBERO and LIBERO-Safety only (the SafeLIBERO target choice is not "
+                         "checked); remove this refusal after checking oracle_codes.choose_target on the SafeLIBERO BDDL")
     identity = l0.checkpoint_identity(Path(args.checkpoint_dir), require=True)
     if args.dry_run:
         print(json.dumps({m: server_argv(m, identity["path"], 0, args.ag3s_version, **version_options(args))
                           + record_constraints_argv(m, RUN_DIR_TOKEN, args.record_constraints) for m in modes},
                          indent=1))
-        print(json.dumps(client_argv("<run>", 0, args)))
+        print(json.dumps(client_argv("<run>", 0, args) + oracle_client_argv("vla_v11ab", args)))
         print(json.dumps({"protocol": protocol_settings(args), "runtime_schedule": runtime_schedule(args)}, default=str))
         return 0
     if gpu_lock_held_by_caller():
