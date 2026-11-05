@@ -1,0 +1,18 @@
+{
+ "what": "Panda grasp latch thresholds when its opening is the two-finger gap (SL11 section 5, --gripper-gap-opening). Fixed from the physical distributions below (recorded runs 62c0076f78b9 pc LIBERO 9 and 66b2c14f pc LIBERO-Safety 10), not tuned on the replay result.",
+ "normalisation": "opening_norm = clip((finger_joint1 - finger_joint2) / 0.08, 0, 1) from the MuJoCo qpos (1 = open); gap = 80 mm * opening_norm",
+ "thresholds": {"empty_below": 0.04, "blocked_gap": 0.03, "hold_empty_below": 0.01678, "assist_requires_reach": true},
+ "measured": {
+  "mechanical_stop_gap_mm": 0.9996, "mechanical_stop_opening_norm": 0.0125,
+  "how_stop": "448 frames of the 2 runs sit at gap 0.9996 mm (both pads in contact); same as gripper_calibration.json empty_closure",
+  "held_gap_mm_percentiles_lifted_in_hand": {"p05": 3.4, "p50": 4.6, "note": "LIBERO-Safety: 419 in-hand calls; LIBERO: min 3.6 (50 calls)"},
+  "ambiguous_band_mm": [1.35, 3.2],
+  "ambiguous_band_counts": "settled closed calls (executed command < 0.1, gap change < 1.6 mm): in hand 4, target >= 12 cm from the EE 22, target 9-12 cm and not lifted 6"
+ },
+ "rules": {
+  "empty_below": "attach needs gap >= 3.2 mm (0.04): below it the fingers closed on something thinner than every recorded hold, which was empty-ish 22 times to in-hand 4",
+  "blocked_gap": "gap - executed command >= 2.4 mm (0.03), between the sag of an empty closure (<= 0.02) and the thinnest hold (0.04)",
+  "hold_empty_below": "an attached hold that closes to 1.35 mm (0.01678 = midpoint of the stop 0.0125 and 0.0211, the thinnest settled in-hand gap 1.69 mm) holds nothing: revoke / slip",
+  "assist_requires_reach": "the HSR6 attach-assist also needs the reach check (object near the hand)"
+ }
+}

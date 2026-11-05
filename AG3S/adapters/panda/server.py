@@ -57,6 +57,9 @@ ATTENTION_ALIAS = {"cam_high": "head", "cam_left_wrist": "left_wrist"}
 #: Reverse-conversion mode of this server (``action.CONVERSION_MODES``): env ``AG3S_PANDA_CONVERSION`` (A | B).
 ENV_CONVERSION = "AG3S_PANDA_CONVERSION"
 GRIPPER_CALIBRATION = pm.DESCRIPTION_DIR / "gripper_calibration.json"
+#: SL11 §5: thresholds of the latch when its opening is the two-finger gap (read only with ``--gripper-gap-opening``).
+GRIPPER_GAP_CALIBRATION = pm.DESCRIPTION_DIR / "gripper_gap_calibration.json"
+GRIPPER_GAP_FULL_M = 0.08      # both fingers fully open: 2 x 0.04 m
 
 
 def conversion_mode() -> str:
@@ -70,11 +73,25 @@ def gripper_calibration() -> dict:
     return json.loads(GRIPPER_CALIBRATION.read_text())
 
 
-def panda_latch_config():
-    """V11AB ``LatchConfig`` defaults with only ``empty_below`` calibrated for the Panda gripper."""
+def gripper_gap_calibration() -> dict:
+    return json.loads(GRIPPER_GAP_CALIBRATION.read_text())
+
+
+def panda_latch_config(gap_opening: bool = False):
+    """V11AB ``LatchConfig`` defaults with only ``empty_below`` calibrated for the Panda gripper.
+
+    SL11 §5 ``gap_opening``: the latch's opening is the two-finger gap (:func:`gripper_gap_norm`), so the three thresholds that
+    read a *closed on nothing / blocked by something* off the opening are re-fitted to that scale
+    (``gripper_gap_calibration.json``): ``empty_below``, ``blocked_gap`` and ``hold_empty_below``, and the HSR6 attach-assist also needs
+    the reach check (``assist_requires_reach``). Everything else is unchanged.
+    """
     from AG3S.trajopt.grasp_latch import LatchConfig
 
-    return LatchConfig(empty_below=float(gripper_calibration()["panda"]["empty_below"]))
+    if not gap_opening:
+        return LatchConfig(empty_below=float(gripper_calibration()["panda"]["empty_below"]))
+    c = gripper_gap_calibration()["thresholds"]
+    return LatchConfig(empty_below=float(c["empty_below"]), blocked_gap=float(c["blocked_gap"]),
+                       hold_empty_below=float(c["hold_empty_below"]), assist_requires_reach=bool(c["assist_requires_reach"]))
 ATTENTION_CAMERAS = ("head", "left_wrist")
 HANDS = {pm.MANIPULATOR_SIDE: 0}
 GRIPPER_COLUMNS = (pa.GRIPPER_COLUMN,)
@@ -116,6 +133,17 @@ def strip_panda_keys(obs: dict) -> tuple[dict, dict]:
 #: SafePolicy reads the capture-time gripper opening from the policy observation's ``state`` at
 #: ``gripper_columns`` (T29 convention, 1 = open); the Panda request carries it in ``panda/robot_state``.
 STATE_KEY = "state"
+
+
+def gripper_gap_norm(robot_state9) -> float:
+    """SL11 §5: ``(q1 - q2) / 0.08`` clipped to [0, 1] -- the gap between the two finger pads over its full width (both
+    MuJoCo finger joints, ``q2`` is negative when open). Unlike ``|q1| / 0.04`` it does not read two fingers pushed to
+    one side together (``q1 = 0, q2 = -0.02``) as a nearly closed hand."""
+    rs = np.asarray(robot_state9, np.float64).reshape(-1)
+    if rs.shape[0] != len(pm.JOINT_MAP):
+        raise ValueError(f"Panda robot_state must have {len(pm.JOINT_MAP)} entries, got {rs.shape[0]}")
+    gap = float(rs[7]) - float(rs[8])      # MuJoCo qpos: finger_joint1 in [0, 0.04], finger_joint2 in [-0.04, 0]
+    return float(min(1.0, max(0.0, gap / GRIPPER_GAP_FULL_M)))
 
 
 def gripper_opening_norm(robot_state9) -> float:
@@ -209,7 +237,8 @@ class ChunkToJointPolicy:
 class PandaSafeServer:
     """Outside ``SafePolicy``: refined joint chunk -> EE-delta chunk (``action.joint_chunk_to_delta_chunk``)."""
 
-    def __init__(self, safe, chunk_policy: ChunkToJointPolicy, mode: str = "A", observe_only: bool = False):
+    def __init__(self, safe, chunk_policy: ChunkToJointPolicy, mode: str = "A", observe_only: bool = False,
+                 gap_opening: bool = False):
         self._policy = safe
         self.chunk_policy = chunk_policy
         self.mode = mode
@@ -217,6 +246,9 @@ class PandaSafeServer:
         #: client executes is the policy's own chunk, bit for bit, with ``safe`` True (never a HOLD). Off: the code below
         #: is not reached and the response is the one of the earlier versions.
         self.observe_only = bool(observe_only)
+        #: SL11 §5 ``--gripper-gap-opening``: the exec feedback's ``measured_gripper`` (what the grasp latch reads as the measured
+        #: opening) is the two-finger gap of this request's ``panda/robot_state`` instead of ``|q1| / 0.04``. Off: not touched.
+        self.gap_opening = bool(gap_opening)
         self._sent = {}  # seq -> (Conversion, refined, reference) of the chunks sent, for the next exec_feedback
 
     @property
@@ -270,6 +302,21 @@ class PandaSafeServer:
                                                            for k in range(n)))
         return rec
 
+    @staticmethod
+    def _gap_feedback(obs: dict, fb_rec: dict) -> dict:
+        """SL11 §5 -- replace ``measured_gripper`` of the available exec feedback by the two-finger gap opening of this request
+        (the capture instant the feedback is confirmed at). The single-finger value it had stays in the record."""
+        fb = obs.get("ag3s/exec_feedback")
+        if KEY_ROBOT_STATE not in obs or not isinstance(fb, dict) or not fb.get("available"):
+            return fb_rec
+        rs = np.asarray(obs[KEY_ROBOT_STATE], np.float64).reshape(-1)
+        old = np.asarray(fb["measured_gripper"], np.float64).reshape(-1)
+        new = old.copy()
+        new[0] = gripper_gap_norm(rs)
+        obs["ag3s/exec_feedback"] = dict(fb, measured_gripper=new.astype(np.float32))
+        return {**fb_rec, "gripper_gap_opening": {"single_finger": float(old[0]), "gap": float(new[0]),
+                                                  "q1": float(rs[7]), "q2": float(rs[8])}}
+
     def _g1_deferred(self) -> bool:
         """SL6-A A8 — did the geometric grasp (``SafePolicy._geo``) defer the close on the chunk just refined."""
         geo = getattr(self._policy, "_geo", None)
@@ -283,6 +330,8 @@ class PandaSafeServer:
         if obs.get("ag3s/reset"):
             self._sent.clear()  # a new episode: seq restarts, earlier chunks are not this episode's
         fb_rec = self._feedback(obs)
+        if self.gap_opening:
+            fb_rec = self._gap_feedback(obs, fb_rec)
         response = dict(self._policy.infer(adapt_request(obs), **kwargs))
         conv = self.chunk_policy.last
         refined, reference = response["actions"], response.get("actions_reference")
@@ -838,6 +887,7 @@ def build_safe_server(policy, args, *, attention_model=None, gpu_warm_up: bool =
     constraint = ag3s.constraint_robot_model
     kin = pa.PandaKinematics(constraint)
     response_name = getattr(args, "response_model", "robosuite141")   # SL11
+    gap_opening = bool(getattr(args, "gripper_gap_opening", False))     # SL11 §5
     chunk_policy = ChunkToJointPolicy(served_policy, kin, response=pa.response_for(response_name), response_name=response_name)
     to_config = _replace_horizon_limits(ss.trajopt_config_from_args(args))
     if getattr(args, "to_action_box", False):
@@ -856,7 +906,7 @@ def build_safe_server(policy, args, *, attention_model=None, gpu_warm_up: bool =
                  **({"hsr6_objective_scope": scope} if scope != "all" else {}),
                  **ss.subtask_from_latch_kwargs(args)}   # SL7 (T92): {} unless --subtask-from-latch
                 if final_options_on(args) else {})
-    safe = SafePolicy(chunk_policy, ag3s=ag3s, to_config=to_config, attention_fn=attention_fn, latch=panda_latch_config(),
+    safe = SafePolicy(chunk_policy, ag3s=ag3s, to_config=to_config, attention_fn=attention_fn, latch=panda_latch_config(gap_opening=gap_opening),
                       grasp_links=dict(profile.PANDA_GRASP_LINKS), hold_links=dict(profile.PANDA_HOLD_LINKS),
                       static_geometry=None, recorder=recorder, shadow=bool(getattr(args, "shadow", False)),
                       layout=pa.panda_chunk_layout(constraint.joint_names), gripper_columns=GRIPPER_COLUMNS,
@@ -882,6 +932,12 @@ def build_safe_server(policy, args, *, attention_model=None, gpu_warm_up: bool =
             "hands": HANDS, "gripper_columns": GRIPPER_COLUMNS, "gripper_convention": panda_gripper_convention().record(),
             "conversion": pa.conventions(), "static_geometry": None,
             "v11ab_build_kwargs_not_applied": ["constraint_sphere_options", "finger_cover"]}
+    if gap_opening:   # SL11 §5 -- key only with the flag (the earlier servers' dump is unchanged)
+        gc = panda_latch_config(gap_opening=True)
+        info["latch"]["gripper_gap_opening"] = {"calibration": str(GRIPPER_GAP_CALIBRATION), "record": gripper_gap_calibration(),
+                                                "empty_below": gc.empty_below, "blocked_gap": gc.blocked_gap,
+                                                "hold_empty_below": gc.hold_empty_below,
+                                                "assist_requires_reach": gc.assist_requires_reach}
     final = final_config_record(args, safe, to_config, attn_rec, gpu, inert)
     if response_name != "robosuite141":   # SL11 -- key only with the fork model (the earlier servers' dump is unchanged)
         info["response_model"] = {"name": response_name, "pos": chunk_policy.response["pos"],
@@ -902,8 +958,9 @@ def build_safe_server(policy, args, *, attention_model=None, gpu_warm_up: bool =
         info["observe_only"] = True
         logging.warning("!!! --observe-only: the client gets the policy's action bit for bit and is never held; the "
                         "verdict and the converted actions the server computed are recorded (panda/observe) !!!")
-        return PandaSafeServer(safe, chunk_policy, mode=mode, observe_only=True), info
-    return PandaSafeServer(safe, chunk_policy, mode=mode), info
+        return PandaSafeServer(safe, chunk_policy, mode=mode, observe_only=True,
+                               **({"gap_opening": True} if gap_opening else {})), info
+    return PandaSafeServer(safe, chunk_policy, mode=mode, **({"gap_opening": True} if gap_opening else {})), info
 
 
 def final_options_on(args) -> list[str]:

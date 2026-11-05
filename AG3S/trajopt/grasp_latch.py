@@ -263,6 +263,22 @@ class LatchConfig:
     #: `dropped=False` 였다 (실제로는 ≈1.0 에서 닫혔다).
     drop_from_open: bool = False
 
+    # --- SL11 §5 (benchmark branch): thin objects on a gripper whose opening is the two-finger gap ----------------
+    #: **기본 None = SL11 전과 비트 동일.** 값을 주면 (정규화 개도, 1 = 열림) HELD 에서 측정 개도가 이보다 작은 것을
+    #: "손가락이 물체 없이 끝까지 닫혔다" 로 읽는다. 얇은 테두리를 쥔 개도(≈ 0.05)는 `revoke_drop` · `slip_drop`(0.05) 만큼
+    #: 줄어들 수 없어 (끝까지 닫혀도 0.0125 까지 0.037) 개도 감소 검사가 못 보는 "쥔 물체가 빠짐"을 이 검사가 본다:
+    #:   * 회수 창 안: `closed_on_nothing` 이 `attach_revoked` 의 이유가 된다 (`revoke_use_opening` 일 때).
+    #:     같은 창에서 관측된 조작 대상 centroid 가 쥔 구 안이면 (`observed_at_hand`) 얇은 틈의 `not_blocked` 는 이유에서 빠진다 (둘째 증거).
+    #:   * 창 밖: `slip_detach` 의 "닫힌 채 빠짐" 에 `개도 < hold_empty_below ∧ 개도 − 마지막 실행 명령 < slip_gap` 이
+    #:     `drop ≥ slip_drop ∧ gap < slip_gap` 의 대안으로 더해진다 (같은 `slip_frames` 연속).
+    #: 개도가 두 손가락 간격(`gripper_gap_opening`)일 때 Panda server 가 켠다 (기계적 닫힘 한계 위의 값).
+    hold_empty_below: Optional[float] = None
+    #: **기본 False = SL11 전과 비트 동일.** True 면 HSR6 attach-assist(`attach_assist`)가 `reach` 검사도 통과해야 attach 한다
+    #: (조작 대상이 손 가까이 있다는 **물체 존재 증거**). assist 는 `closed ∧ blocked` 만 보는데 개도를 두 손가락 간격으로 재면
+    #: 얇은 틈(1.5–5 mm)에서 `blocked` 가 쉽게 참이라, 대상이 22–33 cm 떨어진 빈손 닫힘(reach 224–330 mm)을 HSR6 단계 오인
+    #: (lift)만으로 attach 하게 된다. 간격 하나로 빈손을 가르지 않으려는 둘째 증거다.
+    assist_requires_reach: bool = False
+
 
 @dataclasses.dataclass(frozen=True)
 class LatchEvent:
@@ -669,6 +685,8 @@ class GraspLatch:
 
                     phase6 = attach_assist.get("phase")
                     assisted = bool(failed) and attach_assist_ok(phase6, checks)
+                    if assisted and cfg.assist_requires_reach and checks.get("reach") is not True:   # SL11 §5
+                        assisted = False
                     ev["attach_assist"] = {"phase": phase6, "assisted": assisted, "strong_failed": list(failed)}
                 if assisted:
                     self.phase = GraspPhase.HELD
@@ -894,6 +912,8 @@ class GraspLatch:
         a = self._attach_opening
         if a is not None and opening is not None:
             checks["opening_dropped"] = round(a - float(opening), 4)
+        if cfg.hold_empty_below is not None and opening is not None:   # SL11 §5 (off: no key)
+            checks["closed_on_nothing"] = bool(float(opening) < float(cfg.hold_empty_below))
         cmd = signal.last_command
         tightening = (a is not None and cmd is not None
                       and float(cmd) <= a - float(cfg.blocked_gap))
@@ -906,13 +926,22 @@ class GraspLatch:
                 (float(obs["held_radius_m"]) + float(cfg.revoke_centre_slack)) * 1000.0, 1)
             checks["hand_rise_mm"] = round(float(obs["hand_rise_m"]) * 1000.0, 1)
             checks["object_rise_mm"] = round(float(obs["object_rise_m"]) * 1000.0, 1)
+        if cfg.hold_empty_below is not None and obs:   # SL11 §5 (off: no key)
+            checks["observed_at_hand"] = bool(float(obs["centre_distance_m"])
+                                              <= float(obs["held_radius_m"]) + float(cfg.revoke_centre_slack)
+                                              and (opening is None or float(opening) >= float(cfg.hold_empty_below)))
         ev["hold_checks"] = checks
         failed = []
         if cfg.revoke_use_opening:
             if "opening_dropped" in checks and checks["opening_dropped"] >= float(cfg.revoke_drop):
                 failed.append("opening_dropped")
             if "gap_to_command" in checks and checks["gap_to_command"] < float(cfg.blocked_gap):
-                failed.append("not_blocked")
+                # SL11 §5 (`hold_empty_below` set): a thin object (fingers settle under `blocked_gap` but above the closed stop) whose
+                # observed centroid is inside the held sphere is the second evidence that something is between the pads
+                if not checks.get("observed_at_hand"):
+                    failed.append("not_blocked")
+            if checks.get("closed_on_nothing") is True:   # SL11 §5
+                failed.append("closed_on_nothing")
         if obs:
             if float(obs["centre_distance_m"]) > (float(obs["held_radius_m"])
                                                    + float(cfg.revoke_centre_slack)):
@@ -938,9 +967,15 @@ class GraspLatch:
         drop = None if not known else round(a - float(opening), 4)
         gap = None if not known else round(float(opening) - c, 4)
         now = bool(known and drop >= float(cfg.slip_drop) and gap < float(cfg.slip_gap))
+        closed_on_nothing = None
+        if cfg.hold_empty_below is not None:   # SL11 §5 (off: the line above is the whole rule, no key)
+            closed_on_nothing = bool(known and float(opening) < float(cfg.hold_empty_below) and gap < float(cfg.slip_gap))
+            now = now or closed_on_nothing
         self._slip_streak = self._slip_streak + 1 if now else 0
         ev["slip"] = {"attach_opening": a, "hold_command": c, "drop": drop, "gap": gap,
                       "now": now, "streak": int(self._slip_streak), "frames": int(cfg.slip_frames)}
+        if closed_on_nothing is not None:
+            ev["slip"]["closed_on_nothing"] = closed_on_nothing
         return self._slip_streak >= int(cfg.slip_frames)
 
     def _event(self, attach: bool, detach: bool, note: str, evidence: dict, *,

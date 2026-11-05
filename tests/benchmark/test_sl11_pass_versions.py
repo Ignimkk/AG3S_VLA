@@ -99,10 +99,11 @@ def test_each_new_version_is_the_base_plus_exactly_its_flags():
 def test_every_other_version_is_unchanged():
     from AG3S.adapters.panda import profile as pf
 
-    old = {k: list(v) for k, v in pf.AG3S_VERSIONS.items() if k not in NEW and not k.endswith("-lsfork")}   # SL11 fork merge adds -lsfork
+    old = {k: list(v) for k, v in pf.AG3S_VERSIONS.items()
+           if k not in NEW and not k.endswith("-lsfork") and k not in pf.SL11_GAP_VERSIONS}   # SL11 fork merge adds -lsfork; §5 the -gap pair
     assert len(old) == OLD_REGISTRY_SIZE
     assert hashlib.sha256(json.dumps(old, sort_keys=True).encode()).hexdigest() == OLD_REGISTRY_SHA256
-    assert list(pf.PC_LATCH_VERSIONS[-3:]) == list(NEW)                                      # the others keep their place
+    assert list(pf.PC_LATCH_VERSIONS[-3 - len(pf.SL11_GAP_VERSIONS):-len(pf.SL11_GAP_VERSIONS)]) == list(NEW)   # the others keep their place
 
 
 def test_parsed_flags_differ_only_in_the_new_dests(gpu_ok, monkeypatch):
