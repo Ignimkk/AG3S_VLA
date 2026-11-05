@@ -1,6 +1,6 @@
 # SL10g — 진단: LIBERO-Safety "쥐기 시도 반복"(유형 B)의 쥐기 직전 TrajOpt 수정의 주인 (결과 전 고정, 채택 없음)
 
-> writer: lead (benchmark checkout), 2026-11-05 08:5x KST, 자율 판정 시간(`doc/active/experiments/SL_AUTONOMOUS_DECISIONS_20261105_KO.md` E30).
+> writer: lead (benchmark checkout), 2026-11-05 08:4x KST, 자율 판정 시간(`doc/active/experiments/SL_AUTONOMOUS_DECISIONS_20261105_KO.md` E30).
 > 근거:
 > - `outputs/2026-11-05_기준판_실패지도_3벤치/`: LIBERO-Safety에서 VLA 단독은 10/10이고, pc판은 1/10이다. 그 실패의 가장 큰 유형이 B(쥐기 시도 반복, 5 episode)다. LIBERO에서는 B episode의 쥐기 직전 실행 action 변화가 크다(중앙값 0.99 vs 성공 0.03). LIBERO-Safety에서는 구분되지 않았다.
 > - `outputs/2026-11-05_SL10f_미인증HOLD풀기_진단/`: 미인증 HOLD를 풀어도 1 episode만 돌아온다.
