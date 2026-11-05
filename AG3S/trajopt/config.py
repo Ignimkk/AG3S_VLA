@@ -222,6 +222,11 @@ class CostConfig:
     # (`problem.objective` is `np.diff(Q, n=2)`. The key keeps its name for flag compatibility —
     # `--w-smooth` and recorded configs use it — but it has never penalised jerk. T24, guide §7.1.)
     w_smooth: float = 0.05
+    #: **SL11 (`--smooth-on-deviation`) -- the smoothness term on the deviation from the policy.** `False` (default) = as
+    #: above: `w_smooth * sum_k ||D2 Q||^2` on the planned path itself, so a policy chunk that is not a straight line pays
+    #: and the QP bends it even in free space. `True` = `w_smooth * sum_k ||D2 (Q - Q_ref)||^2`: zero (value and gradient) at
+    #: `Q = Q_ref`, so a free-space chunk is returned as the policy sent it and only a deflection is kept smooth.
+    smooth_on_deviation: bool = False
     w_continuity: float = 0.5  # against the previously refined chunk's overlapping tail
     # Linear penalty on constraint violation. It must dominate `w_track` — otherwise the optimizer
     # can buy tracking accuracy with collision — but "dominate" is not "as large as possible": at
@@ -504,6 +509,8 @@ class CostConfig:
         if not isinstance(self.deflection_rate_after_grasp, bool):
             raise TrajOptConfigError(
                 f"cost.deflection_rate_after_grasp must be a bool, got {self.deflection_rate_after_grasp!r}")
+        if not isinstance(self.smooth_on_deviation, bool):
+            raise TrajOptConfigError(f"cost.smooth_on_deviation must be a bool, got {self.smooth_on_deviation!r}")
         if not isinstance(self.grasp_continuity_off, bool):
             raise TrajOptConfigError(
                 f"cost.grasp_continuity_off must be a bool, got {self.grasp_continuity_off!r}")
@@ -1472,7 +1479,8 @@ _OMIT_WHEN_NONE = frozenset({("collision", "palm_shell_margin"),
                              ("cost", "geo_time_budget_ms")})          # AG3S-CORE-EVAL-G1 (geo-grasp merge)
 #: AG3S-PRE-CORE-TO-GGW — `(section, field)` left out of `to_dict` while at this default (same reason: a record that
 #: dumps the config keeps its keys when the option is off).
-_OMIT_WHEN_DEFAULT = {("cost", "grasp_goal_window"): "close", ("cost", "continuity_after_grasp"): False}
+_OMIT_WHEN_DEFAULT = {("cost", "grasp_goal_window"): "close", ("cost", "continuity_after_grasp"): False,
+                       ("cost", "smooth_on_deviation"): False}   # SL11
 #: AG3S-CORE-EVAL-A6 — the palm neighbour-contact allowance: without `--neighbour-palm-contact-mm` the config dump keeps
 #: the keys it had before the option existed.
 _OMIT_WHEN_DEFAULT.update({("collision", "neighbour_palm_contact_depth"): 0.0,

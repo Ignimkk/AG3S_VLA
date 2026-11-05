@@ -274,6 +274,8 @@ def cost_overrides(args) -> dict[str, float]:
     out: dict = {k: float(v) for k, v in given.items() if v is not None}
     if getattr(args, "deflection_rate_after_grasp", False):
         out["deflection_rate_after_grasp"] = True   # IFG-TOB (needs --w-deflection-rate > 0)
+    if getattr(args, "smooth_on_deviation", False):
+        out["smooth_on_deviation"] = True   # SL11 (off: no key)
     if getattr(args, "grasp_anchor", None) is not None:
         # IFG-TOA: one weight for both palm terms (per m^2), optional activation radius (mm).
         out["w_grasp_tcp"] = out["w_grasp_goal"] = float(args.grasp_anchor)
@@ -2765,6 +2767,14 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--w-smooth", type=float, default=None, metavar="W",
                     help="2 차 차분(jerk) 항의 가중치 (기본 0.05). 올리면 궤적이 매끄러워지는 "
                          "대신 청크의 급한 변화(파지 순간의 손목 꺾임)를 깎는다")
+    ap.add_argument("--smooth-on-deviation", action="store_true",
+                    help="SL11 (benchmark branch) — smoothness 항(--w-smooth)을 계획 경로 자체의 2차 차분 D2(Q) 가 아니라 정책 "
+                         "청크에서 벗어난 양의 2차 차분 D2(Q − Q_ref) 에 건다. Q = Q_ref 에서 값 · 기울기가 0 이므로 자유 공간에서 "
+                         "정책 청크가 정책 그대로 나온다. --to-multi-seed 와 함께 줄 수 없다. 기본 off")
+    ap.add_argument("--observe-only", action="store_true",
+                    help="SL11 (benchmark branch, Panda 서버만) — 진단: AG3S · TO · verdict 는 그대로 계산 · 기록하지만 client 에는 "
+                         "언제나 정책 action 을 bit 그대로 보내고 HOLD 하지 않는다 (응답 panda/observe 에 TO 가 냈을 verdict · "
+                         "action 이 남는다). RB-Y1 서버는 거절. 기본 off")
     ap.add_argument("--w-continuity", type=float, default=None, metavar="W",
                     help="앞 청크의 겹치는 꼬리와의 연속성 항 (기본 0.5). **0 이면 그 항이 "
                          "아예 없어진다** (`refiner` 가 그때 이전 청크를 안 쓴다)")
@@ -3848,6 +3858,9 @@ def reject_panda_only_flags(ap: argparse.ArgumentParser, args) -> None:
     if getattr(args, "hsr6_placement_contact_lift", False):   # SL10e
         ap.error("--hsr6-placement-contact-lift 는 Panda 서버의 ⑤ 단계 조건입니다 (--robot panda 만). RB-Y1 서버는 "
                  "거절합니다")
+    if getattr(args, "observe_only", False):   # SL11
+        ap.error("--observe-only 는 Panda 서버가 client 에 정책 action 을 그대로 보내는 진단 flag 입니다 (--robot panda 만). "
+                 "RB-Y1 서버는 거절합니다")
 
 
 def reject_bad_flag_combinations(ap: argparse.ArgumentParser, args, *, seed_map_labels=None) -> None:
@@ -4400,7 +4413,12 @@ def reject_bad_flag_combinations(ap: argparse.ArgumentParser, args, *, seed_map_
         ("--limits-source", getattr(args, "limits_source", "model_xml") != "model_xml"),
         ("--sqp-*", bool(sqp_overrides(args))),
         ("--qp-backend", getattr(args, "qp_backend", "osqp") != "osqp"),      # AG3S-PRE-CORE-TO E3-a
+        ("--smooth-on-deviation", bool(getattr(args, "smooth_on_deviation", False))),   # SL11
+        ("--observe-only", bool(getattr(args, "observe_only", False))),                  # SL11
     ) if given]
+    if getattr(args, "smooth_on_deviation", False) and int(getattr(args, "to_multi_seed", 0) or 0) > 0:
+        ap.error("--smooth-on-deviation 는 --to-multi-seed (seed 고르기 · GPU seed 풀이가 D2(Q) 를 따로 잰다) 와 함께 줄 수 "
+                 "없습니다")   # SL11
     if args.no_safe and to_flags:
         ap.error(f"{', '.join(to_flags)} 는 TO 를 고치는 flag 입니다 (--no-safe 는 TO 를 아예 안 "
                  "돌립니다). 그대로 띄우면 효과가 있었다고 믿게 됩니다")
@@ -4865,6 +4883,8 @@ def announce_ta(to_config) -> None:
                     "none (always)" if h.lookahead_gate is None
                     else f"{h.lookahead_gate * 1000:.0f} mm (tail used only when the reference "
                          "comes that close to an obstacle in it)")
+    if getattr(c, "smooth_on_deviation", False):
+        log.warning("TO smoothness on the deviation (SL11): w_smooth=%g on D2(Q - Q_ref), not D2(Q)", c.w_smooth)
     if float(c.w_deflection_rate) > 0.0:
         log.warning("TO deflection rate (T43 TA B): w_deflection_rate=%g (‖ΔD‖², incl. the "
                     "executed boundary)", c.w_deflection_rate)

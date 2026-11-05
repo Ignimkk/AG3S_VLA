@@ -541,6 +541,24 @@ for _v in SL10F_VERSIONS:
     AG3S_VERSIONS[_v] = tuple(AG3S_VERSIONS[_v[:-len("-uncwaive")]]) + UNCERTIFIED_WAIVE_FLAGS
 del _v
 PC_LATCH_VERSIONS = PC_LATCH_VERSIONS + SL10F_VERSIONS
+#: SL11 (task SL11, lead 2026-11-05): "장애물 없는 실패의 기본 원인 고치기 -- 통과 판". Three pc-based versions:
+#:   ``-pc-mi10``       pc판 + the existing pb2 gate ``--minimal-intervention-mm 10`` (the VLA plan clears every certified row by
+#:                      10 mm or more -> it is the plan, so the conversion passes the policy action bit for bit);
+#:   ``-pc-mi10-sdev``  mi10 + ``--smooth-on-deviation`` (smoothness on D2(Q - Q_ref), zero for a smooth VLA plan);
+#:   ``-pc-observe``    pc판 + ``--observe-only`` (diagnostic: the client always gets the policy action, never a HOLD; the verdict
+#:                      and the converted actions the server computed are recorded).
+#: ``--minimal-intervention-mm`` is a V11AB-family dest (every version records it, None here); the two new dests join a record only
+#: when set (see :func:`version_flag_values`).
+MINIMAL_INTERVENTION_FLAGS: tuple[str, ...] = ("--minimal-intervention-mm", "10")
+SMOOTH_ON_DEVIATION_FLAGS: tuple[str, ...] = ("--smooth-on-deviation",)
+OBSERVE_ONLY_FLAGS: tuple[str, ...] = ("--observe-only",)
+SL11_VERSIONS: tuple[str, ...] = ("AG3S-final-panda-v3-e0to-pc-mi10", "AG3S-final-panda-v3-e0to-pc-mi10-sdev",
+                                  "AG3S-final-panda-v3-e0to-pc-observe")
+AG3S_VERSIONS["AG3S-final-panda-v3-e0to-pc-mi10"] = tuple(AG3S_VERSIONS["AG3S-final-panda-v3-e0to-pc"]) + MINIMAL_INTERVENTION_FLAGS
+AG3S_VERSIONS["AG3S-final-panda-v3-e0to-pc-mi10-sdev"] = (
+    tuple(AG3S_VERSIONS["AG3S-final-panda-v3-e0to-pc-mi10"]) + SMOOTH_ON_DEVIATION_FLAGS)
+AG3S_VERSIONS["AG3S-final-panda-v3-e0to-pc-observe"] = tuple(AG3S_VERSIONS["AG3S-final-panda-v3-e0to-pc"]) + OBSERVE_ONLY_FLAGS
+PC_LATCH_VERSIONS = PC_LATCH_VERSIONS + SL11_VERSIONS
 #: SL6-B B4 — the Panda HSR6 probe (5 classes, no retreat; labels approved by the user 2026-10-29), the default
 #: ``--hsr6-probe`` of the final versions, and its SHA-256 (recorded by the server, checked by the test when present).
 #: SL7 (0.7): found under the shared storage root (``AG3S_STORAGE_ROOT``, default the checkout's sibling
@@ -619,6 +637,8 @@ def version_flag_values(args: argparse.Namespace) -> dict[str, Any]:
              if d not in set(dests) | set(final) | set(p0m) | set(sl9) | set(sl10) | set(sl10d)]   # SL10e
     sl10f = [d for d in _version_dests(SL10F_VERSIONS)
              if d not in set(dests) | set(final) | set(p0m) | set(sl9) | set(sl10) | set(sl10d) | set(sl10e)]   # SL10f
+    sl11 = [d for d in _version_dests(SL11_VERSIONS)
+            if d not in set(dests) | set(final) | set(p0m) | set(sl9) | set(sl10) | set(sl10d) | set(sl10e) | set(sl10f)]   # SL11
     parser = ss.build_parser()
     actions = parser._option_string_actions
     pinned = {actions[t].dest for t in V11AB_PRE_MERGE_DEFAULTS if t.startswith("--")}   # set on every V11AB argv
@@ -646,6 +666,9 @@ def version_flag_values(args: argparse.Namespace) -> dict[str, Any]:
     # SL10f: the uncertified-waive option joins only when it is set (it is the only new dest of that version)
     if any(getattr(args, d, None) != parser.get_default(d) for d in sl10f):
         dests = sorted(set(dests) | set(final) | set(p0m) | set(sl9) | set(sl10) | set(sl10d) | set(sl10e) | set(sl10f))
+    # SL11: the smooth-on-deviation / observe-only options join only when one is set (minimal_intervention_mm is a V11AB dest)
+    if any(getattr(args, d, None) != parser.get_default(d) for d in sl11):
+        dests = sorted(set(dests) | set(final) | set(p0m) | set(sl9) | set(sl10) | set(sl10d) | set(sl10e) | set(sl10f) | set(sl11))
     return {d: _jsonable(getattr(args, d, None)) for d in dests}
 
 
