@@ -926,6 +926,8 @@ def build_safe_server(policy, args, *, attention_model=None, gpu_warm_up: bool =
 
     kw = profile.v11ab_build_kwargs(args)
     ag3s, ag3s_info = profile.build_panda_ag3s(kw=kw)
+    if kw.get("self_filter"):   # SL15 sfhand: the RB-Y1 server prints the per-link inflation it applies; so does this one (only when a flag gave one)
+        ss.announce_self_filter(ag3s.self_filter_settings(), cli=dict(kw["self_filter"]))
     served_policy = policy
     attn_kw, attn_rec = attention_policy_kwargs(args, tokenizer=attention_model is not None)
     if attention_model is not None:
