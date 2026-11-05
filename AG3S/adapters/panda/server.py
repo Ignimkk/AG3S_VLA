@@ -82,6 +82,7 @@ GRIPPER_COLUMNS = (pa.GRIPPER_COLUMN,)
 PANDA_PREFIX = "panda/"
 KEY_ROBOT_STATE = "panda/robot_state"      # (9,) q7 + 2 MuJoCo finger qpos, image instant
 KEY_T_WORLD_BASE = "panda/T_world_base"    # (4, 4)
+KEY_ACTION_ADAPTER = pa.ACTION_ADAPTER_KEY     # SL11: the LIBERO-Safety client's action adapter (absent from other clients)
 KEY_PREV_STEP = "panda/prev_step_world"    # (6,) last realised EE step, world frame: dp (m), drotvec (rad)
 
 
@@ -91,6 +92,19 @@ def panda_gripper_convention():
     return ClientGripperConvention(open_command_m=0.04, driven_joints={pm.MANIPULATOR_SIDE: "panda_finger_joint1"},
                                    source="AG3S/adapters/panda/server.py: LIBERO Panda finger joint1 open limit 0.04 m "
                                           "(adapter URDF); normalised opening = q / 0.04")
+
+
+def check_response_adapter(response_name: str, adapter) -> None:
+    """SL11 -- the fork response model is expressed for the LIBERO-scale action the LIBERO-Safety client rescales with
+    ``libero_to_safety``; on any other client / adapter its beta would be wrong, so the request is refused (not guessed).
+    The default model has no requirement (``adapter`` is not looked at: those requests are unchanged)."""
+    if response_name == "robosuite141":
+        return
+    adapter = None if adapter is None else str(np.asarray(adapter).item() if hasattr(adapter, "shape") else adapter)
+    if adapter != pa.FORK_REQUIRED_ADAPTER:
+        raise ValueError(f"--response-model {response_name} needs the LIBERO-Safety client with action_adapter "
+                         f"{pa.FORK_REQUIRED_ADAPTER!r} (request {KEY_ACTION_ADAPTER}={adapter!r}); refusing to convert with a "
+                         "model that does not describe the env")
 
 
 def strip_panda_keys(obs: dict) -> tuple[dict, dict]:
@@ -157,9 +171,11 @@ class PandaVLAOnly:
 class ChunkToJointPolicy:
     """Inside ``SafePolicy``: pops ``panda/*``, calls the policy, turns its EE-delta chunk into ``[q7, g]``."""
 
-    def __init__(self, policy, kin: pa.PandaKinematics):
+    def __init__(self, policy, kin: pa.PandaKinematics, response: Optional[dict] = None, response_name: str = "robosuite141"):
         self._policy = policy
         self.kin = kin
+        self.response = response              # SL11: None = ``action.RESPONSE`` (robosuite 1.4.1), the earlier behaviour
+        self.response_name = response_name
         self.last: Optional[pa.Conversion] = None
         self.last_result_actions = None
 
@@ -178,12 +194,13 @@ class ChunkToJointPolicy:
         if KEY_ROBOT_STATE not in panda or KEY_T_WORLD_BASE not in panda:
             raise ValueError(f"the Panda request needs {KEY_ROBOT_STATE} and {KEY_T_WORLD_BASE}")
         q_now, _fingers = pm.split_robot_state(panda[KEY_ROBOT_STATE])
+        check_response_adapter(self.response_name, panda.get(KEY_ACTION_ADAPTER))
         result = dict(self._policy.infer(obs, **kwargs))
         delta = np.asarray(result["actions"])
         prev = panda.get(KEY_PREV_STEP)
         prev = None if prev is None else (np.asarray(prev, np.float64)[:3], np.asarray(prev, np.float64)[3:6])
         self.last = pa.delta_chunk_to_joint_chunk(self.kin, delta, q_now, np.asarray(panda[KEY_T_WORLD_BASE]),
-                                                  prev_step_world=prev)
+                                                  prev_step_world=prev, response=self.response)
         self.last_result_actions = delta
         result["actions"] = self.last.joint_chunk
         return result
@@ -794,7 +811,8 @@ def build_safe_server(policy, args, *, attention_model=None, gpu_warm_up: bool =
         served_policy = AttentionPolicy(policy, attention_model, subtask_probe=None, **attn_kw)
     constraint = ag3s.constraint_robot_model
     kin = pa.PandaKinematics(constraint)
-    chunk_policy = ChunkToJointPolicy(served_policy, kin)
+    response_name = getattr(args, "response_model", "robosuite141")   # SL11
+    chunk_policy = ChunkToJointPolicy(served_policy, kin, response=pa.response_for(response_name), response_name=response_name)
     to_config = _replace_horizon_limits(ss.trajopt_config_from_args(args))
     if getattr(args, "to_action_box", False):
         to_config = action_box_qp_config(to_config)   # SL10 §2.2: a QP budget the action rows can converge in
@@ -839,6 +857,10 @@ def build_safe_server(policy, args, *, attention_model=None, gpu_warm_up: bool =
             "conversion": pa.conventions(), "static_geometry": None,
             "v11ab_build_kwargs_not_applied": ["constraint_sphere_options", "finger_cover"]}
     final = final_config_record(args, safe, to_config, attn_rec, gpu, inert)
+    if response_name != "robosuite141":   # SL11 -- key only with the fork model (the earlier servers' dump is unchanged)
+        info["response_model"] = {"name": response_name, "pos": chunk_policy.response["pos"],
+                                  "rot": chunk_policy.response["rot"], "fit": chunk_policy.response["path"],
+                                  "requires_action_adapter": pa.FORK_REQUIRED_ADAPTER}
     if final:   # SL6-A — key only with a final-configuration option on (V11AB / pb config unchanged)
         info["final_config"] = final
     if recorder is not None:  # key only when recording (the panda_server_config.json of other runs is unchanged)

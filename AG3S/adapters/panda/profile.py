@@ -541,6 +541,38 @@ for _v in SL10F_VERSIONS:
     AG3S_VERSIONS[_v] = tuple(AG3S_VERSIONS[_v[:-len("-uncwaive")]]) + UNCERTIFIED_WAIVE_FLAGS
 del _v
 PC_LATCH_VERSIONS = PC_LATCH_VERSIONS + SL10F_VERSIONS
+#: SL11 (task SL11, user ruling 2026-11-05): "fork 응답 모델 맞추기" -- any Panda version ``X`` can be run as ``X-lsfork`` = ``X`` plus
+#: ``--response-model libero_safety_fork`` (conversion C uses the LIBERO-Safety fork controller's lag model; LIBERO-Safety client with
+#: ``libero_to_safety`` only -- the server refuses other clients). Generic: :func:`register_lsfork` adds the entry for one base version
+#: and gives it the base's final-version / probe membership (:func:`_lsfork_base`); to run another version on LIBERO-Safety add its
+#: name to :data:`LSFORK_BASES` (or call ``register_lsfork``) after that version is registered.
+LSFORK_SUFFIX = "-lsfork"
+LSFORK_FLAGS: tuple[str, ...] = ("--response-model", "libero_safety_fork")
+LSFORK_VERSIONS: tuple[str, ...] = ()
+
+
+def _lsfork_base(version: str) -> str:
+    """The version an ``-lsfork`` entry is built on (any other name: itself)."""
+    version = str(version)
+    return version[:-len(LSFORK_SUFFIX)] if version in LSFORK_VERSIONS else version
+
+
+def register_lsfork(base: str) -> str:
+    """Register ``base + "-lsfork"`` (idempotent); returns its name. ``base`` must be a registered Panda version."""
+    global LSFORK_VERSIONS, PC_LATCH_VERSIONS
+    if base not in AG3S_VERSIONS or base.endswith(LSFORK_SUFFIX):
+        raise ValueError(f"cannot add {LSFORK_SUFFIX} to {base!r}")
+    name = base + LSFORK_SUFFIX
+    if name not in AG3S_VERSIONS:
+        AG3S_VERSIONS[name] = tuple(AG3S_VERSIONS[base]) + LSFORK_FLAGS
+        LSFORK_VERSIONS = LSFORK_VERSIONS + (name,)
+    return name
+
+
+LSFORK_BASES: tuple[str, ...] = ("AG3S-final-panda-v3-e0to-pc",)
+for _b in LSFORK_BASES:
+    register_lsfork(_b)
+del _b
 #: SL6-B B4 — the Panda HSR6 probe (5 classes, no retreat; labels approved by the user 2026-10-29), the default
 #: ``--hsr6-probe`` of the final versions, and its SHA-256 (recorded by the server, checked by the test when present).
 #: SL7 (0.7): found under the shared storage root (``AG3S_STORAGE_ROOT``, default the checkout's sibling
@@ -556,6 +588,7 @@ FINAL_RUN_PARAMETERS: tuple[str, ...] = ("hsr6_probe", "attention_source")
 
 def is_final_version(version: str) -> bool:
     """A version on the final-configuration base argv: the SL6 final versions and (SL7) the P0m versions."""
+    version = _lsfork_base(version)   # SL11: X-lsfork is as final as X
     return (str(version) in FINAL_CONFIG_VERSIONS or str(version) in P0M_VERSIONS or str(version) in P0M_SL9_VERSIONS
             or str(version) in PC_LATCH_VERSIONS or str(version) in PC_NOPROBE_VERSIONS)   # SL7d / SL7e / SL9
 
@@ -571,7 +604,8 @@ def version_server_flags(version: str, *, hsr6_probe: Optional[str] = None,
         if hsr6_probe is not None or attention_source is not None:
             raise ValueError(f"{version}: --hsr6-probe / --attention-source apply to {list(FINAL_CONFIG_VERSIONS)} only")
         return flags
-    if version in P0M_VERSIONS or version in P0M_SL9_VERSIONS or version in PC_NOPROBE_VERSIONS:   # SL7 / SL7e / SL9: no HSR6 rule -> no probe
+    base = _lsfork_base(version)   # SL11: the probe rules of X-lsfork are X's
+    if base in P0M_VERSIONS or base in P0M_SL9_VERSIONS or base in PC_NOPROBE_VERSIONS:   # SL7 / SL7e / SL9: no HSR6 rule -> no probe
         if hsr6_probe is not None:
             raise ValueError(f"{version}: the P0m versions use no HSR6 rule, so --hsr6-probe has nothing to feed")
         if attention_source is not None:
@@ -619,6 +653,8 @@ def version_flag_values(args: argparse.Namespace) -> dict[str, Any]:
              if d not in set(dests) | set(final) | set(p0m) | set(sl9) | set(sl10) | set(sl10d)]   # SL10e
     sl10f = [d for d in _version_dests(SL10F_VERSIONS)
              if d not in set(dests) | set(final) | set(p0m) | set(sl9) | set(sl10) | set(sl10d) | set(sl10e)]   # SL10f
+    sl11 = [d for d in _version_dests(LSFORK_VERSIONS)
+            if d not in set(dests) | set(final) | set(p0m) | set(sl9) | set(sl10) | set(sl10d) | set(sl10e) | set(sl10f)]   # SL11
     parser = ss.build_parser()
     actions = parser._option_string_actions
     pinned = {actions[t].dest for t in V11AB_PRE_MERGE_DEFAULTS if t.startswith("--")}   # set on every V11AB argv
@@ -646,6 +682,9 @@ def version_flag_values(args: argparse.Namespace) -> dict[str, Any]:
     # SL10f: the uncertified-waive option joins only when it is set (it is the only new dest of that version)
     if any(getattr(args, d, None) != parser.get_default(d) for d in sl10f):
         dests = sorted(set(dests) | set(final) | set(p0m) | set(sl9) | set(sl10) | set(sl10d) | set(sl10e) | set(sl10f))
+    # SL11: the response-model option joins only when it is set (it is the only new dest of the -lsfork versions)
+    if any(getattr(args, d, None) != parser.get_default(d) for d in sl11):
+        dests = sorted(set(dests) | set(final) | set(p0m) | set(sl9) | set(sl10) | set(sl10d) | set(sl10e) | set(sl10f) | set(sl11))
     return {d: _jsonable(getattr(args, d, None)) for d in dests}
 
 
