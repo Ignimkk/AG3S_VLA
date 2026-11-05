@@ -285,7 +285,7 @@ __all__ = [
     "make_reason", "gate_decision", "unpack_verdict_reasons", "derive_verdict_reasons",
     "POLICY_SEED", "POLICY_SEED_LIMIT", "check_policy_seed", "unpack_policy_seed",
     "unpack_policy_seed_echo",
-    "ORACLE_SEG", "ORACLE_SEG_META", "ORACLE_SEG_REQUIRED", "unpack_oracle_segmentation",
+    "ORACLE_SEG", "ORACLE_SEG_META", "ORACLE_SEG_REQUIRED", "ORACLE_GRASP", "ORACLE_GRASP_REQUIRED", "unpack_oracle_segmentation",
     "GT_STAGE", "GT_STAGE_REQUIRED", "unpack_gt_stage",   # T85
 ]
 
@@ -343,6 +343,10 @@ ORACLE_SEG = "oracle_seg"
 ORACLE_SEG_META = "oracle_seg_meta"
 #: 서버 metadata 키 — 이 서버가 GT segmentation 을 **요구한다** (`esdf.target_extent = "oracle_visible"`). 켰을 때만 실린다.
 ORACLE_SEG_REQUIRED = "oracle_segmentation_required"
+#: SL14 `--oracle-latch` (Panda 서버 · 진단): 요청 키 `ag3s/oracle_grasp` = `{"held": bool, "target_body": str}` (MuJoCo 정답: 대상 물체가
+#: 왼손가락·오른손가락 geom 둘 다와 접촉 중인가) 와 서버 metadata 키. 서버는 `--oracle-latch` 일 때만 읽는다 — 켜지 않으면 무시한다.
+ORACLE_GRASP = "oracle_grasp"
+ORACLE_GRASP_REQUIRED = "oracle_grasp_required"
 
 # --- T85 — begin
 #: 요청 키 (`ag3s/` 접두 뒤) — **MuJoCo 정답 단계** (분석용, T85). `"approach" | "grasp" | "carry" | "place" |

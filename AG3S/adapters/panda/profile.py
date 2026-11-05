@@ -632,6 +632,28 @@ for _b in SL12_ORACLE_BASES:
     AG3S_VERSIONS[_b + SL13_ORACLE_VOLUME_SUFFIX] = tuple(AG3S_VERSIONS[_b + SL12_ORACLE_SUFFIX]) + ORACLE_VOLUME_FLAGS
 del _b
 
+#: SL14 (task SL14, lead 2026-11-05): "층별 원인 진단" -- two diagnostic / repair versions of the pc판 grasp latch, each = pc판 + one flag.
+#:   ``-pc-oraclelatch``  + ``--oracle-latch``: the latch's attach / detach follow the simulator's ground truth (the LIBERO / LIBERO-Safety clients
+#:                        send ``ag3s/oracle_grasp`` with ``--oracle-grasp``, which the launchers pass for this version). Diagnostic, not a candidate.
+#:   ``-pc-rearm``        + ``--placed-rearm``: PLACED is not absorbing (an open hand after a release may grasp again). Deployable (no oracle).
+#: Like SL12 / SL13 they are not in :data:`PC_LATCH_VERSIONS` (so no earlier list slice moves), have no ``-lsfork`` twin, and their record dests
+#: join a record only when set (:func:`version_flag_values`).
+ORACLE_LATCH_FLAGS: tuple[str, ...] = ("--oracle-latch",)
+PLACED_REARM_FLAGS: tuple[str, ...] = ("--placed-rearm",)
+OPENING_RULE_FLAGS: tuple[str, ...] = ("--grasp-opening-rule",)
+SL14_ORACLE_LATCH_VERSION = "AG3S-final-panda-v3-e0to-pc-oraclelatch"
+SL14_REARM_VERSION = "AG3S-final-panda-v3-e0to-pc-rearm"
+SL14_OPENRULE_VERSION = "AG3S-final-panda-v3-e0to-pc-openrule"
+SL14_VERSIONS: tuple[str, ...] = (SL14_ORACLE_LATCH_VERSION, SL14_REARM_VERSION, SL14_OPENRULE_VERSION)
+AG3S_VERSIONS[SL14_ORACLE_LATCH_VERSION] = tuple(AG3S_VERSIONS["AG3S-final-panda-v3-e0to-pc"]) + ORACLE_LATCH_FLAGS
+AG3S_VERSIONS[SL14_REARM_VERSION] = tuple(AG3S_VERSIONS["AG3S-final-panda-v3-e0to-pc"]) + PLACED_REARM_FLAGS
+AG3S_VERSIONS[SL14_OPENRULE_VERSION] = tuple(AG3S_VERSIONS["AG3S-final-panda-v3-e0to-pc"]) + OPENING_RULE_FLAGS
+
+
+def needs_oracle_grasp(version: str) -> bool:
+    """SL14: whether the version's server runs ``--oracle-latch`` (the client must send ``ag3s/oracle_grasp``, ``--oracle-grasp``)."""
+    return "--oracle-latch" in AG3S_VERSIONS.get(str(version), ())
+
 
 def needs_oracle_segmentation(version: str) -> bool:
     """SL12: whether the version's server runs ``--target-extent oracle-visible`` (the client must send the GT code image)."""
@@ -657,7 +679,8 @@ def is_final_version(version: str) -> bool:
     version = _lsfork_base(version)   # SL11: X-lsfork is as final as X
     return (str(version) in FINAL_CONFIG_VERSIONS or str(version) in P0M_VERSIONS or str(version) in P0M_SL9_VERSIONS
             or str(version) in PC_LATCH_VERSIONS or str(version) in PC_NOPROBE_VERSIONS   # SL7d / SL7e / SL9
-            or str(version) in SL12_VERSIONS or str(version) in SL13_VERSIONS)   # SL12 / SL13
+            or str(version) in SL12_VERSIONS or str(version) in SL13_VERSIONS   # SL12 / SL13
+            or str(version) in SL14_VERSIONS)   # SL14
 
 
 def version_server_flags(version: str, *, hsr6_probe: Optional[str] = None,
@@ -728,6 +751,10 @@ def version_flag_values(args: argparse.Namespace) -> dict[str, Any]:
             if d not in set(dests) | set(final) | set(p0m) | set(sl9) | set(sl10) | set(sl10d) | set(sl10e) | set(sl10f) | set(sl11) | set(sl11gap)]   # SL12
     sl13 = [d for d in _version_dests(SL13_VERSIONS)
             if d not in set(dests) | set(final) | set(p0m) | set(sl9) | set(sl10) | set(sl10d) | set(sl10e) | set(sl10f) | set(sl11) | set(sl11gap) | set(sl12)]   # SL13
+    sl14 = [d for d in _version_dests((SL14_ORACLE_LATCH_VERSION, SL14_REARM_VERSION))
+            if d not in set(dests) | set(final) | set(p0m) | set(sl9) | set(sl10) | set(sl10d) | set(sl10e) | set(sl10f) | set(sl11) | set(sl11gap) | set(sl12) | set(sl13)]   # SL14
+    sl14ks = [d for d in _version_dests((SL14_OPENRULE_VERSION,))
+              if d not in set(dests) | set(final) | set(p0m) | set(sl9) | set(sl10) | set(sl10d) | set(sl10e) | set(sl10f) | set(sl11) | set(sl11gap) | set(sl12) | set(sl13) | set(sl14)]   # SL14 KS
     parser = ss.build_parser()
     actions = parser._option_string_actions
     pinned = {actions[t].dest for t in V11AB_PRE_MERGE_DEFAULTS if t.startswith("--")}   # set on every V11AB argv
@@ -769,6 +796,12 @@ def version_flag_values(args: argparse.Namespace) -> dict[str, Any]:
     # SL11 §5: the gap-opening dest joins only when it is set -- no other version's record gains a key
     if any(getattr(args, d, None) != parser.get_default(d) for d in sl11gap):
         dests = sorted(set(dests) | set(sl11gap))
+    # SL14: the oracle-latch / placed-rearm dests join only when one is set -- no other version's record gains a key
+    if any(getattr(args, d, None) != parser.get_default(d) for d in sl14):
+        dests = sorted(set(dests) | set(sl14))
+    # SL14 KS: the opening-rule dest joins only when it is set -- the oracle-latch / rearm records keep their keys
+    if any(getattr(args, d, None) != parser.get_default(d) for d in sl14ks):
+        dests = sorted(set(dests) | set(sl14ks))
     return {d: _jsonable(getattr(args, d, None)) for d in dests}
 
 

@@ -211,13 +211,18 @@ class SafeClient(object):
     """Wraps the websocket policy client; one instance per episode (``policy_for``)."""
 
     def __init__(self, ws_client, seed, task_id, episode_idx, replan_steps, emit_privileged=False, request_extra=None,
-                 oracle=False, oracle_info=None):
+                 oracle=False, oracle_info=None, oracle_grasp=False):
         self.ws = ws_client
         #: SL12 ``--oracle-segmentation`` (diagnostic, default off = no key added): the request also carries the GT code image
         #: per camera (``oracle_codes``); the labeller is made on the first observation (it needs the env's BDDL problem).
         self.oracle = bool(oracle)
         self.oracle_info = dict(oracle_info or {})
         self.labeler = None
+        #: SL14 ``--oracle-grasp`` (diagnostic, default off = no key added): the request carries ``ag3s/oracle_grasp``
+        #: (``oracle_codes.GraspOracle``), read at the observation instant.
+        self.oracle_grasp = bool(oracle_grasp)
+        self.grasp_oracle = None
+        self._grasp_keys = {}
         self.request_extra = dict(request_extra or {})  # SL11: extra request keys (LIBERO-Safety: panda/action_adapter)
         self.emit_privileged = bool(emit_privileged)
         self.env = None                # set by the observer only with emit_privileged
@@ -246,6 +251,11 @@ class SafeClient(object):
                 self.labeler = oc.OracleLabeler.from_env(env, geometry.tables, **self.oracle_info)
                 logging.info("SL12 oracle target: %s (%s); codes %s", self.labeler.target, self.labeler.rule,
                              self.labeler.codes)
+            if self.oracle_grasp:   # SL14
+                if self.grasp_oracle is None:
+                    self.grasp_oracle = oc.GraspOracle.from_env(env, geometry.tables, **self.oracle_info)
+                    logging.info("SL14 oracle grasp target: %s (%s)", self.grasp_oracle.target, self.grasp_oracle.rule)
+                self._grasp_keys = self.grasp_oracle.request_keys(env.sim.data)
             self.eef.append((np.array(obs["robot0_eef_pos"], np.float64), np.array(obs["robot0_eef_quat"], np.float64)))
             if self.emit_privileged:
                 self.env = env
@@ -273,6 +283,8 @@ class SafeClient(object):
         req.update(self.request_extra)
         if self.labeler is not None:
             req.update(self.labeler.request_keys(frames))
+        if self.grasp_oracle is not None:   # SL14 (key only with --oracle-grasp)
+            req.update(self._grasp_keys)
         req["panda/robot_state"] = rs9
         req["panda/T_world_base"] = np.asarray(frames[self.geometry.cameras[0]]["T_world_base"], np.float64)
         if len(self.eef) >= 2:
@@ -408,6 +420,8 @@ class SafeClient(object):
                "calls": len(self.calls), "max_abs_action_change_executed": float(max(changed) if changed else 0.0)}
         if self.labeler is not None:   # SL12 (key only with --oracle-segmentation)
             out["oracle"] = self.labeler.record()
+        if self.grasp_oracle is not None:   # SL14 (key only with --oracle-grasp)
+            out["oracle_grasp"] = self.grasp_oracle.record()
         return out
 
 
@@ -434,6 +448,10 @@ def add_oracle_argument(parser):
                         help="SL12 diagnostic: send the MuJoCo GT code image per camera (0 robot, 1 target, 2 static, >=3 other "
                              "movable objects; target = the BDDL goal's first object) for a server run with --target-extent "
                              "oracle-visible. Implies --capture-segmentation (one extra render per camera and observation)")
+    # SL14: default off = nothing read or sent
+    parser.add_argument(oc.CLIENT_GRASP_FLAG, dest="oracle_grasp", action="store_true",
+                        help="SL14 diagnostic: send the MuJoCo ground-truth grasp every request (ag3s/oracle_grasp = {held, target_body}; "
+                             "held = the target object touches both finger geoms) for a server run with --oracle-latch")
 
 
 def check_oracle_pairing(args, ws):
@@ -453,6 +471,13 @@ def check_oracle_pairing(args, ws):
     if args.oracle_segmentation and not required:
         raise RuntimeError(oc.CLIENT_FLAG + " but the server does not run the visible-target oracle (no " + oc.SERVER_REQUIRES_KEY
                            + " in its metadata): refusing a run whose images the server would ignore")
+    grasp_required = bool(meta.get(oc.SERVER_GRASP_REQUIRES_KEY, False))   # SL14: the same pairing for the ground-truth grasp
+    if grasp_required and not getattr(args, "oracle_grasp", False):
+        raise RuntimeError("the server runs --oracle-latch and needs ag3s/oracle_grasp in every request: start the client with "
+                           + oc.CLIENT_GRASP_FLAG)
+    if getattr(args, "oracle_grasp", False) and not grasp_required:
+        raise RuntimeError(oc.CLIENT_GRASP_FLAG + " but the server does not run --oracle-latch (no " + oc.SERVER_GRASP_REQUIRES_KEY
+                           + " in its metadata): refusing a run whose oracle grasp the server would ignore")
 
 
 def main(argv=None):
@@ -501,11 +526,14 @@ def main(argv=None):
     check_oracle_pairing(args, ws)
     if args.oracle_segmentation:
         extra["oracle_segmentation"] = oc.settings_record()["oracle_segmentation"]
+    if args.oracle_grasp:   # SL14
+        extra["oracle_grasp"] = oc.grasp_settings_record()["oracle_grasp"]
 
     def policy_for(task_id, episode_idx):
         client = SafeClient(ws, args.seed, task_id, episode_idx, args.replan_steps,
                             emit_privileged=args.emit_privileged_obstacles, oracle=args.oracle_segmentation,
-                            oracle_info={"suite": args.task_suite_name, "task_id": task_id})
+                            oracle_info={"suite": args.task_suite_name, "task_id": task_id},
+                            oracle_grasp=args.oracle_grasp)
         client.collision = CollisionMonitor(args.num_steps_wait) if safelibero else None
         return client, connector, dict(extra)
 
