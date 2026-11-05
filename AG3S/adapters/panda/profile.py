@@ -640,11 +640,14 @@ del _b
 #: join a record only when set (:func:`version_flag_values`).
 ORACLE_LATCH_FLAGS: tuple[str, ...] = ("--oracle-latch",)
 PLACED_REARM_FLAGS: tuple[str, ...] = ("--placed-rearm",)
+OPENING_RULE_FLAGS: tuple[str, ...] = ("--grasp-opening-rule",)
 SL14_ORACLE_LATCH_VERSION = "AG3S-final-panda-v3-e0to-pc-oraclelatch"
 SL14_REARM_VERSION = "AG3S-final-panda-v3-e0to-pc-rearm"
-SL14_VERSIONS: tuple[str, ...] = (SL14_ORACLE_LATCH_VERSION, SL14_REARM_VERSION)
+SL14_OPENRULE_VERSION = "AG3S-final-panda-v3-e0to-pc-openrule"
+SL14_VERSIONS: tuple[str, ...] = (SL14_ORACLE_LATCH_VERSION, SL14_REARM_VERSION, SL14_OPENRULE_VERSION)
 AG3S_VERSIONS[SL14_ORACLE_LATCH_VERSION] = tuple(AG3S_VERSIONS["AG3S-final-panda-v3-e0to-pc"]) + ORACLE_LATCH_FLAGS
 AG3S_VERSIONS[SL14_REARM_VERSION] = tuple(AG3S_VERSIONS["AG3S-final-panda-v3-e0to-pc"]) + PLACED_REARM_FLAGS
+AG3S_VERSIONS[SL14_OPENRULE_VERSION] = tuple(AG3S_VERSIONS["AG3S-final-panda-v3-e0to-pc"]) + OPENING_RULE_FLAGS
 
 
 def needs_oracle_grasp(version: str) -> bool:
@@ -748,8 +751,10 @@ def version_flag_values(args: argparse.Namespace) -> dict[str, Any]:
             if d not in set(dests) | set(final) | set(p0m) | set(sl9) | set(sl10) | set(sl10d) | set(sl10e) | set(sl10f) | set(sl11) | set(sl11gap)]   # SL12
     sl13 = [d for d in _version_dests(SL13_VERSIONS)
             if d not in set(dests) | set(final) | set(p0m) | set(sl9) | set(sl10) | set(sl10d) | set(sl10e) | set(sl10f) | set(sl11) | set(sl11gap) | set(sl12)]   # SL13
-    sl14 = [d for d in _version_dests(SL14_VERSIONS)
+    sl14 = [d for d in _version_dests((SL14_ORACLE_LATCH_VERSION, SL14_REARM_VERSION))
             if d not in set(dests) | set(final) | set(p0m) | set(sl9) | set(sl10) | set(sl10d) | set(sl10e) | set(sl10f) | set(sl11) | set(sl11gap) | set(sl12) | set(sl13)]   # SL14
+    sl14ks = [d for d in _version_dests((SL14_OPENRULE_VERSION,))
+              if d not in set(dests) | set(final) | set(p0m) | set(sl9) | set(sl10) | set(sl10d) | set(sl10e) | set(sl10f) | set(sl11) | set(sl11gap) | set(sl12) | set(sl13) | set(sl14)]   # SL14 KS
     parser = ss.build_parser()
     actions = parser._option_string_actions
     pinned = {actions[t].dest for t in V11AB_PRE_MERGE_DEFAULTS if t.startswith("--")}   # set on every V11AB argv
@@ -794,6 +799,9 @@ def version_flag_values(args: argparse.Namespace) -> dict[str, Any]:
     # SL14: the oracle-latch / placed-rearm dests join only when one is set -- no other version's record gains a key
     if any(getattr(args, d, None) != parser.get_default(d) for d in sl14):
         dests = sorted(set(dests) | set(sl14))
+    # SL14 KS: the opening-rule dest joins only when it is set -- the oracle-latch / rearm records keep their keys
+    if any(getattr(args, d, None) != parser.get_default(d) for d in sl14ks):
+        dests = sorted(set(dests) | set(sl14ks))
     return {d: _jsonable(getattr(args, d, None)) for d in dests}
 
 

@@ -2807,6 +2807,12 @@ def build_parser() -> argparse.ArgumentParser:
                          "열려 있으면 (≥ gripper_closed_below) SEARCHING 으로 돌아가 조작 대상 잠금 → LATCHED → CLOSING → HELD 를 평소 증거 "
                          "검사로 다시 거친다 (놓았다가 다시 쥐는 VLA 에서 두 번째 쥠이 attach 되지 않는 문제). 기록 panda/grasp.rearm. "
                          "RB-Y1 서버는 거절. 기본 off")
+    ap.add_argument("--grasp-opening-rule", action="store_true",
+                    help="SL14 (benchmark branch, Panda 서버만) — grasp latch 의 attach · detach 를 개도와 명령만 쓰는 단순 규칙으로 바꾼다: "
+                         "CLOSING · LATCHED · PLACED 에서 마지막 실행 gripper 명령이 닫힘 ∧ 개도 정지 (settled) ∧ 측정 개도 ≥ 0.03 ∧ 손 – "
+                         "target 거리 ≤ reach (120 mm) 이면 attach (blocked · not_empty · dropped · manipulated 검사 없음). HELD 에서는 "
+                         "(열림 명령 ∧ 개도 > attach 개도 + 0.02) 또는 개도 < 0.02 (빈손) 이면 detach 하고 LATCHED 로 가 다시 쥐기를 허용한다 "
+                         "(T34 attach 회수 · 놓음 · slip 판정은 쓰지 않는다). 기록 panda/grasp.opening_rule. RB-Y1 서버는 거절. 기본 off")
     ap.add_argument("--w-continuity", type=float, default=None, metavar="W",
                     help="앞 청크의 겹치는 꼬리와의 연속성 항 (기본 0.5). **0 이면 그 항이 "
                          "아예 없어진다** (`refiner` 가 그때 이전 청크를 안 쓴다)")
@@ -3899,6 +3905,8 @@ def reject_panda_only_flags(ap: argparse.ArgumentParser, args) -> None:
     if getattr(args, "oracle_latch", False) or getattr(args, "placed_rearm", False):   # SL14
         ap.error("--oracle-latch · --placed-rearm 은 Panda 서버의 grasp latch 진단 · 변경입니다 (--robot panda 만). RB-Y1 서버는 "
                  "거절합니다")
+    if getattr(args, "grasp_opening_rule", False):   # SL14 (KS)
+        ap.error("--grasp-opening-rule 은 Panda 서버의 grasp latch 단순 규칙입니다 (--robot panda 만). RB-Y1 서버는 거절합니다")
     if getattr(args, "gripper_gap_opening", False):   # SL11 §5
         ap.error("--gripper-gap-opening 은 Panda 손가락 두 관절 (finger_joint1 · finger_joint2) 의 간격으로 latch 개도를 재는 flag 입니다 "
                  "(--robot panda 만). RB-Y1 gripper 는 관절이 하나라 거절합니다")

@@ -2378,6 +2378,11 @@ class SafePolicy:
         if cfg.placed_rearm:
             # SL14 `--placed-rearm` — key only with the flag: True on the request the latch left PLACED for SEARCHING.
             self._last_grasp_record["rearm"] = bool((event.evidence or {}).get("rearm"))
+        if cfg.opening_rule:
+            # SL14 `--grasp-opening-rule` -- key only with the flag: {applied, decision, opening, last_command, reach_mm}.
+            self._last_grasp_record["opening_rule"] = dict(
+                (event.evidence or {}).get("opening_rule")
+                or {"applied": False, "decision": None, "opening": signal.opening, "last_command": None, "reach_mm": None})
         if cfg.slip_detach:
             # T43 Z3 — flag 가 켜졌을 때만 싣는다 (꺼지면 기록이 Z3 전과 같다). 근거는 `evidence.slip`.
             self._last_grasp_record["held_slip"] = bool(event.slipped)

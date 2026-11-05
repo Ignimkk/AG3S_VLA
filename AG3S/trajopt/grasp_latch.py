@@ -285,6 +285,20 @@ class LatchConfig:
     #: 증거 검사를 그대로 거친다. 켜지 않으면 PLACED 는 에피소드 끝까지 남아 (놓고 다시 쥐는 VLA 에서) 다시 attach 하지 않는다.
     placed_rearm: bool = False
 
+    # --- SL14 (benchmark branch): the opening-and-command attach rule (`--grasp-opening-rule`) ---------------------------
+    #: **기본 False = SL14 전과 비트 동일.** True 면 `observe_grasp` 가 증거 검사(`blocked` · `not_empty` · `dropped` · `manipulated` ·
+    #: T34 회수 · 열림 놓기 · slip) 대신 개도와 명령만 쓰는 규칙을 쓴다. CLOSING · LATCHED · PLACED (또는 잠금이 있는 SEARCHING) 에서
+    #: 마지막 실행 명령이 닫힘 (< `gripper_closed_below`) ∧ `settled` ∧ 측정 개도 ≥ `opening_rule_min` ∧ `reach` 면 HELD (attach).
+    #: HELD 에서는 (마지막 실행 명령이 열림 ∧ 개도 > attach 개도 + `opening_rule_release_rise`) ∨ 개도 < `opening_rule_empty_below` 면
+    #: detach 하고 LATCHED 로 간다 (PLACED 아님 -- 다시 쥐기를 허용한다).
+    opening_rule: bool = False
+    #: 이 개도 미만은 빈손 (완전히 닫힌 빈손 0.0125 위, 실제로 쥔 개도 0.035–0.073 아래).
+    opening_rule_min: float = 0.03
+    #: HELD 의 빈손 판정: 개도가 이 값 미만이면 detach.
+    opening_rule_empty_below: float = 0.02
+    #: HELD 의 놓음 판정: 열림 명령이고 개도가 attach 때보다 이만큼 넘게 커졌으면 detach.
+    opening_rule_release_rise: float = 0.02
+
 
 @dataclasses.dataclass(frozen=True)
 class LatchEvent:
@@ -458,6 +472,8 @@ class GraspLatch:
         self._destination = _Confirm(self.config)
         self.phase = GraspPhase.SEARCHING
         self._open_streak = 0
+        #: SL14 `opening_rule`: the last executed gripper command, kept across detach / re-grasp (a HOLD chunk executes none).
+        self._rule_command: Optional[float] = None
         self._reset_grasp()
 
     # --- 조회 --------------------------------------------------------------------------
@@ -629,6 +645,8 @@ class GraspLatch:
             return self._last_grasp
 
         opening = signal.opening
+        if cfg.opening_rule:
+            return self._observe_opening_rule(signal, ev, reach_m)
         if (cfg.placed_rearm and self.phase is GraspPhase.PLACED and opening is not None
                 and float(opening) >= cfg.gripper_closed_below):
             # SL14 — PLACED is not absorbing: an open hand after the release may grasp again. The target lock is kept (the next
@@ -792,6 +810,66 @@ class GraspLatch:
 
         if opening is not None:
             self._last_opening = float(opening)
+        self._track_open(signal, opening)
+        self._last_grasp = self._event(attach, detach, note, ev)
+        return self._last_grasp
+
+    # --- SL14 `--grasp-opening-rule` -------------------------------------------------------------------------------
+    def _observe_opening_rule(self, signal: GraspSignal, ev: dict, reach_m: Optional[float]) -> LatchEvent:
+        """The opening-and-command rule replaces the evidence state machine (see `LatchConfig.opening_rule`). Attach / detach go
+        through the same `LatchEvent` as a normal one, so the caller's attach path (and the held object leaving the distance field)
+        is unchanged. `ev["opening_rule"]` carries the per-call record."""
+        cfg = self.config
+        opening = None if signal.opening is None else float(signal.opening)
+        if signal.last_command is not None:      # a HOLD chunk executes nothing: the last executed command stays
+            self._rule_command = float(signal.last_command)
+        cmd = self._rule_command
+        closed_cmd = cmd is not None and cmd < cfg.gripper_closed_below
+        open_cmd = cmd is not None and cmd >= cfg.gripper_closed_below
+        delta = _delta(opening, self._last_opening)
+        rec = {"applied": True, "decision": None, "opening": opening, "last_command": cmd,
+               "reach_mm": None if reach_m is None else round(float(reach_m) * 1000.0, 2)}
+        ev["opening_rule"] = rec
+        attach = detach = False
+        note = ""
+        if self.phase is GraspPhase.LATCHED and signal.closing_steps > 0:
+            self.phase = GraspPhase.CLOSING
+            note = f"닫힘 시도: 실행된 닫힘 명령 {signal.closing_steps} 스텝 (feedback seq {signal.feedback_seq})"
+        elif (self.phase is GraspPhase.CLOSING and open_cmd and opening is not None
+              and opening >= cfg.gripper_closed_below):
+            self.phase = GraspPhase.LATCHED
+            note = f"닫힘 시도 포기: 명령 {cmd:.3f} · 개도 {opening:.3f} 가 다시 열렸다"
+        if self.phase is GraspPhase.HELD:
+            a = self._attach_opening
+            released = bool(open_cmd and a is not None and opening is not None
+                            and opening > a + float(cfg.opening_rule_release_rise))
+            empty = bool(opening is not None and opening < float(cfg.opening_rule_empty_below))
+            rec["attach_opening"] = a
+            if released or empty:
+                detach = True
+                rec["decision"] = "detach"
+                why = (f"열림 명령 · 개도 {opening:.3f} > attach {a:.3f} + {cfg.opening_rule_release_rise:g}" if released
+                       else f"개도 {opening:.3f} < {cfg.opening_rule_empty_below:g} (빈손)")
+                note = f"opening_rule detach — {why} (feedback seq {signal.feedback_seq}) — detach(), LATCHED 로"
+                self.phase = GraspPhase.LATCHED
+                self._reset_grasp(keep_opening=True)
+        elif (self.phase in (GraspPhase.CLOSING, GraspPhase.LATCHED, GraspPhase.PLACED)
+              or (self.phase is GraspPhase.SEARCHING and self._manipulated.locked is not None)):
+            checks = {"closed_command": bool(closed_cmd),
+                      "settled": delta is not None and delta < float(cfg.settle_epsilon),
+                      "opening_min": opening is not None and opening >= float(cfg.opening_rule_min),
+                      "reach": reach_m is not None and float(reach_m) <= float(cfg.reach)}
+            ev["checks"] = checks
+            if all(checks.values()):
+                attach = True
+                rec["decision"] = "attach"
+                self.force_hold(opening)
+                self._hold_command = cmd
+                note = (f"opening_rule attach: 명령 {cmd:.3f} (닫힘) · 개도 {opening:.3f} ≥ {cfg.opening_rule_min:g} "
+                        f"(직전과 차 {delta:.4f} < {cfg.settle_epsilon:g}) · reach {reach_m * 1000.0:.1f} mm ≤ "
+                        f"{cfg.reach * 1000.0:.0f} mm (feedback seq {signal.feedback_seq})")
+        if opening is not None:
+            self._last_opening = opening
         self._track_open(signal, opening)
         self._last_grasp = self._event(attach, detach, note, ev)
         return self._last_grasp
@@ -1058,6 +1136,7 @@ class GraspLatch:
         self._external_destination = None
         self.phase = GraspPhase.SEARCHING
         self._open_streak = 0
+        self._rule_command = None
         self._reset_grasp()
 
 

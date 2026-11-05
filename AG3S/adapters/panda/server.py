@@ -77,7 +77,7 @@ def gripper_gap_calibration() -> dict:
     return json.loads(GRIPPER_GAP_CALIBRATION.read_text())
 
 
-def panda_latch_config(gap_opening: bool = False, placed_rearm: bool = False):
+def panda_latch_config(gap_opening: bool = False, placed_rearm: bool = False, opening_rule: bool = False):
     """V11AB ``LatchConfig`` defaults with only ``empty_below`` calibrated for the Panda gripper.
 
     SL11 §5 ``gap_opening``: the latch's opening is the two-finger gap (:func:`gripper_gap_norm`), so the three thresholds that
@@ -87,7 +87,7 @@ def panda_latch_config(gap_opening: bool = False, placed_rearm: bool = False):
     """
     from AG3S.trajopt.grasp_latch import LatchConfig
 
-    extra = {"placed_rearm": True} if placed_rearm else {}   # SL14 --placed-rearm (off: no key, the config as before)
+    extra = {**({"placed_rearm": True} if placed_rearm else {}), **({"opening_rule": True} if opening_rule else {})}   # SL14 --placed-rearm / --grasp-opening-rule (off: no key, the config as before)
     if not gap_opening:
         return LatchConfig(empty_below=float(gripper_calibration()["panda"]["empty_below"]), **extra)
     c = gripper_gap_calibration()["thresholds"]
@@ -951,7 +951,7 @@ def build_safe_server(policy, args, *, attention_model=None, gpu_warm_up: bool =
                  **({"hsr6_objective_scope": scope} if scope != "all" else {}),
                  **ss.subtask_from_latch_kwargs(args)}   # SL7 (T92): {} unless --subtask-from-latch
                 if final_options_on(args) else {})
-    safe = SafePolicy(chunk_policy, ag3s=ag3s, to_config=to_config, attention_fn=attention_fn, latch=panda_latch_config(gap_opening=gap_opening, placed_rearm=bool(getattr(args, "placed_rearm", False))),
+    safe = SafePolicy(chunk_policy, ag3s=ag3s, to_config=to_config, attention_fn=attention_fn, latch=panda_latch_config(gap_opening=gap_opening, placed_rearm=bool(getattr(args, "placed_rearm", False)), opening_rule=bool(getattr(args, "grasp_opening_rule", False))),
                       grasp_links=dict(profile.PANDA_GRASP_LINKS), hold_links=dict(profile.PANDA_HOLD_LINKS),
                       static_geometry=None, recorder=recorder, shadow=bool(getattr(args, "shadow", False)),
                       layout=pa.panda_chunk_layout(constraint.joint_names), gripper_columns=GRIPPER_COLUMNS,
@@ -990,6 +990,9 @@ def build_safe_server(policy, args, *, attention_model=None, gpu_warm_up: bool =
                                 "rule": "held (target touches both fingers) -> attach; not held -> detach + searching; HELD: release/revoke follow the oracle"}
     if getattr(args, "placed_rearm", False):
         info["placed_rearm"] = {"rule": "latch PLACED and measured opening >= gripper_closed_below -> SEARCHING (record grasp.rearm)"}
+    if getattr(args, "grasp_opening_rule", False):   # SL14 (KS) -- key only with the flag
+        info["grasp_opening_rule"] = {"rule": "attach: last executed command closed & settled & opening >= 0.03 & reach <= 120 mm; "
+                                               "detach (-> LATCHED): open command & opening > attach + 0.02, or opening < 0.02 (record grasp.opening_rule)"}
     final = final_config_record(args, safe, to_config, attn_rec, gpu, inert)
     if response_name != "robosuite141":   # SL11 -- key only with the fork model (the earlier servers' dump is unchanged)
         info["response_model"] = {"name": response_name, "pos": chunk_policy.response["pos"],

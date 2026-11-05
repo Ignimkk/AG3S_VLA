@@ -44,7 +44,7 @@ def test_every_earlier_versions_server_argv_is_bit_identical():
     old = {v: a for v, a in path_independent_argv(pf).items() if v not in pf.SL13_VERSIONS and v not in pf.SL14_VERSIONS}
     assert len(old) == 61
     assert hashlib.sha256(json.dumps(old, sort_keys=True).encode()).hexdigest() == OLD_ARGV_SHA256
-    assert pf.SL14_VERSIONS == (OL, RE)
+    assert pf.SL14_VERSIONS[:2] == (OL, RE)
     assert not any("--oracle-latch" in a or "--placed-rearm" in a for a in old.values())
     assert not set(pf.SL14_VERSIONS) & set(pf.PC_LATCH_VERSIONS) and not any(v.endswith("-lsfork") for v in pf.SL14_VERSIONS)
 
