@@ -68,7 +68,8 @@ def test_build_kwargs_follow_the_serve_safe_main_call():
     assert list(kw) == [n for n in names if n not in pf.LOG_ONLY_BUILD_KEYWORDS]
     # merge-added keywords: all off for V11AB (with profile.V11AB_PRE_MERGE_DEFAULTS pinning the ROI carve off)
     assert {k: kw[k] for k in pf.UNPORTED_BUILD_KEYWORDS if k in kw} == {
-        "palm_cover": None, "wrist_cover": None, "contact": None, "confidence_gate": None}
+        "palm_cover": None, "wrist_cover": None, "confidence_gate": None}
+    assert kw["contact"] is None and "contact" not in pf.UNPORTED_BUILD_KEYWORDS   # SL15: the T44e A9 section is ported (off here)
     # SL6-A A2 / A5: ported keywords, still off for V11AB (`palm_shell` is a `**{...}` key only when on)
     assert kw["target_exclusion"] is None and "palm_shell" not in kw
     assert set(pf.LOG_ONLY_BUILD_KEYWORDS) <= set(names)

@@ -537,7 +537,7 @@ UNPORTED_FINAL_CONFIG_DESTS: tuple[str, ...] = (
     'geo_w_rot', 'geo_wrist_check', 'grasp_anchor_radius_mm', 'grasp_goal_box', 'grasp_goal_window', 'held_3d_max_m',
     'held_3d_rule', 'held_permission_parent_links', 'hybrid_identity', 'hybrid_other_exclude_voxels',
     'latch_carry_from_closing', 'latch_reach_hand_relative', 'latch_reach_kept_unseen',
-    'nonauthorized_target_margin', 'nontarget_shell_voxels', 'oracle_extent_identity', 'oracle_max_dist_voxels',
+    'nontarget_shell_voxels', 'oracle_extent_identity', 'oracle_max_dist_voxels',
     'owned_ambiguous', 'owned_tie_voxels', 'owned_unowned', 'palm_cover', 'palm_cover_overflow',
     'palm_shell_overflow', 'profile_substages', 'qp_backend', 'recovery_retreat', 'robot_free_shrink_mm',
     'robot_mask', 'robot_occupied_free', 'roi_pad_mm', 'stem_cap_bottom_fit_frac', 'stem_cap_radius_mm',
@@ -597,6 +597,9 @@ PORTED_FINAL_CONFIG_DESTS: tuple[str, ...] = (
     # B (removed-seed sign fix: T96e); esdf keys via serve_safe.target_exclusion_section like surface_seed_ats_gate
     'surface_solid_owned', 'surface_solid_protect_mm', 'surface_solid_dilate_mm', 'surface_solid_shadow_mm',
     'surface_solid_dn_ever_target', 'surface_solid_dn_support', 'surface_removed_sign_free',
+    # SL15 (lead 2026-11-05): T44e A9 -- the margin the links without contact permission keep from the target; the config reaches
+    # AG3S as ``contact.nonauthorized_target_margin`` (``profile.v11ab_config_dict``), the TrajOpt side is the shared linearize code
+    'nonauthorized_target_margin',
 )
 
 
