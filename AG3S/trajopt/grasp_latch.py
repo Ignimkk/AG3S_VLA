@@ -279,6 +279,12 @@ class LatchConfig:
     #: (lift)만으로 attach 하게 된다. 간격 하나로 빈손을 가르지 않으려는 둘째 증거다.
     assist_requires_reach: bool = False
 
+    # --- SL14 (benchmark branch): the PLACED state is not absorbing ---------------------------------------------
+    #: **기본 False = SL14 전과 비트 동일.** True 면 PLACED 에서 측정 개도가 열렸을 때 (≥ `gripper_closed_below`) SEARCHING 으로
+    #: 돌아간다 (`observe_grasp`). 조작 대상 잠금은 그대로 두므로 다음 `update` 가 LATCHED 로 올리고, 그 뒤 닫힘 시도 → HELD 는 평소의
+    #: 증거 검사를 그대로 거친다. 켜지 않으면 PLACED 는 에피소드 끝까지 남아 (놓고 다시 쥐는 VLA 에서) 다시 attach 하지 않는다.
+    placed_rearm: bool = False
+
 
 @dataclasses.dataclass(frozen=True)
 class LatchEvent:
@@ -623,6 +629,14 @@ class GraspLatch:
             return self._last_grasp
 
         opening = signal.opening
+        if (cfg.placed_rearm and self.phase is GraspPhase.PLACED and opening is not None
+                and float(opening) >= cfg.gripper_closed_below):
+            # SL14 — PLACED is not absorbing: an open hand after the release may grasp again. The target lock is kept (the next
+            # `update` goes LATCHED); the closing attempt and the HELD confirmation then run the normal evidence checks.
+            self.phase = GraspPhase.SEARCHING
+            self._reset_grasp(keep_opening=True)
+            ev["rearm"] = True
+            note = (f"PLACED 다시 장전 (placed_rearm): 개도 {float(opening):.3f} ≥ {cfg.gripper_closed_below:g} — SEARCHING 으로")
         if self.phase is GraspPhase.LATCHED and signal.closing_steps > 0:
             self.phase = GraspPhase.CLOSING
             self._opening_before = self._last_opening
@@ -853,6 +867,23 @@ class GraspLatch:
         ev["rejected"] = str(reason)
         self._last_grasp = self._event(False, False, note, ev)
         return self._last_grasp
+
+    # --- SL14 `--oracle-latch` (diagnostic): the caller overrides the state with the simulator's ground truth ----------
+    def force_hold(self, opening: Optional[float] = None) -> None:
+        """The caller attached the held object on the simulator's word (not on the evidence): HELD, with the bookkeeping of a
+        normal attach (revoke window · slip · release counters start from here)."""
+        self.phase = GraspPhase.HELD
+        self._open_streak = 0
+        self._attach_opening = None if opening is None else float(opening)
+        self._held_exec_chunks = 0
+        self._hold_command = self._last_command
+        self._slip_streak = 0
+
+    def force_release(self) -> None:
+        """The caller detached on the simulator's word: back to SEARCHING (the target lock stays, so the next `update` goes
+        LATCHED and a new grasp is allowed)."""
+        self.phase = GraspPhase.SEARCHING
+        self._reset_grasp(keep_opening=True)
 
     @property
     def last_grasp(self) -> Optional[LatchEvent]:

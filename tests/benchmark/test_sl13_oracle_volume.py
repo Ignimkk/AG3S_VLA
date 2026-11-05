@@ -25,15 +25,30 @@ from tests.benchmark.test_sl12_oracle_panda import MI, NEW as GT, PC, _args
 
 VOL = (f"{PC}-oraclevol", f"{MI}-oraclevol")
 #: sha256 of ``json.dumps({name: version_server_argv(name) + list(flags)}, sort_keys=True)`` over the 61 AG3S_VERSIONS entries
-#: of 8a7ba963 (the registry without the SL13 pair)
-OLD_ARGV_SHA256 = "42e6c7f5165d1fc1de6dd614a09a16914eac3725a1a653129d8aa6bb1855af8c"
+#: of 8a7ba963 / 240fa5df (the registry without the SL13 pair), **path-independent**: this checkout's root and the shared storage
+#: root are replaced by ``<ROOT>`` / ``<STORAGE>`` before hashing (the earlier hash contained the absolute path of the checkout it
+#: was measured in and failed in every other one). Measured at 240fa5df before SL14 touched the registry.
+OLD_ARGV_SHA256 = "f80420b6695987aba4505fceeeb2b579b9c4bb417124217982d15fdb50e5c7a7"
+
+
+def path_independent_argv(pf):
+    """``{version: argv}`` of the registry with this checkout's and the storage root's absolute paths replaced by tokens."""
+    import pathlib
+
+    import AG3S
+    from common.workspace import shared_storage_root
+
+    root = str(pathlib.Path(AG3S.__file__).resolve().parent.parent)
+    storage = str(shared_storage_root())
+    return {v: [t.replace(storage, "<STORAGE>").replace(root, "<ROOT>") for t in pf.version_server_argv(v) + list(pf.AG3S_VERSIONS[v])]
+            for v in pf.AG3S_VERSIONS}
 
 
 # ---------------------------------------------------------------------------------------------------- (a) off is unchanged
 def test_every_earlier_versions_server_argv_is_bit_identical():
     from AG3S.adapters.panda import profile as pf
 
-    old = {v: pf.version_server_argv(v) + list(pf.AG3S_VERSIONS[v]) for v in pf.AG3S_VERSIONS if v not in pf.SL13_VERSIONS}
+    old = {v: a for v, a in path_independent_argv(pf).items() if v not in pf.SL13_VERSIONS and v not in pf.SL14_VERSIONS}
     assert len(old) == 61
     assert hashlib.sha256(json.dumps(old, sort_keys=True).encode()).hexdigest() == OLD_ARGV_SHA256
     assert pf.SL13_VERSIONS == VOL

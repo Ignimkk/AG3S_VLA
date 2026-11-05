@@ -130,18 +130,30 @@ def oracle_client_argv(mode: str, args) -> list[str]:
     oracle-visible`` and needs the GT code image); ``[]`` for every other version and for the vla_only client."""
     from AG3S.adapters.panda import profile
 
+    out = []
     if mode == "vla_v11ab" and profile.needs_oracle_segmentation(getattr(args, "ag3s_version", "V11AB")):
         from benchmark.adapters.libero_panda import oracle_codes
-        return [oracle_codes.CLIENT_FLAG]
-    return []
+        out.append(oracle_codes.CLIENT_FLAG)
+    if mode == "vla_v11ab" and profile.needs_oracle_grasp(getattr(args, "ag3s_version", "V11AB")):
+        # SL14: ``--oracle-grasp`` for the vla_v11ab client of an ``--oracle-latch`` version (the server needs ag3s/oracle_grasp)
+        from benchmark.adapters.libero_panda import oracle_codes
+        out.append(oracle_codes.CLIENT_GRASP_FLAG)
+    return out
 
 
 def oracle_settings(mode: str, args) -> dict:
-    """SL12: the manifest entry that says what the oracle is and how its target is chosen ({} when the client has no oracle)."""
-    if not oracle_client_argv(mode, args):
+    """SL12: the manifest entry that says what the oracle is and how its target is chosen ({} when the client has no oracle).
+    SL14: the ground-truth grasp entry for an ``--oracle-grasp`` client."""
+    argv = oracle_client_argv(mode, args)
+    if not argv:
         return {}
     from benchmark.adapters.libero_panda import oracle_codes
-    return oracle_codes.settings_record()
+    out = {}
+    if oracle_codes.CLIENT_FLAG in argv:
+        out.update(oracle_codes.settings_record())
+    if oracle_codes.CLIENT_GRASP_FLAG in argv:
+        out.update(oracle_codes.grasp_settings_record())
+    return out
 
 
 def _is_safelibero(args) -> bool:

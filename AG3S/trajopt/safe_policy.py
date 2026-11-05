@@ -198,6 +198,9 @@ class SafePolicy:
     #: T93 — same reason (test doubles built without `__init__` read "no flow guidance", as before).
     fm_guide: Any = None
     # --- T93 — end
+    #: SL14 `--oracle-latch` (diagnostic, Panda server only): the latch's attach / detach follow the simulator's ground truth
+    #: (`ag3s/oracle_grasp`). Class default = off (test doubles built without `__init__` read "evidence only", as before).
+    oracle_latch: bool = False
     #: AG3S-CORE-EVAL-A6 — same reason (test doubles built without `__init__` read "no palm allowance record").
     _last_neighbour_palm_contact: dict = {}
     #: SL6-H (HSR6 ⑤) — same reason: no placement-contact record.
@@ -629,6 +632,8 @@ class SafePolicy:
             meta["target_extent"] = "oracle_visible"
             meta["oracle_extent_identity"] = str(getattr(self.ag3s.config.esdf, "oracle_extent_identity",
                                                          "pipeline"))
+        if self.oracle_latch:   # SL14 — same convention: the key exists only on an `--oracle-latch` server
+            meta[wire.ORACLE_GRASP_REQUIRED] = True
         # IFG-CL1 — 같은 규약: 켰을 때만 키가 생긴다. attention-surface 는 client 에 segmentation 을 요구하지 않는다
         # (code 영상은 서버가 만든다) — `ORACLE_SEG_REQUIRED` 는 싣지 않는다.
         esdf = getattr(getattr(self.ag3s, "config", None), "esdf", None)
@@ -2286,6 +2291,9 @@ class SafePolicy:
                if self.hsr5 is not None else {}))
         if self.hsr5 is not None and "closing_release" in (event.evidence or {}):
             self._hsr5_source("closing_release")
+        oracle_rec = None
+        if self.oracle_latch:   # SL14 (off: this block does not exist for the call)
+            event, oracle_rec = self._oracle_latch_pre(event, phase_before, signal.opening)
         if self._carry_from_closing():
             # IFG-HSR2: remember the request this grasp attempt entered CLOSING on; forget it when the latch
             # leaves CLOSING / HELD (opened, revoked, placed) — a new attempt starts a new carry.
@@ -2344,6 +2352,9 @@ class SafePolicy:
                 # T43 Z3: 닫힌 채 손에서 빠졌다 — 열림 놓기와 같은 PLACED 뒤처리 (아래 기록 · 다음 줄들).
                 print(f"[safe_policy] held_slip: {event.note}")
 
+        if oracle_rec is not None and oracle_rec.get("held") is not None:   # SL14
+            self._oracle_latch_post(oracle_rec, manip=manip, q=q, parent_link=parent_link, allowed=allowed, hand=hand,
+                                    opening=signal.opening, reach=reach)
         self._last_grasp_record = {
             "mode": "evidence",
             "hand": hand,
@@ -2362,6 +2373,11 @@ class SafePolicy:
             "evidence": dict(event.evidence or {}),
             "alignment": alignment,
         }
+        if oracle_rec is not None:
+            self._last_grasp_record["oracle"] = oracle_rec   # SL14 — {held, overrode, evidence_state, ...}, only with --oracle-latch
+        if cfg.placed_rearm:
+            # SL14 `--placed-rearm` — key only with the flag: True on the request the latch left PLACED for SEARCHING.
+            self._last_grasp_record["rearm"] = bool((event.evidence or {}).get("rearm"))
         if cfg.slip_detach:
             # T43 Z3 — flag 가 켜졌을 때만 싣는다 (꺼지면 기록이 Z3 전과 같다). 근거는 `evidence.slip`.
             self._last_grasp_record["held_slip"] = bool(event.slipped)
@@ -2401,6 +2417,72 @@ class SafePolicy:
         if self._last_grasp_record["transition"]:
             print(f"[safe_policy] grasp {phase_before.value} -> {self._latch.phase.value}: "
                   f"{event.note}")
+
+    # --- SL14 `--oracle-latch` ------------------------------------------------------------------------------------
+    def _oracle_request(self) -> Optional[dict]:
+        """The request's ``ag3s/oracle_grasp`` = ``{"held": bool, "target_body": str}``, or None when the client sent none."""
+        og = (self._pending.get("scene") or {}).get(wire.ORACLE_GRASP)
+        if not isinstance(og, dict) or "held" not in og:
+            return None
+        return {"held": bool(og["held"]), "target_body": None if og.get("target_body") is None else str(og["target_body"])}
+
+    def _oracle_latch_pre(self, event, phase_before, opening):
+        """After the evidence latch updated: while the latch was HELD, the evidence's own revoke / slip / placed detach is
+        void when the oracle still says held (the latch returns to HELD, ``ag3s`` is never told to detach). The record
+        ``{held, overrode, evidence_state}`` is completed by :meth:`_oracle_latch_post`."""
+        req = self._oracle_request()
+        rec = {"held": None if req is None else req["held"], "overrode": None,
+               "evidence_state": self._latch.phase.value, "evidence_attach": bool(event.attach),
+               "evidence_detach": bool(event.detach),
+               "target_body": None if req is None else req["target_body"]}
+        if req is None:
+            rec["error"] = "the request carries no ag3s/oracle_grasp (the evidence latch ran alone)"
+            return event, rec
+        if req["held"] and phase_before is GraspPhase.HELD and event.detach:
+            self._latch.force_hold(opening)
+            event = dataclasses.replace(
+                event, phase=GraspPhase.HELD, attach=False, detach=False, revoked=False, slipped=False,
+                note=event.note + " [oracle-latch: 정답은 아직 쥠 — detach 취소]")
+            rec["suppressed_detach"] = True
+        return event, rec
+
+    def _oracle_latch_post(self, rec, *, manip, q, parent_link, allowed, hand, opening, reach) -> None:
+        """Make the latch (and ``ag3s``' attached object) agree with the oracle: held and not HELD -> attach; not held and HELD ->
+        detach and SEARCHING; not held and PLACED -> SEARCHING (a new grasp is allowed)."""
+        from AG3S.ag3s.constraints.attached import AttachRejected
+
+        held = bool(rec["held"])
+        if held and not self._latch.holding:
+            geom, source = None, None
+            if manip is not None and getattr(manip, "usable", False) and getattr(manip, "geometry", None) is not None:
+                geom, source = manip.geometry, "manipulated"
+            elif self._latched_target is not None:
+                geom, source = self._latched_target, "latched_target"
+            elif getattr(getattr(self, "_last_constraint_set", None), "target", None) is not None:
+                geom, source = self._last_constraint_set.target, "attention_target"
+            if geom is None:
+                rec["attach_failed"] = "no geometry candidate (no manipulated object, latched target or attention target)"
+                return
+            try:
+                # reach=None: the oracle says the object is between the fingers, the reach gate is not asked again
+                self.ag3s.attach(geom, robot_state=q, parent_link=parent_link, allowed_contact_links=allowed,
+                                 label="manipulated", reach=None, hold_link=self.hold_links.get(hand, parent_link))
+            except AttachRejected as exc:
+                rec["attach_failed"] = exc.record()
+                return
+            self._grasp_state_version += 1
+            self._latch.force_hold(opening)
+            rec["overrode"] = "attach"
+            rec["held_source"] = source
+            rec["reach_mm"] = None if reach is None else round(float(reach) * 1000.0, 2)
+        elif not held and self._latch.holding:
+            self.ag3s.detach()
+            self._grasp_state_version += 1
+            self._latch.force_release()
+            rec["overrode"] = "detach"
+        elif not held and self._latch.phase is GraspPhase.PLACED:
+            self._latch.force_release()
+            rec["rearmed_from_placed"] = True
 
     def _grasp_continuity_gate(self) -> Optional[str]:
         """이 청크에서 continuity 항을 끌 사유, 또는 `None` (T37 K1).

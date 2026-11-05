@@ -616,12 +616,15 @@ def main(argv=None):
     sc.check_oracle_pairing(args, ws)   # SL12
     if args.oracle_segmentation:
         extra["oracle_segmentation"] = sc.oc.settings_record()["oracle_segmentation"]
+    if args.oracle_grasp:   # SL14
+        extra["oracle_grasp"] = sc.oc.grasp_settings_record()["oracle_grasp"]
 
     def policy_for(task_id, episode_idx):
         client = sc.SafeClient(ws, args.seed, task_id, episode_idx, args.replan_steps,
                                request_extra={"panda/action_adapter": str(args.action_adapter)},  # SL11: server --response-model check
                                oracle=args.oracle_segmentation,
-                               oracle_info={"suite": args.task_suite_name, "task_id": task_id})
+                               oracle_info={"suite": args.task_suite_name, "task_id": task_id},
+                               oracle_grasp=args.oracle_grasp)
         return client, connector, dict(extra)
 
     def observer_for(client, geometry, task_id, episode_idx):

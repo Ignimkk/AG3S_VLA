@@ -77,7 +77,7 @@ def gripper_gap_calibration() -> dict:
     return json.loads(GRIPPER_GAP_CALIBRATION.read_text())
 
 
-def panda_latch_config(gap_opening: bool = False):
+def panda_latch_config(gap_opening: bool = False, placed_rearm: bool = False):
     """V11AB ``LatchConfig`` defaults with only ``empty_below`` calibrated for the Panda gripper.
 
     SL11 §5 ``gap_opening``: the latch's opening is the two-finger gap (:func:`gripper_gap_norm`), so the three thresholds that
@@ -87,11 +87,12 @@ def panda_latch_config(gap_opening: bool = False):
     """
     from AG3S.trajopt.grasp_latch import LatchConfig
 
+    extra = {"placed_rearm": True} if placed_rearm else {}   # SL14 --placed-rearm (off: no key, the config as before)
     if not gap_opening:
-        return LatchConfig(empty_below=float(gripper_calibration()["panda"]["empty_below"]))
+        return LatchConfig(empty_below=float(gripper_calibration()["panda"]["empty_below"]), **extra)
     c = gripper_gap_calibration()["thresholds"]
     return LatchConfig(empty_below=float(c["empty_below"]), blocked_gap=float(c["blocked_gap"]),
-                       hold_empty_below=float(c["hold_empty_below"]), assist_requires_reach=bool(c["assist_requires_reach"]))
+                       hold_empty_below=float(c["hold_empty_below"]), assist_requires_reach=bool(c["assist_requires_reach"]), **extra)
 ATTENTION_CAMERAS = ("head", "left_wrist")
 HANDS = {pm.MANIPULATOR_SIDE: 0}
 GRIPPER_COLUMNS = (pa.GRIPPER_COLUMN,)
@@ -950,12 +951,14 @@ def build_safe_server(policy, args, *, attention_model=None, gpu_warm_up: bool =
                  **({"hsr6_objective_scope": scope} if scope != "all" else {}),
                  **ss.subtask_from_latch_kwargs(args)}   # SL7 (T92): {} unless --subtask-from-latch
                 if final_options_on(args) else {})
-    safe = SafePolicy(chunk_policy, ag3s=ag3s, to_config=to_config, attention_fn=attention_fn, latch=panda_latch_config(gap_opening=gap_opening),
+    safe = SafePolicy(chunk_policy, ag3s=ag3s, to_config=to_config, attention_fn=attention_fn, latch=panda_latch_config(gap_opening=gap_opening, placed_rearm=bool(getattr(args, "placed_rearm", False))),
                       grasp_links=dict(profile.PANDA_GRASP_LINKS), hold_links=dict(profile.PANDA_HOLD_LINKS),
                       static_geometry=None, recorder=recorder, shadow=bool(getattr(args, "shadow", False)),
                       layout=pa.panda_chunk_layout(constraint.joint_names), gripper_columns=GRIPPER_COLUMNS,
                       finger_map=FingerJointMap(constraint, convention=panda_gripper_convention()), hands=HANDS,
                       **final_kw, **abox_kw)
+    if getattr(args, "oracle_latch", False):
+        safe.oracle_latch = True   # SL14: the latch follows the request's ag3s/oracle_grasp (default off: class attribute False)
     grasp_contact = ss.apply_grasp_contact_flags(safe, args)  # V11AB-pb4 / pb5 (all off = V11AB)
     gpu = gpu_seeds_setup(safe, to_config, warm_up=gpu_warm_up)
     inert = []
@@ -982,6 +985,11 @@ def build_safe_server(policy, args, *, attention_model=None, gpu_warm_up: bool =
                                                 "empty_below": gc.empty_below, "blocked_gap": gc.blocked_gap,
                                                 "hold_empty_below": gc.hold_empty_below,
                                                 "assist_requires_reach": gc.assist_requires_reach}
+    if getattr(args, "oracle_latch", False):   # SL14 -- keys only with the flag (the earlier servers' dump is unchanged)
+        info["oracle_latch"] = {"needs_client_flag": "--oracle-grasp (metadata oracle_grasp_required)", "request_key": "ag3s/oracle_grasp",
+                                "rule": "held (target touches both fingers) -> attach; not held -> detach + searching; HELD: release/revoke follow the oracle"}
+    if getattr(args, "placed_rearm", False):
+        info["placed_rearm"] = {"rule": "latch PLACED and measured opening >= gripper_closed_below -> SEARCHING (record grasp.rearm)"}
     final = final_config_record(args, safe, to_config, attn_rec, gpu, inert)
     if response_name != "robosuite141":   # SL11 -- key only with the fork model (the earlier servers' dump is unchanged)
         info["response_model"] = {"name": response_name, "pos": chunk_policy.response["pos"],

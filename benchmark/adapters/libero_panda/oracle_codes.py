@@ -188,3 +188,90 @@ def settings_record(suite_rule=None):
         "limits": "put-both tasks keep their first object as the target; fixture-only goals are refused",
         "segmentation_instant": "rendered at env.step return (camera.capture), depth at the image substep",
         **({} if suite_rule is None else {"suite": suite_rule})}}
+
+
+# --- SL14: the ground-truth grasp (``--oracle-grasp``; the server side is ``serve_safe --oracle-latch``) --------------------
+#: client flag (``libero_safe_client`` / ``libero_safety_client``) the launchers pass for an ``--oracle-latch`` version
+CLIENT_GRASP_FLAG = "--oracle-grasp"
+#: request key (``AG3S.trajopt.wire.PREFIX + ORACLE_GRASP``) and the server metadata key (``wire.ORACLE_GRASP_REQUIRED``);
+#: ``tests/benchmark/test_sl14_oracle_latch.py`` compares them with ``wire``
+REQUEST_GRASP_KEY = "ag3s/oracle_grasp"
+SERVER_GRASP_REQUIRES_KEY = "oracle_grasp_required"
+#: robosuite ``PandaGripper`` finger bodies (``phase_export.FINGER_BODIES``): left = finger 1, right = finger 2
+FINGER_BODIES = {"left": ("gripper0_leftfinger", "gripper0_finger_joint1_tip"),
+                 "right": ("gripper0_rightfinger", "gripper0_finger_joint2_tip")}
+
+
+def finger_side_table(body_names, geom_bodyid):
+    """(ngeom,) int8: 1 = geom of a left finger body, 2 = of a right finger body, 0 = any other geom."""
+    names = [str(b) for b in body_names]
+    side_of_body = {}
+    for code, side in ((1, "left"), (2, "right")):
+        for name in FINGER_BODIES[side]:
+            if name in names:
+                side_of_body[names.index(name)] = code
+    gb = np.asarray(geom_bodyid, np.int64)
+    return np.array([side_of_body.get(int(b), 0) for b in gb], np.int8)
+
+
+def held_from_pairs(pairs, target_mask, finger_side):
+    """True iff a geom of the target touches a left-finger geom **and** a right-finger geom (``pairs``: ``(geom1, geom2)`` of
+    ``data.contact``; ``target_mask`` (ngeom,) bool; ``finger_side`` from :func:`finger_side_table`)."""
+    left = right = False
+    for g1, g2 in pairs:
+        for a, b in ((g1, g2), (g2, g1)):
+            if target_mask[a] and not target_mask[b]:
+                if finger_side[b] == 1:
+                    left = True
+                elif finger_side[b] == 2:
+                    right = True
+    return bool(left and right)
+
+
+class GraspOracle(object):
+    """One episode's ground-truth grasp: ``held`` = the task's target object (the same target as :class:`OracleLabeler`) is in
+    contact with both fingers of the Panda gripper at this instant of the simulation."""
+
+    def __init__(self, problem, body_names, geom_bodyid, *, suite="", task_id=None):
+        self.target, self.rule = choose_target(problem)
+        names = [str(b) for b in body_names]
+        ids = instance_body_ids(self.target, names)
+        if not ids:
+            raise ValueError("no MuJoCo body for LIBERO object {!r}".format(self.target))
+        self.target_mask = np.isin(np.asarray(geom_bodyid, np.int64), np.asarray(ids, np.int64))
+        self.finger_side = finger_side_table(names, geom_bodyid)
+        if not (self.finger_side == 1).any() or not (self.finger_side == 2).any():
+            raise ValueError("the model has no left / right finger geoms {}".format(FINGER_BODIES))
+        self.suite, self.task_id = suite, task_id
+        self.n_frames = 0
+        self.n_held = 0
+
+    @classmethod
+    def from_env(cls, env, tables, **kwargs):
+        inner = getattr(env, "env", env)
+        return cls(problem_from_parsed(inner.parsed_problem), tables["model_body_names"], tables["model_geom_bodyid"], **kwargs)
+
+    def held(self, data):
+        """``data``: the env's ``sim.data`` (``contact`` / ``ncon``)."""
+        pairs = [(int(c.geom1), int(c.geom2)) for c in data.contact[: data.ncon]]
+        return held_from_pairs(pairs, self.target_mask, self.finger_side)
+
+    def request_keys(self, data):
+        held = self.held(data)
+        self.n_frames += 1
+        self.n_held += int(held)
+        return {REQUEST_GRASP_KEY: {"held": bool(held), "target_body": self.target + "_main"}}
+
+    def record(self):
+        """Per-episode record (``episodes.jsonl`` ``safe_client.oracle_grasp``)."""
+        return {"target": self.target, "rule": self.rule, "suite": self.suite, "task_id": self.task_id,
+                "frames": int(self.n_frames), "frames_held": int(self.n_held), "finger_bodies": {k: list(v) for k, v in FINGER_BODIES.items()}}
+
+
+def grasp_settings_record():
+    """The run-settings entry (launcher manifest) that says what the grasp oracle is."""
+    return {"oracle_grasp": {
+        "what": "SL14 diagnostic: the client sends the MuJoCo ground-truth grasp per request (ag3s/oracle_grasp = {held, target_body}); "
+                "held = the task's target object touches both the left and the right finger geoms (data.contact); the server "
+                "(--oracle-latch) makes the grasp latch's attach / detach follow it",
+        "target_rule": "the same as the SL12 code image (oracle_codes.choose_target)"}}
