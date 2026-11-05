@@ -2782,6 +2782,12 @@ def build_parser() -> argparse.ArgumentParser:
                     help="SL11 (benchmark branch, Panda 서버만) — 진단: AG3S · TO · verdict 는 그대로 계산 · 기록하지만 client 에는 "
                          "언제나 정책 action 을 bit 그대로 보내고 HOLD 하지 않는다 (응답 panda/observe 에 TO 가 냈을 verdict · "
                          "action 이 남는다). RB-Y1 서버는 거절. 기본 off")
+    ap.add_argument("--gripper-gap-opening", action="store_true",
+                    help="SL11 §5 (benchmark branch, Panda 서버만) — grasp latch 가 읽는 측정 개도를 손가락 하나 |q1|/0.04 가 아니라 두 손가락 "
+                         "간격 (q1 − q2)/0.08 로 잰다 (두 손가락이 한쪽으로 함께 밀린 쥠을 닫힌 채 빠짐으로 오판하지 않는다). 개도 문턱 "
+                         "셋 (empty_below · blocked_gap · hold_empty_below) 을 그 척도로 다시 두고 (robots/panda/description/"
+                         "gripper_gap_calibration.json), HSR6 attach-assist 도 reach 검사를 통과해야 한다. 정책에 주는 state 개도 · 손가락 "
+                         "모델은 그대로. RB-Y1 서버는 거절. 기본 off")
     ap.add_argument("--w-continuity", type=float, default=None, metavar="W",
                     help="앞 청크의 겹치는 꼬리와의 연속성 항 (기본 0.5). **0 이면 그 항이 "
                          "아예 없어진다** (`refiner` 가 그때 이전 청크를 안 쓴다)")
@@ -3868,6 +3874,9 @@ def reject_panda_only_flags(ap: argparse.ArgumentParser, args) -> None:
     if getattr(args, "hsr6_placement_contact_lift", False):   # SL10e
         ap.error("--hsr6-placement-contact-lift 는 Panda 서버의 ⑤ 단계 조건입니다 (--robot panda 만). RB-Y1 서버는 "
                  "거절합니다")
+    if getattr(args, "gripper_gap_opening", False):   # SL11 §5
+        ap.error("--gripper-gap-opening 은 Panda 손가락 두 관절 (finger_joint1 · finger_joint2) 의 간격으로 latch 개도를 재는 flag 입니다 "
+                 "(--robot panda 만). RB-Y1 gripper 는 관절이 하나라 거절합니다")
     if getattr(args, "observe_only", False):   # SL11
         ap.error("--observe-only 는 Panda 서버가 client 에 정책 action 을 그대로 보내는 진단 flag 입니다 (--robot panda 만). "
                  "RB-Y1 서버는 거절합니다")
@@ -4256,6 +4265,7 @@ def reject_bad_flag_combinations(ap: argparse.ArgumentParser, args, *, seed_map_
         ("--refused-identity-release", getattr(args, "refused_identity_release", None) is not None),
         ("--supported-max-bottom-mm", getattr(args, "supported_max_bottom_mm", None) is not None),
         ("--held-slip-detach", getattr(args, "held_slip_detach", False)),
+        ("--gripper-gap-opening", getattr(args, "gripper_gap_opening", False)),   # SL11 §5
         ("--latch-reach-hand-relative", getattr(args, "latch_reach_hand_relative", False)),  # T46g
         ("--latch-reach-kept-unseen", getattr(args, "latch_reach_kept_unseen", False)),  # IFG-HSR
         ("--latch-carry-from-closing", getattr(args, "latch_carry_from_closing", False)),  # IFG-HSR2

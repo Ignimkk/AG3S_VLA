@@ -592,6 +592,16 @@ LSFORK_BASES: tuple[str, ...] = ("AG3S-final-panda-v3-e0to-pc", "AG3S-final-pand
 for _b in LSFORK_BASES:
     register_lsfork(_b)
 del _b
+#: SL11 §5 (task SL11 §5, user ruling 2026-11-05): the grasp latch measures the opening as the gap of the two fingers.
+#:   ``-pc-gap``       pc판 + ``--gripper-gap-opening``;   ``-pc-mi10-gap``   ``-pc-mi10`` + the flag.
+#: Registered after the ``-lsfork`` loop, so they have no ``-lsfork`` twin (add one with ``register_lsfork``/``LSFORK_BASES`` if wanted).
+#: They are not in :data:`SL11_VERSIONS` (that tuple is the three pass versions); their record dest joins by its own group
+#: (:func:`version_flag_values`), so the record of every earlier version, sdev / observe / lsfork included, keeps its keys.
+GAP_OPENING_FLAGS: tuple[str, ...] = ("--gripper-gap-opening",)
+SL11_GAP_VERSIONS: tuple[str, ...] = ("AG3S-final-panda-v3-e0to-pc-gap", "AG3S-final-panda-v3-e0to-pc-mi10-gap")
+AG3S_VERSIONS["AG3S-final-panda-v3-e0to-pc-gap"] = tuple(AG3S_VERSIONS["AG3S-final-panda-v3-e0to-pc"]) + GAP_OPENING_FLAGS
+AG3S_VERSIONS["AG3S-final-panda-v3-e0to-pc-mi10-gap"] = tuple(AG3S_VERSIONS["AG3S-final-panda-v3-e0to-pc-mi10"]) + GAP_OPENING_FLAGS
+PC_LATCH_VERSIONS = PC_LATCH_VERSIONS + SL11_GAP_VERSIONS
 #: SL6-B B4 — the Panda HSR6 probe (5 classes, no retreat; labels approved by the user 2026-10-29), the default
 #: ``--hsr6-probe`` of the final versions, and its SHA-256 (recorded by the server, checked by the test when present).
 #: SL7 (0.7): found under the shared storage root (``AG3S_STORAGE_ROOT``, default the checkout's sibling
@@ -674,6 +684,8 @@ def version_flag_values(args: argparse.Namespace) -> dict[str, Any]:
              if d not in set(dests) | set(final) | set(p0m) | set(sl9) | set(sl10) | set(sl10d) | set(sl10e)]   # SL10f
     sl11 = [d for d in _version_dests(tuple(SL11_VERSIONS) + tuple(LSFORK_VERSIONS))
             if d not in set(dests) | set(final) | set(p0m) | set(sl9) | set(sl10) | set(sl10d) | set(sl10e) | set(sl10f)]   # SL11
+    sl11gap = [d for d in _version_dests(SL11_GAP_VERSIONS)
+               if d not in set(dests) | set(final) | set(p0m) | set(sl9) | set(sl10) | set(sl10d) | set(sl10e) | set(sl10f) | set(sl11)]   # SL11 §5
     parser = ss.build_parser()
     actions = parser._option_string_actions
     pinned = {actions[t].dest for t in V11AB_PRE_MERGE_DEFAULTS if t.startswith("--")}   # set on every V11AB argv
@@ -705,6 +717,9 @@ def version_flag_values(args: argparse.Namespace) -> dict[str, Any]:
     # (minimal_intervention_mm is a V11AB dest)
     if any(getattr(args, d, None) != parser.get_default(d) for d in sl11):
         dests = sorted(set(dests) | set(final) | set(p0m) | set(sl9) | set(sl10) | set(sl10d) | set(sl10e) | set(sl10f) | set(sl11))
+    # SL11 §5: the gap-opening dest joins only when it is set -- no other version's record gains a key
+    if any(getattr(args, d, None) != parser.get_default(d) for d in sl11gap):
+        dests = sorted(set(dests) | set(sl11gap))
     return {d: _jsonable(getattr(args, d, None)) for d in dests}
 
 
