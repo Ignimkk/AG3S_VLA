@@ -101,7 +101,7 @@ def test_every_other_version_is_unchanged():
 
     old = {k: list(v) for k, v in pf.AG3S_VERSIONS.items()
            if k not in NEW and not k.endswith("-lsfork") and k not in pf.SL11_GAP_VERSIONS
-           and k not in pf.SL12_VERSIONS and k not in pf.SL13_VERSIONS and k not in pf.SL14_VERSIONS and k not in pf.SL15_NTM_VERSIONS and k not in pf.SL15_SFHAND_VERSIONS and k not in pf.SL16_HSC_VERSIONS and k not in pf.SL16_HVC_VERSIONS}   # SL11 fork merge adds -lsfork; §5 the -gap pair; SL12 the -oraclegt pair
+           and k not in pf.SL12_VERSIONS and k not in pf.SL13_VERSIONS and k not in pf.SL14_VERSIONS and k not in pf.SL15_NTM_VERSIONS and k not in pf.SL15_SFHAND_VERSIONS and k not in pf.SL16_HSC_VERSIONS and k not in pf.SL16_HVC_VERSIONS and not pf.is_gtto_version(k)}   # SL11 fork merge adds -lsfork; §5 the -gap pair; SL12 the -oraclegt pair   # 2026-11-06 merge: SL-GTTO versions came later
     assert len(old) == OLD_REGISTRY_SIZE
     assert hashlib.sha256(json.dumps(old, sort_keys=True).encode()).hexdigest() == OLD_REGISTRY_SHA256
     assert list(pf.PC_LATCH_VERSIONS[-3 - len(pf.SL11_GAP_VERSIONS):-len(pf.SL11_GAP_VERSIONS)]) == list(NEW)   # the others keep their place

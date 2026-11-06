@@ -156,6 +156,36 @@ def oracle_settings(mode: str, args) -> dict:
     return out
 
 
+# --- SL-GTTO — begin: GT code images for an oracle-perception version (default: argv unchanged) ------------------------
+ORACLE_CLIENT_FLAGS = ("--capture-segmentation", "--oracle-seg")
+
+
+def oracle_segmentation_required(mode: str, args) -> bool:
+    """The ``vla_v11ab`` server of ``--ag3s-version`` needs the client's GT code images (``profile.
+    version_requires_oracle_segmentation``: ``--target-extent oracle-visible``)."""
+    from AG3S.adapters.panda import profile
+
+    return mode == "vla_v11ab" and profile.version_requires_oracle_segmentation(getattr(args, "ag3s_version", "V11AB"))
+
+
+def gt_oracle_client_argv(mode: str, args, argv: list[str]) -> list[str]:
+    """``argv`` + ``--capture-segmentation --oracle-seg`` (each once) when the mode's server needs the code images;
+    ``argv`` unchanged otherwise (every other version / the vla_only mode)."""
+    out = list(argv)
+    if oracle_segmentation_required(mode, args):
+        out += [flag for flag in ORACLE_CLIENT_FLAGS if flag not in out]
+    return out
+
+
+def check_oracle_client_argv(mode: str, args, argv: list[str]) -> None:
+    """Refuse before the server starts: an oracle server with a client that would not send the code images (the
+    client itself also refuses at connect, ``libero_safe_client.check_server_oracle``)."""
+    if oracle_segmentation_required(mode, args) and not all(flag in argv for flag in ORACLE_CLIENT_FLAGS):
+        raise RuntimeError(f"--ag3s-version {args.ag3s_version} needs the GT segmentation: the client argv lacks "
+                           f"{[f for f in ORACLE_CLIENT_FLAGS if f not in argv]}")
+# --- SL-GTTO — end
+
+
 def _is_safelibero(args) -> bool:
     return args.task_suite_name.startswith("safelibero")
 
@@ -303,11 +333,17 @@ def run_mode(mode: str, args, identity: dict, shared: dict) -> Path:
                 "safety_level": args.safety_level,
                 "policy_seed_rule": "seed*100000 + task_id*1000 + episode_idx (libero_safe_client.episode_seed)",
                 "checkpoint": identity, "server_argv": s_argv + record_constraints_argv(mode, RUN_DIR_TOKEN, record),
-                "data_split": args.data_split, **rec_settings, **oracle_settings(mode, args), **shared}
+                "data_split": args.data_split, **rec_settings, **oracle_settings(mode, args), **shared,
+                # SL-GTTO — key only for an oracle-perception server (every other run's settings unchanged)
+                **({"oracle_segmentation": {"client_flags": list(ORACLE_CLIENT_FLAGS),
+                                            "source": "benchmark/adapters/libero_panda/gtto_oracle_codes.py"}}
+                   if oracle_segmentation_required(mode, args) else {})}
     run_dir = create_run(run_id=f"{args.run_id}-{run_tag(mode, args)}", settings=settings, checkpoint=identity["path"])
     print(f"[{mode}] {run_dir}", flush=True)
     s_argv = s_argv + record_constraints_argv(mode, run_dir, record)
-    c_argv = client_argv(str(run_dir), port, args) + oracle_client_argv(mode, args)   # SL12 (else unchanged)
+    # SL12 / SL14 flags (oracle_client_argv), then SL-GTTO's (gt_oracle_client_argv); each is [] / unchanged when off
+    c_argv = gt_oracle_client_argv(mode, args, client_argv(str(run_dir), port, args) + oracle_client_argv(mode, args))
+    check_oracle_client_argv(mode, args, c_argv)
     logs = run_dir / "logs"
     result = {"role": "launcher_result", "mode": mode, "port": port}
     server = None
@@ -475,6 +511,9 @@ def main(argv=None) -> int:
                           + record_constraints_argv(m, RUN_DIR_TOKEN, args.record_constraints) for m in modes},
                          indent=1))
         print(json.dumps(client_argv("<run>", 0, args) + oracle_client_argv("vla_v11ab", args)))
+        if any(oracle_segmentation_required(m, args) for m in modes):   # SL-GTTO (off: no line)
+            print(json.dumps({"client_argv_by_mode": {m: gt_oracle_client_argv(m, args, client_argv("<run>", 0, args))
+                                                      for m in modes}}))
         print(json.dumps({"protocol": protocol_settings(args), "runtime_schedule": runtime_schedule(args)}, default=str))
         return 0
     if gpu_lock_held_by_caller():

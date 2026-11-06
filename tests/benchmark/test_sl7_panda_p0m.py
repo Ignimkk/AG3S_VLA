@@ -227,8 +227,9 @@ def test_ported_and_still_refused_dests():
                "surface_crease_reattach_ratio", "surface_memory_target_sticky", "surface_reattach_hull",
                "target_vacancy_release", "grasp_corridor_allow", "grasp_set_to", "hsr_gt_stage", "hsr5",
                "hsr6_objective_window", "support_surface_offset_mm",
-               "subtask_from_phase_machine", "fm_guide", "robot_mask", "oracle_extent_identity",
-               "oracle_max_dist_voxels", "hybrid_identity", "hybrid_other_exclude_voxels", "target_free_coarse")
+               "subtask_from_phase_machine", "fm_guide", "robot_mask",
+               # SL-GTTO ported oracle_extent_identity / oracle_max_dist_voxels (tests/benchmark/test_sl_gtto_*.py)
+               "hybrid_identity", "hybrid_other_exclude_voxels", "target_free_coarse")
     dests = {a.dest for a in ss.build_parser()._actions}
     for d in ported:
         assert d in dests and d in ps.PORTED_FINAL_CONFIG_DESTS and d not in ps.UNPORTED_FINAL_CONFIG_DESTS, d
@@ -248,7 +249,7 @@ def test_p0m_passes_check_unported_flags_without_a_probe(version, gpu_ok):
     ("surface_split", True), ("surface_crease_cut", True), ("surface_memory_target_sticky", True),
     ("hsr_gt_stage", True), ("subtask_from_phase_machine", True),
     ("robot_mask", "render"), ("target_free_coarse", True), ("grasp_corridor_allow", True),
-    ("target_extent", "attention-surface-hybrid")])   # SL12: oracle-visible is ported (test_sl12_oracle_panda.py)
+    ("target_extent", "attention-surface-hybrid")])   # SL12 / SL-GTTO: oracle-visible is ported (test_sl12_oracle_panda.py, test_sl_gtto_*.py)
 def test_p0m_still_refuses_what_is_not_ported(dest, value, gpu_ok):
     from AG3S.adapters.panda import server as ps
 

@@ -396,3 +396,11 @@ Step 4 종료 시점의 다음 구성 작업은 Step 5: 공식 template과 manus
 - 참고문헌 21편 추가 (유사 논문 KNOWS · VLSA 의 참고문헌 구성 참고, 고전 포함): RT-1, RT-2, OpenVLA, Octo, Grounding DINO, SAM, DINO, normalized cuts, Felzenszwalb graph segmentation, random walker, local-global consistency, Khatib potential field, CHOMP, TrajOpt, CBF (Ames 2019), Voxblox, MoveIt, VoxPoser, ReKep, SafeVLA, LIBERO. 서지는 모두 1차 기록 (Crossref DOI, PMLR v229 · v270 목록, NeurIPS 목록, JOSER 사본) 과 대조. 기존 nvblox · Curless 1996 · YOLOE 를 본문에서 인용하도록 연결.
 - Contemporaneous 확인: agarwal2026multilink (v1 2026-09-30), guo2026nudge (v1 2026-09-28) 는 2026-09-15 이후 → 인용 · 논의로 충분.
 - 빌드: BUILD_PASS, overfull 0, 미정의 참조 0, BibTeX 경고 0.
+
+## 2026-11-04 19:50–20:05 KST — E1 baseline R 수집 protocol 초안 (`/cvpr-experiment`)
+
+- 입력: `AG3S-VLA_CVPR2027_Experimental_Design.md`, `SOTA_COMPARISON_KO.md`, `AG3S-VLA_EXPERIMENT_RESULTS_KO.md` (commit `89b42459`), `papers/` PDF.
+- 산출: `paper/experiments/configs/E1_SAFELIBERO_LIBEROSAFETY_BASELINE_PROTOCOL_20261104_KO.md` (`PLANNED`), `EXPERIMENTS.md` 계획 표에 P007 · P008 추가. **실험은 실행하지 않았다**(CPU `--dry-run`만).
+- 확인한 것: 공식 `main_aegis.py`의 horizon은 policy 300 / 550 step + wait 20 (harness `--safelibero-step-budget main_aegis`와 같음; 기존 dev run의 기본값 `total_incl_wait`는 280 / 530). 기존 baseline 기록(BL-7 · BL-11 · BL-13 · SL7 D13)은 dev split 또는 비공식 조건이라 E1 R 칸에 넣지 않는다. SafeDojo · SafeVLA · WMPO는 π0.5 harness에서 실행 불가 → P only. LIBERO-Safety 원문 비교는 `pi05_libero_safety`(이 기계에 없음) · controller · cost 문제 해결 전 불가.
+- 문헌 표 점검: SafeDojo Table 1–2와 LIBERO-Safety Table 3 L2 값은 PDF와 일치. `SOTA_COMPARISON_KO.md` §1에 Level II WMPO 행 누락(수정하지 않고 보고만 함). VLSA Table I의 OFT full-action 평균 CAR 5.7 %는 표 내부 불일치.
+- 등록 형식 문제: manifest schema는 16-D 전용이라 Panda 7-D run을 등록할 수 없다(별도 형식 TBD).

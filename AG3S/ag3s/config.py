@@ -418,6 +418,38 @@ class ClusteringConfig:
     identity_attention_release: int | None = None
     identity_attention_off_frac: float = 0.7
     identity_attention_radius: float = 0.015
+    # --- SL-GTTO — begin
+    #: **SL-GTTO — what grounding clusters** (default `"attention"` = the attention cloud, bit-identical).
+    #: `"oracle"` = the GT grounding of task SL-GTTO §2-1: `ground_target` sees only the fused points whose every
+    #: labelled observation has code 1 (the GT target) in **this** request's simulator code images
+    #: (`wire.ORACLE_SEG`, `AG3S.set_oracle_segmentation`), at attention 1.0; every other point is out of
+    #: connectivity, so clustering cannot grow into a neighbour touching the target. No code-1 point this request
+    #: (or no segmentation) = grounding sees no geometry (`TargetConfirm` keeps / ages its last geometry as usual).
+    #: The segmentation is only stored with `esdf.target_extent == "oracle_visible"` (the server refuses the
+    #: option without it). Record: `metrics["grounding_source"]` (only when `"oracle"`).
+    grounding_source: str = "attention"
+    # --- SL-GTTO — end
+    # --- SL-GTTO2 — begin
+    #: **SL-GTTO2 F1 — the GT cluster is not refused by admissibility** (default False = bit-identical; only with
+    #: `grounding_source == "oracle"`). The GT says which points are the target, so `TargetConfirm`'s inference
+    #: rules that keep a wrong cluster from becoming the manipulated object (T26 graspable / destination, T43 T 3(c)
+    #: support) do not refuse it: the per-cluster evidence is still computed and recorded
+    #: (`metrics["grounding_source"]["admissibility_would_refuse"]`), the destination registry does not register a
+    #: GT cluster (every GT cluster is the target), and `AG3S._exclusion_gate` records instead of refusing
+    #: (`exclusion_gate_would_refuse`). Measured need (SL-GTTO2.impl.md ①): LIBERO t4e0 / t9e0, SafeLIBERO t3e0–e4
+    #: — every call refused by `not_supported` (bowl in the drawer / on the cabinet, bottom 143–234 mm above the
+    #: fitted table plane; narrowest 36–61 mm ≤ 78 mm, no destination).
+    oracle_admissible: bool = False
+    #: **SL-GTTO2 F2 — the held GT target's own pixels are never obstacle evidence** (default False = bit-identical;
+    #: only with `grounding_source == "oracle"`). While a grasp is active (closing) or an object is attached, every
+    #: pixel this request's code image labels the GT target (code 1) is added to that camera's TSDF depth mask (the
+    #: self-filter mask: masked = not integrated), so the held object adds no surface — and no truncation band behind
+    #: it — to the field the attached spheres and the hand are checked against. The fused cloud (grounding) is not
+    #: changed. Record: `metrics["grounding_source"]["held_target_mask"]`. Measured need (SL-GTTO2.impl.md ②):
+    #: LIBERO t0e0 seq 29 / 32 and SafeLIBERO t1e1 seq 12 / 13 — the `attached_point` rows sit inside the 60 mm
+    #: TSDF band behind code-1 pixels the self-filter left unmasked (held: 40–160 px/frame; closing: thousands).
+    oracle_held_target: bool = False
+    # --- SL-GTTO2 — end
     #: **T43 T 3(b) — release an identity the exclusion gate keeps refusing.** An integer N = when
     #: `AG3S._exclusion_gate` refuses the manipulated object because it overlaps the destination on
     #: N consecutive grounding calls (and nothing is frozen), the identity is let go at the start of
@@ -479,6 +511,7 @@ class ClusteringConfig:
     peak_scale: float = 0.10
 
     METHODS = ("dbscan", "region_growing")
+    GROUNDING_SOURCES = ("attention", "oracle")   # SL-GTTO
 
     def validate(self) -> None:
         if self.method not in self.METHODS:
@@ -624,6 +657,16 @@ class ClusteringConfig:
                                          and float(rad) > 0.0):
             raise AG3SConfigError(
                 f"clustering.identity_attention_radius must be a finite length > 0 in metres, got {rad!r}")
+        if self.grounding_source not in self.GROUNDING_SOURCES:   # SL-GTTO
+            raise AG3SConfigError(f"clustering.grounding_source must be one of {self.GROUNDING_SOURCES}, "
+                                  f"got {self.grounding_source!r}")
+        for name in ("oracle_admissible", "oracle_held_target"):   # SL-GTTO2
+            value = getattr(self, name)
+            if not isinstance(value, bool):
+                raise AG3SConfigError(f"clustering.{name} must be true or false, got {value!r}")
+            if value and self.grounding_source != "oracle":
+                raise AG3SConfigError(f"clustering.{name} needs clustering.grounding_source == 'oracle' "
+                                      f"(the GT says which points are the target), got {self.grounding_source!r}")
         if not isinstance(self.held_slip_detach, bool):
             raise AG3SConfigError(
                 f"clustering.held_slip_detach must be true or false, got {self.held_slip_detach!r}")

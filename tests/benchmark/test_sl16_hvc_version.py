@@ -34,7 +34,7 @@ DATA = pathlib.Path(__file__).resolve().parents[2] / "AG3S" / "ag3s" / "docs" / 
 def test_every_earlier_versions_server_argv_is_bit_identical():
     from AG3S.adapters.panda import profile as pf
 
-    old = {v: a for v, a in path_independent_argv(pf).items() if v not in pf.SL16_HVC_VERSIONS and v not in pf.SL16_HSC_VERSIONS}
+    old = {v: a for v, a in path_independent_argv(pf).items() if v not in pf.SL16_HVC_VERSIONS and v not in pf.SL16_HSC_VERSIONS and not pf.is_gtto_version(v)}   # 2026-11-06 merge: SL-GTTO versions came later
     assert len(old) == 69
     assert hashlib.sha256(json.dumps(old, sort_keys=True).encode()).hexdigest() == EARLIER_ARGV_SHA256
     assert not any("--hand-voxel-carve" in a for a in old.values())

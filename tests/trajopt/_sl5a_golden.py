@@ -408,7 +408,11 @@ PB_DEFAULT_OFF = {"reach_at_capture": False, "minimal_intervention_mm": None, "l
                   "hsr6_placement_contact": False,
                   # SL8b (2026-11-04): window-vote switch / attention release of the first-chosen object, default off
                   "identity_switch_window": None, "identity_switch_votes": None, "identity_attention_release": None,
-                  "identity_attention_off_frac": None, "identity_attention_radius_mm": None}
+                  "identity_attention_off_frac": None, "identity_attention_radius_mm": None,
+                  # SL-GTTO (2026-11-04): --grounding-source, default `attention` = the attention cloud as before
+                  "grounding_source": "attention",
+                  # SL-GTTO2 (2026-11-05): --oracle-admissible / --oracle-held-target, default off
+                  "oracle_admissible": False, "oracle_held_target": False}
 
 
 def _drop_sqp_default_off(cfg: dict) -> dict:

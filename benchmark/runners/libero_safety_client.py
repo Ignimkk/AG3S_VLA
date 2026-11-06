@@ -578,6 +578,7 @@ def build_parser():
                         help="default: the checkpoint's (pi05_libero -> libero_to_safety)")
     parser.add_argument("--max-steps", type=int, default=None, help="override MAX_STEPS[suite] (recorded)")
     sc.add_oracle_argument(parser)   # SL12
+    sc.add_oracle_arguments(parser)   # SL-GTTO (default off)
     return parser
 
 
@@ -596,6 +597,7 @@ def main(argv=None):
     if args.oracle_segmentation:
         args.capture_segmentation = True  # SL12: the code image is made from the geom-id segmentation
     base.check_geometry_arguments(args)
+    sc.check_oracle_arguments(args)   # SL-GTTO
     run_dir = base.validate_run_dir(args.run_dir)
     extra = {"libero_safety_env": activate_libero_safety(), "level": args.level,
              "libero_safety_protocol": protocol(), "policy_checkpoint": args.policy_checkpoint,
@@ -618,20 +620,31 @@ def main(argv=None):
         extra["oracle_segmentation"] = sc.oc.settings_record()["oracle_segmentation"]
     if args.oracle_grasp:   # SL14
         extra["oracle_grasp"] = sc.oc.grasp_settings_record()["oracle_grasp"]
+    # SL-GTTO: refuse at connect (either client path satisfies an oracle server: SL12 --oracle-segmentation / --oracle-seg)
+    _get_meta = getattr(ws, "get_server_metadata", None)   # as check_oracle_pairing: a client without metadata reads {}
+    oracle_check = sc.check_server_oracle(_get_meta() if callable(_get_meta) else {},
+                                        args.oracle_seg or args.oracle_segmentation)
 
     def policy_for(task_id, episode_idx):
+        oracle = None
+        if args.oracle_seg:   # SL-GTTO (off: SafeClient as before)
+            oracle, rec = sc.oracle_coder_for(task_suite.get_task(task_id))
+            oracle.record = dict(rec, connect=oracle_check)
         client = sc.SafeClient(ws, args.seed, task_id, episode_idx, args.replan_steps,
                                request_extra={"panda/action_adapter": str(args.action_adapter)},  # SL11: server --response-model check
                                oracle=args.oracle_segmentation,
                                oracle_info={"suite": args.task_suite_name, "task_id": task_id},
-                               oracle_grasp=args.oracle_grasp)
+                               oracle_grasp=args.oracle_grasp, gt_oracle=oracle)
         return client, connector, dict(extra)
 
     def observer_for(client, geometry, task_id, episode_idx):
         return client.observer(geometry)
 
     def after_episode(client, stem, row):
-        return {"safe_client": client.save(episodes_dir, stem)}
+        out = {"safe_client": client.save(episodes_dir, stem)}
+        if client.gt_oracle is not None:   # SL-GTTO (off: no key)
+            out["oracle_seg"] = sc.oracle_record(client.gt_oracle, client.gt_oracle.record)
+        return out
 
     with jsonl:
         errors = run_tasks(args, run_dir, jsonl, task_suite, max_steps, policy_for,

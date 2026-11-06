@@ -75,6 +75,14 @@ class TrajectoryOptimizer:
     budget is per step and fixed rather than per scene — see `linearize`.
     """
 
+    #: SL-GTTO9 (F7) — the action-space QP. ``ee_action_map`` = ``{"M": (H*nq, H*m), "a_ref": (H, m)}`` set by the robot
+    #: adapter before each request (Panda: ``action.ee_action_map``); ``None`` (default) = the joint-space SQP as before.
+    #: ``last_ee_action`` = what the action QP returned on the last request (read by the adapter), else ``None``.
+    ee_action_map = None
+    last_ee_action = None
+    ee_action_iterations = 4
+    ee_action_slack_weight = 1.0e6
+
     def __init__(
         self,
         robot_model,
@@ -1048,6 +1056,13 @@ class TrajectoryOptimizer:
                     reference, q_now, scene, template, reference_violation, previous_chunk, notes, started,
                     geometry_certified, envelope, passthrough_record)
         # --- T88 — end ---
+        # --- SL-GTTO9 (F7) — begin: the action-space QP instead of the joint-space SQP (adapter-supplied map) ---
+        self.last_ee_action = None
+        if (self.ee_action_map is not None and initial_iterate is None
+                and np.shape(self.ee_action_map["M"])[0] == reference.size):
+            return self._solve_ee_action(reference, q_now, scene, template, reference_violation, previous_chunk,
+                                         notes, started, geometry_certified, passthrough_record)
+        # --- SL-GTTO9 — end ---
         # Forward kinematics for a whole chunk is the most expensive thing left in the loop, so each
         # trajectory's sphere states are computed once and carried: the iterate's states feed both
         # the linearization and its merit, and an accepted candidate hands its states to the next
@@ -1331,8 +1346,10 @@ class TrajectoryOptimizer:
             record["reason"] = "collision"
         elif self.path is not None and self._path_violation(reference, scene) > 0.0:
             record["reason"] = "path"
-        elif max(self._limit_overshoot(reference, q_now, envelope).values()) > _LIMIT_TOLERANCE:
+        elif max((over := self._limit_overshoot(reference, q_now, envelope)).values()) > _LIMIT_TOLERANCE:
             record["reason"] = "limit"
+            # SL-GTTO6 (record only): which limit the reference overshoots, and by how much
+            record["limit_overshoot"] = {k: round(float(v), 6) for k, v in over.items() if v > _LIMIT_TOLERANCE}
         else:
             record.update(applied=True, reason="clear")
         return record["applied"], record
@@ -1359,6 +1376,78 @@ class TrajectoryOptimizer:
         result.metrics["passthrough_clear"] = record
         return result
     # --- T88 — end ---
+
+    def _solve_ee_action(self, reference, q_now, scene, template, reference_violation, previous_chunk, notes,
+                         started, geometry_certified, passthrough_record) -> TrajOptResult:
+        """SL-GTTO9 (F7) — ``min ||Da||^2`` over the policy's own action rows (the VLA safety-filter form), subject to
+        the same linearized collision rows as the SQP (``value + grad . Dq_k + s >= backoff``, ``Dq = M Da``) and the
+        action box ``-1 <= a_ref + Da <= 1``; slack is penalised (``ee_action_slack_weight``) so the QP always solves.
+        Re-linearized ``ee_action_iterations`` times at ``reference + M Da``. The returned trajectory goes through the
+        same ``_finish`` (final check on the real geometry, status, records) as an SQP result."""
+        import osqp
+        import scipy.sparse as sp
+
+        cfg = self.config
+        amap = self.ee_action_map
+        M = np.asarray(amap["M"], np.float64)
+        a_ref = np.asarray(amap["a_ref"], np.float64)
+        nq, H = reference.shape
+        n_x = a_ref.size
+        if M.shape != (H * nq, n_x):
+            raise ValueError(f"ee_action_map M {M.shape} does not match the chunk ({H * nq}, {n_x})")
+        lo_x = (-1.0 - a_ref).reshape(-1)
+        hi_x = (1.0 - a_ref).reshape(-1)
+        x = np.zeros(n_x)
+        backoff = float(cfg.reduction.linearization_backoff)
+        trajectory = np.array(reference, np.float64)
+        rec = {"iterations": 0, "rows": [], "status": [], "slack_max_m": 0.0}
+        it = 0
+        for it in range(1, int(self.ee_action_iterations) + 1):
+            rows = self.linearizer.linearize(trajectory, q_now, scene, cfg)
+            used = rows.used & np.isfinite(rows.value)
+            ks, rs = np.nonzero(used)
+            rec["rows"].append(int(ks.size))
+            if ks.size == 0:
+                break
+            G = np.einsum("nj,njx->nx", rows.gradient[ks, rs],
+                          M.reshape(H, nq, n_x)[ks])                        # (n, n_x)
+            b = backoff - rows.value[ks, rs] + G @ x
+            n = ks.size
+            P = sp.block_diag([sp.identity(n_x), sp.identity(n) * 1e-6], format="csc")
+            q = np.concatenate([np.zeros(n_x), np.full(n, float(self.ee_action_slack_weight))])
+            A = sp.vstack([sp.hstack([sp.csc_matrix(G), sp.identity(n)]),
+                           sp.hstack([sp.identity(n_x), sp.csc_matrix((n_x, n))]),
+                           sp.hstack([sp.csc_matrix((n, n_x)), sp.identity(n)])], format="csc")
+            lo = np.concatenate([b, lo_x, np.zeros(n)])
+            hi = np.concatenate([np.full(n, np.inf), hi_x, np.full(n, np.inf)])
+            solver = osqp.OSQP(algebra="builtin")
+            solver.setup(P=P, q=q, A=A, l=lo, u=hi, verbose=False, eps_abs=1e-6, eps_rel=1e-6, max_iter=20000,
+                         polishing=True)
+            res = solver.solve()
+            status = str(getattr(res.info, "status", ""))
+            rec["status"].append(status)
+            if res.x is None or not np.all(np.isfinite(res.x[:n_x])):
+                notes.append(f"F7 action QP: solver returned no solution ({status}); keeping the last iterate")
+                break
+            x = np.clip(res.x[:n_x], lo_x, hi_x)
+            rec["slack_max_m"] = float(max(0.0, np.max(res.x[n_x:], initial=0.0)))
+            trajectory = np.array(reference, np.float64) + (M @ x).reshape(H, nq).T
+            if rec["slack_max_m"] <= 1e-6 and it >= 2 and self.linearizer.full_violation(
+                    trajectory, q_now, scene) <= cfg.safety.violation_tolerance:
+                break
+        rec["iterations"] = it
+        da = x.reshape(a_ref.shape)
+        rec["max_abs_delta_action"] = float(np.max(np.abs(da), initial=0.0))
+        rec["saturated_components"] = int(np.sum(np.isclose(np.abs(a_ref + da), 1.0, atol=1e-9)
+                                                 & (np.abs(da) > 1e-9)))
+        notes.append(f"F7 action QP: {it} linearization(s), max |Da| {rec['max_abs_delta_action']:.3f}")
+        result = self._finish(trajectory, reference, q_now, scene, template, it, rec["slack_max_m"],
+                              reference_violation, previous_chunk, notes, started, geometry_certified)
+        result.metrics["ee_action_qp"] = rec
+        if passthrough_record is not None:
+            result.metrics["passthrough_clear"] = passthrough_record
+        self.last_ee_action = {"delta_action": da.copy(), "trajectory": trajectory.copy()}
+        return result
 
     def _seed_is_aligned(self, continuity) -> bool:
         """T43 TP (`warm_start_lookahead`) — is shifting the last plan by `execution_length` this

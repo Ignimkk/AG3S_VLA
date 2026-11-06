@@ -712,12 +712,144 @@ def needs_oracle_grasp(version: str) -> bool:
     return "--oracle-latch" in AG3S_VERSIONS.get(str(version), ())
 
 
+def is_gtto_version(version: str) -> bool:
+    """SL-GTTO (2026-11-06 merge): one of the common-TO GT-perception versions (``GT_VERSIONS`` ... ``GT9_VERSIONS``). They
+    run ``--target-extent oracle-visible`` with their own client path (``--oracle-seg``, ``gtto_oracle_codes.py``), so the SL12
+    client path (:func:`needs_oracle_segmentation`) leaves them out and :func:`version_requires_oracle_segmentation` takes them."""
+    return str(version) in (GT_VERSIONS + GT2_VERSIONS + GT3_VERSIONS + GT4_VERSIONS + GT5_VERSIONS + GT6_VERSIONS
+                            + GT7_VERSIONS + GT8_VERSIONS + GT9_VERSIONS)
+
+
 def needs_oracle_segmentation(version: str) -> bool:
-    """SL12: whether the version's server runs ``--target-extent oracle-visible`` (the client must send the GT code image)."""
+    """SL12: whether the version's server runs ``--target-extent oracle-visible`` (the client must send the GT code image).
+    The SL-GTTO versions are not SL12 ones (:func:`is_gtto_version`; their client flag is ``--oracle-seg``)."""
+    if is_gtto_version(version):
+        return False
     flags = AG3S_VERSIONS.get(str(version), ())
     return "--target-extent" in flags and flags[list(flags).index("--target-extent") + 1] == "oracle-visible"
 
 
+# --- SL-GTTO — begin: the common TO with GT perception (task SL-GTTO, lead 2026-11-04; flag table: SL-GTTO.impl.md) ----
+#: The common TO candidate (task §1) = the Panda final flags (:data:`FINAL_CONFIG_FLAGS`) minus every AG3S-perception
+#: flag (attention source / attention split / split-supersedes-anchor / non-target evidence), minus the HSR6 rules (no
+#: probe), minus TrajOpt multi-seed (E0), minus the D1 neighbour allowances; plus the grasp handling of pc판 / P0m
+#: (:data:`P0M_PANDA_FIX_FLAGS`, :data:`P0M_SUBTASK_FLAGS`); plus the GT perception (task §2): the visible-target
+#: oracle extent with the GT identity and the GT grounding input. Every other flag keeps the final version's value
+#: (ambiguous -> base value, task §1).
+GT_REMOVED_FLAGS: dict[str, int] = {      # flag -> number of value tokens
+    # AG3S perception (identity / extent from attention): replaced by the GT perception below
+    "--attention-source": 1, "--attention-split-radius-mm": 1, "--attention-split-ratio-source": 1,
+    "--attention-split-partition": 0, "--split-supersedes-anchor": 0, "--nontarget-evidence": 1,
+    # HSR6 rules (no probe)
+    "--hsr6-attach-assist": 0, "--hsr6-held-gate": 0, "--hsr6-target-exempt": 0, "--hsr6-objective": 0,
+    "--hsr6-objective-scope": 1,
+    # TrajOpt multi-seed (E0: one VLA chunk as the seed)
+    "--to-multi-seed": 1, "--to-gpu-seeds": 1, "--to-gpu-seeds-check": 1,
+    # scene relaxations (D1)
+    "--neighbour-contact-mm": 1, "--neighbour-palm-contact-mm": 1}
+#: GT perception (task §2): the fine target-free layer from the GT code images (T46e, identity = the GT target) and the
+#: grounding input = this request's code-1 points (``clustering.grounding_source = oracle``).
+GT_PERCEPTION_FLAGS: tuple[str, ...] = ("--target-extent", "oracle-visible", "--oracle-extent-identity", "gt",
+                                        "--grounding-source", "oracle")
+COMMONTO_GT_FLAGS: tuple[str, ...] = (_drop_flags(FINAL_CONFIG_FLAGS, GT_REMOVED_FLAGS) + P0M_PANDA_FIX_FLAGS
+                                      + P0M_SUBTASK_FLAGS + GT_PERCEPTION_FLAGS)
+#: Final-configuration base argv, no HSR6 probe, no ``--attention-source`` per run (no ATS in the grounding).
+GT_VERSIONS: tuple[str, ...] = ("AG3S-commonto-gt", "AG3S-commonto-gt-pass")
+AG3S_VERSIONS["AG3S-commonto-gt"] = COMMONTO_GT_FLAGS                              # main version (task §5)
+AG3S_VERSIONS["AG3S-commonto-gt-pass"] = COMMONTO_GT_FLAGS + P0M_PASS_FLAGS        # + pass-through when clear (T88)
+
+
+def version_requires_oracle_segmentation(version: str) -> bool:
+    """SL-GTTO — the version's server needs the client's GT code images (``--target-extent oracle-visible``: the
+    server metadata says ``oracle_segmentation_required``); the launchers then pass ``--oracle-seg
+    --capture-segmentation`` to the client."""
+    if not is_gtto_version(version):   # 2026-11-06 merge: the SL12 / SL13 oracle versions use --oracle-segmentation
+        return False
+    flags = list(AG3S_VERSIONS.get(str(version), ()))
+    return any(flags[i] == "--target-extent" and flags[i + 1] == "oracle-visible" for i in range(len(flags) - 1))
+# --- SL-GTTO — end
+# --- SL-GTTO2 — begin: the GT identity / extent reaches the TO (task SL-GTTO2 §1, lead 2026-11-05) ----------------------
+#: F1 ``--oracle-admissible``: the GT cluster is not refused by TargetConfirm admissibility / the exclusion gate
+#: (recorded only); F2 ``--oracle-held-target``: while closing / held, the GT target's pixels are masked out of the TSDF.
+GT2_FLAGS: tuple[str, ...] = ("--oracle-admissible", "--oracle-held-target")
+#: Same base argv and per-run rules as :data:`GT_VERSIONS` (kept apart so their recorded flag keys stay as they were).
+GT2_VERSIONS: tuple[str, ...] = ("AG3S-commonto-gt2",)
+AG3S_VERSIONS["AG3S-commonto-gt2"] = COMMONTO_GT_FLAGS + GT2_FLAGS                   # SL-GTTO2 main version
+# --- SL-GTTO2 — end
+# --- SL-GTTO3 — begin: TrajOpt-side variants of the GT2 version (lead self-ruling G26, 2026-11-05 03:5x KST) ----------
+#: gt2 smoke: once the TrajOpt bends the VLA path (reference deviation >= 0.05), conversion C saturates (median max
+#: |correction| 3.9 at 0.05-0.2, 12.3 at >= 0.2) -- in held / placed and, with F1, latched calls. SL7b ruled the TO out
+#: under P0m only because P0m's perception blocked first; the same two TO changes are tried here on the GT2 version.
+#: (termsoff) the continuity / deflection-rate terms off in every phase (as 3판 SL6-E / SL7b (c)); (pass) VLA chunk
+#: through untouched when it has no violation (T88, SL7b (d)); (termsoff-pass) both.
+_AFTER_GRASP_TERMS = ("--continuity-after-grasp", "--deflection-rate-after-grasp")
+GT3_TERMSOFF_FLAGS: tuple[str, ...] = (tuple(t for t in COMMONTO_GT_FLAGS + GT2_FLAGS if t not in _AFTER_GRASP_TERMS)
+                                       + CONTINUITY_DEFLECTION_OFF_FLAGS)
+GT3_VERSIONS: tuple[str, ...] = ("AG3S-commonto-gt2-termsoff", "AG3S-commonto-gt2-pass",
+                                 "AG3S-commonto-gt2-termsoff-pass")
+AG3S_VERSIONS["AG3S-commonto-gt2-termsoff"] = GT3_TERMSOFF_FLAGS
+AG3S_VERSIONS["AG3S-commonto-gt2-pass"] = COMMONTO_GT_FLAGS + GT2_FLAGS + P0M_PASS_FLAGS
+AG3S_VERSIONS["AG3S-commonto-gt2-termsoff-pass"] = GT3_TERMSOFF_FLAGS + P0M_PASS_FLAGS
+del _AFTER_GRASP_TERMS
+# --- SL-GTTO3 — end
+# --- SL-GTTO4 — begin: the held object may rest on what is beneath it (lead self-ruling G29, 2026-11-05 07:3x KST) ------
+#: gt2 30 scenes: in held calls the VLA reference brings the attached held model's bottom within 15 mm of the support
+#: plane in most calls, and the TO deviation there is 3-10x the other held calls (median 0.18-0.29 vs 0.02-0.06); the
+#: model's bottom sits 15-100 mm below the true object's (sim). F3 ``--held-beneath-contact`` = SL6-H's placement-contact
+#: rule on the grasp latch alone (HELD + attached), no HSR6 phase.
+GT4_FLAGS: tuple[str, ...] = ("--held-beneath-contact",)
+GT4_VERSIONS: tuple[str, ...] = ("AG3S-commonto-gt2-hbc", "AG3S-commonto-gt2-termsoff-hbc",
+                                 "AG3S-commonto-gt2-termsoff-pass-hbc")
+AG3S_VERSIONS["AG3S-commonto-gt2-hbc"] = COMMONTO_GT_FLAGS + GT2_FLAGS + GT4_FLAGS
+AG3S_VERSIONS["AG3S-commonto-gt2-termsoff-hbc"] = GT3_TERMSOFF_FLAGS + GT4_FLAGS
+#: G31 (07:4x): + the SL-GTTO3 winner (termsoff-pass, LIBERO 4/9) with F3, added before any F3 result.
+AG3S_VERSIONS["AG3S-commonto-gt2-termsoff-pass-hbc"] = GT3_TERMSOFF_FLAGS + P0M_PASS_FLAGS + GT4_FLAGS
+# --- SL-GTTO4 — end
+# --- SL-GTTO5 — begin: minimal-intervention common TO + final-approach release (user ruling 2026-11-05 ~09:3x) -------
+#: Base = gt2-termsoff-pass (no continuity / deflection-rate terms, VLA chunk through untouched when clear: the
+#: literature's min-norm safety filters, SL-GTTO3 best 4/9). F4 ``--grasp-zone-release``: LATCHED / CLOSING hand rows
+#: within the grasp zone radius (100 mm, horizontal) of the manipulated object are released (cuRobo plan_grasp).
+GT5_FLAGS: tuple[str, ...] = ("--grasp-zone-release",)
+GT5_VERSIONS: tuple[str, ...] = ("AG3S-commonto-gt2-termsoff-pass-zr",)
+AG3S_VERSIONS["AG3S-commonto-gt2-termsoff-pass-zr"] = GT3_TERMSOFF_FLAGS + P0M_PASS_FLAGS + GT5_FLAGS
+# --- SL-GTTO5 — end
+# --- SL-GTTO6 — begin: occluded_target frames certified for the TO (lead self-ruling G40, 2026-11-05 11:0x KST) -------
+#: gt5zr LIBERO 9: in HELD calls the pass-through was refused 67x for "geometry not certified" (6 collision, 6 limit):
+#: the held bowl is hidden by the hand (no_cluster), which the verdict executes as occluded_target. F5
+#: ``--occluded-certify`` gives the TO the verdict's reading.
+GT6_FLAGS: tuple[str, ...] = ("--occluded-certify",)
+GT6_VERSIONS: tuple[str, ...] = ("AG3S-commonto-gt2-termsoff-pass-zr-oc",)
+AG3S_VERSIONS["AG3S-commonto-gt2-termsoff-pass-zr-oc"] = GT3_TERMSOFF_FLAGS + P0M_PASS_FLAGS + GT5_FLAGS + GT6_FLAGS
+#: G42 (11:5x): zr-oc held pass-through refusals are now collision 32 / limit 14 (the held model's rows, HOLD rows
+#: `attached_point`) -> + F3 ``--held-beneath-contact`` (SL-GTTO4) so that a held row on the surface beneath can pass.
+GT6_VERSIONS = GT6_VERSIONS + ("AG3S-commonto-gt2-termsoff-pass-zr-oc-hbc",)
+AG3S_VERSIONS["AG3S-commonto-gt2-termsoff-pass-zr-oc-hbc"] = (GT3_TERMSOFF_FLAGS + P0M_PASS_FLAGS + GT5_FLAGS + GT6_FLAGS
+                                                              + GT4_FLAGS)
+# --- SL-GTTO6 — end
+# --- SL-GTTO7 — begin: the grasping hand's rows join the held-beneath rule (lead self-ruling G44, 2026-11-05 12:3x) --
+#: zr-oc-hbc LIBERO 9: held HOLD rows are the held object (attached_point) and the hand / fingers on a surface that is
+#: not the held object (nearest_is_not_manipulated) -- placing brings the fingers down onto the plate / support.
+GT7_FLAGS: tuple[str, ...] = ("--held-beneath-hand",)
+GT7_VERSIONS: tuple[str, ...] = ("AG3S-commonto-gt2-termsoff-pass-zr-oc-hbch",)
+AG3S_VERSIONS["AG3S-commonto-gt2-termsoff-pass-zr-oc-hbch"] = (GT3_TERMSOFF_FLAGS + P0M_PASS_FLAGS + GT5_FLAGS
+                                                               + GT6_FLAGS + GT4_FLAGS + GT7_FLAGS)
+# --- SL-GTTO7 — end
+# --- SL-GTTO8 — begin: let the SQP converge when it does intervene (lead self-ruling G45, 2026-11-05 14:0x) --
+#: gt8hand / zr: every call whose pass-through is refused for a collision stops on the 3-iteration cap (100 %); the
+#: refined path then moves 2-3x the reference violation (median) and conversion C saturates 60-95 % of rows. F6 runs the
+#: SQP to 8 iterations (min = max, so the 50 ms wall-clock budget cannot stop it earlier) on the zr version.
+GT8_FLAGS: tuple[str, ...] = ("--sqp-min-iterations", "8", "--sqp-max-iterations", "8")
+GT8_VERSIONS: tuple[str, ...] = ("AG3S-commonto-gt2-termsoff-pass-zr-it8",)
+AG3S_VERSIONS["AG3S-commonto-gt2-termsoff-pass-zr-it8"] = GT3_TERMSOFF_FLAGS + P0M_PASS_FLAGS + GT5_FLAGS + GT8_FLAGS
+# --- SL-GTTO8 — end
+# --- SL-GTTO9 — begin: the TO in the policy's action space (lead self-ruling G47, 2026-11-05 17:4x) --
+#: F3 / F3b / F5 / F6 changed which rows bind or how long the SQP runs and none moved success; what every intervening call
+#: shares is a correction 2-3x the violation that conversion C cannot realise (beta 0.071: 3.6 mm of path per unit action
+#: in one step). F7 ``--ee-action-qp``: min ||Da||^2 over the OSC action rows with the response model in the map, on zr.
+GT9_FLAGS: tuple[str, ...] = ("--ee-action-qp",)
+GT9_VERSIONS: tuple[str, ...] = ("AG3S-commonto-gt2-termsoff-pass-zr-ee",)
+AG3S_VERSIONS["AG3S-commonto-gt2-termsoff-pass-zr-ee"] = GT3_TERMSOFF_FLAGS + P0M_PASS_FLAGS + GT5_FLAGS + GT9_FLAGS
+# --- SL-GTTO9 — end
 #: SL6-B B4 — the Panda HSR6 probe (5 classes, no retreat; labels approved by the user 2026-10-29), the default
 #: ``--hsr6-probe`` of the final versions, and its SHA-256 (recorded by the server, checked by the test when present).
 #: SL7 (0.7): found under the shared storage root (``AG3S_STORAGE_ROOT``, default the checkout's sibling
@@ -739,7 +871,12 @@ def is_final_version(version: str) -> bool:
             or str(version) in SL12_VERSIONS or str(version) in SL13_VERSIONS   # SL12 / SL13
             or str(version) in SL14_VERSIONS or str(version) in SL15_NTM_VERSIONS
             or str(version) in SL15_SFHAND_VERSIONS
-            or str(version) in SL16_HSC_VERSIONS or str(version) in SL16_HVC_VERSIONS)   # SL14 / SL15 / SL16
+            or str(version) in SL16_HSC_VERSIONS or str(version) in SL16_HVC_VERSIONS   # SL14 / SL15 / SL16
+            or str(version) in GT_VERSIONS or str(version) in GT2_VERSIONS              # SL-GTTO / SL-GTTO2
+            or str(version) in GT3_VERSIONS or str(version) in GT4_VERSIONS              # SL-GTTO3 / SL-GTTO4
+            or str(version) in GT5_VERSIONS or str(version) in GT6_VERSIONS              # SL-GTTO5 / 6
+            or str(version) in GT7_VERSIONS or str(version) in GT8_VERSIONS              # SL-GTTO7 / 8
+            or str(version) in GT9_VERSIONS)                                             # SL-GTTO9
 
 
 def version_server_flags(version: str, *, hsr6_probe: Optional[str] = None,
@@ -754,6 +891,13 @@ def version_server_flags(version: str, *, hsr6_probe: Optional[str] = None,
             raise ValueError(f"{version}: --hsr6-probe / --attention-source apply to {list(FINAL_CONFIG_VERSIONS)} only")
         return flags
     base = _lsfork_base(version)   # SL11: the probe rules of X-lsfork are X's
+    if (version in GT_VERSIONS or version in GT2_VERSIONS or version in GT3_VERSIONS
+            or version in GT4_VERSIONS or version in GT5_VERSIONS or version in GT6_VERSIONS
+            or version in GT7_VERSIONS or version in GT8_VERSIONS or version in GT9_VERSIONS):   # SL-GTTO(2-9): no HSR6 rule -> no probe; GT grounding -> no cell
+        if hsr6_probe is not None or attention_source is not None:
+            raise ValueError(f"{version}: the GT-perception versions use no HSR6 rule and no ATS grounding, so "
+                             "--hsr6-probe / --attention-source have nothing to feed")
+        return flags
     if base in P0M_VERSIONS or base in P0M_SL9_VERSIONS or base in PC_NOPROBE_VERSIONS:   # SL7 / SL7e / SL9: no HSR6 rule -> no probe
         if hsr6_probe is not None:
             raise ValueError(f"{version}: the P0m versions use no HSR6 rule, so --hsr6-probe has nothing to feed")
@@ -881,6 +1025,44 @@ def version_flag_values(args: argparse.Namespace) -> dict[str, Any]:
     # SL16 HVC: the hand-voxel-carve dests join only when one is set -- the other records keep their keys
     if any(getattr(args, d, None) != parser.get_default(d) for d in sl16hvc):
         dests = sorted(set(dests) | set(sl16hvc))
+    # SL-GTTO: the GT-perception-only options join only when one is set (every earlier version's record unchanged)
+    gt = [d for d in _version_dests(GT_VERSIONS) if d not in set(dests) | set(final) | set(p0m)]
+    if any(getattr(args, d, None) != parser.get_default(d) for d in gt):
+        dests = sorted(set(dests) | set(final) | set(p0m) | set(gt))
+    # SL-GTTO2: the F1 / F2 options join only when one is set (AG3S-commonto-gt keeps its keys)
+    gt2 = [d for d in _version_dests(GT2_VERSIONS) if d not in set(dests) | set(final) | set(p0m) | set(gt)]
+    if any(getattr(args, d, None) != parser.get_default(d) for d in gt2):
+        dests = sorted(set(dests) | set(final) | set(p0m) | set(gt) | set(gt2))
+    # SL-GTTO4: the F3 option joins only when set (every earlier version's record unchanged)
+    gt4 = [d for d in _version_dests(GT4_VERSIONS) if d not in set(dests) | set(final) | set(p0m) | set(gt) | set(gt2)]
+    if any(getattr(args, d, None) != parser.get_default(d) for d in gt4):
+        dests = sorted(set(dests) | set(final) | set(p0m) | set(gt) | set(gt2) | set(gt4))
+    # SL-GTTO5: the F4 option joins only when set
+    gt5 = [d for d in _version_dests(GT5_VERSIONS)
+           if d not in set(dests) | set(final) | set(p0m) | set(gt) | set(gt2) | set(gt4)]
+    if any(getattr(args, d, None) != parser.get_default(d) for d in gt5):
+        dests = sorted(set(dests) | set(final) | set(p0m) | set(gt) | set(gt2) | set(gt4) | set(gt5))
+    # SL-GTTO6: the F5 option joins only when set
+    gt6 = [d for d in _version_dests(GT6_VERSIONS)
+           if d not in set(dests) | set(final) | set(p0m) | set(gt) | set(gt2) | set(gt4) | set(gt5)]
+    if any(getattr(args, d, None) != parser.get_default(d) for d in gt6):
+        dests = sorted(set(dests) | set(final) | set(p0m) | set(gt) | set(gt2) | set(gt4) | set(gt5) | set(gt6))
+    # SL-GTTO7: the F3b option joins only when set
+    gt7 = [d for d in _version_dests(GT7_VERSIONS)
+           if d not in set(dests) | set(final) | set(p0m) | set(gt) | set(gt2) | set(gt4) | set(gt5) | set(gt6)]
+    if any(getattr(args, d, None) != parser.get_default(d) for d in gt7):
+        dests = sorted(set(dests) | set(final) | set(p0m) | set(gt) | set(gt2) | set(gt4) | set(gt5) | set(gt6)
+                       | set(gt7))
+    # SL-GTTO8: the SQP iteration options join only when set (every earlier version's record unchanged)
+    seen8 = set(dests) | set(final) | set(p0m) | set(gt) | set(gt2) | set(gt4) | set(gt5) | set(gt6) | set(gt7)
+    gt8 = [d for d in _version_dests(GT8_VERSIONS) if d not in seen8]
+    if any(getattr(args, d, None) != parser.get_default(d) for d in gt8):
+        dests = sorted(seen8 | set(gt8))
+    # SL-GTTO9: the F7 option joins only when set
+    seen9 = set(dests) | seen8 | set(gt8)
+    gt9 = [d for d in _version_dests(GT9_VERSIONS) if d not in seen9]
+    if any(getattr(args, d, None) != parser.get_default(d) for d in gt9):
+        dests = sorted(seen9 | set(gt9))
     return {d: _jsonable(getattr(args, d, None)) for d in dests}
 
 

@@ -1183,6 +1183,18 @@ class CollisionLinearizer:
                     & auth[None, :])
             margin = np.where(zone, np.minimum(margin, -float(allowance)), margin)
             rec["zone_rows"] = int(zone.sum())
+        if gc.get("zone_release"):
+            # SL-GTTO5 F4 (cuRobo `plan_grasp` style): LATCHED / CLOSING, the grasping hand's authorized rows whose
+            # sphere centre lies within ``zone_radius`` (horizontal) of the manipulated object's centroid are released
+            # whatever their nearest surface is (target, support, wall, neighbour) -- the final approach is the VLA's.
+            # Unauthorized (arm) rows and rows outside the zone keep their margins.
+            rec["zone_release_rows"] = 0
+            if latch in ("latched", "closing") and gc.get("centroid") is not None:
+                c = np.asarray(gc["centroid"], np.float64).reshape(3)
+                horiz = np.linalg.norm(flat[:, :2] - c[None, :2], axis=1).reshape(shape)
+                rel = (horiz <= float(gc.get("zone_radius", 0.10))) & auth[None, :]
+                margin = np.where(rel, -1.0, margin)
+                rec["zone_release_rows"] = int(rel.sum())
         self._last_grasp_contact = rec
         return margin
     def _placement_contact_margin(self, pc: dict, margin: np.ndarray, d: np.ndarray, centres: np.ndarray,
@@ -1233,6 +1245,32 @@ class CollisionLinearizer:
             margin[:, n:] = np.where(sel, -1.0, block)
         rec["rows_released"] = int(sel.sum())
         rec["held_rows_released"] = int(sel.any(axis=0).sum())
+        gc = getattr(scene, "grasp_contact", None)
+        if pc.get("hand_rows") and isinstance(gc, dict) and gc.get("authorized") is not None:
+            # SL-GTTO7 F3b — the grasping hand's authorized rows (palm + fingers) get the same test: nearest surface in
+            # the downward cone and inside the held object's xy footprint (+ tol) -> −1 m. Arm rows never change.
+            a = np.asarray(gc["authorized"], bool).reshape(-1)[:n]
+            cols = np.nonzero(a)[0]
+            hand_rel = 0
+            if cols.size:
+                hc = np.asarray(centres[:, cols, :], np.float64)                   # (H, Na, 3)
+                hp = hc.reshape(-1, 3)
+                hd = np.asarray(d[:, cols], np.float64).reshape(-1)
+                hg = np.asarray(scene.esdf.gradient(hp), np.float64).reshape(-1, 3)
+                hn = np.linalg.norm(hg, axis=1)
+                hok = hn > _EPS
+                hu = np.where(hok[:, None], hg / np.maximum(hn, _EPS)[:, None], 0.0)
+                hup = hok & (hu[:, 2] >= cos_min)
+                hs = (hp - hd[:, None] * hu).reshape(horizon, cols.size, 3)
+                hgap = (np.linalg.norm(hs[:, :, None, :2] - held_c[:, None, :, :2], axis=3)
+                        - held_r[None, None, :]).min(axis=2)
+                hsel = hup.reshape(horizon, cols.size) & (hgap <= tol)
+                if hsel.any():
+                    margin = margin.copy()
+                    block = margin[:, cols]
+                    margin[:, cols] = np.where(hsel, -1.0, block)
+                hand_rel = int(hsel.sum())
+            rec["hand_rows_released"] = hand_rel
         rec["cos_min"] = round(cos_min, 6)
         rec["footprint_tol_m"] = tol
         self._last_placement_contact = rec

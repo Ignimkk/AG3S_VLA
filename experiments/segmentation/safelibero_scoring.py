@@ -10,7 +10,7 @@ import numpy as np
 from Baseline.paper_baselines import lift as L
 from Baseline.paper_baselines.eval import metrics as M
 
-RUN = Path('/mnt/dev/AG3S_VLA-storage/results/benchmark/20261017T151126_38722284e2fa_sl5f-safelibero-LI-dev-LI-vla_only')
+RUN = Path(__import__('os').environ.get('AG3S_SL_SOURCE_RUN', '/mnt/dev/AG3S_VLA-storage/results/benchmark/20261017T151126_38722284e2fa_sl5f-safelibero-LI-dev-LI-vla_only'))  # nb1104: env override, default unchanged
 CAMERAS = ('head', 'left_wrist')
 CLASSES = ('background', 'target', 'destination', 'obstacle', 'other_object', 'fixture', 'support', 'robot', 'mount')
 NEIGHBOR = ('other_object', 'destination', 'obstacle')

@@ -16,7 +16,7 @@ sys.path.insert(0, str(ROOT))
 from benchmark.runners import attention_audit as AA
 from benchmark.runners import launch_libero_pi05_only as launcher
 
-RUN = Path('/mnt/dev/AG3S_VLA-storage/results/benchmark/20261017T151126_38722284e2fa_sl5f-safelibero-LI-dev-LI-vla_only')
+RUN = Path(__import__('os').environ.get('AG3S_SL_SOURCE_RUN', '/mnt/dev/AG3S_VLA-storage/results/benchmark/20261017T151126_38722284e2fa_sl5f-safelibero-LI-dev-LI-vla_only'))  # nb1104: env override, default unchanged
 
 
 def sha(p):

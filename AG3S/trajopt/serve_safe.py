@@ -1101,6 +1101,11 @@ def t43t_identity_section(args) -> dict:
         out["latched_identity_hold"] = True
     out.update(target_vacancy_section(args))   # T81 (off: {})
     out.update(identity_rules_section(args))   # SL8b (off: {})
+    if getattr(args, "grounding_source", "attention") not in (None, "attention"):
+        out["grounding_source"] = str(args.grounding_source)   # SL-GTTO (default attention: no key)
+    for name in ("oracle_admissible", "oracle_held_target"):   # SL-GTTO2 (off: no key)
+        if getattr(args, name, False):
+            out[name] = True
     if getattr(args, "refused_identity_release", None) is not None:
         out["refused_identity_release_frames"] = int(args.refused_identity_release)
     if getattr(args, "supported_max_bottom_mm", None) is not None:
@@ -2568,6 +2573,28 @@ def build_parser() -> argparse.ArgumentParser:
                          "안의 seed 를 가장 가까운 표본이 누구든 모두 미세 target-free 층에서 지운다 (탁자에 닿는 아래쪽 seed 포함). "
                          "target 표본이 없으면 아무것도 더하지 않는다. --target-extent oracle-visible 과 함께만. RB-Y1 서버는 거절. 기본 off")
     # T46e A13 — end
+    # SL-GTTO — begin
+    ap.add_argument("--grounding-source", choices=("attention", "oracle"), default="attention",
+                    help="SL-GTTO — grounding 이 군집하는 점 (clustering.grounding_source). attention (기본) = attention "
+                         "cloud 그대로. oracle = 정답 grounding: 이 요청의 GT code 영상 (client --oracle-seg) 에서 code 1 "
+                         "(GT target) pixel 로만 올린 fused 점 (관측 전부가 code 1) 을 attention 1 로, 나머지 점은 "
+                         "연결에서 뺀다 (이웃이 target 에 닿아도 cluster 가 자라지 않는다). code 1 점이 없는 요청은 "
+                         "grounding 에 기하가 없다 (TargetConfirm 이 마지막 기하를 유지 · 나이 먹임). "
+                         "--target-extent oracle-visible 과 함께만. 기록 metrics.grounding_source")
+    # SL-GTTO — end
+    # SL-GTTO2 — begin
+    ap.add_argument("--oracle-admissible", action="store_true",
+                    help="SL-GTTO2 F1 — --grounding-source oracle 에서만. GT cluster 를 TargetConfirm admissibility "
+                         "(개도 · destination · T43 T 3(c) 지지면) 와 _exclusion_gate 재검사에서 거절하지 않는다 — 검사 결과는 "
+                         "계산해서 기록만 (metrics.grounding_source.admissibility_would_refuse · "
+                         "exclusion_gate_would_refuse). GT cluster 를 destination 으로 등록하지 않는다 "
+                         "(clustering.oracle_admissible)")
+    ap.add_argument("--oracle-held-target", action="store_true",
+                    help="SL-GTTO2 F2 — --grounding-source oracle 에서만. 파지 중 (closing) · 쥔 동안 이 요청의 code 1 "
+                         "(GT target) pixel 을 TSDF depth mask 에 더한다 (적분하지 않음) — 쥔 물체 자신의 관측이 "
+                         "attached 구 · 손 행의 장애물 (표면 + truncation band) 이 되지 않는다. fused cloud · grounding 은 "
+                         "그대로 (clustering.oracle_held_target, 기록 metrics.grounding_source.held_target_mask)")
+    # SL-GTTO2 — end
     # IFG-CL2 — begin
     ap.add_argument("--hybrid-identity", choices=("both", "instance", "centre"), default=None,
                     help="IFG-CL2 — attention-surface-hybrid 의 identity 안전장치 (기본 both: config "
@@ -3094,6 +3121,35 @@ def build_parser() -> argparse.ArgumentParser:
                     help="V11AB-pb4 (benchmark branch): while the grasp latch is HELD, the grasping hand's contact-link "
                          "rows whose nearest surface is the manipulated object are dropped (the hand cannot collide "
                          "with what it holds). Off = V11AB")
+    ap.add_argument("--occluded-certify", action="store_true",
+                    help="SL-GTTO6 F5 (benchmark branch): the TO (pass-through when clear, the solve status) reads a frame "
+                         "the verdict already executes as occluded_target (no target this frame, the rest of the geometry "
+                         "certified, the manipulated object occluded with its contact permission kept) as certified. "
+                         "The collision check is unchanged. Off = as before")
+    ap.add_argument("--ee-action-qp", action="store_true",
+                    help="SL-GTTO9 F7 (benchmark branch, --robot panda only): when the policy chunk is not passed through, "
+                         "the TO solves min ||Da||^2 over the policy's own OSC action rows (robot adapter's linear map "
+                         "Da -> joint chunk through the OSC response model and the EE Jacobian) with the same collision "
+                         "rows and the action box |a| <= 1, instead of the joint-space SQP; the server sends a_ref + Da "
+                         "(no conversion C on those rows). Final check and verdict unchanged. Off = as before")
+    ap.add_argument("--grasp-zone-release", action="store_true",
+                    help="SL-GTTO5 F4 (benchmark branch): while the grasp latch is LATCHED / CLOSING, the grasping hand's "
+                         "contact-link rows whose sphere centre lies within --grasp-zone-radius-mm (horizontal) of the "
+                         "manipulated object are released whatever surface is nearest (target, support, container wall, "
+                         "neighbour) -- cuRobo plan_grasp's final approach without hand-world collision. Arm rows and rows "
+                         "outside the zone keep their margins. Record to.grasp_contact.zone_release_rows. Off = as before")
+    ap.add_argument("--held-beneath-hand", action="store_true",
+                    help="SL-GTTO7 F3b (benchmark branch, with --held-beneath-contact): the grasping hand's contact-link "
+                         "rows (palm + fingers) get the held object's beneath test too -- nearest surface within 45 deg "
+                         "of straight down and inside the held object's xy footprint + 1 voxel -> cannot bind (placing "
+                         "lowers the fingers onto the plate / support). Arm rows and surfaces beside or above unchanged. "
+                         "Record to.held_beneath_contact.hand_rows_released. Off = as before")
+    ap.add_argument("--held-beneath-contact", action="store_true",
+                    help="SL-GTTO4 F3 (benchmark branch): while the grasp latch is HELD with an attached held object, "
+                         "SL6-H's placement-contact rule without HSR6 — the held object's own query rows whose nearest "
+                         "surface lies beneath it (gradient within 45° of up, inside its xy footprint + 1 voxel) cannot "
+                         "bind; hand / finger / arm rows and surfaces beside or above keep their margins. Record "
+                         "to.held_beneath_contact. Off = as before")
     ap.add_argument("--grasp-zone-mm", type=float, default=None, metavar="MM",
                     help="V11AB-pb5 (benchmark branch): while LATCHED / CLOSING, the hand's contact-link rows on the "
                          "target or a support plane within --grasp-zone-radius-mm (horizontal) of the manipulated "
@@ -4102,6 +4158,19 @@ def reject_bad_flag_combinations(ap: argparse.ArgumentParser, args, *, seed_map_
     if oracle_given and not oracle_on:
         ap.error(f"{', '.join(oracle_given)} 는 --target-extent oracle-visible · attention-surface 에서만 읽힙니다 — "
                  "그대로 띄우면 효과가 있었다고 믿게 됩니다")
+    # SL-GTTO — the GT grounding reads the code images the oracle extent stores (and requires from the client)
+    if getattr(args, "grounding_source", "attention") == "oracle":
+        if extent != "oracle-visible":
+            ap.error("--grounding-source oracle 는 client 의 GT code 영상을 읽습니다 — 서버가 그것을 받는 것은 "
+                     f"--target-extent oracle-visible 뿐입니다 (받은 값 {extent}); 함께 주십시오")
+        if args.no_safe or getattr(args, "no_perception", False):
+            ap.error("--grounding-source oracle 는 AG3S 의 grounding flag 입니다 (--no-safe · --no-perception 은 "
+                     "그것을 안 만듭니다)")
+    # SL-GTTO2 — the two GT flags act on the GT grounding only
+    for flag in ("oracle_admissible", "oracle_held_target"):
+        if getattr(args, flag, False) and getattr(args, "grounding_source", "attention") != "oracle":
+            ap.error(f"--{flag.replace('_', '-')} 는 --grounding-source oracle 에서만 읽힙니다 (GT 가 target 을 "
+                     "말할 때만 뜻이 있다) — 그대로 띄우면 효과가 있었다고 믿게 됩니다")
     # IFG-CL2 — begin
     if getattr(args, "hybrid_identity", None) is not None and extent != "attention-surface-hybrid":
         ap.error("--hybrid-identity 는 --target-extent attention-surface-hybrid 에서만 읽힙니다 — "
@@ -4636,6 +4705,18 @@ def apply_grasp_contact_flags(safe, args) -> dict:
     if getattr(args, "closing_hand_exempt", False):
         safe.closing_hand_exempt = True
         out["closing_hand_exempt"] = True
+    if getattr(args, "occluded_certify", False):   # SL-GTTO6 F5 (off: no key)
+        safe.occluded_certify = True
+        out["occluded_certify"] = True
+    if getattr(args, "grasp_zone_release", False):   # SL-GTTO5 F4 (off: no key)
+        safe.grasp_zone_release = True
+        out["grasp_zone_release"] = True
+    if getattr(args, "held_beneath_hand", False):   # SL-GTTO7 F3b (off: no key)
+        safe.held_beneath_hand = True
+        out["held_beneath_hand"] = True
+    if getattr(args, "held_beneath_contact", False):   # SL-GTTO4 F3 (off: no key)
+        safe.held_beneath_contact = True
+        out["held_beneath_contact"] = True
     latch_opts = {k: True for k, flag in (("reach_sticky", "grasp_reach_sticky"),
                                           ("drop_from_open", "grasp_drop_from_open")) if getattr(args, flag, False)}
     if latch_opts:

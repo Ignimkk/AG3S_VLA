@@ -528,3 +528,43 @@ def conventions() -> dict:
             "gripper": "joint-chunk column 7 = (1 - clip(a6)) / 2 (1 = open); output gripper = original a6",
             "ik": {"max_iters": IK_MAX_ITERS, "damping": IK_DAMPING, "pos_tol_m": IK_POS_TOL_M,
                    "rot_tol_rad": IK_ROT_TOL_RAD, "step_clip_rad": IK_STEP_CLIP_RAD}}
+
+
+# --- SL-GTTO9 (F7, lead self-ruling G47, 2026-11-05) — the action-space map for the EE-delta QP ---------------------
+#: Damping of the Jacobian pseudo-inverse in :func:`ee_action_map` (same order as the IK's ``IK_DAMPING``).
+EE_MAP_DAMPING = 1e-4
+
+
+def ee_action_map(kin: PandaKinematics, conv: Conversion, horizon: int, response: Optional[dict] = None) -> dict:
+    """Linear map from a change of the policy's OSC actions to the change of the joint chunk the forward conversion
+    predicts, about the reference chunk ``conv.joint_chunk``.
+
+    With the response model (``y_t = alpha y_{t-1} + beta s x_t`` per position / rotation, world frame) a change
+    ``Da_j`` of row ``j`` changes the chained EE pose at row ``k >= j`` by ``beta s (1 - alpha^(k-j+1)) / (1 - alpha)
+    Da_j``; in the base frame through ``R_bw`` and to joints through the damped pseudo-inverse of the EE Jacobian at
+    the reference row ``k``: ``Dq_k = J_k^+ R_bw DP_k``. Returns ``{"M": (H*7, H*6), "a_ref": (H, 6)}`` with ``Dq``
+    stacked step-major (``k*7 + j``) and ``Da`` step-major (``k*6 + [pos 3, rot 3]``); ``a_ref`` is the policy's
+    rows clipped to the OSC input range. First order: the safety check of the result is done on the real geometry.
+    """
+    resp = response or RESPONSE
+    (ap, bp), (ar, br) = resp["pos"], resp["rot"]
+    H = int(horizon)
+    if conv.delta.shape[0] < H or conv.joint_chunk.shape[0] < H:
+        raise ValueError(f"the conversion has {conv.delta.shape[0]} rows, the TO horizon is {H}")
+    R_bw = conv.R_world_base.T
+    Rb = np.zeros((6, 6))
+    Rb[:3, :3] = R_bw
+    Rb[3:, 3:] = R_bw
+    M = np.zeros((H * ARM_DOF, H * 6))
+    for k in range(H):
+        J = kin.jacobian(np.asarray(conv.joint_chunk[k, :ARM_DOF], np.float64))
+        Jp = J.T @ np.linalg.inv(J @ J.T + EE_MAP_DAMPING * np.eye(6))   # (7, 6)
+        A = Jp @ Rb
+        for j in range(k + 1):
+            n = k - j + 1
+            cp = bp * OSC_POS_SCALE * (1.0 - ap ** n) / (1.0 - ap)
+            cr = br * OSC_ORI_SCALE * (1.0 - ar ** n) / (1.0 - ar)
+            M[k * ARM_DOF:(k + 1) * ARM_DOF, j * 6:j * 6 + 3] = A[:, :3] * cp
+            M[k * ARM_DOF:(k + 1) * ARM_DOF, j * 6 + 3:j * 6 + 6] = A[:, 3:] * cr
+    a_ref = np.clip(np.asarray(conv.delta[:H, :6], np.float64), -OSC_INPUT_CLIP, OSC_INPUT_CLIP)
+    return {"M": M, "a_ref": a_ref}

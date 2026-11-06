@@ -208,6 +208,9 @@ def main(argv=None) -> int:
                           + lp.record_constraints_argv(m, lp.RUN_DIR_TOKEN, args.record_constraints) for m in modes},
                          indent=1))
         print(json.dumps(lp.client_argv("<run>", 0, args) + lp.oracle_client_argv("vla_v11ab", args)))   # SL12 (else unchanged)
+        if any(lp.oracle_segmentation_required(m, args) for m in modes):   # SL-GTTO (off: no line)
+            print(json.dumps({"client_argv_by_mode": {m: lp.gt_oracle_client_argv(m, args, lp.client_argv("<run>", 0, args))
+                                                      for m in modes}}))
         print(json.dumps({"run_id": args.run_id, "protocol": protocol_settings(args),
                           "runtime_schedule": runtime_schedule(args), "checkpoint": identity}, default=str))
         return 0

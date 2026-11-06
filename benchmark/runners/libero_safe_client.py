@@ -196,6 +196,65 @@ def privileged_obstacles(env, tables):
     return out
 
 
+# --- SL-GTTO: GT code images for the oracle-perception servers (``--oracle-seg``, default off) -------------------------
+#: ``--oracle-seg``: every request also carries ``ag3s/oracle_seg/<cam>`` (uint8 code image of this observation's
+#: ``segmentation_geom``, the depth pixel grid) + ``ag3s/oracle_seg_meta`` (``benchmark/adapters/libero_panda/
+#: gtto_oracle_codes.py``; target = the task's BDDL goal object). Needs ``--capture-segmentation``. A server whose
+#: metadata says ``oracle_segmentation_required`` (``--target-extent oracle-visible``) is refused at connect without it.
+
+
+def _oracle_modules():
+    root = str(ROOT)
+    if root not in sys.path:
+        sys.path.append(root)
+    from benchmark.adapters.libero_panda import gtto_oracle_codes as oracle_codes, task_target   # SL-GTTO's own table
+
+    return oracle_codes, task_target
+
+
+def add_oracle_arguments(parser):
+    parser.add_argument("--oracle-seg", action="store_true",
+                        help="SL-GTTO: send the GT code image of every camera (ag3s/oracle_seg/*; target = BDDL goal "
+                             "object) for an oracle-perception server; needs --capture-segmentation")
+    return parser
+
+
+def check_oracle_arguments(args):
+    if getattr(args, "oracle_seg", False) and not args.capture_segmentation:
+        raise ValueError("--oracle-seg builds the code image from the --capture-segmentation render; pass both")
+    if getattr(args, "oracle_seg", False) and getattr(args, "oracle_segmentation", False):
+        # 2026-11-06 merge: both client paths write ag3s/oracle_seg/<cam>; one run uses one table
+        raise ValueError("--oracle-seg (SL-GTTO) and --oracle-segmentation (SL12) both send the GT code image; pass one")
+
+
+def check_server_oracle(metadata, oracle_seg):
+    """Refuse at connect an oracle server (metadata ``oracle_segmentation_required``) without ``--oracle-seg`` (the RB-Y1
+    ``SafeRemoteClient`` rule): it would run with no GT input and the record would not say so."""
+    oc, _ = _oracle_modules()
+    required = bool((metadata or {}).get(oc.ORACLE_SEG_REQUIRED))
+    if required and not oracle_seg:
+        raise RuntimeError("the server requires the GT segmentation (metadata {}); start this client with "
+                           "--oracle-seg --capture-segmentation".format(oc.ORACLE_SEG_REQUIRED))
+    return {"server_requires": required, "client_sends": bool(oracle_seg)}
+
+
+def oracle_coder_for(task):
+    """``(OracleCoder, record)`` of a task: target by the BDDL rule of ``gtto_oracle_codes.bddl_oracle_target`` on the BDDL
+    file the env is built from (``get_libero_path("bddl_files") / problem_folder / bddl_file``)."""
+    from libero.libero import get_libero_path
+
+    oc, tt = _oracle_modules()
+    bddl = pathlib.Path(get_libero_path("bddl_files")) / task.problem_folder / task.bddl_file
+    target, objects, rec = oc.bddl_oracle_target(bddl, tt)
+    return oc.OracleCoder(target, objects, source={"rule": rec["rule"]}), rec
+
+
+def oracle_record(coder, rec):
+    """Per-episode jsonl record of the code table (after the episode: the legend comes from the env's model)."""
+    return {**rec, "codes": dict(coder.legend or {}), "table": dict(coder.info or {}),
+            "code_version": coder.meta()["version"]}
+
+
 def episode_seed(seed, task_id, episode_idx):
     """Deterministic per-episode policy seed, the same in both modes (paired)."""
     return int(seed) * 100000 + int(task_id) * 1000 + int(episode_idx)
@@ -211,7 +270,7 @@ class SafeClient(object):
     """Wraps the websocket policy client; one instance per episode (``policy_for``)."""
 
     def __init__(self, ws_client, seed, task_id, episode_idx, replan_steps, emit_privileged=False, request_extra=None,
-                 oracle=False, oracle_info=None, oracle_grasp=False):
+                 oracle=False, oracle_info=None, oracle_grasp=False, gt_oracle=None):
         self.ws = ws_client
         #: SL12 ``--oracle-segmentation`` (diagnostic, default off = no key added): the request also carries the GT code image
         #: per camera (``oracle_codes``); the labeller is made on the first observation (it needs the env's BDDL problem).
@@ -225,6 +284,9 @@ class SafeClient(object):
         self._grasp_keys = {}
         self.request_extra = dict(request_extra or {})  # SL11: extra request keys (LIBERO-Safety: panda/action_adapter)
         self.emit_privileged = bool(emit_privileged)
+        # SL-GTTO --oracle-seg: a gtto_oracle_codes.OracleCoder (None = off: no key added to any request or row). Kept apart
+        # from SL12's ``self.oracle`` (2026-11-06 merge); main() refuses both client paths at once.
+        self.gt_oracle = gt_oracle
         self.env = None                # set by the observer only with emit_privileged
         self.obstacle_tables = None
         self.seed = episode_seed(seed, task_id, episode_idx)
@@ -246,6 +308,8 @@ class SafeClient(object):
         self.camera, self.wire_pack = geometry.camera, geometry.wire_pack
 
         def observe(env, obs):
+            if self.gt_oracle is not None:
+                self.gt_oracle.prepare(env.sim.model)   # SL-GTTO: code table of this env (first frame only)
             geometry.observe(env, obs)
             if self.oracle and self.labeler is None:
                 self.labeler = oc.OracleLabeler.from_env(env, geometry.tables, **self.oracle_info)
@@ -294,6 +358,9 @@ class SafeClient(object):
             req["panda/prev_step_world"] = np.zeros(6)
         if self.emit_privileged:
             self._add_privileged(req, frames)
+        if self.gt_oracle is not None:
+            # SL-GTTO: ag3s/oracle_seg/<cam> (uint8 codes on the depth grid) + ag3s/oracle_seg_meta
+            req.update(self.gt_oracle.request_keys(frames))
         return req, rs9
 
     def _add_privileged(self, req, frames):
@@ -380,6 +447,14 @@ class SafeClient(object):
             # SL12 -- the server's oracle-extent record of this call (applied / why / identity matches GT / sample counts);
             # logging only. Absent (every version without --target-extent oracle-visible): the row keeps its keys.
             row["oracle"] = base._jsonable(resp.get("panda/oracle"))
+        if self.gt_oracle is not None:
+            # SL-GTTO — code-1 (GT target) pixels per camera of this request (logging only; off: no key)
+            row["oracle_seg"] = {k.split("/")[-1]: int(np.count_nonzero(np.asarray(v) == 1))
+                                 for k, v in req.items() if k.startswith("ag3s/oracle_seg/")}
+        if "panda/gt_perception" in resp:
+            # SL-GTTO — the server's GT-perception record of this call (grounding source, code-1 points, oracle
+            # extent applied / why); logging only. Absent (versions without it): the row keeps its keys.
+            row["gt_perception"] = base._jsonable(resp.get("panda/gt_perception"))
         if "panda/surface" in resp:
             # SL7i — the server's attention-surface record of this call (surface applied / fallback / why);
             # logging only. Absent (versions without the attention-surface extent): the row keeps its keys.
@@ -439,6 +514,7 @@ def build_parser():
                         help="SafeLIBERO only: also send ag3s/privileged/* (obstacle names, poses, geom sizes; GT "
                              "segmentation with --capture-segmentation) for the privileged baseline arms")
     add_oracle_argument(parser)
+    add_oracle_arguments(parser)   # SL-GTTO (default off)
     return parser
 
 
@@ -465,7 +541,8 @@ def check_oracle_pairing(args, ws):
         except Exception:  # noqa: BLE001 -- an unreadable metadata is not a pairing proof either way
             meta = {}
     required = bool(meta.get(oc.SERVER_REQUIRES_KEY, False))
-    if required and not args.oracle_segmentation:
+    # 2026-11-06 merge: the SL-GTTO client path (--oracle-seg, gtto_oracle_codes) also sends the code image
+    if required and not (args.oracle_segmentation or getattr(args, "oracle_seg", False)):
         raise RuntimeError("the server runs the visible-target oracle (--target-extent oracle-visible) and needs the GT code "
                            "image in every request: start the client with " + oc.CLIENT_FLAG)
     if args.oracle_segmentation and not required:
@@ -486,6 +563,7 @@ def main(argv=None):
     if args.oracle_segmentation:
         args.capture_segmentation = True  # SL12: the code image is made from the geom-id segmentation
     base.check_geometry_arguments(args)
+    check_oracle_arguments(args)   # SL-GTTO
     run_dir = base.validate_run_dir(args.run_dir)
     safelibero = args.task_suite_name in SAFELIBERO_TOTAL_STEPS
     extra = {}
@@ -528,12 +606,20 @@ def main(argv=None):
         extra["oracle_segmentation"] = oc.settings_record()["oracle_segmentation"]
     if args.oracle_grasp:   # SL14
         extra["oracle_grasp"] = oc.grasp_settings_record()["oracle_grasp"]
+    # SL-GTTO: refuse at connect (either client path satisfies an oracle server: SL12 --oracle-segmentation / --oracle-seg)
+    _get_meta = getattr(ws, "get_server_metadata", None)   # as check_oracle_pairing: a client without metadata reads {}
+    oracle_check = check_server_oracle(_get_meta() if callable(_get_meta) else {},
+                                        args.oracle_seg or args.oracle_segmentation)
 
     def policy_for(task_id, episode_idx):
+        oracle = None
+        if args.oracle_seg:   # SL-GTTO (off: SafeClient as before)
+            oracle, rec = oracle_coder_for(task_suite.get_task(task_id))
+            oracle.record = dict(rec, connect=oracle_check)
         client = SafeClient(ws, args.seed, task_id, episode_idx, args.replan_steps,
                             emit_privileged=args.emit_privileged_obstacles, oracle=args.oracle_segmentation,
                             oracle_info={"suite": args.task_suite_name, "task_id": task_id},
-                            oracle_grasp=args.oracle_grasp)
+                            oracle_grasp=args.oracle_grasp, gt_oracle=oracle)
         client.collision = CollisionMonitor(args.num_steps_wait) if safelibero else None
         return client, connector, dict(extra)
 
@@ -551,6 +637,8 @@ def main(argv=None):
         out = {"safe_client": client.save(episodes_dir, stem)}
         if client.collision is not None:
             out["safelibero"] = client.collision.record(row.get("official_success"))
+        if client.gt_oracle is not None:   # SL-GTTO (off: no key)
+            out["oracle_seg"] = oracle_record(client.gt_oracle, client.gt_oracle.record)
         return out
 
     with jsonl:
