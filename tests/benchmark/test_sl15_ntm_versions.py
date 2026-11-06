@@ -31,7 +31,7 @@ EARLIER_ARGV_SHA256 = "213654d423fcc59750a4f592a926e3a2c657798c0e0b077cd92fe8dbf
 def test_every_earlier_versions_server_argv_is_bit_identical():
     from AG3S.adapters.panda import profile as pf
 
-    old = {v: a for v, a in path_independent_argv(pf).items() if v not in pf.SL15_NTM_VERSIONS and v not in pf.SL15_SFHAND_VERSIONS}
+    old = {v: a for v, a in path_independent_argv(pf).items() if v not in pf.SL15_NTM_VERSIONS and v not in pf.SL15_SFHAND_VERSIONS and v not in pf.SL16_HVC_VERSIONS}
     assert len(old) == 66
     assert hashlib.sha256(json.dumps(old, sort_keys=True).encode()).hexdigest() == EARLIER_ARGV_SHA256
     assert not any("--nonauthorized-target-margin" in a for a in old.values())

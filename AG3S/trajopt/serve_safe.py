@@ -1388,7 +1388,22 @@ def ag3s_from_args(args, *, plan_horizon_steps, rows_per_step):
                       # V11AB-pb1 (benchmark branch) — off by default.
                       reach_at_capture=bool(getattr(args, "reach_at_capture", False)),
                       # SL10d (benchmark branch) -- off by default.
-                      held_free_query_spheres=bool(getattr(args, "held_free_query_spheres", False)))
+                      held_free_query_spheres=bool(getattr(args, "held_free_query_spheres", False)),
+                      # SL16 HVC -- off by default (None: the AG3S is as before).
+                      hand_voxel_carve=hand_voxel_carve_section(args) or None)
+
+
+#: SL16 HVC -- the `current` mode's default growth (mm): the fixed rule's cap (p90 of the hand-voxel distance 23.6 mm, capped at 20).
+HAND_VOXEL_CARVE_DEFAULT_MM = 20.0
+
+
+def hand_voxel_carve_section(args) -> dict:
+    """SL16 HVC -- `{"mode": ..., "radius_m": ...}` for `--hand-voxel-carve current|trail`, else `{}` (off, the AG3S as before)."""
+    mode = getattr(args, "hand_voxel_carve", "off") or "off"
+    if mode == "off":
+        return {}
+    mm = getattr(args, "hand_voxel_carve_mm", None)
+    return {"mode": str(mode), "radius_m": float(HAND_VOXEL_CARVE_DEFAULT_MM if mm is None else mm) / 1000.0}
 
 
 def build_ag3s(model_xml: str, *, voxel: float, range_max: float, links: str,
@@ -1415,6 +1430,7 @@ def build_ag3s(model_xml: str, *, voxel: float, range_max: float, links: str,
                held_free_observed_pad: float | None = None,
                reach_at_capture: bool = False,
                held_free_query_spheres: bool = False,
+               hand_voxel_carve: dict | None = None,
                target_exclusion: dict | None = None,
                contact: dict | None = None,
                confidence_gate=None):
@@ -1807,6 +1823,13 @@ def build_ag3s(model_xml: str, *, voxel: float, range_max: float, links: str,
         # SL10d -- the held frees also the spheres the solver is queried with (pipeline.held_free_query_spheres).
         ag3s.held_free_query_spheres = True
         logging.warning("AG3S held_free: + the spheres the solver is queried with this frame (SL10d)")
+    if hand_voxel_carve:
+        # SL16 HVC -- the fine TSDF's occupied voxels inside the hand's volume are freed (pipeline.hand_voxel_carve).
+        ag3s.hand_voxel_carve = dict(hand_voxel_carve)
+        logging.warning("AG3S hand voxel carve: mode=%s, grow=%.1f mm (the hand's self-filter spheres; not below the support plane, "
+                        "near the destination, or inside the manipulated target) (SL16 HVC)",
+                        hand_voxel_carve["mode"], 1000.0 * (AG3S.HAND_CARVE_TRAIL_M if hand_voxel_carve["mode"] == "trail"
+                                                            else float(hand_voxel_carve["radius_m"])))
     return ag3s
 
 
@@ -3111,6 +3134,13 @@ def build_parser() -> argparse.ArgumentParser:
                          "부착 구 (--held-body-cover 의 몸통 구, q_now 에서 parent link 로 옮긴 것) 를 더한다 "
                          "(합집합; 받침면 아래·목적지 근처 제외·첫 프레임 capture 구는 그대로). cuRobo backend + "
                          "--held-body-cover 와 함께만. 기본 off")
+    ap.add_argument("--hand-voxel-carve", choices=("off", "current", "trail"), default="off",
+                    help="SL16 HVC (benchmark branch, --robot panda 만): 미세 TSDF 에서 손 · 손가락 self-filter 구 부피 안의 점유 voxel 을 "
+                         "free 로 (TSDF -> ESDF 전). current = 지금 관절 상태의 구를 --hand-voxel-carve-mm 만큼 키운 부피; "
+                         "trail = 직전 8 요청의 구 (+4 mm) 합집합 중 지금 손에서 20 mm 안. 지지면 아래 · 목적지 근처 · 조작 대상 "
+                         "부피는 지우지 않는다. cuRobo backend + 미세 계층만. 기본 off")
+    ap.add_argument("--hand-voxel-carve-mm", type=float, default=None, metavar="MM",
+                    help="SL16 HVC: current 모드의 키움 (mm). 기본 20 (측정 규칙의 상한; SL16.hvc.data.json). current 와 함께만")
     ap.add_argument("--static-geometry", default="none", metavar="none|auto|PATH",
                     help="아는 고정 기하(벽·선반·테이블·바닥)를 해석적 채널에 싣는다 — 거리장이 "
                          "min(복셀, 해석적) 을 답해 미관측·격자 밖의 낙관을 없앤다 (E4·N2). "
@@ -3910,6 +3940,10 @@ def reject_panda_only_flags(ap: argparse.ArgumentParser, args) -> None:
     if getattr(args, "gripper_gap_opening", False):   # SL11 §5
         ap.error("--gripper-gap-opening 은 Panda 손가락 두 관절 (finger_joint1 · finger_joint2) 의 간격으로 latch 개도를 재는 flag 입니다 "
                  "(--robot panda 만). RB-Y1 gripper 는 관절이 하나라 거절합니다")
+    if getattr(args, "hand_voxel_carve", "off") != "off" or getattr(args, "hand_voxel_carve_mm", None) is not None:   # SL16 HVC
+        ap.error("--hand-voxel-carve · --hand-voxel-carve-mm 는 Panda 손 · 손가락 self-filter 구 (panda_hand · panda_leftfinger · "
+                 "panda_rightfinger) 를 거리장에서 지우는 flag 입니다 (--robot panda 만). RB-Y1 서버는 그 link 가 없어 아무 일도 "
+                 "하지 않으므로 거절합니다")
     if getattr(args, "observe_only", False):   # SL11
         ap.error("--observe-only 는 Panda 서버가 client 에 정책 action 을 그대로 보내는 진단 flag 입니다 (--robot panda 만). "
                  "RB-Y1 서버는 거절합니다")
@@ -4308,7 +4342,8 @@ def reject_bad_flag_combinations(ap: argparse.ArgumentParser, args, *, seed_map_
         ("--held-cover-cap-mm", getattr(args, "held_cover_cap_mm", None) is not None),
         ("--hold-follow-to", getattr(args, "hold_follow_to", None) is not None),
         ("--held-free-observed-mm", getattr(args, "held_free_observed_mm", None) is not None),
-        ("--held-free-query-spheres", getattr(args, "held_free_query_spheres", False)))   # SL10d
+        ("--held-free-query-spheres", getattr(args, "held_free_query_spheres", False)),   # SL10d
+        ("--hand-voxel-carve", getattr(args, "hand_voxel_carve", "off") != "off"))   # SL16 HVC
         if on]
     if not getattr(args, "target_vacancy_release", False) and any(
             getattr(args, f, None) is not None for f in _T81_THRESHOLDS):   # T81
@@ -4363,6 +4398,17 @@ def reject_bad_flag_combinations(ap: argparse.ArgumentParser, args, *, seed_map_
         ap.error("--held-free-query-spheres 는 cuRobo TSDF 의 voxel 을 비웁니다 (--esdf-backend curobo) 그리고 "
                  "질의 구가 쥔 몸통 구일 때만 기존 구와 다릅니다 (--held-body-cover). 그대로 띄우면 효과가 "
                  "있었다고 믿게 됩니다 — 함께 주십시오")
+    if getattr(args, "hand_voxel_carve", "off") != "off" and (
+            getattr(args, "esdf_backend", None) != "curobo" or not getattr(args, "fine_voxel", None)):   # SL16 HVC
+        ap.error("--hand-voxel-carve 는 cuRobo TSDF 의 미세 계층 voxel 을 비웁니다 (--esdf-backend curobo --fine-voxel V). "
+                 "그대로 띄우면 효과가 있었다고 믿게 됩니다 — 함께 주십시오")
+    if getattr(args, "hand_voxel_carve_mm", None) is not None:   # SL16 HVC
+        mm = float(args.hand_voxel_carve_mm)
+        if getattr(args, "hand_voxel_carve", "off") != "current":
+            ap.error("--hand-voxel-carve-mm 는 --hand-voxel-carve current 의 키움입니다 (trail 의 4 mm · 20 mm 는 고정). "
+                     "그대로 띄우면 값이 쓰였다고 믿게 됩니다 — current 와 함께 주십시오")
+        if not (math.isfinite(mm) and mm > 0.0):
+            ap.error(f"--hand-voxel-carve-mm 는 양수 mm 입니다 (받은 값 {mm})")
     if getattr(args, "held_body_cover", False) and (args.no_safe
                                                     or getattr(args, "no_perception", False)):
         ap.error("--held-body-cover 는 AG3S 의 쥔 물체 질의 구를 고치는 flag 입니다 "

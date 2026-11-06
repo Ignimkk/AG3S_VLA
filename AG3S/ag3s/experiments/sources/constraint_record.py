@@ -268,6 +268,13 @@ class ConstraintRecordWriter:
             render = (getattr(field, "stats", None) or {}).get("robot_mask_render")
             if render:
                 summary["robot_mask_render"] = json.loads(json.dumps(render, default=_scalar))
+            # SL16 HVC: the hand voxel carve of this request as real JSON (only with `--hand-voxel-carve` on)
+            hvc = (getattr(field, "stats", None) or {}).get("hand_voxel_carve")
+            if hvc:
+                summary["hand_voxel_carve"] = json.loads(json.dumps(hvc, default=_scalar))
+                freed = getattr(field, "hand_carve_freed", None)
+                if freed is not None and self.esdf_mode == "full":   # base-frame centres of the voxels freed (float32 (N, 3))
+                    payload["hand_carve_freed_centres"] = np.asarray(freed, np.float32).reshape(-1, 3)
 
         # --- 제약 행 -------------------------------------------------------------------
         if sphere_centres is not None:

@@ -382,6 +382,14 @@ class AG3S:
         #: lifted ~47 mm, the query segments are not), so the query spheres sit 45-60 % inside voxels nobody freed
         #: and the bowl's own surface there reads as an obstacle (`SL10d.task.md`).
         self.held_free_query_spheres: bool = False
+        #: SL16 HVC (benchmark branch, 2026-11-06): ``None`` (default) = no hand voxel carve -- bit-identical to before. A dict
+        #: `{"mode": "current" | "trail", "radius_m": float}` (set by `serve_safe.build_ag3s` / the Panda profile; the CLI
+        #: `--hand-voxel-carve`, `--hand-voxel-carve-mm`) = after integration and before the ESDF is made, the FINE TSDF's occupied
+        #: voxels inside the hand's volume are set free (`_hand_carve_spec`). Why: the occupied voxels the MuJoCo-GT hand owns sit
+        #: far outside the self-filter's hand spheres (median 13.6 mm, p95 29 mm) -- depth masked, TSDF smeared
+        #: (`SL16.hvc.data.json`) -- and TrajOpt avoids its own hand.
+        self.hand_voxel_carve: Optional[dict] = None
+        self._hand_carve_history: list = []   # SL16 HVC: the previous requests' robot states (`trail` only)
         #: T32 H1: the held object's spheres join the **self-filter** sphere set while attached
         #: (cuRobo attach semantics) — its pixels are removed like the robot's and never reach the
         #: TSDF. A public switch for ablation/measurement only; the live path keeps it on.
@@ -522,6 +530,7 @@ class AG3S:
         self._frame_attached = None
         self._last_support_surfaces = []
         self._last_esdf_field = None
+        self._hand_carve_history = []   # SL16 HVC (per episode, like the TSDF)
         self._frame_depth_masks = []
         released = self._esdf_builder is not None
         self._esdf_builder = None
@@ -3821,6 +3830,10 @@ class AG3S:
         if cfg.backend == "curobo" and bool(getattr(cfg, "robot_occupied_free", False)) \
                 and robot_state is not None:
             robot_free = self._robot_free_spheres(robot_state, support_surfaces, destination_points)
+        # SL16 HVC: the hand's volume now (and, `trail`, before) -> free in the fine TSDF (off: None, the call as before).
+        hand_carve = None
+        if self.hand_voxel_carve is not None and cfg.backend == "curobo":
+            hand_carve = self._hand_carve_spec(robot_state, support_surfaces, destination_points, points, target_free_ball)
         attached_points = None
         if (held_free is None and self._attached is not None and robot_state is not None
                 and self.constraint_robot_model is not None):
@@ -3932,6 +3945,9 @@ class AG3S:
                                           # AG3S-DYNAMIC-FIELD D2 (only when on).
                                           **({} if robot_free is None
                                              else {"robot_free_spheres": robot_free}),
+                                          # SL16 HVC (only when on).
+                                          **({} if hand_carve is None
+                                             else {"hand_carve": hand_carve}),
                                           labelled_points=labelled,
                                           # 아는 정적 기하 — **주입**이다. AG3S 는 무엇이 벽이고
                                           # 무엇이 선반인지 알 수 없다 (phase·목적지와 같은 계약).
@@ -3964,6 +3980,13 @@ class AG3S:
                                           **({"surface_protect": hybrid_protect}
                                              if hybrid_protect is not None else {}))
         self._record_geometry_version(field, target, frame_index, nontarget)
+        if self.hand_voxel_carve is not None and cfg.backend == "curobo":   # SL16 HVC
+            stats = getattr(field, "stats", None)
+            if isinstance(stats, dict) and "hand_voxel_carve" not in stats:   # no spec this frame: say so, not silence
+                stats["hand_voxel_carve"] = {"mode": self.hand_voxel_carve["mode"],
+                                             "r_mm": round(float(self._hand_carve_radius_m()) * 1000.0, 6),
+                                             "n_voxels_freed": 0, "applied": False,
+                                             "why": "no_robot_state_or_model" if hand_carve is None else "builder_wrote_no_record"}
         if corridor is not None:   # T83 — the builder's carve numbers into the corridor record
             stats = getattr(field, "stats", None)
             carve = ((stats.get("target_free") or {}).get("grasp_corridor")
@@ -4216,6 +4239,73 @@ class AG3S:
         dest = (None if destination_points is None or not len(destination_points)
                 else np.asarray(destination_points, np.float64).reshape(-1, 3))
         return {"centres": c, "radii": r, "z_min": z_min, "destination": dest, "dest_pad": 2.0 * pad}
+
+    #: SL16 HVC -- the previous requests the `trail` mode remembers; the margin of their spheres; how far from the hand now a voxel
+    #: may still be freed (task `SL16.task.md` 3.1).
+    HAND_CARVE_HISTORY = 8
+    HAND_CARVE_TRAIL_M = 0.004
+    HAND_CARVE_NEAR_M = 0.020
+    #: The self-filter model's hand links (Panda; the RB-Y1 server refuses the flag).
+    HAND_CARVE_LINKS = ("panda_hand", "panda_leftfinger", "panda_rightfinger")
+
+    def _hand_carve_radius_m(self) -> float:
+        spec = self.hand_voxel_carve or {}
+        return float(self.HAND_CARVE_TRAIL_M if spec.get("mode") == "trail" else spec.get("radius_m", 0.0))
+
+    def _hand_carve_spec(self, robot_state, support_surfaces, destination_points, target_points, target_ball):
+        """SL16 HVC -- the volume whose occupied FINE-TSDF voxels the builder frees (`hand_carve_hits`), or None.
+
+        `current`: the hand's (`HAND_CARVE_LINKS`) self-filter spheres at `robot_state`, each grown by `radius_m`.
+        `trail`: the same links' spheres at each of the previous `HAND_CARVE_HISTORY` requests' states and now, grown by
+        `HAND_CARVE_TRAIL_M`, restricted to voxels within `HAND_CARVE_NEAR_M` of the hand now (an older position is trusted to have
+        been looked at again). (The finger opening of the past states is the one the model holds now.)
+        Both: nothing below the support plane under a sphere (+ one fine voxel), nothing near the destination (D2's rules), nothing
+        inside the manipulated target (its removal ball and its observed points, one fine voxel of margin).
+        """
+        mode = self.hand_voxel_carve["mode"]
+        past = list(self._hand_carve_history)
+        if robot_state is not None:   # remember this request's state for the next ones
+            self._hand_carve_history = (past + [np.asarray(robot_state, np.float64).copy()])[-self.HAND_CARVE_HISTORY:]
+        model = self._frame_filter_model
+        if model is None or robot_state is None:
+            return None
+        links = np.asarray([str(n) for n in model.sphere_link_names])
+        sel = np.isin(links, self.HAND_CARVE_LINKS)
+        if not sel.any():
+            return None
+
+        def hand_at(state):
+            c, r = model.sphere_centers_numeric(np.asarray(state, np.float64))
+            return np.asarray(c, np.float64).reshape(-1, 3)[sel], np.asarray(r, np.float64).reshape(-1)[sel]
+
+        c0, r0 = hand_at(robot_state)
+        pad = self._guard_pad()
+        spec = {"mode": mode}
+        if mode == "current":
+            grow = float(self.hand_voxel_carve["radius_m"])
+            centres, radii = c0, r0 + grow
+            spec.update(r_m=grow)
+        else:
+            grow = self.HAND_CARVE_TRAIL_M
+            parts = [hand_at(q) for q in past] + [(c0, r0)]
+            centres = np.concatenate([c for c, _ in parts])
+            radii = np.concatenate([r for _, r in parts]) + grow
+            spec.update(r_m=grow, near={"centres": c0, "radii": r0 + self.HAND_CARVE_NEAR_M},
+                        near_mm=self.HAND_CARVE_NEAR_M * 1000.0, history=len(past))
+        z_min = np.full(len(centres), -np.inf)
+        for i, ci in enumerate(centres):   # the floor under each sphere (the hand spans the table edge)
+            z_plane = self._support_plane_z(support_surfaces, ci)
+            if z_plane is not None:
+                z_min[i] = float(z_plane) + pad
+        dest = (None if destination_points is None or not len(destination_points)
+                else np.asarray(destination_points, np.float64).reshape(-1, 3))
+        ball = None
+        if target_ball is not None:
+            ball = (np.asarray(target_ball.centre, np.float64).reshape(3), float(target_ball.radius) + pad)
+        pts = None if target_points is None or not len(target_points) else np.asarray(target_points, np.float64).reshape(-1, 3)
+        spec.update(centres=centres, radii=radii, z_min=z_min, destination=dest, dest_pad=2.0 * pad,
+                    protect_ball=ball, protect_points=pts, protect_tol=pad)
+        return spec
 
     def _held_free_points(self, robot_state, support_surfaces, destination_points, execution_path=None):
         """Points whose TSDF voxels are set **free** this frame (T32 H3), or None.

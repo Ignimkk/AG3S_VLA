@@ -33,7 +33,7 @@ EARLIER_ARGV_SHA256 = "3b724adb1bf6251b7c0f7ceaf4501e5480c4c9dec4be9df7bd9c90072
 def test_every_earlier_versions_server_argv_is_bit_identical_including_the_other_sl14_versions():
     from AG3S.adapters.panda import profile as pf
 
-    old = {v: a for v, a in path_independent_argv(pf).items() if v != OR and v not in pf.SL15_NTM_VERSIONS and v not in pf.SL15_SFHAND_VERSIONS}
+    old = {v: a for v, a in path_independent_argv(pf).items() if v != OR and v not in pf.SL15_NTM_VERSIONS and v not in pf.SL15_SFHAND_VERSIONS and v not in pf.SL16_HVC_VERSIONS}
     assert len(old) == 65
     assert hashlib.sha256(json.dumps(old, sort_keys=True).encode()).hexdigest() == EARLIER_ARGV_SHA256
     assert {f"{PC}-oraclelatch", f"{PC}-rearm"} <= set(old)

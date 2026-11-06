@@ -33,7 +33,7 @@ DATA = pathlib.Path(__file__).resolve().parents[2] / "AG3S" / "ag3s" / "docs" / 
 def test_every_earlier_versions_server_argv_is_bit_identical():
     from AG3S.adapters.panda import profile as pf
 
-    old = {v: a for v, a in path_independent_argv(pf).items() if v not in pf.SL15_SFHAND_VERSIONS}
+    old = {v: a for v, a in path_independent_argv(pf).items() if v not in pf.SL15_SFHAND_VERSIONS and v not in pf.SL16_HVC_VERSIONS}
     assert len(old) == 68
     assert hashlib.sha256(json.dumps(old, sort_keys=True).encode()).hexdigest() == EARLIER_ARGV_SHA256
     assert not any("--self-filter-inflation-link" in a for a in old.values())
