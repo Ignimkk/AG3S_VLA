@@ -205,6 +205,10 @@ class SafePolicy:
     _last_neighbour_palm_contact: dict = {}
     #: SL6-H (HSR6 ⑤) — same reason: no placement-contact record.
     _last_placement_contact: dict = {}
+    #: SL16 HSC (`--held-support-contact`): the finger / palm overlap (m) the allowance accepts, `None` = off (class default so test
+    #: doubles built without `__init__` read "off"), and this request's gate record.
+    held_support_contact_m: Optional[float] = None
+    _last_held_support_contact: dict = {}
     #: SL6-A — robot injections, class defaults = the RB-Y1 behaviour (test doubles built without `__init__` too):
     #: HSR6 ④ scope (`"all"`: NBC, A4 and G1 withheld unless HSR6 = grasp), the arm joints by hand (None = the
     #: `{hand}_arm_{j}` rule), the NBC finger links by hand (None = grasp link minus trailing digits), the A6 site
@@ -865,6 +869,8 @@ class SafePolicy:
             box = self.action_box_fn()
             if box is not None:
                 context["action_box"] = box
+        if self.held_support_contact_m is not None:
+            self._last_held_support_contact = {}   # SL16 HSC -- this request's gate record is set in `_scene_fn`
         t = time.monotonic()
         refined = self.refiner.refine(chunk, context)
         timing["trajopt"] = (time.monotonic() - t) * 1000.0 - timing.get("ag3s", 0.0)
@@ -1162,6 +1168,10 @@ class SafePolicy:
                                               "_last_grasp_contact", None) or {})}
                if (self.held_hand_exempt or self.grasp_zone_allowance is not None or self.closing_hand_exempt)
                else {}),
+            # SL16 HSC -- {applied, latch, held_rows_exempt, finger_rows_allowed, n_rows}: the gate of this request and, when it
+            # applied, the rows the returned trajectory's final check let touch (only with `--held-support-contact`).
+            **({"held_support_contact": self._held_support_contact_record(metrics)}
+               if self.held_support_contact_m is not None else {}),
             # V11AB-pb4 — the contact phase the constraints were built with (only when the latch picked it).
             **({"contact_phase": dict(self._last_contact_phase)}
                if self.latch_phase and self._last_contact_phase else {}),
@@ -1379,6 +1389,8 @@ class SafePolicy:
             snapshot = self._hsr6_target_gate(snapshot, constraint_set)   # AG3S-CORE-EVAL-HSR6 ③ (off: never called)
         if snapshot is not None and self.hsr6 is not None and self.hsr6.placement_contact:
             snapshot = self._hsr6_placement_contact(snapshot)   # SL6-H (HSR6 ⑤; off: never called)
+        if self.held_support_contact_m is not None:
+            snapshot = self._held_support_contact(snapshot, manipulators)   # SL16 HSC (off: never called)
         # 판정이 위반 행을 **최적화기가 본 것과 같은 씬으로** 다시 분류한다 (T23, `_verdict`).
         self._last_snapshot = snapshot
         # 촬영 시점 중 **가장 최신** 자세가 TO 가 계획을 시작하는 곳이다. AG3S 도 같은 규칙을
@@ -1771,6 +1783,51 @@ class SafePolicy:
         if not applied:
             return snapshot
         return dataclasses.replace(snapshot, placement_contact=placement_contact_spec())
+
+    def _held_support_contact(self, snapshot, manipulators=None):
+        """SL16 HSC (`--held-support-contact`) -- on this request's final latch state: the call is **actually holding** when the
+        latch is HELD (including the HELD that `--grasp-opening-rule` sets) or CLOSING with the evidence `closed` ∧ `blocked`
+        (the condition of HSR6 ⑤, `hsr6.PLACEMENT_CONTACT_CHECKS`) -- in every HSR6 phase, the phase is not asked. Then the
+        snapshot gets `held_support_contact` (the optimizer lets the held rows and the grasping hand's finger / palm rows touch
+        the surface beneath them, `CollisionLinearizer._held_support_contact_margin`); otherwise the snapshot as built.
+        The hand's rows are the spheres of its fingers (`grasp_links[hand]`) and of its hold link (`hold_links[hand]`, the palm
+        incl. the palm shell). The record `self._last_held_support_contact` = {applied, latch, ...}; after the solve the row counts
+        of the returned trajectory join it (`_to_block`)."""
+        from AG3S.trajopt.hsr6 import PLACEMENT_BENEATH_COS, PLACEMENT_CONTACT_CHECKS
+
+        latch = getattr(self._latch.phase, "value", str(self._latch.phase))
+        ev = getattr(self._latch.last_grasp, "evidence", None) or {}
+        checks = ev.get("checks") or {}
+        holding = bool(latch == "held" or (latch == "closing"
+                                           and all(checks.get(k) is True for k in PLACEMENT_CONTACT_CHECKS)))
+        rec: dict[str, Any] = {"applied": False, "latch": latch}
+        self._last_held_support_contact = rec
+        if snapshot is None or not holding:
+            if snapshot is not None:
+                rec["reason"] = "not holding"
+            return snapshot
+        hand, parent_link, allowed = self._grasp_hand(manipulators)
+        links = {str(parent_link), str(self.hold_links.get(hand, parent_link)), *(str(x) for x in allowed)}
+        names = [str(n) for n in getattr(self.constraint_robot_model, "sphere_link_names", ())]
+        rows = np.asarray([n in links for n in names], bool)
+        if getattr(snapshot, "esdf", None) is None:
+            rec["reason"] = "no field"
+            return snapshot
+        rec.update(applied=True, hand_links=sorted(links), n_hand_spheres=int(rows.sum()),
+                   finger_margin_m=float(self.held_support_contact_m))
+        return dataclasses.replace(snapshot, held_support_contact={
+            "cos_min": PLACEMENT_BENEATH_COS, "footprint_tol_m": None, "hand_rows": rows,
+            "finger_margin_m": float(self.held_support_contact_m)})
+
+    def _held_support_contact_record(self, metrics: dict) -> dict[str, Any]:
+        """SL16 HSC -- this request's `held_support_contact` record: the gate (`_held_support_contact`) with, when it applied, the
+        row counts the returned trajectory's final check reported (`to.metrics.held_support_contact`); zeros when it did not."""
+        rec = {"applied": False, "latch": None, **dict(self._last_held_support_contact or {})}
+        counts = metrics.get("held_support_contact") if rec["applied"] else None
+        rec["held_rows_exempt"] = int((counts or {}).get("held_rows_exempt", 0))
+        rec["finger_rows_allowed"] = int((counts or {}).get("finger_rows_allowed", 0))
+        rec["n_rows"] = int((counts or {}).get("n_rows", 0))
+        return _jsonable(rec)
 
     def _hsr6_placement_contact_result(self) -> None:
         """⑤ — after the solve: the held rows the returned trajectory's final check released
