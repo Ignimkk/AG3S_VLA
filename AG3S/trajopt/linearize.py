@@ -119,7 +119,7 @@ class _BufferedCall:
 _CLEARANCE_SIDE_ATTRS = ("query_radii", "_last_obstacle_class", "_last_held_rows", "_last_lookahead",
                          "last_target_free_tiers", "_last_grasp_contact", "_last_neighbour_contact",
                          "_last_neighbour_palm_contact", "_last_placement_contact",
-                         "_last_support_surface_offset", "_last_support_offset_rows")
+                         "_last_held_support_contact", "_last_support_surface_offset", "_last_support_offset_rows")
 _MISSING = object()
 
 
@@ -322,6 +322,16 @@ class SceneSnapshot:
     #: exemption). Robot rows (hand · fingers · arm) never change; a held row whose nearest surface is beside or above it
     #: keeps its margin. `CollisionLinearizer._placement_contact_margin`.
     placement_contact: Optional[dict] = None
+    #: **SL16 HSC — contact with the surface beneath, while the call is actually holding (`--held-support-contact`).**
+    #: `None` (default) = as before. A dict `{"cos_min": c, "footprint_tol_m": m | None, "hand_rows": (S,) bool,
+    #: "finger_margin_m": f}` set by `SafePolicy._held_support_contact` on a call whose latch is HELD (or CLOSING with
+    #: `closed` ∧ `blocked`), in **every** HSR6 phase: (1) a **held** query row whose nearest field surface is beneath it
+    #: (the `placement_contact` test) or lies on a support plane gets the margin −1 m; (2) a row of the grasping hand
+    #: (`hand_rows`: panda_hand incl. the palm shell, panda_leftfinger, panda_rightfinger) whose nearest surface is beneath it
+    #: (footprint = the held object's xy discs ∪ the hand spheres' xy discs at that step) or on a support plane gets
+    #: `min(margin, −f)` (up to `f` of overlap accepted). Arm rows, side / above surfaces and rows failing the test keep
+    #: their margin. `CollisionLinearizer._held_support_contact_margin`.
+    held_support_contact: Optional[dict] = None
     #: **T67 ① — support-surface offset of the fine layers (m).** `0.0` (default) = as before. `> 0`: a robot row whose
     #: nearest surface `_obstacle_rows` classes `support` and whose distance a fine tier answered (`answer_tier` ∈
     #: {`fine`, `target_free`}) reads `d + offset` (`_support_surface_offset`); gradient unchanged. Set by
@@ -1085,7 +1095,11 @@ class CollisionLinearizer:
         if pc is not None:
             # SL6-H (HSR6 ⑤) — held rows only: a surface beneath the held object does not block it.
             margin = self._placement_contact_margin(pc, margin, d, centres, radii, scene, n_query)
-        nb = getattr(scene, "neighbour_contact", None)
+        hsc = getattr(scene, "held_support_contact", None)
+        if hsc is not None:
+            # SL16 HSC -- while holding: held rows and the grasping hand's rows may touch the surface beneath them.
+            margin = self._held_support_contact_margin(hsc, margin, d, centres, radii, scene, n_query)
+        nb =getattr(scene, "neighbour_contact", None)
         if nb is not None and (float(nb.get("depth", 0.0)) > 0.0 or bool(nb.get("at_zero", False))):
             # IFG-NBC — the grasping fingers may overlap a neighbour obstacle near the target by up to `depth`.
             # T67 ③: `at_zero` (`--neighbour-contact-mm 0`) = on with depth 0 — those rows require `d − r ≥ 0`.
@@ -1222,6 +1236,87 @@ class CollisionLinearizer:
         rec["cos_min"] = round(cos_min, 6)
         rec["footprint_tol_m"] = tol
         self._last_placement_contact = rec
+        return margin
+
+    def _held_support_contact_margin(self, hsc: dict, margin: np.ndarray, d: np.ndarray, centres: np.ndarray,
+                                     radii: np.ndarray, scene: SceneSnapshot, n_query: int) -> np.ndarray:
+        """SL16 HSC (`--held-support-contact`) -- `margin` with the rows that touch the surface **beneath** them while holding.
+
+        | row | condition | margin |
+        |---|---|---|
+        | held (`>= n_spheres`) | nearest surface beneath (`ĝ_z >= cos_min` ∧ nearest surface point `s = p − d·ĝ` inside the held xy footprint + tol) **or** on a support plane (`|d − (n·p − o)| <= 2 voxel`) | −1 m (cannot bind) |
+        | hand (`hand_rows`: panda_hand + palm shell, fingers) | the same two tests; footprint = held discs ∪ the hand spheres' discs at the step | `min(margin, −finger_margin_m)` |
+        | arm rows, rows failing both tests | — | unchanged |
+
+        The 'beneath' test is `_placement_contact_margin`'s (HSR6 ⑤). The support-plane test is `_obstacle_rows`'s, asked here
+        directly because `_obstacle_rows` calls every held row `held` and skips the planes under `obstacle_margin_support`.
+        Row counts are step × sphere. Record `self._last_held_support_contact` (a new dict per call; `sqp._finish` puts it
+        into `to.metrics.held_support_contact`)."""
+        n = int(self.n_spheres)
+        horizon = centres.shape[0]
+        n_held = max(0, int(n_query) - n)
+        hand = np.zeros(n, bool)
+        hr = np.asarray(hsc.get("hand_rows", ()), bool).reshape(-1)[:n]
+        hand[:hr.shape[0]] = hr
+        hand_idx = np.flatnonzero(hand)
+        n_hand = int(hand_idx.size)
+        rec: dict[str, Any] = {"n_held_rows": n_held * horizon, "n_hand_rows": n_hand * horizon, "steps": int(horizon),
+                               "held_rows_exempt": 0, "finger_rows_allowed": 0}
+        rec["n_rows"] = rec["n_held_rows"] + rec["n_hand_rows"]
+        if scene.esdf is None or (n_held == 0 and n_hand == 0):
+            rec["reason"] = "no rows"
+            self._last_held_support_contact = rec
+            return margin
+        cos_min = float(hsc.get("cos_min", np.cos(np.deg2rad(45.0))))
+        voxel = float(scene.esdf.grid.voxel_size)
+        tol = hsc.get("footprint_tol_m")
+        tol = voxel if tol is None else float(tol)
+        finger = float(hsc.get("finger_margin_m", 0.010))
+        cols = np.concatenate([hand_idx, np.arange(n, n + n_held)]).astype(int)      # query columns examined: hand, then held
+        c = np.asarray(centres[:, cols, :], np.float64)                              # (H, M, 3)
+        dr = np.asarray(d[:, cols], np.float64)                                      # (H, M)
+        r = np.asarray(radii, np.float64).reshape(-1)[cols]                          # (M,)
+        pts = c.reshape(-1, 3)
+        g = np.asarray(scene.esdf.gradient(pts), np.float64).reshape(-1, 3)
+        norm = np.linalg.norm(g, axis=1)
+        ok = norm > _EPS
+        u = np.where(ok[:, None], g / np.maximum(norm, _EPS)[:, None], 0.0)
+        up = (ok & (u[:, 2] >= cos_min)).reshape(horizon, -1)
+        surf = (pts - dr.reshape(-1, 1) * u).reshape(horizon, -1, 3)
+
+        def gap(first: int) -> np.ndarray:
+            """(H, M): how far the nearest surface point lies outside the union of the xy discs of columns `first:`."""
+            return (np.linalg.norm(surf[:, :, None, :2] - c[:, None, first:, :2], axis=3)
+                    - r[None, None, first:]).min(axis=2)
+
+        on_plane = np.zeros(dr.shape, bool)
+        planes = getattr(scene, "support_planes", None)
+        if planes is not None:
+            planes = np.asarray(planes, np.float64).reshape(-1, 4)
+            if planes.shape[0]:
+                s = pts @ planes[:, :3].T - planes[None, :, 3]
+                on_plane = (np.abs(s - dr.reshape(-1, 1)) <= _SUPPORT_TOL_VOXELS * voxel).any(axis=1).reshape(horizon, -1)
+        sel_hand = np.zeros((horizon, n_hand), bool)
+        sel_held = np.zeros((horizon, n_held), bool)
+        if n_held:
+            sel_held = (up & (gap(n_hand) <= tol) | on_plane)[:, n_hand:]
+        if n_hand:
+            # the hand rows' footprint: the held object's discs ∪ the hand spheres' own discs (every examined column)
+            sel_hand = (up & (gap(0) <= tol) | on_plane)[:, :n_hand]
+        if sel_hand.any() or sel_held.any():
+            margin = margin.copy()
+            if sel_hand.any():
+                block = margin[:, hand_idx]
+                margin[:, hand_idx] = np.where(sel_hand, np.minimum(block, -finger), block)
+            if sel_held.any():
+                block = margin[:, n:]
+                margin[:, n:] = np.where(sel_held, -1.0, block)
+        rec["held_rows_exempt"] = int(sel_held.sum())
+        rec["finger_rows_allowed"] = int(sel_hand.sum())
+        rec["cos_min"] = round(cos_min, 6)
+        rec["footprint_tol_m"] = tol
+        rec["finger_margin_m"] = finger
+        self._last_held_support_contact = rec
         return margin
 
     def _neighbour_palm_contact(self, npc: dict, d: np.ndarray, flat: np.ndarray, centres: np.ndarray,

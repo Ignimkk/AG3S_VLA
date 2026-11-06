@@ -682,6 +682,18 @@ SL15_SFHAND_VERSIONS: tuple[str, ...] = (SL15_SFHAND_VERSION,)
 AG3S_VERSIONS[SL15_SFHAND_VERSION] = tuple(AG3S_VERSIONS["AG3S-final-panda-v3-e0to-pc"]) + SELF_FILTER_HAND_FLAGS
 
 
+#: SL16 HSC (task SL16 §2, lead 2026-11-06; user: "쥔 물체와 받침면의 접촉은 당연히 허용해야 합니다"): while the call is actually holding
+#: (latch HELD, the HELD that ``--grasp-opening-rule`` sets included; CLOSING only with ``closed`` ∧ ``blocked``) the held rows and the grasping
+#: hand's finger / palm rows may touch the surface beneath them in **every** HSR6 phase (``--held-support-contact``; the finger / palm overlap
+#: is ``--held-support-contact-finger-mm``, default 10). ``-pc-openrule-hsc`` = ``-pc-openrule`` + the flag. Like the other SL14 / SL15 versions it
+#: is not in :data:`PC_LATCH_VERSIONS`, has no ``-lsfork`` twin, and the record dest (``held_support_contact``) joins a record only when set
+#: (:func:`version_flag_values`). The run conversion D is chosen by the launcher, not by the version (task SL16 §2).
+HELD_SUPPORT_CONTACT_FLAGS: tuple[str, ...] = ("--held-support-contact",)
+SL16_HSC_VERSION = "AG3S-final-panda-v3-e0to-pc-openrule-hsc"
+SL16_HSC_VERSIONS: tuple[str, ...] = (SL16_HSC_VERSION,)
+AG3S_VERSIONS[SL16_HSC_VERSION] = tuple(AG3S_VERSIONS[SL14_OPENRULE_VERSION]) + HELD_SUPPORT_CONTACT_FLAGS
+
+
 def needs_oracle_grasp(version: str) -> bool:
     """SL14: whether the version's server runs ``--oracle-latch`` (the client must send ``ag3s/oracle_grasp``, ``--oracle-grasp``)."""
     return "--oracle-latch" in AG3S_VERSIONS.get(str(version), ())
@@ -713,7 +725,8 @@ def is_final_version(version: str) -> bool:
             or str(version) in PC_LATCH_VERSIONS or str(version) in PC_NOPROBE_VERSIONS   # SL7d / SL7e / SL9
             or str(version) in SL12_VERSIONS or str(version) in SL13_VERSIONS   # SL12 / SL13
             or str(version) in SL14_VERSIONS or str(version) in SL15_NTM_VERSIONS
-            or str(version) in SL15_SFHAND_VERSIONS)   # SL14 / SL15
+            or str(version) in SL15_SFHAND_VERSIONS
+            or str(version) in SL16_HSC_VERSIONS)   # SL14 / SL15 / SL16
 
 
 def version_server_flags(version: str, *, hsr6_probe: Optional[str] = None,
@@ -792,6 +805,8 @@ def version_flag_values(args: argparse.Namespace) -> dict[str, Any]:
             if d not in set(dests) | set(final) | set(p0m) | set(sl9) | set(sl10) | set(sl10d) | set(sl10e) | set(sl10f) | set(sl11) | set(sl11gap) | set(sl12) | set(sl13) | set(sl14) | set(sl14ks)]   # SL15
     sl15sf = [d for d in _version_dests(SL15_SFHAND_VERSIONS)
               if d not in set(dests) | set(final) | set(p0m) | set(sl9) | set(sl10) | set(sl10d) | set(sl10e) | set(sl10f) | set(sl11) | set(sl11gap) | set(sl12) | set(sl13) | set(sl14) | set(sl14ks) | set(sl15)]   # SL15 sfhand
+    sl16hsc = [d for d in _version_dests(SL16_HSC_VERSIONS)
+               if d not in set(dests) | set(final) | set(p0m) | set(sl9) | set(sl10) | set(sl10d) | set(sl10e) | set(sl10f) | set(sl11) | set(sl11gap) | set(sl12) | set(sl13) | set(sl14) | set(sl14ks) | set(sl15) | set(sl15sf)]   # SL16 HSC
     parser = ss.build_parser()
     actions = parser._option_string_actions
     pinned = {actions[t].dest for t in V11AB_PRE_MERGE_DEFAULTS if t.startswith("--")}   # set on every V11AB argv
@@ -845,6 +860,9 @@ def version_flag_values(args: argparse.Namespace) -> dict[str, Any]:
     # SL15 sfhand: the self-filter inflation dest joins only when it is set -- the other records keep their keys
     if any(getattr(args, d, None) != parser.get_default(d) for d in sl15sf):
         dests = sorted(set(dests) | set(sl15sf))
+    # SL16 HSC: the held-support-contact dest joins only when it is set -- the other records keep their keys
+    if any(getattr(args, d, None) != parser.get_default(d) for d in sl16hsc):
+        dests = sorted(set(dests) | set(sl16hsc))
     return {d: _jsonable(getattr(args, d, None)) for d in dests}
 
 

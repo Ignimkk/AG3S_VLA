@@ -3091,6 +3091,15 @@ def build_parser() -> argparse.ArgumentParser:
                     help="V11AB-pb7 (benchmark branch, SL5i): while CLOSING with the latch evidence closed, not_empty and "
                          "blocked all true, the grasping hand's contact-link rows whose nearest surface is the "
                          "manipulated object are dropped (the --held-hand-exempt rule). Off = V11AB")
+    ap.add_argument("--held-support-contact", action="store_true",
+                    help="SL16 HSC (benchmark branch, Panda 서버만) — 실제로 쥐고 있는 call (latch HELD, --grasp-opening-rule 이 만든 HELD "
+                         "포함; CLOSING 은 closed ∧ blocked 일 때) 에서, HSR6 단계와 무관하게 (1) 쥔 물체 질의 구 행의 최근접 표면이 그 "
+                         "아래 (기울기 위로 45° 안 ∧ 최근접 표면점이 쥔 물체 xy 발자국 + 1 voxel 안) 이거나 지지면이면 막지 않고, "
+                         "(2) 쥔 손의 손가락 · 손바닥 행 (panda_leftfinger · panda_rightfinger · panda_hand, palm shell 포함) 은 같은 "
+                         "시험 (발자국 = 쥔 물체 ∪ 손 구 xy 원판) 을 통과하면 --held-support-contact-finger-mm 만큼 겹침을 허용한다. 팔 "
+                         "link · 옆 · 위 표면 · 시험을 못 넘은 행은 그대로. 기록 to.held_support_contact. RB-Y1 서버는 거절. 기본 off")
+    ap.add_argument("--held-support-contact-finger-mm", type=float, default=None, metavar="MM",
+                    help="SL16 HSC: 손가락 · 손바닥 행이 받침면에 겹쳐도 되는 깊이 (기본 10). --held-support-contact 와 함께만")
     ap.add_argument("--latch-phase", action="store_true",
                     help="V11AB-pb4 (benchmark branch): the contact phase comes from the grasp latch (LATCHED -> "
                          "pre_grasp, CLOSING/HELD -> grasp) instead of the request's ag3s/phase. Off = V11AB")
@@ -3907,6 +3916,10 @@ def reject_panda_only_flags(ap: argparse.ArgumentParser, args) -> None:
                  "거절합니다")
     if getattr(args, "grasp_opening_rule", False):   # SL14 (KS)
         ap.error("--grasp-opening-rule 은 Panda 서버의 grasp latch 단순 규칙입니다 (--robot panda 만). RB-Y1 서버는 거절합니다")
+    if (getattr(args, "held_support_contact", False)
+            or getattr(args, "held_support_contact_finger_mm", None) is not None):   # SL16 HSC
+        ap.error("--held-support-contact 는 Panda 손 (panda_hand · 손가락) 의 받침면 접촉 허용입니다 (--robot panda 만). RB-Y1 서버는 "
+                 "거절합니다")
     if getattr(args, "gripper_gap_opening", False):   # SL11 §5
         ap.error("--gripper-gap-opening 은 Panda 손가락 두 관절 (finger_joint1 · finger_joint2) 의 간격으로 latch 개도를 재는 flag 입니다 "
                  "(--robot panda 만). RB-Y1 gripper 는 관절이 하나라 거절합니다")
@@ -3926,6 +3939,11 @@ def reject_bad_flag_combinations(ap: argparse.ArgumentParser, args, *, seed_map_
     if seed_map_labels is None:
         seed_map_labels = panda_seed_map_labels(args)
     reject_ifg_s2serve_flags(ap, args)   # IFG-S2SERVE
+    if getattr(args, "held_support_contact_finger_mm", None) is not None:   # SL16 HSC
+        if not getattr(args, "held_support_contact", False):
+            ap.error("--held-support-contact-finger-mm 는 --held-support-contact 와 함께만 읽힙니다")
+        if float(args.held_support_contact_finger_mm) < 0.0:
+            ap.error("--held-support-contact-finger-mm 는 0 이상이어야 합니다 (겹침 허용 깊이, mm)")
     if getattr(args, "reach_at_capture", False) and getattr(args, "latch_reach_hand_relative", False):
         # V11AB-pb1 (benchmark) and T46g (development) are two separate fixes of the same SL5b reach failure;
         # together T46g silently overwrites pb1's reach, so the run would be neither version.
@@ -4577,6 +4595,11 @@ def apply_grasp_contact_flags(safe, args) -> dict:
     if latch_opts:
         safe.set_latch_options(**latch_opts)
         out.update({f"latch_{k}": True for k in latch_opts})
+    if getattr(args, "held_support_contact", False):
+        # SL16 HSC -- set and reported only when on (off = the record as before, key for key).
+        mm = getattr(args, "held_support_contact_finger_mm", None)
+        safe.held_support_contact_m = (10.0 if mm is None else float(mm)) / 1000.0
+        out["held_support_contact"] = {"finger_margin_m": safe.held_support_contact_m}
     if safe.latch_phase or safe.held_hand_exempt or safe.grasp_zone_allowance is not None or len(out) > 4:
         logging.warning("SafePolicy grasp contact rules (V11AB-pb4..pb7): %s", out)
     return out

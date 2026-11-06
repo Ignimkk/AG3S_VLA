@@ -1720,6 +1720,11 @@ class TrajectoryOptimizer:
         placement_record = (dict(getattr(self.linearizer, "_last_placement_contact", None) or {})
                             if getattr(scene, "placement_contact", None) is not None
                             and getattr(scene, "esdf", None) is not None else None)
+        # SL16 HSC -- the rows the held-support allowance changed on what is returned (same read point). `None` unless the
+        # scene carries it this chunk: the metrics keys as before.
+        hsc_record = (dict(getattr(self.linearizer, "_last_held_support_contact", None) or {})
+                      if getattr(scene, "held_support_contact", None) is not None
+                      and getattr(scene, "esdf", None) is not None else None)
         # T67 ① — the support rows that read the fine-layer offset on what is returned (same place, same reason).
         # `None` unless the scene carries the offset: the metrics keys as before.
         support_record = (dict(getattr(self.linearizer, "_last_support_surface_offset", None) or {})
@@ -1828,6 +1833,7 @@ class TrajectoryOptimizer:
                 **({"held_rows": held_rows} if held_rows is not None else {}),
                 **({"neighbour_palm_contact": palm_record} if palm_record is not None else {}),
                 **({"placement_contact": placement_record} if placement_record is not None else {}),
+                **({"held_support_contact": hsc_record} if hsc_record is not None else {}),
                 **({"support_surface_offset": support_record} if support_record is not None else {}),
                 **({"lookahead": lookahead_record} if lookahead_record is not None else {}),
                 **self._ta_record(trajectory, reference),
