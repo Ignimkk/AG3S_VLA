@@ -994,6 +994,14 @@ class OracleVisibleEvidence:
     #: shadow paths); `d_o` (surface · band paths) keeps `other_points`. None (default) = `d_N` from `other_points`.
     dn_other_points: Optional[np.ndarray] = None
     # --- T96d — end
+    # --- T98 — begin: `d_o` of the surface · band paths without the support-plane samples (`esdf.surface_do_support`)
+    #: (4,) the support plane `[n, offset]` (unit normal; the plane `z_floor` was made from) and the RANSAC inlier
+    #: threshold (m). Both or neither. Given: the non-target samples with `|n·p − offset| ≤ threshold` leave `d_o`
+    #: (`oracle_visible_split`; the table is guarded by `z_floor`, not by being the nearest "other"). The τ protection `d_N`
+    #: of the solid still sees every sample unless T96b drops them. None (default) = `d_o` from every other sample.
+    do_plane: Optional[np.ndarray] = None
+    do_threshold_m: Optional[float] = None
+    # --- T98 — end
 
     def __post_init__(self) -> None:
         object.__setattr__(self, "target_points",
@@ -1028,6 +1036,20 @@ class OracleVisibleEvidence:
         if self.dn_other_points is not None:
             object.__setattr__(self, "dn_other_points", np.asarray(self.dn_other_points, np.float64).reshape(-1, 3))
         # --- T96d — end
+        # --- T98 — begin: the same normalisation and checks as `SolidOwned.dn_plane` (T96b)
+        if (self.do_plane is None) != (self.do_threshold_m is None):
+            raise ValueError("OracleVisibleEvidence: do_plane 과 do_threshold_m 은 함께 주거나 함께 빼야 합니다")
+        if self.do_plane is not None:
+            pl = np.asarray(self.do_plane, np.float64).reshape(4)
+            nn = float(np.linalg.norm(pl[:3]))
+            thr = self.do_threshold_m
+            if not (np.all(np.isfinite(pl)) and nn > 0.0):
+                raise ValueError(f"OracleVisibleEvidence.do_plane 은 유한한 [n, offset] (|n| > 0) 이어야 합니다: {self.do_plane!r}")
+            if isinstance(thr, bool) or not (np.isfinite(float(thr)) and float(thr) > 0.0):
+                raise ValueError(f"OracleVisibleEvidence.do_threshold_m 는 0 보다 큰 유한한 m 여야 합니다: {thr!r}")
+            object.__setattr__(self, "do_plane", pl / nn)
+            object.__setattr__(self, "do_threshold_m", float(thr))
+        # --- T98 — end
 
 
 # --- T78b — begin: hull fill of the fine target-free tier (`esdf.surface_hull_fill`) ---------------------------------
@@ -1459,6 +1481,16 @@ def oracle_visible_split(centres: np.ndarray, is_seed: np.ndarray, oracle: Oracl
         op = op[np.all((op >= lo) & (op <= hi), axis=1)]
     d_t = _nearest(tp, c)
     d_o = _nearest(op, c)
+    # --- T98 — begin: d_o of the surface · band paths without the support-plane samples (None = d_o as above)
+    d_o_all, n_do_dropped = d_o, None
+    if oracle.do_plane is not None:
+        n_do_dropped = 0
+        if len(op):
+            on_plane = np.abs(op @ oracle.do_plane[:3] - oracle.do_plane[3]) <= float(oracle.do_threshold_m)
+            n_do_dropped = int(on_plane.sum())
+            if n_do_dropped:
+                d_o = _nearest(op[~on_plane], c)
+    # --- T98 — end
     above = (np.ones(len(c), bool) if oracle.z_floor is None
              else c[:, 2] >= float(oracle.z_floor))
     surface = (d_t <= max_d) & (d_t < d_o) & above
@@ -1472,7 +1504,7 @@ def oracle_visible_split(centres: np.ndarray, is_seed: np.ndarray, oracle: Oracl
     t96 = None
     if sol is not None:
         # --- T96b — begin: d_N = d_o without the support-plane samples (D28; no plane = d_o, T96 as is)
-        d_N, n_dn_dropped = d_o, 0
+        d_N, n_dn_dropped = d_o_all, 0   # T98: d_o_all = d_o unless T98 dropped the support samples (d_N is not T98's)
         # --- T96d — begin: d_N's samples without the "ever target" cells (off: `op`, the lines below as before)
         op_dn, n_et = op, None
         if oracle.dn_other_points is not None:
@@ -1542,6 +1574,8 @@ def oracle_visible_split(centres: np.ndarray, is_seed: np.ndarray, oracle: Oracl
            "d_t": d_t, "d_o": d_o, "n_other_near": int(len(op))}
     if allowance_extra is not None:   # T78f (the key exists only when on)
         out["allowance_extra"] = allowance_extra
+    if n_do_dropped is not None:   # T98 (the key exists only when on)
+        out["n_do_support_dropped"] = n_do_dropped
     if t96 is not None:   # T96 (the key exists only when on): the solid fill voxels join the sign set
         out["sign"] = out["sign"] | t96["fill"]
         out["solid"] = t96
@@ -3796,6 +3830,8 @@ class CuroboFieldBuilder:
                      "n_removed_band": int(split["band"].sum())})
         if oracle.contact_allowance_m is not None:   # T78f — the seeds only the allowance removed
             info["n_allowance_extra"] = int(split["allowance_extra"].sum())
+        if "n_do_support_dropped" in split:   # T98 (the key exists only when on)
+            info["n_do_support_dropped"] = int(split["n_do_support_dropped"])
         # --- T96 — begin: the seeds of each path, the τ-protected ones and their trace (only when on)
         if sol_rec is not None:
             sp = split["solid"]

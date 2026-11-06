@@ -1484,6 +1484,17 @@ class EsdfConfig:
     #: False (default) = off (values · record keys as before).
     surface_removed_sign_free: bool = False
     # --- T96e — end
+    # --- T98 — begin (default off; `"include"` = every non-target sample counts in `d_o`, as before)
+    #: **The support plane's samples in `d_o`** (the nearest non-target sample the surface · band paths compare `d_t`
+    #: with). `"exclude"` = drop every non-target sample within `support_surface.distance_threshold` (the RANSAC inlier
+    #: threshold) of the support plane `surface_no_ball`'s `z_floor` was made from, so the table under a target whose
+    #: bottom was never seen does not make the target's lowest voxels "closer to another object". The table itself is
+    #: still guarded by `z_floor`; neighbour / crate / obstacle samples off that plane keep competing. Needs
+    #: `target_extent == "attention_surface"` + `surface_keep_last` + `surface_no_ball` (the plane under the region).
+    #: Record `target_exclusion.oracle.do_support`. `"include"` (default) = values · record keys as before.
+    surface_do_support: str = "include"
+    SURFACE_DO_SUPPORT = ("include", "exclude")
+    # --- T98 — end
 
     #: **T44c A5 — target 을 지운 거친 계층 (`coarse_no_target`) 을 한 겹 더 만들고 target-free 질의에
     #: 합성한다.** 기본 `False` = 예전 그대로 (값 비트 동일, 계층을 만들지도 않는다).
@@ -1802,6 +1813,17 @@ class EsdfConfig:
             raise AG3SConfigError("esdf.surface_removed_sign_free 는 target_extent='attention_surface' 의 손 층 지우기 "
                                   f"목록 위에서 정의됩니다 (target_extent={self.target_extent!r}) (T96e)")
         # --- T96e — end
+        # --- T98 — begin
+        if self.surface_do_support not in self.SURFACE_DO_SUPPORT:
+            raise AG3SConfigError(f"esdf.surface_do_support 는 {' · '.join(self.SURFACE_DO_SUPPORT)} 중 하나: "
+                                  f"{self.surface_do_support!r}")
+        if self.surface_do_support == "exclude" and not (
+                self.target_extent == "attention_surface" and self.surface_keep_last and self.surface_no_ball):
+            raise AG3SConfigError("esdf.surface_do_support='exclude' 는 target_extent='attention_surface' 의 마지막 채택 영역 "
+                                  "(surface_keep_last) 아래 받침면 (surface_no_ball 의 z_floor 평면) 위에서 정의됩니다 — 함께 "
+                                  f"켜십시오 (target_extent={self.target_extent!r}, surface_keep_last="
+                                  f"{self.surface_keep_last!r}, surface_no_ball={self.surface_no_ball!r}) (T98)")
+        # --- T98 — end
         # IFG-CL2
         if self.surface_hybrid_identity not in self.SURFACE_HYBRID_IDENTITIES:
             raise AG3SConfigError(

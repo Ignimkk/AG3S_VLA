@@ -99,3 +99,18 @@
     - **뺌 — 부호 수정 (T96e) seed 2 반복.** benchmark SL9 가 같은 수정 (수정안 B) 을 지금 closed-loop 로 재고 있고, P0m 유지 / 반영은 SL9 결과로 고르기로 했다 (17:0x 판정). 같은 채택 질문에 두 번째 근거를 만드는 일이라 겹침으로 본다.
     - **함 — 우선순위 7 (b) 받침면 guard (T98), 우선순위 5 옛 위치 비어 있음 (RB-Y1 closed-loop), 우선순위 8.** benchmark 의 받침면 작업 (SL8c 국소 받침면 · SL9b/c 받침 가중 균형) 은 Panda ATS 분할 · 표면 선택 graph 층이고, 7 (b) 는 RB-Y1 LTE 손 층의 지지면 guard 아래 잔여다 — 층 · 로봇이 다르다. T81 의 Panda 이식 (benchmark 계획 마지막) 과 RB-Y1 최종 편입 확인도 로봇 · 장면이 다르다. 새 기능은 기본 꺼짐 flag 로만 넣어 benchmark 공용 코드의 꺼짐 동작을 바꾸지 않는다.
   - ADOPTED_KO.md 요약표 A2 · A2 절 제목: "A8 까지만, A9 · P0m 에서는 뺌 (E0, T74 Q1)" 로 고침. `BENCHMARK_SL8_ATS_PROPOSALS_20261104_KO.md` commit.
+  - 21:1x lead — **T98 진단 (offline CPU) 결과, 7 (b) 를 "guard 높이 낮추기" 가 아니라 "guard 위 소유 판정에서 받침면 표본 빼기" 로 정함.**
+    - guard 로 센 957 voxel 중 builder guard 가 실제로 막은 것은 137 개 (14 %) 다. 나머지 820 개는 `z_floor` 위의 사과 바닥이다. T84 `causes()` 의 ½ voxel 허용폭 때문에 guard 로 세었고, 실제로는 탁자 표본이 `d_o` 로 경쟁해 남았다.
+    - `z_floor` − 실제 탁자는 중앙 6.45 mm 다 (여유 5 mm + RANSAC 약 1.45 mm).
+    - guard 값은 그대로 두고 기본 꺼짐 flag `--surface-do-support exclude` 로 고친다 (T96b D28 과 같은 규칙).
+    - 대안: guard 여유를 낮춤 — 효과 137 voxel 뿐, 탁자 접촉 위험.
+    - 틀렸을 때 다시 돌릴 실험: T98 재생 arm 에 `target_ball_pad_voxels` 0.5 판을 더한다.
+    - 자료: `outputs/2026-11-04_T98_받침면guard_잔여원인_재생/`, `T98.task.md` · `T98.impl.md`.
+  - **2026-11-05 01:3x KST lead — T98 재생 결과: 사전 기준 1b 미통과 → T98 멈춤, `--surface-do-support exclude` 는 기본 꺼짐 그대로, T99 에 넣지 않음.**
+    - 잔여 (쥐기 창 78 요청 중앙값) 11.53 → 10.11 % (−1.42 %p, 기준 1a 통과). 더 지운 voxel 중 탁자 · 바구니 0, 이웃 1.5 % (기준 2 통과).
+    - 그러나 노린 guard 위 820 voxel 은 820 → 820 이다 (기준 1b 미통과). 줄어든 것은 부호 문제 (1,163 → 854) · 이번 frame 미관측 (266 → 69) 같은 다른 원인이다.
+    - 21:1x 진단의 "탁자 표본이 `d_o` 로 경쟁해 남았다" 는 **틀렸다.** 받침면 inlier (평면 ± 8 mm) 를 빼도 820 개 모두 `nontarget_kept` 에 남는다. 이 voxel 의 target 표본 거리는 중앙 19 mm (표면 길 상한 30 mm 안) 다. 평면 밖의 다른 "다른" 표본이 이긴다. 그 표본은 기록에 없어 특정하지 못했다 (원인 층 추정: LTE 소유 판정 · 관측 segmentation 경계).
+    - 대안 (잔여가 줄었으니 T99 에 넣음) 을 고르지 않은 이유: 사전 기준이 "노린 원인을 고쳤는가" 를 요구했다. 결과를 보고 기준을 바꾸지 않는다.
+    - 다시 돌릴 조건: 서버가 소유 판정에서 이긴 "다른" 표본 (위치 · 표시 code) 을 기록하는 항목을 넣고, 820 을 다시 분해한다. guard 여유 0.5 판은 137 개만 다루므로 지금 돌리지 않는다.
+    - 첫 재생은 이전 세션 종료로 2026-11-04 23:53 KST 에 끊겼다. 끝난 P0m 재생은 그대로 쓰고, 끊긴 기록은 `replay/P0fD.killed_1453UTC` 로 옮겼다. P0m parity: refined 435 / 435 bit 동일.
+    - 자료: `outputs/2026-11-04_T98_받침면guard_잔여원인_재생/` (재생 절), storage `…5ad14af7febd/verify/T98/metrics/`.

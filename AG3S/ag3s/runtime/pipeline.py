@@ -802,6 +802,25 @@ class AG3S:
                "region_source": ("this_request" if surf.get("applied")
                                  else "last_accepted" if len(tp) else "none_yet"),
                "n_target_samples": int(len(tp))}
+        # --- T98 — begin: d_o of the surface · band paths without the support plane's samples (off: nothing here runs)
+        do_kw: dict[str, Any] = {}
+        if str(getattr(cfg, "surface_do_support", "include")) == "exclude":
+            do_rec: dict[str, Any] = {"mode": "exclude", "applied": False, "n_excluded": None}
+            plane = (self._support_surface_under(support_surfaces, tp.mean(axis=0))
+                     if z_src == "support_plane_under_region" and z_floor is not None and len(tp) else None)
+            if plane is None:
+                do_rec["why"] = ("no_z_floor" if z_floor is None
+                                 else "z_floor_not_from_support_plane" if z_src != "support_plane_under_region"
+                                 else "no_support_plane")
+            else:
+                thr = float(self.config.support_surface.distance_threshold)
+                n = np.asarray(plane.normal, np.float64).reshape(3)
+                nn = float(np.linalg.norm(n))
+                do_kw = {"do_plane": np.r_[n, float(plane.offset)], "do_threshold_m": thr}
+                do_rec.update({"applied": True, "why": "support_plane_under_region", "threshold_mm": round(thr * 1e3, 6),
+                               "plane": [round(float(v), 9) for v in np.r_[n / nn, float(plane.offset) / nn]]})
+            rec["do_support"] = do_rec
+        # --- T98 — end
         if ev is None:
             # No accepted region yet (or no manipulated geometry — the record says which): remove nothing.
             ev = OracleVisibleEvidence(target_points=np.zeros((0, 3)), other_points=op,
@@ -810,6 +829,10 @@ class AG3S:
                                        z_floor=z_floor)
             rec.update({"applied": False, "removes_nothing": True,
                         "why": f"keep_last_no_region ({rec.get('why')})"})
+            if "do_support" in rec:   # T98: nothing is removed this request
+                rec["do_support"] = {**rec["do_support"], "applied": False, "why": "keep_last_no_region"}
+        elif do_kw:   # T98
+            ev = dataclasses.replace(ev, **do_kw)
         return ev, rec
 
     # --- T78b — begin: hull fill of the hand layer just before the grasp (`esdf.surface_hull_fill`) -----------------
@@ -3902,6 +3925,13 @@ class AG3S:
                      or {})
             oracle_record["n_allowance_extra"] = split.get("n_allowance_extra")   # None = the builder did not split
         # --- T78f — end
+        # --- T98 — begin: the builder's count of dropped support samples into `target_exclusion.oracle.do_support`
+        if oracle_record is not None and isinstance(oracle_record.get("do_support"), dict):
+            stats = getattr(field, "stats", None)
+            split = (((stats.get("target_free") or {}).get("oracle_split") if isinstance(stats, dict) else None)
+                     or {})
+            oracle_record["do_support"]["n_excluded"] = split.get("n_do_support_dropped")   # None = no split
+        # --- T98 — end
         # --- T96 — begin: `target_exclusion.attention_surface.solid` = the pipeline record + the builder's voxel counts
         if bool(getattr(cfg, "surface_solid_owned", False)) and extent == "attention_surface":
             stats = getattr(field, "stats", None)

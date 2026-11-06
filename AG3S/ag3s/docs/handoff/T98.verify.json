@@ -1,0 +1,395 @@
+{
+ "_comment": "lead 가 직접 돌린 순차 실험 (진단 → 재생 → 지표). 숫자와 경로만, 해석 없음. 판정은 DECISIONS_20261104_3a_KO.md §4 (21:1x · 2026-11-05 01:3x) 와 사용자.",
+ "step": "T98",
+ "date": "2026-11-04 ~ 2026-11-05 (KST)",
+ "runs": [
+  {
+   "id": "T98-diag (offline CPU)",
+   "command": "bash /mnt/dev/AG3S_VLA-storage/results/development/20261104T205922+0900_f3cc91eeb8c2_5ad14af7febd/verify/T98/diag/run.sh",
+   "venv": ".venv-ag3s",
+   "raw_output": "/mnt/dev/AG3S_VLA-storage/results/development/20261104T205922+0900_f3cc91eeb8c2_5ad14af7febd/verify/T98/diag/diag_summary.json",
+   "rows": [
+    "/mnt/dev/AG3S_VLA-storage/results/development/20261104T205922+0900_f3cc91eeb8c2_5ad14af7febd/verify/T98/diag/diag_w0.json",
+    "/mnt/dev/AG3S_VLA-storage/results/development/20261104T205922+0900_f3cc91eeb8c2_5ad14af7febd/verify/T98/diag/diag_w1.json"
+   ],
+   "input": "T96e 고정 입력 재생 /mnt/dev/AG3S_VLA-storage/results/development/20261104T045052+0900_054748e6a73c_a02802211ca9/verify/T96e/replay (B0p · P0f · P0fs)"
+  },
+  {
+   "id": "T98-replay (공유 GPU lock, est 30 GiB, port 8313)",
+   "command": "bash /mnt/dev/AG3S_VLA-storage/results/development/20261104T205922+0900_f3cc91eeb8c2_5ad14af7febd/verify/T98/chain.sh",
+   "venv": ".venv-openpi-live (server = snapshot_t98)",
+   "raw_output": "/mnt/dev/AG3S_VLA-storage/results/development/20261104T205922+0900_f3cc91eeb8c2_5ad14af7febd/verify/T98/replay/run_replay.out",
+   "note": "첫 실행 2026-11-04 23:53 KST 에 이전 세션 종료로 rc -15; P0f 는 끝난 기록 재사용, 끊긴 P0fD 는 replay/P0fD.killed_1453UTC 로 이동, 첫 log 는 replay/run_replay.1st.out. 재실행 00:55–01:21 KST rc 0"
+  },
+  {
+   "id": "T98-metrics (CPU, 2 worker)",
+   "raw_output": "/mnt/dev/AG3S_VLA-storage/results/development/20261104T205922+0900_f3cc91eeb8c2_5ad14af7febd/verify/T98/metrics/t98_metrics.json",
+   "rows": [
+    "/mnt/dev/AG3S_VLA-storage/results/development/20261104T205922+0900_f3cc91eeb8c2_5ad14af7febd/verify/T98/metrics/part_w0.json",
+    "/mnt/dev/AG3S_VLA-storage/results/development/20261104T205922+0900_f3cc91eeb8c2_5ad14af7febd/verify/T98/metrics/part_w1.json"
+   ],
+   "pairing": "/mnt/dev/AG3S_VLA-storage/results/development/20261104T205922+0900_f3cc91eeb8c2_5ad14af7febd/verify/T98/metrics/pairing_t98.json"
+  },
+  {
+   "id": "T98-why820 (CPU, 추가 분해)",
+   "command": "/mnt/dev/AG3S_VLA-storage/results/development/20261104T205922+0900_f3cc91eeb8c2_5ad14af7febd/verify/T98/metrics/why820/why820.py",
+   "raw_output": [
+    "/mnt/dev/AG3S_VLA-storage/results/development/20261104T205922+0900_f3cc91eeb8c2_5ad14af7febd/verify/T98/metrics/why820/why820_w0.json",
+    "/mnt/dev/AG3S_VLA-storage/results/development/20261104T205922+0900_f3cc91eeb8c2_5ad14af7febd/verify/T98/metrics/why820/why820_w1.json"
+   ]
+  }
+ ],
+ "code_state": {
+  "repo": "AG3S_VLA-development",
+  "head": "f3cc91ee",
+  "snapshot": "/mnt/dev/AG3S_VLA-storage/results/development/20261104T205922+0900_f3cc91eeb8c2_5ad14af7febd/verify/T98/snapshot_t98 (HEAD + 작업 트리, 8156 files; 기본 꺼짐 T94q CBF 미커밋 코드 포함)",
+  "make_snapshot": "/mnt/dev/AG3S_VLA-storage/results/development/20261104T205922+0900_f3cc91eeb8c2_5ad14af7febd/verify/T98/verify/T98/make_snapshot.sh"
+ },
+ "definitions": {
+  "window": "손바닥–사과 ≤ 150 mm 이고 아직 안 쥔 요청 (t96e_replay_metrics.py 그대로)",
+  "residual": "정답 사과 표면 voxel 중 손 층 값 ≤ 0 인 비율, 바닥 띠 (사과 바닥 + 6 mm 이하) 제외, 요청 중앙값",
+  "causes": "T84 t84_fail_reason.causes() 그대로",
+  "guard_above": "causes = '지지면 guard 아래' 이고 voxel 중심 z ≥ 서버 z_floor",
+  "guard_below": "같은 분류이고 중심 z < z_floor",
+  "freed_by_class": "P0fD 대 P0f 에서 새로 지워진 voxel 의 MuJoCo GT 분류 (T83 규칙, TM.cls_of)",
+  "arms": {
+   "P0f": "기록 B0 서버 인자 + --surface-hull-fill --surface-contact-allowance-mm 10",
+   "P0fD": "P0f + --surface-do-support exclude",
+   "P0fsD": "P0f + --surface-removed-sign-free --surface-do-support exclude",
+   "P0f_e / P0fs_e": "T96e 재생의 P0f / P0fs (다시 돌리지 않음)"
+  },
+  "criteria_prefixed": "T98.task.md §4"
+ },
+ "numbers": {
+  "diag": {
+   "n_window_requests": 87,
+   "B0p": {
+    "n_left_nb": 3845,
+    "n_vox_nb": 28238,
+    "causes": {
+     "target 표본에서 멂 (제거 후보 아님)": 1000,
+     "제거 목록에 있으나 손 층 값 <= 0": 1447,
+     "지지면 guard 아래": 957,
+     "이번 frame 에 안 보임 (기억만)": 392,
+     "다른 표면 표본이 더 가까움": 49
+    },
+    "guard_voxels": {
+     "n": 957,
+     "below": 137,
+     "tol": 820
+    },
+    "guard_centre_minus_zfloor_mm_p10_50_90": [
+     -0.31,
+     1.09,
+     2.37
+    ],
+    "guard_centre_minus_table_mm_p10_50_90": [
+     6.22,
+     7.78,
+     8.77
+    ],
+    "zfloor_minus_table_mm_p10_50_90": [
+     6.32,
+     6.45,
+     6.69
+    ],
+    "zfloor_minus_apple_bottom_mm_p10_50_90": [
+     6.32,
+     6.47,
+     6.75
+    ],
+    "z_floor_sources": {
+     "support_plane_under_region": 78
+    },
+    "table_top_minus_apple_bottom_mm_p10_50_90": [
+     0.01,
+     0.01,
+     0.15
+    ]
+   },
+   "P0f": {
+    "n_left_nb": 3170,
+    "n_vox_nb": 28238,
+    "causes": {
+     "target 표본에서 멂 (제거 후보 아님)": 776,
+     "제거 목록에 있으나 손 층 값 <= 0": 1163,
+     "지지면 guard 아래": 957,
+     "이번 frame 에 안 보임 (기억만)": 266,
+     "다른 표면 표본이 더 가까움": 8
+    },
+    "guard_voxels": {
+     "n": 957,
+     "below": 137,
+     "tol": 820
+    },
+    "guard_centre_minus_zfloor_mm_p10_50_90": [
+     -0.31,
+     1.09,
+     2.37
+    ],
+    "guard_centre_minus_table_mm_p10_50_90": [
+     6.22,
+     7.78,
+     8.77
+    ],
+    "zfloor_minus_table_mm_p10_50_90": [
+     6.32,
+     6.45,
+     6.69
+    ],
+    "zfloor_minus_apple_bottom_mm_p10_50_90": [
+     6.32,
+     6.47,
+     6.75
+    ],
+    "z_floor_sources": {
+     "support_plane_under_region": 78
+    },
+    "table_top_minus_apple_bottom_mm_p10_50_90": [
+     0.01,
+     0.01,
+     0.15
+    ]
+   },
+   "P0fs": {
+    "n_left_nb": 2007,
+    "n_vox_nb": 28238,
+    "causes": {
+     "target 표본에서 멂 (제거 후보 아님)": 776,
+     "지지면 guard 아래": 957,
+     "이번 frame 에 안 보임 (기억만)": 266,
+     "다른 표면 표본이 더 가까움": 8
+    },
+    "guard_voxels": {
+     "n": 957,
+     "below": 137,
+     "tol": 820
+    },
+    "guard_centre_minus_zfloor_mm_p10_50_90": [
+     -0.31,
+     1.09,
+     2.37
+    ],
+    "guard_centre_minus_table_mm_p10_50_90": [
+     6.22,
+     7.78,
+     8.77
+    ],
+    "zfloor_minus_table_mm_p10_50_90": [
+     6.32,
+     6.45,
+     6.69
+    ],
+    "zfloor_minus_apple_bottom_mm_p10_50_90": [
+     6.32,
+     6.47,
+     6.75
+    ],
+    "z_floor_sources": {
+     "support_plane_under_region": 78
+    },
+    "table_top_minus_apple_bottom_mm_p10_50_90": [
+     0.01,
+     0.01,
+     0.15
+    ]
+   }
+  },
+  "replay": {
+   "n_requests": 435,
+   "n_window": 78,
+   "parity_P0f_vs_T96e": {
+    "refined_identical": 435,
+    "grid_identical": 316,
+    "n": 435
+   },
+   "P0f_e": {
+    "frac_left_nb_request_median": 0.1153,
+    "n_left_nb": 3170,
+    "n_vox_nb": 28238,
+    "guard_above": 820,
+    "guard_below": 137,
+    "causes": {
+     "target 표본에서 멂 (제거 후보 아님)": 776,
+     "제거 목록에 있으나 손 층 값 <= 0": 1163,
+     "지지면 guard 아래": 957,
+     "이번 frame 에 안 보임 (기억만)": 266,
+     "다른 표면 표본이 더 가까움": 8
+    },
+    "do_support_applied": 0
+   },
+   "P0f": {
+    "frac_left_nb_request_median": 0.1153,
+    "n_left_nb": 3170,
+    "n_vox_nb": 28238,
+    "guard_above": 820,
+    "guard_below": 137,
+    "causes": {
+     "target 표본에서 멂 (제거 후보 아님)": 776,
+     "제거 목록에 있으나 손 층 값 <= 0": 1163,
+     "지지면 guard 아래": 957,
+     "이번 frame 에 안 보임 (기억만)": 266,
+     "다른 표면 표본이 더 가까움": 8
+    },
+    "do_support_applied": 0
+   },
+   "P0fD": {
+    "frac_left_nb_request_median": 0.1011,
+    "n_left_nb": 2605,
+    "n_vox_nb": 28238,
+    "guard_above": 820,
+    "guard_below": 137,
+    "causes": {
+     "target 표본에서 멂 (제거 후보 아님)": 717,
+     "지지면 guard 아래": 957,
+     "제거 목록에 있으나 손 층 값 <= 0": 854,
+     "이번 frame 에 안 보임 (기억만)": 69,
+     "다른 표면 표본이 더 가까움": 8
+    },
+    "do_support_applied": 78
+   },
+   "P0fs_e": {
+    "frac_left_nb_request_median": 0.07765,
+    "n_left_nb": 2007,
+    "n_vox_nb": 28238,
+    "guard_above": 820,
+    "guard_below": 137,
+    "causes": {
+     "target 표본에서 멂 (제거 후보 아님)": 776,
+     "지지면 guard 아래": 957,
+     "이번 frame 에 안 보임 (기억만)": 266,
+     "다른 표면 표본이 더 가까움": 8
+    },
+    "do_support_applied": 0
+   },
+   "P0fsD": {
+    "frac_left_nb_request_median": 0.0701,
+    "n_left_nb": 1751,
+    "n_vox_nb": 28238,
+    "guard_above": 820,
+    "guard_below": 137,
+    "causes": {
+     "target 표본에서 멂 (제거 후보 아님)": 717,
+     "지지면 guard 아래": 957,
+     "이번 frame 에 안 보임 (기억만)": 69,
+     "다른 표면 표본이 더 가까움": 8
+    },
+    "do_support_applied": 78
+   },
+   "P0fD_vs_P0f": {
+    "n_freed": 24041,
+    "freed_by_class": {
+     "apple": 15619,
+     "none": 7960,
+     "fruit": 361,
+     "robot": 101
+    },
+    "table_crate": 0,
+    "neighbour_obstacle": 361,
+    "neighbour_frac": 0.015,
+    "reoccupied_by_class": {},
+    "hold_flips": {
+     "P0f execute -> HOLD": 1
+    },
+    "refined_identical": 244,
+    "dpalm_mm_median_max": [
+     0.0,
+     132.76
+    ]
+   },
+   "P0fsD_vs_P0fs_e": {
+    "n_freed": 14960,
+    "freed_by_class": {
+     "apple": 6937,
+     "none": 7598,
+     "fruit": 348,
+     "robot": 77
+    },
+    "table_crate": 0,
+    "neighbour_obstacle": 348,
+    "neighbour_frac": 0.0233,
+    "reoccupied_by_class": {},
+    "hold_flips": {
+     "P0fs_e HOLD -> execute": 1
+    },
+    "refined_identical": 247,
+    "dpalm_mm_median_max": [
+     0.0,
+     174.97
+    ]
+   },
+   "criteria": {
+    "1_residual_drop_pp": 1.42,
+    "1_guard_above_reduction": 0.0,
+    "2_table_crate": 0,
+    "2_neighbour_frac": 0.015,
+    "pass": false
+   }
+  },
+  "why820": {
+   "n": 968,
+   "lists": {
+    "nontarget_kept_ijk": 820
+   },
+   "d_t_mm_p10_p50_p90": [
+    9.8,
+    19.0,
+    27.4
+   ],
+   "n_d_t_le_10mm": 110,
+   "n_d_t_le_30mm": 932
+  },
+  "scene": {
+   "item": "HURDLE_ep850_s8503",
+   "request": 15,
+   "palm_apple_mm": 17.3,
+   "P0f": {
+    "n_left_nb": 50,
+    "d_t_mm_median": 16.5
+   },
+   "P0fD": {
+    "n_left_nb": 46,
+    "d_t_mm_median": 16.5
+   }
+  }
+ },
+ "lead_judgment_quoted": {
+  "21:1x": "DECISIONS_20261104_3a_KO.md §4 21:1x",
+  "2026-11-05 01:3x": "DECISIONS_20261104_3a_KO.md §4 2026-11-05 01:3x"
+ },
+ "figures": [
+  {
+   "path": "AG3S/ag3s/docs/figures/t98-replay-residual-causes.png",
+   "kind": "graph",
+   "sidecar": "AG3S/ag3s/docs/figures/t98-replay-residual-causes.json"
+  },
+  {
+   "path": "AG3S/ag3s/docs/figures/t98-replay-scene-hurdle850.png",
+   "kind": "real scene",
+   "sidecar": "AG3S/ag3s/docs/figures/t98-replay-scene-hurdle850.json"
+  },
+  {
+   "path": "outputs/2026-11-04_T98_받침면guard_잔여원인_재생/graph_guard_heights_causes.png",
+   "kind": "graph (진단)",
+   "sidecar": "outputs/2026-11-04_T98_받침면guard_잔여원인_재생/figures.json"
+  },
+  {
+   "path": "outputs/2026-11-04_T98_받침면guard_잔여원인_재생/scene_wrist_section_HURDLE850_req15.png",
+   "kind": "real scene + section (진단)",
+   "sidecar": "outputs/2026-11-04_T98_받침면guard_잔여원인_재생/figures.json"
+  }
+ ],
+ "outputs": "outputs/2026-11-04_T98_받침면guard_잔여원인_재생",
+ "parity": {
+  "refined_identical": 435,
+  "grid_identical": 316,
+  "n": 435
+ },
+ "verdict": "사전 기준 1a 충족 (잔여 −1.42 %p), 1b 불충족 (guard 위 820 → 820), 2 충족 (탁자 · 바구니 0, 이웃 1.5 %).",
+ "not_measured": [
+  "guard 위 820 voxel 을 소유 판정에서 이긴 비 target 표본의 위치 · 표시 — 서버 기록에 비 target 표본 cloud 가 없다",
+  "closed-loop (T98 미통과로 T99 에 넣지 않음)",
+  "전체 tests/ 묶음 (관련 test 만: test_t98_do_support 10 통과, 관련 173 통과 · 29 skip)",
+  "why820 의 968 중 어느 목록에도 없는 148 voxel 의 개별 원인"
+ ]
+}

@@ -1147,6 +1147,7 @@ def target_exclusion_section(args) -> dict:
     out.update(_t96c_esdf_keys(args))   # T96c (given flag only)
     out.update(_t96d_esdf_keys(args))   # T96d (given flag only)
     out.update(_t96e_esdf_keys(args))   # T96e (given flag only)
+    out.update(_t98_esdf_keys(args))   # T98 (given flag only)
     if getattr(args, "hybrid_identity", None) is not None:   # IFG-CL2 (given flag only)
         out["surface_hybrid_identity"] = str(args.hybrid_identity)
     if getattr(args, "hybrid_other_exclude_voxels", None) is not None:   # IFG-CL2b (given flag only)
@@ -1700,6 +1701,13 @@ def build_ag3s(model_xml: str, *, voxel: float, range_max: float, links: str,
                                 "(남은 seed 까지 양수 거리) 를 받는다 — 남은 seed 1.5 voxel 안이어도 (부호 교정 순수 판정 무시, "
                                 "남은 seed · 다른 voxel 은 그대로, 기록 oracle_split.removed_sign_free) !!!")
             # --- T96e — end
+            # --- T98 — begin
+            if getattr(e, "surface_do_support", "include") == "exclude":
+                logging.warning("!!! AG3S T98 — 손 층 표면 · 띠 길의 d_o 에서 z_floor 를 만든 받침면의 inlier (%.1f mm 안) 비 target "
+                                "표본을 뺀다. z_floor 아래는 그대로 guard 가 지킨다. 평면 밖 이웃 표본은 계속 경쟁한다 (기록 "
+                                "target_exclusion.oracle.do_support) !!!",
+                                float(ag3s.config.support_surface.distance_threshold) * 1e3)
+            # --- T98 — end
         if e.target_extent == "attention_surface_hybrid":
             # IFG-CL2 — ball_owned range, attention-surface protection.
             logging.warning("!!! AG3S IFG-CL2 — target_extent = attention_surface_hybrid (identity %s): 미세 target-free "
@@ -2554,6 +2562,13 @@ def build_parser() -> argparse.ArgumentParser:
                          "교정이 건너뛰던 것 포함). 남은 seed · 다른 voxel 은 그대로. --target-extent attention-surface 와 함께만. "
                          "기본 off")
     # --- T96e — end
+    # --- T98 — begin (default include = off)
+    ap.add_argument("--surface-do-support", default=None, choices=("include", "exclude"),
+                    help="T98 — 표면 · 띠 길의 d_o (가장 가까운 비 target 표본) 에 받침면 표본을 넣는가. include (기본 = 지금 "
+                         "그대로) | exclude = z_floor 를 만든 받침면에서 RANSAC inlier 문턱 (support_surface."
+                         "distance_threshold) 안 비 target 표본을 d_o 에서 뺀다 (탁자는 z_floor 가 지킨다). "
+                         "--target-extent attention-surface · --surface-keep-last · --surface-no-ball 와 함께만")
+    # --- T98 — end
     # --- T96d — begin (D34; default off)
     ap.add_argument("--surface-solid-dn-ever-target", action="store_true",
                     help="T96d — d_N (모든 길의 τ 보호 · solid 길 · 그림자 길) 에서 이 episode 동안 한 번이라도 target (code 1, "
@@ -3176,6 +3191,7 @@ def ifg_cl1_record_meta(args) -> dict:
     out.update(_t96c_esdf_keys(args))   # T96c (only when on)
     out.update(_t96d_esdf_keys(args))   # T96d (only when on)
     out.update(_t96e_esdf_keys(args))   # T96e (only when on)
+    out.update(_t98_esdf_keys(args))   # T98 (only when on)
     return out
 
 
@@ -3273,6 +3289,27 @@ def _t96e_reject(ap, args) -> None:
         ap.error("--surface-removed-sign-free 는 --target-extent attention-surface 의 손 층 지우기 목록에 거는 규칙입니다 — "
                  "그대로 띄우면 효과가 있었다고 믿게 됩니다")
 # --- T96e — end
+
+
+# --- T98 — begin: d_o without the support plane's samples (default include = off) ------------------------------------
+def _t98_esdf_keys(args) -> dict:
+    """T98 — `esdf.surface_do_support` only when `--surface-do-support exclude` is given (absent / include = config default)."""
+    return {"surface_do_support": "exclude"} if getattr(args, "surface_do_support", None) == "exclude" else {}
+
+
+def _t98_reject(ap, args) -> None:
+    """T98 — `--surface-do-support exclude` needs the plane under the accepted region (`--surface-no-ball`'s `z_floor`)."""
+    if getattr(args, "surface_do_support", None) != "exclude":
+        return
+    if getattr(args, "target_extent", None) != "attention-surface":
+        ap.error("--surface-do-support exclude 는 --target-extent attention-surface 의 손 층 d_o 규칙입니다 — 그대로 띄우면 "
+                 "효과가 있었다고 믿게 됩니다")
+    missing = [f for f, a in (("--surface-keep-last", "surface_keep_last"), ("--surface-no-ball", "surface_no_ball"))
+               if not getattr(args, a, False)]
+    if missing:
+        ap.error(f"--surface-do-support exclude 는 {' · '.join(missing)} 와 함께만 줄 수 있습니다 (마지막 채택 영역 · z_floor 를 "
+                 "만든 받침면)")
+# --- T98 — end
 
 
 def reject_t57a_flags(ap: argparse.ArgumentParser, args) -> None:
@@ -3902,6 +3939,7 @@ def reject_bad_flag_combinations(ap: argparse.ArgumentParser, args) -> None:
     _t96c_reject(ap, args)   # T96c
     _t96d_reject(ap, args)   # T96d
     _t96e_reject(ap, args)   # T96e
+    _t98_reject(ap, args)   # T98
     # T78 갈래 A — end
     if oracle_on:
         # T46f A14c — `none` (예외 없음, T46f A14) 도 `relax` 처럼 target-free 계층을 만들지 않는다: oracle 이 바꿀
