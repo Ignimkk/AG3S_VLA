@@ -634,6 +634,74 @@ def inside_robot_spheres(points: np.ndarray, spheres: dict) -> np.ndarray:
     return out
 
 
+# --- SL16 HVC — begin: the hand voxel carve (`AG3S.hand_voxel_carve`; off: nothing below is called) -----------------
+def inside_sphere_union(points: np.ndarray, centres: np.ndarray, radii: np.ndarray, z_min: Optional[np.ndarray] = None,
+                        *, chunk: int = 128) -> np.ndarray:
+    """`(N,)` bool -- which `points` lie inside at least one sphere (`|p - c| <= r`) whose floor `z_min` they are not below.
+
+    Exact (brute force over the spheres inside the points' reach, in chunks) -- unlike `inside_robot_spheres` it does not stop at the
+    16 nearest centres, which matters for the hundreds of overlapping hand spheres. Pure numpy (the CPU tests read it).
+    """
+    p = np.asarray(points, np.float64).reshape(-1, 3)
+    c = np.asarray(centres, np.float64).reshape(-1, 3)
+    r = np.asarray(radii, np.float64).reshape(-1)
+    zm = np.full(len(c), -np.inf) if z_min is None else np.asarray(z_min, np.float64).reshape(-1)
+    out = np.zeros(len(p), bool)
+    if not len(p) or not len(c):
+        return out
+    lo, hi = (c - r[:, None]).min(axis=0), (c + r[:, None]).max(axis=0)
+    cand = np.flatnonzero(np.all((p >= lo) & (p <= hi), axis=1))
+    for i in range(0, len(cand), chunk):
+        idx = cand[i:i + chunk]
+        d2 = ((p[idx, None, :] - c[None, :, :]) ** 2).sum(axis=2)
+        hit = (d2 <= (r * r)[None, :]) & (p[idx, 2][:, None] >= zm[None, :])
+        out[idx] = hit.any(axis=1)
+    return out
+
+
+def hand_carve_hits(points: np.ndarray, spec: dict) -> tuple[np.ndarray, dict]:
+    """SL16 HVC -- which occupied voxel centres `points` (N, 3) the hand carve frees, and the counts that explain it.
+
+    `spec` (pipeline `_hand_carve_spec`): `centres` / `radii` / `z_min` = the carve volume (union of spheres, the floor under each sphere
+    = support plane + pad), `destination` / `dest_pad` (D2's rule: the crate is never eroded), `near` = `{"centres", "radii"}` or None
+    (`trail`: only voxels inside this too -- within `near_m` of the hand now), `protect_ball` = `(centre, radius)` or None and
+    `protect_points` / `protect_tol` (the manipulated target's volume: never freed). Returns `(hit, info)`;
+    `info` = n_in_volume (inside the spheres, before the floor / destination / target rules), n_excluded_floor_or_destination,
+    n_excluded_target, n_freed.
+    """
+    from scipy.spatial import cKDTree
+
+    p = np.asarray(points, np.float64).reshape(-1, 3)
+    c, r = np.asarray(spec["centres"], np.float64).reshape(-1, 3), np.asarray(spec["radii"], np.float64).reshape(-1)
+    volume = inside_sphere_union(p, c, r)
+    if spec.get("near") is not None:
+        near = spec["near"]
+        volume &= inside_sphere_union(p, near["centres"], near["radii"])
+    hit = volume & inside_sphere_union(p, c, r, spec.get("z_min"))
+    dest = spec.get("destination")
+    if hit.any() and dest is not None and len(dest):
+        dd, _ = cKDTree(np.asarray(dest, np.float64).reshape(-1, 3)).query(
+            p[hit], distance_upper_bound=float(spec.get("dest_pad", 0.0)))
+        idx = np.flatnonzero(hit)
+        hit[idx[np.isfinite(dd)]] = False
+    n_floor_dest = int(volume.sum() - hit.sum())
+    protected = np.zeros(len(p), bool)
+    ball = spec.get("protect_ball")
+    if ball is not None:
+        protected |= np.linalg.norm(p - np.asarray(ball[0], np.float64).reshape(1, 3), axis=1) <= float(ball[1])
+    pp = spec.get("protect_points")
+    if pp is not None and len(pp) and hit.any():
+        dd, _ = cKDTree(np.asarray(pp, np.float64).reshape(-1, 3)).query(
+            p[hit], distance_upper_bound=float(spec.get("protect_tol", 0.0)))
+        idx = np.flatnonzero(hit)
+        protected[idx[np.isfinite(dd)]] = True
+    n_target = int((hit & protected).sum())
+    hit &= ~protected
+    return hit, {"n_in_volume": int(volume.sum()), "n_excluded_floor_or_destination": n_floor_dest,
+                 "n_excluded_target": n_target, "n_freed": int(hit.sum())}
+# --- SL16 HVC -- end
+
+
 @dataclasses.dataclass
 class TargetLayerRequest:
     """AG3S-TASK-DYNAMIC-MAP ① — what the target-only TSDF needs this frame (pipeline `_target_layer_request`).
@@ -2146,6 +2214,7 @@ class CuroboFieldBuilder:
                oracle_evidence: Optional[OracleVisibleEvidence] = None,
                surface_protect: Optional[SurfaceProtectEvidence] = None,
                robot_free_spheres: Optional[dict] = None,
+               hand_carve: Optional[dict] = None,
                target_layer: Optional[TargetLayerRequest] = None,
                roi_points: Optional[Sequence[Optional[np.ndarray]]] = None,
                grasp_corridor: Optional[Any] = None) -> CuroboEsdfField:
@@ -2277,6 +2346,13 @@ class CuroboFieldBuilder:
             if itg_fine is not None:
                 dynamic["robot_free"]["fine_tsdf"] = self._free_inside_robot(itg_fine, robot_free_spheres,
                                                                              self.fine_truncation)
+        hand_stats = None
+        self._hand_carve_freed = None   # SL16 HVC: this request's freed voxel centres (the recorder writes them; None when off)
+        if hand_carve is not None:
+            # SL16 HVC: the hand's own voxels (current / trail) in the FINE TSDF, before the ESDF is made from it.
+            if itg_fine is None:
+                raise ValueError("hand_carve 는 미세 TSDF (esdf.fine_voxel_size) 에만 걸립니다 -- 미세 계층이 없습니다")
+            hand_stats = self._carve_hand(itg_fine, hand_carve, self.fine_truncation)
         if bool(getattr(cfg, "free_space_carve", False)):
             # D1: occupied voxels a depth ray of this frame passed through.
             margin_cfg = getattr(cfg, "free_space_carve_margin", None)
@@ -2543,6 +2619,8 @@ class CuroboFieldBuilder:
                               "n_voxels_freed": freed}
         if dynamic:   # AG3S-DYNAMIC-FIELD D1 · D2 (only when one is on)
             stats["dynamic"] = dynamic
+        if hand_stats is not None:   # SL16 HVC (only when on)
+            stats["hand_voxel_carve"] = hand_stats
         if tl_stats is not None:   # AG3S-TASK-DYNAMIC-MAP ① (only when on)
             stats["target_layer"] = tl_stats
         if roi_stats is not None:   # AG3S-TASK-DYNAMIC-MAP ② (only when on)
@@ -2600,6 +2678,8 @@ class CuroboFieldBuilder:
         # T44 I0: target-free 계층에서 **실제로** 지운 seed 의 ijk (+ 그 계층의 origin/voxel) —
         # `--record-constraints` 가 chunk npz 에 싣는다. 공이 없으면 None.
         field.exclusion_trace = self._exclusion_trace(free_tiers)
+        if hand_stats is not None:   # SL16 HVC (only when on): the freed voxels' centres, for the record (`hand_carve_freed_centres`)
+            field.hand_carve_freed = self._hand_carve_freed
         # T44c A5: 거친 target-free 계층의 trace (지운 seed · 공유로 보존한 seed 의 ijk). 없으면 None.
         field.coarse_exclusion_trace = (None if coarse_free_tier is None
                                         else self._exclusion_trace([coarse_free_tier]))
@@ -3323,6 +3403,33 @@ class CuroboFieldBuilder:
         self._set_free(itg, pool[hit], li[hit], truncation)
         return {"n_occupied": int(len(pool)), "n_freed": int(hit.sum()), "margin_m": round(m, 6),
                 "per_camera": per}
+
+    def _carve_hand(self, itg, spec: dict, truncation: float) -> dict:
+        """SL16 HVC -- set **free** the occupied voxels of this (fine) TSDF inside the hand carve volume (`hand_carve_hits`).
+
+        Only the blocks that overlap the volume's bounding box are read. Returns the record `{mode, r_mm, n_voxels_freed, ...}`
+        (`stats["hand_voxel_carve"]`).
+        """
+        c = np.asarray(spec["centres"], np.float64).reshape(-1, 3)
+        r = np.asarray(spec["radii"], np.float64).reshape(-1)
+        rec = {"mode": spec["mode"], "r_mm": round(float(spec["r_m"]) * 1000.0, 6), "n_voxels_freed": 0, "n_spheres": int(len(c)),
+               "n_occupied_in_box": 0, "applied": bool(len(c))}
+        for k in ("near_mm", "history"):
+            if k in spec:
+                rec[k] = spec[k]
+        if not len(c):
+            return rec
+        box = [(c.min(axis=0) - r.max(), c.max(axis=0) + r.max())]
+        pool, li, centres = self.occupied_voxels(itg, boxes=box)
+        rec["n_occupied_in_box"] = int(len(pool))
+        if not len(pool):
+            return rec
+        hit, info = hand_carve_hits(centres, spec)
+        self._set_free(itg, pool[hit], li[hit], truncation)
+        self._hand_carve_freed = np.asarray(centres[hit], np.float32).reshape(-1, 3)
+        rec.update(info)
+        rec["n_voxels_freed"] = int(hit.sum())
+        return rec
 
     def _free_inside_robot(self, itg, spheres: dict, truncation: float) -> dict:
         """AG3S-DYNAMIC-FIELD D2 — set **free** the occupied voxels of this TSDF inside the robot's shrunk spheres."""

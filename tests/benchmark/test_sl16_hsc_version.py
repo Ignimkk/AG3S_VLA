@@ -28,7 +28,7 @@ EARLIER_ARGV_SHA256 = "568968bef41a8685b0982429b3ae6afa6d1544d0a18cbfd2242a8bae8
 def test_every_earlier_versions_server_argv_is_bit_identical():
     from AG3S.adapters.panda import profile as pf
 
-    old = {v: a for v, a in path_independent_argv(pf).items() if v not in pf.SL16_HSC_VERSIONS}
+    old = {v: a for v, a in path_independent_argv(pf).items() if v not in pf.SL16_HSC_VERSIONS and v not in pf.SL16_HVC_VERSIONS}
     assert len(old) == 69
     assert hashlib.sha256(json.dumps(old, sort_keys=True).encode()).hexdigest() == EARLIER_ARGV_SHA256
     assert not any("--held-support-contact" in a for a in old.values())

@@ -692,6 +692,19 @@ HELD_SUPPORT_CONTACT_FLAGS: tuple[str, ...] = ("--held-support-contact",)
 SL16_HSC_VERSION = "AG3S-final-panda-v3-e0to-pc-openrule-hsc"
 SL16_HSC_VERSIONS: tuple[str, ...] = (SL16_HSC_VERSION,)
 AG3S_VERSIONS[SL16_HSC_VERSION] = tuple(AG3S_VERSIONS[SL14_OPENRULE_VERSION]) + HELD_SUPPORT_CONTACT_FLAGS
+#: SL16 HVC (task SL16, lead 2026-11-06): the occupied FINE voxels the MuJoCo-GT hand owns sit 13.6 mm (median) / 29 mm (p95) from the
+#: self-filter's hand spheres, while the depth leak is 4 mm (p95; SL15 sfhand) -- the field holds hand-owned voxels the filter does not
+#: reach, and TrajOpt avoids them. ``AG3S/trajopt/experiments/panda_hvc_origin.py`` split them by the fixed rule (current / trail /
+#: smear; ``AG3S/ag3s/docs/handoff/SL16.hvc.data.json``): trail share 0.21 < 0.5 -> mode ``current``, r = p90 of the hand-voxel distance
+#: (23.6 mm) capped at 20 mm. ``-pc-openrule-hvc`` = ``-pc-openrule`` + ``--hand-voxel-carve current --hand-voxel-carve-mm 20``. Like
+#: the other SL14 / SL15 versions: not in :data:`PC_LATCH_VERSIONS`, no ``-lsfork`` twin, and the record dests join a record only when
+#: set (:func:`version_flag_values`). Panda only (the RB-Y1 server refuses the flags).
+SL16_HVC_MODE = "current"
+SL16_HVC_MM = 20.0
+HAND_VOXEL_CARVE_FLAGS: tuple[str, ...] = ("--hand-voxel-carve", SL16_HVC_MODE, "--hand-voxel-carve-mm", f"{SL16_HVC_MM:g}")
+SL16_HVC_VERSION = "AG3S-final-panda-v3-e0to-pc-openrule-hvc"
+SL16_HVC_VERSIONS: tuple[str, ...] = (SL16_HVC_VERSION,)
+AG3S_VERSIONS[SL16_HVC_VERSION] = tuple(AG3S_VERSIONS[SL14_OPENRULE_VERSION]) + HAND_VOXEL_CARVE_FLAGS
 
 
 def needs_oracle_grasp(version: str) -> bool:
@@ -726,7 +739,7 @@ def is_final_version(version: str) -> bool:
             or str(version) in SL12_VERSIONS or str(version) in SL13_VERSIONS   # SL12 / SL13
             or str(version) in SL14_VERSIONS or str(version) in SL15_NTM_VERSIONS
             or str(version) in SL15_SFHAND_VERSIONS
-            or str(version) in SL16_HSC_VERSIONS)   # SL14 / SL15 / SL16
+            or str(version) in SL16_HSC_VERSIONS or str(version) in SL16_HVC_VERSIONS)   # SL14 / SL15 / SL16
 
 
 def version_server_flags(version: str, *, hsr6_probe: Optional[str] = None,
@@ -807,6 +820,8 @@ def version_flag_values(args: argparse.Namespace) -> dict[str, Any]:
               if d not in set(dests) | set(final) | set(p0m) | set(sl9) | set(sl10) | set(sl10d) | set(sl10e) | set(sl10f) | set(sl11) | set(sl11gap) | set(sl12) | set(sl13) | set(sl14) | set(sl14ks) | set(sl15)]   # SL15 sfhand
     sl16hsc = [d for d in _version_dests(SL16_HSC_VERSIONS)
                if d not in set(dests) | set(final) | set(p0m) | set(sl9) | set(sl10) | set(sl10d) | set(sl10e) | set(sl10f) | set(sl11) | set(sl11gap) | set(sl12) | set(sl13) | set(sl14) | set(sl14ks) | set(sl15) | set(sl15sf)]   # SL16 HSC
+    sl16hvc = [d for d in _version_dests(SL16_HVC_VERSIONS)
+               if d not in set(dests) | set(final) | set(p0m) | set(sl9) | set(sl10) | set(sl10d) | set(sl10e) | set(sl10f) | set(sl11) | set(sl11gap) | set(sl12) | set(sl13) | set(sl14) | set(sl14ks) | set(sl15) | set(sl15sf) | set(sl16hsc)]   # SL16 HVC
     parser = ss.build_parser()
     actions = parser._option_string_actions
     pinned = {actions[t].dest for t in V11AB_PRE_MERGE_DEFAULTS if t.startswith("--")}   # set on every V11AB argv
@@ -863,6 +878,9 @@ def version_flag_values(args: argparse.Namespace) -> dict[str, Any]:
     # SL16 HSC: the held-support-contact dest joins only when it is set -- the other records keep their keys
     if any(getattr(args, d, None) != parser.get_default(d) for d in sl16hsc):
         dests = sorted(set(dests) | set(sl16hsc))
+    # SL16 HVC: the hand-voxel-carve dests join only when one is set -- the other records keep their keys
+    if any(getattr(args, d, None) != parser.get_default(d) for d in sl16hvc):
+        dests = sorted(set(dests) | set(sl16hvc))
     return {d: _jsonable(getattr(args, d, None)) for d in dests}
 
 
@@ -1200,6 +1218,8 @@ def build_panda_ag3s(*, esdf_bounds: str = "panda", extra_overrides: Optional[Ma
         ag3s.reach_at_capture = True
     if kw.get("held_free_query_spheres"):   # SL10d -- key in `info` only when on
         ag3s.held_free_query_spheres = True
+    if kw.get("hand_voxel_carve"):   # SL16 HVC -- key in `info` only when on
+        ag3s.hand_voxel_carve = dict(kw["hand_voxel_carve"])
     if getattr(ag3s.config.esdf, "target_extent", "estimated") == "attention_surface":
         # SL7 -- the surface selection needs head / left_wrist / right_wrist views; the Panda has no right wrist
         # (pi05_libero's third image is a masked zero image), so that view is a dummy (attention_surface.dummy_view).
@@ -1224,6 +1244,8 @@ def build_panda_ag3s(*, esdf_bounds: str = "panda", extra_overrides: Optional[Ma
         info["surface_pad_missing_cameras"] = True
     if ag3s.held_free_query_spheres:   # SL10d -- key only when on
         info["held_free_query_spheres"] = True
+    if ag3s.hand_voxel_carve:   # SL16 HVC -- key only when on
+        info["hand_voxel_carve"] = _jsonable(ag3s.hand_voxel_carve)
     if getattr(models.constraint, "palm_shell_report", None) is not None:
         info["palm_shell"] = _jsonable(models.constraint.palm_shell_report)
     return ag3s, info

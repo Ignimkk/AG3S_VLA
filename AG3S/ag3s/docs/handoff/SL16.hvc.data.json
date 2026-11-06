@@ -1,0 +1,2054 @@
+{
+ "tool": "AG3S.trajopt.experiments.panda_hvc_origin",
+ "run_dir": "/mnt/dev/AG3S_VLA-storage/results/benchmark/20261106T023436_5bccd363ef5d_sl15-DREC-libero9-pc-convD-seed8-vla_v11ab-AG3S-final-panda-v3-e0to-pc-D",
+ "tol_mm": 4.0,
+ "n_prev": 8,
+ "ghost_mm": 30.0,
+ "reach_mm": 220.0,
+ "rule": "trail share >= 0.5 -> trail; else current with r = p90(hand voxel sd) capped at 20.0 mm",
+ "voxel_size_mm": 5.0,
+ "n_calls_closing_held_with_chunk": 226,
+ "n_calls_measured": 195,
+ "max_finger_gap_between_summary_and_geom_robot_state_m": 0.013655310943487785,
+ "tables": {
+  "closing_and_held": {
+   "n_calls": 195,
+   "n_hand_voxels": 2095,
+   "sd_cur_all_mm": {
+    "n": 2095,
+    "min": -18.825510518605363,
+    "median": 9.138102593092185,
+    "p90": 23.59775769421836,
+    "p95": 26.52382314036176,
+    "p99": 30.58847277997883,
+    "max": 34.2590993456775
+   },
+   "current": {
+    "n": 781,
+    "share": 0.3727923627684964,
+    "sd_cur_mm": {
+     "n": 781,
+     "min": -18.825510518605363,
+     "median": -6.055477085647374,
+     "p90": 2.1790768670246554,
+     "p95": 2.9761210837102348,
+     "p99": 3.8442764869199495,
+     "max": 3.990091782039882
+    },
+    "sd_trail_min_mm": {
+     "n": 781,
+     "min": -20.449224699917586,
+     "median": 3.177340002874628,
+     "p90": 15.760164848906788,
+     "p95": 18.972000960552915,
+     "p99": 28.466532093740753,
+     "max": 36.79816591299087
+    }
+   },
+   "trail": {
+    "n": 434,
+    "share": 0.2071599045346062,
+    "sd_cur_mm": {
+     "n": 434,
+     "min": 4.027216660521908,
+     "median": 12.633590846151078,
+     "p90": 24.068476904035293,
+     "p95": 28.033964750142186,
+     "p99": 32.772988910283054,
+     "max": 34.2590993456775
+    },
+    "sd_trail_min_mm": {
+     "n": 434,
+     "min": -28.095081157171972,
+     "median": -4.413134309930768,
+     "p90": 2.4700307061824702,
+     "p95": 3.150237104190731,
+     "p99": 3.884739031254763,
+     "max": 3.9725421753258225
+    }
+   },
+   "smear": {
+    "n": 880,
+    "share": 0.4200477326968974,
+    "sd_cur_mm": {
+     "n": 880,
+     "min": 4.093458380099059,
+     "median": 16.9642352297364,
+     "p90": 26.10247046690775,
+     "p95": 27.854766732324812,
+     "p99": 30.832297309554367,
+     "max": 33.12679805226368
+    },
+    "sd_trail_min_mm": {
+     "n": 880,
+     "min": 4.089304436428985,
+     "median": 17.28841358332477,
+     "p90": 30.964660193700215,
+     "p95": 34.3941735368841,
+     "p99": 39.02970769508565,
+     "max": 45.42526009317395
+    }
+   },
+   "per_call_share": {
+    "current": {
+     "median": 0.20820668693009117,
+     "mean": 0.3706178823291465
+    },
+    "trail": {
+     "median": 0.12406015037593984,
+     "mean": 0.3307110064474821
+    },
+    "smear": {
+     "median": 0.13142857142857142,
+     "mean": 0.2986711112233714
+    },
+    "n_calls": 64
+   }
+  },
+  "closing": {
+   "n_calls": 132,
+   "n_hand_voxels": 1922,
+   "sd_cur_all_mm": {
+    "n": 1922,
+    "min": -18.825510518605363,
+    "median": 8.533765611067693,
+    "p90": 23.49674119344528,
+    "p95": 26.349490499143815,
+    "p99": 30.353191717353322,
+    "max": 34.2590993456775
+   },
+   "current": {
+    "n": 756,
+    "share": 0.39334027055150883,
+    "sd_cur_mm": {
+     "n": 756,
+     "min": -18.825510518605363,
+     "median": -6.421245408998295,
+     "p90": 1.7845698095774083,
+     "p95": 2.838518235279433,
+     "p99": 3.81067189391016,
+     "max": 3.990091782039882
+    },
+    "sd_trail_min_mm": {
+     "n": 756,
+     "min": -20.449224699917586,
+     "median": 3.4407175829997243,
+     "p90": 15.815584071690418,
+     "p95": 19.065718639534335,
+     "p99": 28.515416411064553,
+     "max": 36.79816591299087
+    }
+   },
+   "trail": {
+    "n": 379,
+    "share": 0.19719042663891778,
+    "sd_cur_mm": {
+     "n": 379,
+     "min": 4.027216660521908,
+     "median": 12.973059708608298,
+     "p90": 22.71458747887893,
+     "p95": 26.513895095488184,
+     "p99": 32.04437954321649,
+     "max": 34.2590993456775
+    },
+    "sd_trail_min_mm": {
+     "n": 379,
+     "min": -28.095081157171972,
+     "median": -4.480451193993762,
+     "p90": 2.286964922140348,
+     "p95": 3.097833394077245,
+     "p99": 3.8667904719923016,
+     "max": 3.9725421753258225
+    }
+   },
+   "smear": {
+    "n": 787,
+    "share": 0.4094693028095734,
+    "sd_cur_mm": {
+     "n": 787,
+     "min": 4.093458380099059,
+     "median": 16.90183490839469,
+     "p90": 26.205075831269617,
+     "p95": 28.052997908896668,
+     "p99": 30.97357186215604,
+     "max": 33.12679805226368
+    },
+    "sd_trail_min_mm": {
+     "n": 787,
+     "min": 4.089304436428985,
+     "median": 17.36118719306594,
+     "p90": 31.69864586454866,
+     "p95": 35.07020731618355,
+     "p99": 39.32381524604735,
+     "max": 45.42526009317395
+    }
+   },
+   "per_call_share": {
+    "current": {
+     "median": 0.3333333333333333,
+     "mean": 0.4110696396972925
+    },
+    "trail": {
+     "median": 0.08695652173913043,
+     "mean": 0.3144574198598642
+    },
+    "smear": {
+     "median": 0.12,
+     "mean": 0.27447294044284315
+    },
+    "n_calls": 55
+   }
+  },
+  "held": {
+   "n_calls": 63,
+   "n_hand_voxels": 173,
+   "sd_cur_all_mm": {
+    "n": 173,
+    "min": -1.5966422681624113,
+    "median": 14.876832639841545,
+    "p90": 24.588972551579026,
+    "p95": 28.15901299991627,
+    "p99": 32.517199804390124,
+    "max": 33.901327707502496
+   },
+   "current": {
+    "n": 25,
+    "share": 0.14450867052023122,
+    "sd_cur_mm": {
+     "n": 25,
+     "min": -1.5966422681624113,
+     "median": 2.350789161369028,
+     "p90": 3.7924207035265516,
+     "p95": 3.8956248435940517,
+     "p99": 3.938935994503056,
+     "max": 3.9463079534897
+    },
+    "sd_trail_min_mm": {
+     "n": 25,
+     "min": -17.676096908123238,
+     "median": -8.39290291605063,
+     "p90": -0.7734170830314121,
+     "p95": 2.0778195491670535,
+     "p99": 7.805771327419384,
+     "max": 9.436378357135029
+    }
+   },
+   "trail": {
+    "n": 55,
+    "share": 0.3179190751445087,
+    "sd_cur_mm": {
+     "n": 55,
+     "min": 4.147736985088437,
+     "median": 9.08478233239338,
+     "p90": 29.971457686466522,
+     "p95": 31.654856797733274,
+     "p99": 33.662196568833714,
+     "max": 33.901327707502496
+    },
+    "sd_trail_min_mm": {
+     "n": 55,
+     "min": -13.979998514184011,
+     "median": -3.8744181444817904,
+     "p90": 2.818661518203459,
+     "p95": 3.1651314612670634,
+     "p99": 3.7961017175959446,
+     "max": 3.915943767235419
+    }
+   },
+   "smear": {
+    "n": 93,
+    "share": 0.5375722543352601,
+    "sd_cur_mm": {
+     "n": 93,
+     "min": 8.128931185823117,
+     "median": 17.06210573108761,
+     "p90": 22.22007678501615,
+     "p95": 25.579398429976536,
+     "p99": 27.51206970498588,
+     "max": 28.32432295112298
+    },
+    "sd_trail_min_mm": {
+     "n": 93,
+     "min": 4.324363551298164,
+     "median": 16.439143254859484,
+     "p90": 26.447488053103626,
+     "p95": 28.054703632099116,
+     "p99": 29.97038273014195,
+     "max": 31.19070692299999
+    }
+   },
+   "per_call_share": {
+    "current": {
+     "median": 0.125,
+     "mean": 0.12341269841269842
+    },
+    "trail": {
+     "median": 0.275,
+     "mean": 0.43003848003848005
+    },
+    "smear": {
+     "median": 0.375,
+     "mean": 0.44654882154882153
+    },
+    "n_calls": 9
+   }
+  },
+  "closing_by_latch_state": {
+   "closing": {
+    "n_calls": 132,
+    "n_hand_voxels": 1922,
+    "sd_cur_all_mm": {
+     "n": 1922,
+     "min": -18.825510518605363,
+     "median": 8.533765611067693,
+     "p90": 23.49674119344528,
+     "p95": 26.349490499143815,
+     "p99": 30.353191717353322,
+     "max": 34.2590993456775
+    },
+    "current": {
+     "n": 756,
+     "share": 0.39334027055150883,
+     "sd_cur_mm": {
+      "n": 756,
+      "min": -18.825510518605363,
+      "median": -6.421245408998295,
+      "p90": 1.7845698095774083,
+      "p95": 2.838518235279433,
+      "p99": 3.81067189391016,
+      "max": 3.990091782039882
+     },
+     "sd_trail_min_mm": {
+      "n": 756,
+      "min": -20.449224699917586,
+      "median": 3.4407175829997243,
+      "p90": 15.815584071690418,
+      "p95": 19.065718639534335,
+      "p99": 28.515416411064553,
+      "max": 36.79816591299087
+     }
+    },
+    "trail": {
+     "n": 379,
+     "share": 0.19719042663891778,
+     "sd_cur_mm": {
+      "n": 379,
+      "min": 4.027216660521908,
+      "median": 12.973059708608298,
+      "p90": 22.71458747887893,
+      "p95": 26.513895095488184,
+      "p99": 32.04437954321649,
+      "max": 34.2590993456775
+     },
+     "sd_trail_min_mm": {
+      "n": 379,
+      "min": -28.095081157171972,
+      "median": -4.480451193993762,
+      "p90": 2.286964922140348,
+      "p95": 3.097833394077245,
+      "p99": 3.8667904719923016,
+      "max": 3.9725421753258225
+     }
+    },
+    "smear": {
+     "n": 787,
+     "share": 0.4094693028095734,
+     "sd_cur_mm": {
+      "n": 787,
+      "min": 4.093458380099059,
+      "median": 16.90183490839469,
+      "p90": 26.205075831269617,
+      "p95": 28.052997908896668,
+      "p99": 30.97357186215604,
+      "max": 33.12679805226368
+     },
+     "sd_trail_min_mm": {
+      "n": 787,
+      "min": 4.089304436428985,
+      "median": 17.36118719306594,
+      "p90": 31.69864586454866,
+      "p95": 35.07020731618355,
+      "p99": 39.32381524604735,
+      "max": 45.42526009317395
+     }
+    },
+    "per_call_share": {
+     "current": {
+      "median": 0.3333333333333333,
+      "mean": 0.4110696396972925
+     },
+     "trail": {
+      "median": 0.08695652173913043,
+      "mean": 0.3144574198598642
+     },
+     "smear": {
+      "median": 0.12,
+      "mean": 0.27447294044284315
+     },
+     "n_calls": 55
+    }
+   }
+  },
+  "held_by_latch_state": {
+   "held": {
+    "n_calls": 63,
+    "n_hand_voxels": 173,
+    "sd_cur_all_mm": {
+     "n": 173,
+     "min": -1.5966422681624113,
+     "median": 14.876832639841545,
+     "p90": 24.588972551579026,
+     "p95": 28.15901299991627,
+     "p99": 32.517199804390124,
+     "max": 33.901327707502496
+    },
+    "current": {
+     "n": 25,
+     "share": 0.14450867052023122,
+     "sd_cur_mm": {
+      "n": 25,
+      "min": -1.5966422681624113,
+      "median": 2.350789161369028,
+      "p90": 3.7924207035265516,
+      "p95": 3.8956248435940517,
+      "p99": 3.938935994503056,
+      "max": 3.9463079534897
+     },
+     "sd_trail_min_mm": {
+      "n": 25,
+      "min": -17.676096908123238,
+      "median": -8.39290291605063,
+      "p90": -0.7734170830314121,
+      "p95": 2.0778195491670535,
+      "p99": 7.805771327419384,
+      "max": 9.436378357135029
+     }
+    },
+    "trail": {
+     "n": 55,
+     "share": 0.3179190751445087,
+     "sd_cur_mm": {
+      "n": 55,
+      "min": 4.147736985088437,
+      "median": 9.08478233239338,
+      "p90": 29.971457686466522,
+      "p95": 31.654856797733274,
+      "p99": 33.662196568833714,
+      "max": 33.901327707502496
+     },
+     "sd_trail_min_mm": {
+      "n": 55,
+      "min": -13.979998514184011,
+      "median": -3.8744181444817904,
+      "p90": 2.818661518203459,
+      "p95": 3.1651314612670634,
+      "p99": 3.7961017175959446,
+      "max": 3.915943767235419
+     }
+    },
+    "smear": {
+     "n": 93,
+     "share": 0.5375722543352601,
+     "sd_cur_mm": {
+      "n": 93,
+      "min": 8.128931185823117,
+      "median": 17.06210573108761,
+      "p90": 22.22007678501615,
+      "p95": 25.579398429976536,
+      "p99": 27.51206970498588,
+      "max": 28.32432295112298
+     },
+     "sd_trail_min_mm": {
+      "n": 93,
+      "min": 4.324363551298164,
+      "median": 16.439143254859484,
+      "p90": 26.447488053103626,
+      "p95": 28.054703632099116,
+      "p99": 29.97038273014195,
+      "max": 31.19070692299999
+     }
+    },
+    "per_call_share": {
+     "current": {
+      "median": 0.125,
+      "mean": 0.12341269841269842
+     },
+     "trail": {
+      "median": 0.275,
+      "mean": 0.43003848003848005
+     },
+     "smear": {
+      "median": 0.375,
+      "mean": 0.44654882154882153
+     },
+     "n_calls": 9
+    }
+   }
+  }
+ },
+ "decision": {
+  "mode": "current",
+  "trail_share": 0.2071599045346062,
+  "trail_threshold": 0.5,
+  "hand_voxel_sd_p90_mm": 23.59775769421836,
+  "cap_mm": 20.0,
+  "r_mm": 20.0
+ },
+ "decision_sensitivity": {
+  "p90_of_sd_cur_positive_only_mm": 25.04331371723989,
+  "p90_closing_mm": 23.49674119344528,
+  "p90_held_mm": 24.588972551579026,
+  "trail_share_closing": 0.19719042663891778,
+  "trail_share_held": 0.3179190751445087
+ },
+ "carve_risk_if_applied_in_this_data": {
+  "hand": {
+   "n": 2095,
+   "freed": 1722,
+   "freed_above_support": 1621,
+   "share_freed": 0.8219570405727924
+  },
+  "target": {
+   "n": 48963,
+   "freed": 6007,
+   "freed_above_support": 3898,
+   "share_freed": 0.12268447603292282
+  },
+  "other": {
+   "n": 950915,
+   "freed": 9818,
+   "freed_above_support": 3802,
+   "share_freed": 0.01032479243675828
+  },
+  "unowned": {
+   "n": 13866,
+   "freed": 23,
+   "freed_above_support": 23,
+   "share_freed": 0.0016587335929612
+  }
+ },
+ "hand_voxel_below_support_share": 0.05632458233890215,
+ "per_call": [
+  {
+   "id": "libero_spatial_t0_e0#8",
+   "phase": "closing",
+   "n_hand_voxels": 0,
+   "n_prev": 8,
+   "finger_gap_m": 7.992002471394338e-05
+  },
+  {
+   "id": "libero_spatial_t0_e0#9",
+   "phase": "closing",
+   "n_hand_voxels": 6,
+   "n_prev": 8,
+   "finger_gap_m": 2.5582460721412098e-05
+  },
+  {
+   "id": "libero_spatial_t0_e0#10",
+   "phase": "held",
+   "n_hand_voxels": 0,
+   "n_prev": 8,
+   "finger_gap_m": 4.554625917179344e-05
+  },
+  {
+   "id": "libero_spatial_t0_e0#11",
+   "phase": "held",
+   "n_hand_voxels": 0,
+   "n_prev": 8,
+   "finger_gap_m": 3.629477615762957e-05
+  },
+  {
+   "id": "libero_spatial_t0_e0#12",
+   "phase": "held",
+   "n_hand_voxels": 0,
+   "n_prev": 8,
+   "finger_gap_m": 3.226076937291097e-05
+  },
+  {
+   "id": "libero_spatial_t0_e0#13",
+   "phase": "held",
+   "n_hand_voxels": 0,
+   "n_prev": 8,
+   "finger_gap_m": 2.2645185537930462e-05
+  },
+  {
+   "id": "libero_spatial_t0_e0#14",
+   "phase": "held",
+   "n_hand_voxels": 0,
+   "n_prev": 8,
+   "finger_gap_m": 1.3866336353454602e-05
+  },
+  {
+   "id": "libero_spatial_t0_e0#15",
+   "phase": "held",
+   "n_hand_voxels": 0,
+   "n_prev": 8,
+   "finger_gap_m": 2.1329897957906435e-06
+  },
+  {
+   "id": "libero_spatial_t1_e0#11",
+   "phase": "closing",
+   "n_hand_voxels": 10,
+   "n_prev": 8,
+   "finger_gap_m": 0.0001238377895576362
+  },
+  {
+   "id": "libero_spatial_t1_e0#12",
+   "phase": "closing",
+   "n_hand_voxels": 42,
+   "n_prev": 8,
+   "finger_gap_m": 1.1176502417917927e-05
+  },
+  {
+   "id": "libero_spatial_t1_e0#13",
+   "phase": "closing",
+   "n_hand_voxels": 48,
+   "n_prev": 8,
+   "finger_gap_m": 3.261112477365071e-05
+  },
+  {
+   "id": "libero_spatial_t1_e0#14",
+   "phase": "held",
+   "n_hand_voxels": 0,
+   "n_prev": 8,
+   "finger_gap_m": 2.6049040376896482e-05
+  },
+  {
+   "id": "libero_spatial_t1_e0#15",
+   "phase": "held",
+   "n_hand_voxels": 0,
+   "n_prev": 8,
+   "finger_gap_m": 1.9349121391868014e-05
+  },
+  {
+   "id": "libero_spatial_t1_e0#16",
+   "phase": "held",
+   "n_hand_voxels": 0,
+   "n_prev": 8,
+   "finger_gap_m": 4.126853360862572e-06
+  },
+  {
+   "id": "libero_spatial_t1_e0#17",
+   "phase": "held",
+   "skipped": "no occupied voxel near the hand"
+  },
+  {
+   "id": "libero_spatial_t1_e0#18",
+   "phase": "held",
+   "skipped": "no occupied voxel near the hand"
+  },
+  {
+   "id": "libero_spatial_t1_e0#19",
+   "phase": "held",
+   "skipped": "no occupied voxel near the hand"
+  },
+  {
+   "id": "libero_spatial_t1_e0#20",
+   "phase": "held",
+   "skipped": "no occupied voxel near the hand"
+  },
+  {
+   "id": "libero_spatial_t1_e0#21",
+   "phase": "held",
+   "skipped": "no occupied voxel near the hand"
+  },
+  {
+   "id": "libero_spatial_t1_e0#22",
+   "phase": "held",
+   "skipped": "no occupied voxel near the hand"
+  },
+  {
+   "id": "libero_spatial_t1_e0#23",
+   "phase": "held",
+   "skipped": "no occupied voxel near the hand"
+  },
+  {
+   "id": "libero_spatial_t1_e0#24",
+   "phase": "held",
+   "skipped": "no occupied voxel near the hand"
+  },
+  {
+   "id": "libero_spatial_t1_e0#25",
+   "phase": "held",
+   "skipped": "no occupied voxel near the hand"
+  },
+  {
+   "id": "libero_spatial_t1_e0#26",
+   "phase": "held",
+   "skipped": "no occupied voxel near the hand"
+  },
+  {
+   "id": "libero_spatial_t1_e0#27",
+   "phase": "held",
+   "skipped": "no occupied voxel near the hand"
+  },
+  {
+   "id": "libero_spatial_t1_e0#28",
+   "phase": "held",
+   "skipped": "no occupied voxel near the hand"
+  },
+  {
+   "id": "libero_spatial_t1_e0#29",
+   "phase": "held",
+   "skipped": "no occupied voxel near the hand"
+  },
+  {
+   "id": "libero_spatial_t1_e0#30",
+   "phase": "held",
+   "skipped": "no occupied voxel near the hand"
+  },
+  {
+   "id": "libero_spatial_t1_e0#31",
+   "phase": "held",
+   "skipped": "no occupied voxel near the hand"
+  },
+  {
+   "id": "libero_spatial_t1_e0#32",
+   "phase": "held",
+   "skipped": "no occupied voxel near the hand"
+  },
+  {
+   "id": "libero_spatial_t1_e0#33",
+   "phase": "held",
+   "skipped": "no occupied voxel near the hand"
+  },
+  {
+   "id": "libero_spatial_t1_e0#34",
+   "phase": "held",
+   "skipped": "no occupied voxel near the hand"
+  },
+  {
+   "id": "libero_spatial_t1_e0#35",
+   "phase": "held",
+   "skipped": "no occupied voxel near the hand"
+  },
+  {
+   "id": "libero_spatial_t1_e0#36",
+   "phase": "held",
+   "skipped": "no occupied voxel near the hand"
+  },
+  {
+   "id": "libero_spatial_t1_e0#37",
+   "phase": "held",
+   "skipped": "no occupied voxel near the hand"
+  },
+  {
+   "id": "libero_spatial_t1_e0#38",
+   "phase": "held",
+   "skipped": "no occupied voxel near the hand"
+  },
+  {
+   "id": "libero_spatial_t1_e0#39",
+   "phase": "held",
+   "skipped": "no occupied voxel near the hand"
+  },
+  {
+   "id": "libero_spatial_t1_e0#40",
+   "phase": "held",
+   "skipped": "no occupied voxel near the hand"
+  },
+  {
+   "id": "libero_spatial_t1_e0#41",
+   "phase": "held",
+   "skipped": "no occupied voxel near the hand"
+  },
+  {
+   "id": "libero_spatial_t1_e0#42",
+   "phase": "held",
+   "skipped": "no occupied voxel near the hand"
+  },
+  {
+   "id": "libero_spatial_t1_e0#43",
+   "phase": "held",
+   "skipped": "no occupied voxel near the hand"
+  },
+  {
+   "id": "libero_spatial_t2_e0#8",
+   "phase": "closing",
+   "n_hand_voxels": 0,
+   "n_prev": 8,
+   "finger_gap_m": 0.0001206811078743944
+  },
+  {
+   "id": "libero_spatial_t2_e0#9",
+   "phase": "closing",
+   "n_hand_voxels": 0,
+   "n_prev": 8,
+   "finger_gap_m": 0.00014344873696013616
+  },
+  {
+   "id": "libero_spatial_t2_e0#10",
+   "phase": "closing",
+   "n_hand_voxels": 4,
+   "n_prev": 8,
+   "finger_gap_m": 0.0001623550199790786
+  },
+  {
+   "id": "libero_spatial_t2_e0#11",
+   "phase": "closing",
+   "n_hand_voxels": 0,
+   "n_prev": 8,
+   "finger_gap_m": 0.00016162707365185297
+  },
+  {
+   "id": "libero_spatial_t2_e0#12",
+   "phase": "closing",
+   "n_hand_voxels": 0,
+   "n_prev": 8,
+   "finger_gap_m": 0.00017046726577986415
+  },
+  {
+   "id": "libero_spatial_t2_e0#13",
+   "phase": "closing",
+   "n_hand_voxels": 0,
+   "n_prev": 8,
+   "finger_gap_m": 0.00017178908511282683
+  },
+  {
+   "id": "libero_spatial_t2_e0#14",
+   "phase": "closing",
+   "n_hand_voxels": 0,
+   "n_prev": 8,
+   "finger_gap_m": 0.00016549356371473446
+  },
+  {
+   "id": "libero_spatial_t2_e0#15",
+   "phase": "closing",
+   "n_hand_voxels": 0,
+   "n_prev": 8,
+   "finger_gap_m": 0.00015446087704809206
+  },
+  {
+   "id": "libero_spatial_t2_e0#16",
+   "phase": "closing",
+   "n_hand_voxels": 0,
+   "n_prev": 8,
+   "finger_gap_m": 0.00015762354118127055
+  },
+  {
+   "id": "libero_spatial_t2_e0#17",
+   "phase": "closing",
+   "n_hand_voxels": 0,
+   "n_prev": 8,
+   "finger_gap_m": 0.0001902210736939654
+  },
+  {
+   "id": "libero_spatial_t2_e0#18",
+   "phase": "closing",
+   "n_hand_voxels": 13,
+   "n_prev": 8,
+   "finger_gap_m": 0.00021791562603944918
+  },
+  {
+   "id": "libero_spatial_t2_e0#19",
+   "phase": "closing",
+   "n_hand_voxels": 0,
+   "n_prev": 8,
+   "finger_gap_m": 0.00023170383658846906
+  },
+  {
+   "id": "libero_spatial_t2_e0#20",
+   "phase": "closing",
+   "n_hand_voxels": 1,
+   "n_prev": 8,
+   "finger_gap_m": 0.00023782136368778696
+  },
+  {
+   "id": "libero_spatial_t2_e0#21",
+   "phase": "closing",
+   "n_hand_voxels": 0,
+   "n_prev": 8,
+   "finger_gap_m": 0.00021125515607202795
+  },
+  {
+   "id": "libero_spatial_t2_e0#22",
+   "phase": "closing",
+   "n_hand_voxels": 0,
+   "n_prev": 8,
+   "finger_gap_m": 0.00017118370514335006
+  },
+  {
+   "id": "libero_spatial_t2_e0#23",
+   "phase": "closing",
+   "n_hand_voxels": 0,
+   "n_prev": 8,
+   "finger_gap_m": 0.00013018680819268488
+  },
+  {
+   "id": "libero_spatial_t2_e0#24",
+   "phase": "closing",
+   "n_hand_voxels": 1,
+   "n_prev": 8,
+   "finger_gap_m": 8.526698276093672e-05
+  },
+  {
+   "id": "libero_spatial_t2_e0#25",
+   "phase": "closing",
+   "n_hand_voxels": 1,
+   "n_prev": 8,
+   "finger_gap_m": 3.279696739458661e-05
+  },
+  {
+   "id": "libero_spatial_t2_e0#26",
+   "phase": "closing",
+   "n_hand_voxels": 1,
+   "n_prev": 8,
+   "finger_gap_m": 9.905269318281375e-06
+  },
+  {
+   "id": "libero_spatial_t2_e0#27",
+   "phase": "closing",
+   "n_hand_voxels": 14,
+   "n_prev": 8,
+   "finger_gap_m": 5.826027989747702e-05
+  },
+  {
+   "id": "libero_spatial_t2_e0#28",
+   "phase": "closing",
+   "n_hand_voxels": 21,
+   "n_prev": 8,
+   "finger_gap_m": 8.709186735642461e-05
+  },
+  {
+   "id": "libero_spatial_t3_e0#9",
+   "phase": "closing",
+   "n_hand_voxels": 0,
+   "n_prev": 8,
+   "finger_gap_m": 1.4781579704865877e-05
+  },
+  {
+   "id": "libero_spatial_t3_e0#10",
+   "phase": "closing",
+   "n_hand_voxels": 15,
+   "n_prev": 8,
+   "finger_gap_m": 4.5020821814664713e-07
+  },
+  {
+   "id": "libero_spatial_t3_e0#11",
+   "phase": "closing",
+   "n_hand_voxels": 4,
+   "n_prev": 8,
+   "finger_gap_m": 0.0004424583032887905
+  },
+  {
+   "id": "libero_spatial_t3_e0#12",
+   "phase": "closing",
+   "n_hand_voxels": 0,
+   "n_prev": 8,
+   "finger_gap_m": 0.00026327006491357724
+  },
+  {
+   "id": "libero_spatial_t3_e0#13",
+   "phase": "closing",
+   "n_hand_voxels": 0,
+   "n_prev": 8,
+   "finger_gap_m": 0.0002531812930429314
+  },
+  {
+   "id": "libero_spatial_t3_e0#14",
+   "phase": "closing",
+   "n_hand_voxels": 0,
+   "n_prev": 8,
+   "finger_gap_m": 0.00023057919029397965
+  },
+  {
+   "id": "libero_spatial_t3_e0#15",
+   "phase": "closing",
+   "n_hand_voxels": 2,
+   "n_prev": 8,
+   "finger_gap_m": 0.00018936258524072502
+  },
+  {
+   "id": "libero_spatial_t3_e0#16",
+   "phase": "closing",
+   "n_hand_voxels": 55,
+   "n_prev": 8,
+   "finger_gap_m": 0.00019515329136765786
+  },
+  {
+   "id": "libero_spatial_t3_e0#17",
+   "phase": "closing",
+   "n_hand_voxels": 88,
+   "n_prev": 8,
+   "finger_gap_m": 0.00031074254823187735
+  },
+  {
+   "id": "libero_spatial_t3_e0#18",
+   "phase": "closing",
+   "n_hand_voxels": 28,
+   "n_prev": 8,
+   "finger_gap_m": 0.00021175985449760045
+  },
+  {
+   "id": "libero_spatial_t3_e0#19",
+   "phase": "closing",
+   "n_hand_voxels": 29,
+   "n_prev": 8,
+   "finger_gap_m": 0.0002671236238852878
+  },
+  {
+   "id": "libero_spatial_t3_e0#20",
+   "phase": "closing",
+   "n_hand_voxels": 30,
+   "n_prev": 8,
+   "finger_gap_m": 0.00030732769490446517
+  },
+  {
+   "id": "libero_spatial_t3_e0#21",
+   "phase": "closing",
+   "n_hand_voxels": 26,
+   "n_prev": 8,
+   "finger_gap_m": 0.0003173017625394644
+  },
+  {
+   "id": "libero_spatial_t3_e0#22",
+   "phase": "closing",
+   "n_hand_voxels": 37,
+   "n_prev": 8,
+   "finger_gap_m": 0.00027259778794503655
+  },
+  {
+   "id": "libero_spatial_t3_e0#23",
+   "phase": "closing",
+   "n_hand_voxels": 25,
+   "n_prev": 8,
+   "finger_gap_m": 0.00022869742471189644
+  },
+  {
+   "id": "libero_spatial_t3_e0#24",
+   "phase": "closing",
+   "n_hand_voxels": 24,
+   "n_prev": 8,
+   "finger_gap_m": 0.00017180239780525595
+  },
+  {
+   "id": "libero_spatial_t3_e0#25",
+   "phase": "closing",
+   "n_hand_voxels": 19,
+   "n_prev": 8,
+   "finger_gap_m": 8.964843130712425e-05
+  },
+  {
+   "id": "libero_spatial_t3_e0#26",
+   "phase": "closing",
+   "n_hand_voxels": 8,
+   "n_prev": 8,
+   "finger_gap_m": 1.4219748893226289e-05
+  },
+  {
+   "id": "libero_spatial_t3_e0#27",
+   "phase": "closing",
+   "n_hand_voxels": 16,
+   "n_prev": 8,
+   "finger_gap_m": 3.642952039807721e-05
+  },
+  {
+   "id": "libero_spatial_t3_e0#28",
+   "phase": "closing",
+   "n_hand_voxels": 15,
+   "n_prev": 8,
+   "finger_gap_m": 6.314861916024398e-05
+  },
+  {
+   "id": "libero_spatial_t3_e0#29",
+   "phase": "closing",
+   "n_hand_voxels": 26,
+   "n_prev": 8,
+   "finger_gap_m": 9.194597929507446e-05
+  },
+  {
+   "id": "libero_spatial_t3_e0#30",
+   "phase": "closing",
+   "n_hand_voxels": 20,
+   "n_prev": 8,
+   "finger_gap_m": 0.00011286175162376964
+  },
+  {
+   "id": "libero_spatial_t3_e0#31",
+   "phase": "closing",
+   "n_hand_voxels": 25,
+   "n_prev": 8,
+   "finger_gap_m": 0.00019066463375260736
+  },
+  {
+   "id": "libero_spatial_t3_e0#32",
+   "phase": "closing",
+   "n_hand_voxels": 11,
+   "n_prev": 8,
+   "finger_gap_m": 0.00042855449344502577
+  },
+  {
+   "id": "libero_spatial_t3_e0#33",
+   "phase": "closing",
+   "n_hand_voxels": 19,
+   "n_prev": 8,
+   "finger_gap_m": 0.0003302800477745741
+  },
+  {
+   "id": "libero_spatial_t3_e0#34",
+   "phase": "closing",
+   "n_hand_voxels": 12,
+   "n_prev": 8,
+   "finger_gap_m": 0.00042084119216012107
+  },
+  {
+   "id": "libero_spatial_t3_e0#35",
+   "phase": "closing",
+   "n_hand_voxels": 0,
+   "n_prev": 8,
+   "finger_gap_m": 8.877787614746183e-05
+  },
+  {
+   "id": "libero_spatial_t3_e0#36",
+   "phase": "closing",
+   "n_hand_voxels": 0,
+   "n_prev": 8,
+   "finger_gap_m": 0.0003300611181918135
+  },
+  {
+   "id": "libero_spatial_t3_e0#37",
+   "phase": "closing",
+   "n_hand_voxels": 0,
+   "n_prev": 8,
+   "finger_gap_m": 0.0002946577933538759
+  },
+  {
+   "id": "libero_spatial_t3_e0#38",
+   "phase": "closing",
+   "n_hand_voxels": 0,
+   "n_prev": 8,
+   "finger_gap_m": 0.00021550219558015213
+  },
+  {
+   "id": "libero_spatial_t3_e0#39",
+   "phase": "closing",
+   "n_hand_voxels": 0,
+   "n_prev": 8,
+   "finger_gap_m": 0.0001665871640720816
+  },
+  {
+   "id": "libero_spatial_t3_e0#40",
+   "phase": "closing",
+   "n_hand_voxels": 0,
+   "n_prev": 8,
+   "finger_gap_m": 0.00019933109612686392
+  },
+  {
+   "id": "libero_spatial_t3_e0#41",
+   "phase": "closing",
+   "n_hand_voxels": 0,
+   "n_prev": 8,
+   "finger_gap_m": 0.00018988085218782716
+  },
+  {
+   "id": "libero_spatial_t3_e0#42",
+   "phase": "closing",
+   "n_hand_voxels": 0,
+   "n_prev": 8,
+   "finger_gap_m": 0.0001071094461935465
+  },
+  {
+   "id": "libero_spatial_t3_e0#43",
+   "phase": "closing",
+   "n_hand_voxels": 0,
+   "n_prev": 8,
+   "finger_gap_m": 8.276815465000351e-05
+  },
+  {
+   "id": "libero_spatial_t4_e0#16",
+   "phase": "closing",
+   "n_hand_voxels": 0,
+   "n_prev": 8,
+   "finger_gap_m": 0.0018262563372927962
+  },
+  {
+   "id": "libero_spatial_t4_e0#17",
+   "phase": "closing",
+   "n_hand_voxels": 0,
+   "n_prev": 8,
+   "finger_gap_m": 0.0008273217829651638
+  },
+  {
+   "id": "libero_spatial_t4_e0#18",
+   "phase": "closing",
+   "n_hand_voxels": 7,
+   "n_prev": 8,
+   "finger_gap_m": 0.003702576458471149
+  },
+  {
+   "id": "libero_spatial_t4_e0#19",
+   "phase": "closing",
+   "n_hand_voxels": 0,
+   "n_prev": 8,
+   "finger_gap_m": 0.013655310943487785
+  },
+  {
+   "id": "libero_spatial_t4_e0#20",
+   "phase": "closing",
+   "n_hand_voxels": 1,
+   "n_prev": 8,
+   "finger_gap_m": 0.00729610045292094
+  },
+  {
+   "id": "libero_spatial_t4_e0#21",
+   "phase": "closing",
+   "n_hand_voxels": 0,
+   "n_prev": 8,
+   "finger_gap_m": 0.00120074256635689
+  },
+  {
+   "id": "libero_spatial_t4_e0#22",
+   "phase": "closing",
+   "n_hand_voxels": 0,
+   "n_prev": 8,
+   "finger_gap_m": 0.0006451896658139886
+  },
+  {
+   "id": "libero_spatial_t4_e0#23",
+   "phase": "closing",
+   "n_hand_voxels": 0,
+   "n_prev": 8,
+   "finger_gap_m": 0.0003875450894062515
+  },
+  {
+   "id": "libero_spatial_t4_e0#24",
+   "phase": "closing",
+   "n_hand_voxels": 0,
+   "n_prev": 8,
+   "finger_gap_m": 0.0002987269772189876
+  },
+  {
+   "id": "libero_spatial_t4_e0#25",
+   "phase": "closing",
+   "n_hand_voxels": 0,
+   "n_prev": 8,
+   "finger_gap_m": 0.0003233079959180404
+  },
+  {
+   "id": "libero_spatial_t4_e0#26",
+   "phase": "closing",
+   "n_hand_voxels": 0,
+   "n_prev": 8,
+   "finger_gap_m": 0.0002819199093719413
+  },
+  {
+   "id": "libero_spatial_t4_e0#27",
+   "phase": "closing",
+   "n_hand_voxels": 0,
+   "n_prev": 8,
+   "finger_gap_m": 0.00027392116665079526
+  },
+  {
+   "id": "libero_spatial_t4_e0#28",
+   "phase": "closing",
+   "n_hand_voxels": 0,
+   "n_prev": 8,
+   "finger_gap_m": 0.00016520468196002053
+  },
+  {
+   "id": "libero_spatial_t4_e0#29",
+   "phase": "closing",
+   "n_hand_voxels": 0,
+   "n_prev": 8,
+   "finger_gap_m": 0.00011896014214745699
+  },
+  {
+   "id": "libero_spatial_t4_e0#30",
+   "phase": "closing",
+   "n_hand_voxels": 0,
+   "n_prev": 8,
+   "finger_gap_m": 5.310085758682007e-05
+  },
+  {
+   "id": "libero_spatial_t4_e0#31",
+   "phase": "closing",
+   "n_hand_voxels": 0,
+   "n_prev": 8,
+   "finger_gap_m": 3.917931289585579e-05
+  },
+  {
+   "id": "libero_spatial_t4_e0#32",
+   "phase": "closing",
+   "n_hand_voxels": 0,
+   "n_prev": 8,
+   "finger_gap_m": 8.16909847057394e-05
+  },
+  {
+   "id": "libero_spatial_t4_e0#33",
+   "phase": "closing",
+   "n_hand_voxels": 0,
+   "n_prev": 8,
+   "finger_gap_m": 2.9671004123585365e-06
+  },
+  {
+   "id": "libero_spatial_t4_e0#34",
+   "phase": "closing",
+   "n_hand_voxels": 0,
+   "n_prev": 8,
+   "finger_gap_m": 1.6867845173400287e-05
+  },
+  {
+   "id": "libero_spatial_t4_e0#37",
+   "phase": "closing",
+   "n_hand_voxels": 0,
+   "n_prev": 8,
+   "finger_gap_m": 0.0005376030020640965
+  },
+  {
+   "id": "libero_spatial_t4_e0#38",
+   "phase": "closing",
+   "n_hand_voxels": 2,
+   "n_prev": 8,
+   "finger_gap_m": 0.0004147344188227334
+  },
+  {
+   "id": "libero_spatial_t4_e0#39",
+   "phase": "closing",
+   "n_hand_voxels": 7,
+   "n_prev": 8,
+   "finger_gap_m": 0.0016454542295946855
+  },
+  {
+   "id": "libero_spatial_t4_e0#40",
+   "phase": "closing",
+   "n_hand_voxels": 0,
+   "n_prev": 8,
+   "finger_gap_m": 0.0011413945323651509
+  },
+  {
+   "id": "libero_spatial_t4_e0#41",
+   "phase": "closing",
+   "n_hand_voxels": 0,
+   "n_prev": 8,
+   "finger_gap_m": 0.0004035006244411189
+  },
+  {
+   "id": "libero_spatial_t4_e0#42",
+   "phase": "closing",
+   "n_hand_voxels": 0,
+   "n_prev": 8,
+   "finger_gap_m": 0.00029138576849610867
+  },
+  {
+   "id": "libero_spatial_t4_e0#43",
+   "phase": "closing",
+   "n_hand_voxels": 0,
+   "n_prev": 8,
+   "finger_gap_m": 0.0002492336478123261
+  },
+  {
+   "id": "libero_spatial_t6_e0#11",
+   "phase": "closing",
+   "n_hand_voxels": 28,
+   "n_prev": 8,
+   "finger_gap_m": 8.769061136136569e-05
+  },
+  {
+   "id": "libero_spatial_t6_e0#12",
+   "phase": "closing",
+   "n_hand_voxels": 82,
+   "n_prev": 8,
+   "finger_gap_m": 0.0009270291491474767
+  },
+  {
+   "id": "libero_spatial_t6_e0#13",
+   "phase": "held",
+   "n_hand_voxels": 0,
+   "n_prev": 8,
+   "finger_gap_m": 0.0002812356732598987
+  },
+  {
+   "id": "libero_spatial_t6_e0#14",
+   "phase": "held",
+   "n_hand_voxels": 0,
+   "n_prev": 8,
+   "finger_gap_m": 0.00025144877222177094
+  },
+  {
+   "id": "libero_spatial_t6_e0#15",
+   "phase": "held",
+   "n_hand_voxels": 0,
+   "n_prev": 8,
+   "finger_gap_m": 0.00023655879262176683
+  },
+  {
+   "id": "libero_spatial_t6_e0#16",
+   "phase": "held",
+   "skipped": "no occupied voxel near the hand"
+  },
+  {
+   "id": "libero_spatial_t6_e0#17",
+   "phase": "held",
+   "skipped": "no occupied voxel near the hand"
+  },
+  {
+   "id": "libero_spatial_t6_e0#18",
+   "phase": "held",
+   "skipped": "no occupied voxel near the hand"
+  },
+  {
+   "id": "libero_spatial_t6_e0#19",
+   "phase": "held",
+   "skipped": "no occupied voxel near the hand"
+  },
+  {
+   "id": "libero_spatial_t6_e0#20",
+   "phase": "held",
+   "n_hand_voxels": 0,
+   "n_prev": 8,
+   "finger_gap_m": 0.0003129977845245384
+  },
+  {
+   "id": "libero_spatial_t6_e0#21",
+   "phase": "held",
+   "n_hand_voxels": 0,
+   "n_prev": 8,
+   "finger_gap_m": 0.00035627013266033075
+  },
+  {
+   "id": "libero_spatial_t6_e0#22",
+   "phase": "held",
+   "n_hand_voxels": 0,
+   "n_prev": 8,
+   "finger_gap_m": 0.00040585959738611904
+  },
+  {
+   "id": "libero_spatial_t6_e0#23",
+   "phase": "held",
+   "n_hand_voxels": 0,
+   "n_prev": 8,
+   "finger_gap_m": 0.0004347280005603158
+  },
+  {
+   "id": "libero_spatial_t6_e0#24",
+   "phase": "held",
+   "n_hand_voxels": 0,
+   "n_prev": 8,
+   "finger_gap_m": 0.0004505540104512511
+  },
+  {
+   "id": "libero_spatial_t7_e0#8",
+   "phase": "closing",
+   "n_hand_voxels": 0,
+   "n_prev": 8,
+   "finger_gap_m": 0.0004432118752995262
+  },
+  {
+   "id": "libero_spatial_t7_e0#9",
+   "phase": "closing",
+   "n_hand_voxels": 53,
+   "n_prev": 8,
+   "finger_gap_m": 0.00032544241786605903
+  },
+  {
+   "id": "libero_spatial_t7_e0#10",
+   "phase": "closing",
+   "n_hand_voxels": 90,
+   "n_prev": 8,
+   "finger_gap_m": 0.002905621171113357
+  },
+  {
+   "id": "libero_spatial_t7_e0#11",
+   "phase": "held",
+   "n_hand_voxels": 40,
+   "n_prev": 8,
+   "finger_gap_m": 0.0009405486342531468
+  },
+  {
+   "id": "libero_spatial_t7_e0#12",
+   "phase": "held",
+   "n_hand_voxels": 15,
+   "n_prev": 8,
+   "finger_gap_m": 0.0007777388050429174
+  },
+  {
+   "id": "libero_spatial_t7_e0#13",
+   "phase": "held",
+   "n_hand_voxels": 0,
+   "n_prev": 8,
+   "finger_gap_m": 0.0006468876991877334
+  },
+  {
+   "id": "libero_spatial_t7_e0#14",
+   "phase": "held",
+   "n_hand_voxels": 0,
+   "n_prev": 8,
+   "finger_gap_m": 0.0005275875019913451
+  },
+  {
+   "id": "libero_spatial_t7_e0#15",
+   "phase": "held",
+   "n_hand_voxels": 0,
+   "n_prev": 8,
+   "finger_gap_m": 0.0004522589343266361
+  },
+  {
+   "id": "libero_spatial_t7_e0#16",
+   "phase": "held",
+   "n_hand_voxels": 0,
+   "n_prev": 8,
+   "finger_gap_m": 0.0003926311139267609
+  },
+  {
+   "id": "libero_spatial_t7_e0#17",
+   "phase": "held",
+   "n_hand_voxels": 0,
+   "n_prev": 8,
+   "finger_gap_m": 0.00034882240977863587
+  },
+  {
+   "id": "libero_spatial_t7_e0#18",
+   "phase": "held",
+   "n_hand_voxels": 0,
+   "n_prev": 8,
+   "finger_gap_m": 0.00030874557722226437
+  },
+  {
+   "id": "libero_spatial_t7_e0#19",
+   "phase": "held",
+   "n_hand_voxels": 0,
+   "n_prev": 8,
+   "finger_gap_m": 0.0002732116241345845
+  },
+  {
+   "id": "libero_spatial_t7_e0#20",
+   "phase": "held",
+   "n_hand_voxels": 0,
+   "n_prev": 8,
+   "finger_gap_m": 0.00024682020050915314
+  },
+  {
+   "id": "libero_spatial_t7_e0#21",
+   "phase": "held",
+   "n_hand_voxels": 0,
+   "n_prev": 8,
+   "finger_gap_m": 0.0002378159988891738
+  },
+  {
+   "id": "libero_spatial_t7_e0#22",
+   "phase": "held",
+   "n_hand_voxels": 0,
+   "n_prev": 8,
+   "finger_gap_m": 0.0002443588737852543
+  },
+  {
+   "id": "libero_spatial_t7_e0#23",
+   "phase": "held",
+   "n_hand_voxels": 0,
+   "n_prev": 8,
+   "finger_gap_m": 0.00021581080457538059
+  },
+  {
+   "id": "libero_spatial_t7_e0#24",
+   "phase": "held",
+   "n_hand_voxels": 0,
+   "n_prev": 8,
+   "finger_gap_m": 0.00019582154315908465
+  },
+  {
+   "id": "libero_spatial_t7_e0#25",
+   "phase": "held",
+   "n_hand_voxels": 0,
+   "n_prev": 8,
+   "finger_gap_m": 0.00028721354494422096
+  },
+  {
+   "id": "libero_spatial_t7_e0#26",
+   "phase": "held",
+   "n_hand_voxels": 0,
+   "n_prev": 8,
+   "finger_gap_m": 0.0002609178684283113
+  },
+  {
+   "id": "libero_spatial_t7_e0#27",
+   "phase": "held",
+   "n_hand_voxels": 0,
+   "n_prev": 8,
+   "finger_gap_m": 0.00025017264444552895
+  },
+  {
+   "id": "libero_spatial_t7_e0#28",
+   "phase": "held",
+   "n_hand_voxels": 8,
+   "n_prev": 8,
+   "finger_gap_m": 0.00019226895238885853
+  },
+  {
+   "id": "libero_spatial_t7_e0#29",
+   "phase": "held",
+   "n_hand_voxels": 2,
+   "n_prev": 8,
+   "finger_gap_m": 0.00015633139149463446
+  },
+  {
+   "id": "libero_spatial_t7_e0#30",
+   "phase": "held",
+   "n_hand_voxels": 14,
+   "n_prev": 8,
+   "finger_gap_m": 0.0001234561433705872
+  },
+  {
+   "id": "libero_spatial_t7_e0#31",
+   "phase": "held",
+   "n_hand_voxels": 0,
+   "n_prev": 8,
+   "finger_gap_m": 9.901498123621958e-05
+  },
+  {
+   "id": "libero_spatial_t7_e0#32",
+   "phase": "held",
+   "n_hand_voxels": 11,
+   "n_prev": 8,
+   "finger_gap_m": 7.207048623928541e-05
+  },
+  {
+   "id": "libero_spatial_t7_e0#33",
+   "phase": "held",
+   "n_hand_voxels": 0,
+   "n_prev": 8,
+   "finger_gap_m": 3.995311030097724e-05
+  },
+  {
+   "id": "libero_spatial_t7_e0#34",
+   "phase": "held",
+   "n_hand_voxels": 40,
+   "n_prev": 8,
+   "finger_gap_m": 1.479672000443159e-05
+  },
+  {
+   "id": "libero_spatial_t7_e0#35",
+   "phase": "held",
+   "n_hand_voxels": 0,
+   "n_prev": 8,
+   "finger_gap_m": 6.409328530207568e-05
+  },
+  {
+   "id": "libero_spatial_t7_e0#36",
+   "phase": "held",
+   "n_hand_voxels": 7,
+   "n_prev": 8,
+   "finger_gap_m": 5.367084453423597e-05
+  },
+  {
+   "id": "libero_spatial_t7_e0#37",
+   "phase": "held",
+   "n_hand_voxels": 1,
+   "n_prev": 8,
+   "finger_gap_m": 3.0009610747445785e-05
+  },
+  {
+   "id": "libero_spatial_t7_e0#38",
+   "phase": "held",
+   "n_hand_voxels": 5,
+   "n_prev": 8,
+   "finger_gap_m": 0.00012108310816264694
+  },
+  {
+   "id": "libero_spatial_t7_e0#39",
+   "phase": "held",
+   "n_hand_voxels": 0,
+   "n_prev": 8,
+   "finger_gap_m": 0.0001897569326869495
+  },
+  {
+   "id": "libero_spatial_t7_e0#40",
+   "phase": "held",
+   "n_hand_voxels": 1,
+   "n_prev": 8,
+   "finger_gap_m": 0.00023473859655839466
+  },
+  {
+   "id": "libero_spatial_t7_e0#41",
+   "phase": "held",
+   "n_hand_voxels": 2,
+   "n_prev": 8,
+   "finger_gap_m": 0.0002621919465258574
+  },
+  {
+   "id": "libero_spatial_t7_e0#42",
+   "phase": "held",
+   "n_hand_voxels": 0,
+   "n_prev": 8,
+   "finger_gap_m": 0.00030697663339130645
+  },
+  {
+   "id": "libero_spatial_t7_e0#43",
+   "phase": "held",
+   "n_hand_voxels": 0,
+   "n_prev": 8,
+   "finger_gap_m": 0.00031212865382506966
+  },
+  {
+   "id": "libero_spatial_t8_e0#11",
+   "phase": "closing",
+   "n_hand_voxels": 6,
+   "n_prev": 8,
+   "finger_gap_m": 0.0002299613173080313
+  },
+  {
+   "id": "libero_spatial_t8_e0#12",
+   "phase": "closing",
+   "n_hand_voxels": 12,
+   "n_prev": 8,
+   "finger_gap_m": 0.00017907289468414335
+  },
+  {
+   "id": "libero_spatial_t8_e0#13",
+   "phase": "closing",
+   "n_hand_voxels": 2,
+   "n_prev": 8,
+   "finger_gap_m": 0.00022653131295216383
+  },
+  {
+   "id": "libero_spatial_t8_e0#14",
+   "phase": "closing",
+   "n_hand_voxels": 0,
+   "n_prev": 8,
+   "finger_gap_m": 0.00018005387673760646
+  },
+  {
+   "id": "libero_spatial_t8_e0#15",
+   "phase": "closing",
+   "n_hand_voxels": 0,
+   "n_prev": 8,
+   "finger_gap_m": 0.00014732973679103104
+  },
+  {
+   "id": "libero_spatial_t8_e0#16",
+   "phase": "closing",
+   "n_hand_voxels": 4,
+   "n_prev": 8,
+   "finger_gap_m": 0.00015121421911316575
+  },
+  {
+   "id": "libero_spatial_t8_e0#17",
+   "phase": "closing",
+   "n_hand_voxels": 5,
+   "n_prev": 8,
+   "finger_gap_m": 0.00011915142115528454
+  },
+  {
+   "id": "libero_spatial_t8_e0#18",
+   "phase": "closing",
+   "n_hand_voxels": 10,
+   "n_prev": 8,
+   "finger_gap_m": 8.471860886901349e-05
+  },
+  {
+   "id": "libero_spatial_t8_e0#19",
+   "phase": "closing",
+   "n_hand_voxels": 7,
+   "n_prev": 8,
+   "finger_gap_m": 0.0001516654403382865
+  },
+  {
+   "id": "libero_spatial_t8_e0#20",
+   "phase": "closing",
+   "n_hand_voxels": 0,
+   "n_prev": 8,
+   "finger_gap_m": 0.00024259280873132564
+  },
+  {
+   "id": "libero_spatial_t8_e0#21",
+   "phase": "closing",
+   "n_hand_voxels": 6,
+   "n_prev": 8,
+   "finger_gap_m": 0.00027195322964728135
+  },
+  {
+   "id": "libero_spatial_t8_e0#22",
+   "phase": "closing",
+   "n_hand_voxels": 0,
+   "n_prev": 8,
+   "finger_gap_m": 0.00030244366981243827
+  },
+  {
+   "id": "libero_spatial_t8_e0#23",
+   "phase": "closing",
+   "n_hand_voxels": 0,
+   "n_prev": 8,
+   "finger_gap_m": 0.0003549884444063677
+  },
+  {
+   "id": "libero_spatial_t8_e0#24",
+   "phase": "closing",
+   "n_hand_voxels": 9,
+   "n_prev": 8,
+   "finger_gap_m": 0.0003770323514525756
+  },
+  {
+   "id": "libero_spatial_t8_e0#25",
+   "phase": "closing",
+   "n_hand_voxels": 10,
+   "n_prev": 8,
+   "finger_gap_m": 0.0005056070183603457
+  },
+  {
+   "id": "libero_spatial_t8_e0#26",
+   "phase": "closing",
+   "n_hand_voxels": 8,
+   "n_prev": 8,
+   "finger_gap_m": 0.0004899701293580039
+  },
+  {
+   "id": "libero_spatial_t8_e0#27",
+   "phase": "held",
+   "n_hand_voxels": 8,
+   "n_prev": 8,
+   "finger_gap_m": 0.00050550045244432
+  },
+  {
+   "id": "libero_spatial_t8_e0#28",
+   "phase": "held",
+   "n_hand_voxels": 3,
+   "n_prev": 8,
+   "finger_gap_m": 0.0005309339519807648
+  },
+  {
+   "id": "libero_spatial_t8_e0#29",
+   "phase": "held",
+   "n_hand_voxels": 4,
+   "n_prev": 8,
+   "finger_gap_m": 0.0005496258286692816
+  },
+  {
+   "id": "libero_spatial_t8_e0#30",
+   "phase": "held",
+   "n_hand_voxels": 4,
+   "n_prev": 8,
+   "finger_gap_m": 0.0005600980523010331
+  },
+  {
+   "id": "libero_spatial_t8_e0#31",
+   "phase": "held",
+   "n_hand_voxels": 0,
+   "n_prev": 8,
+   "finger_gap_m": 0.0005819040309976743
+  },
+  {
+   "id": "libero_spatial_t8_e0#32",
+   "phase": "held",
+   "n_hand_voxels": 1,
+   "n_prev": 8,
+   "finger_gap_m": 0.0005879427119323036
+  },
+  {
+   "id": "libero_spatial_t8_e0#33",
+   "phase": "held",
+   "n_hand_voxels": 0,
+   "n_prev": 8,
+   "finger_gap_m": 0.000580635936648199
+  },
+  {
+   "id": "libero_spatial_t8_e0#34",
+   "phase": "held",
+   "n_hand_voxels": 0,
+   "n_prev": 8,
+   "finger_gap_m": 0.0005858024721785262
+  },
+  {
+   "id": "libero_spatial_t8_e0#35",
+   "phase": "held",
+   "n_hand_voxels": 2,
+   "n_prev": 8,
+   "finger_gap_m": 0.0005716338767611264
+  },
+  {
+   "id": "libero_spatial_t8_e0#36",
+   "phase": "held",
+   "n_hand_voxels": 2,
+   "n_prev": 8,
+   "finger_gap_m": 0.0005523747480670638
+  },
+  {
+   "id": "libero_spatial_t8_e0#37",
+   "phase": "held",
+   "n_hand_voxels": 2,
+   "n_prev": 8,
+   "finger_gap_m": 0.0004907927602618568
+  },
+  {
+   "id": "libero_spatial_t8_e0#38",
+   "phase": "held",
+   "n_hand_voxels": 1,
+   "n_prev": 8,
+   "finger_gap_m": 0.0005051354320056538
+  },
+  {
+   "id": "libero_spatial_t8_e0#39",
+   "phase": "held",
+   "n_hand_voxels": 0,
+   "n_prev": 8,
+   "finger_gap_m": 0.00025937959588000215
+  },
+  {
+   "id": "libero_spatial_t9_e0#11",
+   "phase": "closing",
+   "n_hand_voxels": 0,
+   "n_prev": 8,
+   "finger_gap_m": 0.0002614153377261605
+  },
+  {
+   "id": "libero_spatial_t9_e0#12",
+   "phase": "closing",
+   "n_hand_voxels": 38,
+   "n_prev": 8,
+   "finger_gap_m": 0.00019911609042552736
+  },
+  {
+   "id": "libero_spatial_t9_e0#13",
+   "phase": "closing",
+   "n_hand_voxels": 15,
+   "n_prev": 8,
+   "finger_gap_m": 0.0005289880243732129
+  },
+  {
+   "id": "libero_spatial_t9_e0#14",
+   "phase": "closing",
+   "n_hand_voxels": 1,
+   "n_prev": 8,
+   "finger_gap_m": 0.0013273624283423237
+  },
+  {
+   "id": "libero_spatial_t9_e0#15",
+   "phase": "closing",
+   "n_hand_voxels": 0,
+   "n_prev": 8,
+   "finger_gap_m": 0.00012109111053858852
+  },
+  {
+   "id": "libero_spatial_t9_e0#16",
+   "phase": "closing",
+   "n_hand_voxels": 0,
+   "n_prev": 8,
+   "finger_gap_m": 0.0001053963046951812
+  },
+  {
+   "id": "libero_spatial_t9_e0#17",
+   "phase": "closing",
+   "n_hand_voxels": 0,
+   "n_prev": 8,
+   "finger_gap_m": 8.008867848643443e-05
+  },
+  {
+   "id": "libero_spatial_t9_e0#18",
+   "phase": "closing",
+   "n_hand_voxels": 0,
+   "n_prev": 8,
+   "finger_gap_m": 8.803927811417084e-05
+  },
+  {
+   "id": "libero_spatial_t9_e0#19",
+   "phase": "closing",
+   "n_hand_voxels": 0,
+   "n_prev": 8,
+   "finger_gap_m": 6.253804310449133e-05
+  },
+  {
+   "id": "libero_spatial_t9_e0#20",
+   "phase": "closing",
+   "n_hand_voxels": 0,
+   "n_prev": 8,
+   "finger_gap_m": 5.6039477812813536e-05
+  },
+  {
+   "id": "libero_spatial_t9_e0#21",
+   "phase": "closing",
+   "n_hand_voxels": 0,
+   "n_prev": 8,
+   "finger_gap_m": 6.220978196791113e-05
+  },
+  {
+   "id": "libero_spatial_t9_e0#22",
+   "phase": "closing",
+   "n_hand_voxels": 23,
+   "n_prev": 8,
+   "finger_gap_m": 4.2116514333674204e-05
+  },
+  {
+   "id": "libero_spatial_t9_e0#23",
+   "phase": "closing",
+   "n_hand_voxels": 204,
+   "n_prev": 8,
+   "finger_gap_m": 9.493006743203913e-05
+  },
+  {
+   "id": "libero_spatial_t9_e0#24",
+   "phase": "closing",
+   "n_hand_voxels": 94,
+   "n_prev": 8,
+   "finger_gap_m": 0.0001123631794377254
+  },
+  {
+   "id": "libero_spatial_t9_e0#25",
+   "phase": "closing",
+   "n_hand_voxels": 179,
+   "n_prev": 8,
+   "finger_gap_m": 0.00013055470775338212
+  },
+  {
+   "id": "libero_spatial_t9_e0#26",
+   "phase": "closing",
+   "n_hand_voxels": 73,
+   "n_prev": 8,
+   "finger_gap_m": 0.0005312508164623891
+  },
+  {
+   "id": "libero_spatial_t9_e0#27",
+   "phase": "closing",
+   "n_hand_voxels": 102,
+   "n_prev": 8,
+   "finger_gap_m": 0.0006309303603858627
+  },
+  {
+   "id": "libero_spatial_t9_e0#28",
+   "phase": "closing",
+   "n_hand_voxels": 63,
+   "n_prev": 8,
+   "finger_gap_m": 0.0007809163879260981
+  },
+  {
+   "id": "libero_spatial_t9_e0#29",
+   "phase": "closing",
+   "n_hand_voxels": 29,
+   "n_prev": 8,
+   "finger_gap_m": 0.0008245089633612686
+  },
+  {
+   "id": "libero_spatial_t9_e0#30",
+   "phase": "closing",
+   "n_hand_voxels": 19,
+   "n_prev": 8,
+   "finger_gap_m": 0.000880748317618273
+  },
+  {
+   "id": "libero_spatial_t9_e0#31",
+   "phase": "closing",
+   "n_hand_voxels": 19,
+   "n_prev": 8,
+   "finger_gap_m": 0.0010259959757536066
+  },
+  {
+   "id": "libero_spatial_t9_e0#32",
+   "phase": "closing",
+   "n_hand_voxels": 14,
+   "n_prev": 8,
+   "finger_gap_m": 0.0009892800368781047
+  },
+  {
+   "id": "libero_spatial_t9_e0#33",
+   "phase": "closing",
+   "n_hand_voxels": 4,
+   "n_prev": 8,
+   "finger_gap_m": 0.0009974423825034394
+  },
+  {
+   "id": "libero_spatial_t9_e0#34",
+   "phase": "closing",
+   "n_hand_voxels": 0,
+   "n_prev": 8,
+   "finger_gap_m": 0.0010130944861496127
+  }
+ ],
+ "rby1_comparison": "\uae30\ub85d \uc5c6\uc74c: development \uc758 RB-Y1 constraint \uae30\ub85d(\uc608: results/development/*/verify/T96c/replay/*/server_constraints)\uc5d0\ub294 fine \uac70\ub9ac\uc7a5(esdf_distance, 5 mm) \uacfc \uacc4\ud68d reference_chunk \ub294 \uc788\uc73c\ub098, (1) \uc5b4\ub290 voxel \uc774 \uc190 \uc18c\uc720\uc778\uc9c0 \uac00\ub974\ub294 MuJoCo \uc2dd GT geom \uc18c\uc720\uc790 \uae30\ub85d\uc774 \uc5c6\uace0 (2) \uc694\uccad \uc2dc\uac01\uc758 \uce21\uc815 \uad00\uc808 \uc0c1\ud0dc \uc774\ub825(\uc694\uccad\ubcc4 q)\uc774 \uc5c6\uc5b4 trail \uad6c\ub97c \ub9cc\ub4e4 \uc218 \uc5c6\ub2e4. \uac19\uc740 \ubd84\ub958\ub97c \uc801\uc6a9\ud560 \uc218 \uc5c6\ub2e4."
+}
