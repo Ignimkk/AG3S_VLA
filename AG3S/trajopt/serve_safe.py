@@ -2672,6 +2672,13 @@ def build_parser() -> argparse.ArgumentParser:
                          "이 필요하다. 기록 to.metrics.palm_cover_margin_m. cuRobo 초기값 (--to-gpu-seeds) 은 덮개 행에도 "
                          "--obstacle-margin 을 쓴다")
     # --- T96b — end
+    # --- T94q — begin (default off)
+    ap.add_argument("--safety-filter", choices=("trajopt", "cbf"), default="trajopt",
+                    help="T94q — safe mode 의 궤적 단계: trajopt (기본, 예전과 동일) 또는 cbf (같은 AG3S 행 위의 "
+                         "1-step discrete CBF-QP, AG3S/trajopt/cbf_filter.py). 기록 to.metrics.cbf")
+    ap.add_argument("--cbf-gamma", type=float, default=None, help="T94q — CBF 감쇠율 gamma (0,1], 기본 0.3")
+    ap.add_argument("--cbf-slack-weight", type=float, default=None, help="T94q — CBF slack 가중, 기본 1e4")
+    # --- T94q — end
     ap.add_argument("--wrist-cover-overflow", type=float, default=None, metavar="MM",
                     help="T46f A14 — 손목 (arm_5 · arm_6 · FT sensor) 몸통 구가 MJCF collision mesh 밖으로 나가는 "
                          "최대 거리 (mm, 기본 5.0). --links gripper_wrist 와 함께만")
@@ -4865,6 +4872,15 @@ def main() -> None:
     else:
         logging.warning("AG3S blas_threads: library default (--blas-threads 0)")
     apply_attention_surface_device(args)   # T78 갈래 B (no-op unless --attention-surface-device is given)
+    if args.safety_filter == "cbf":   # T94q — swap the trajectory optimizer for the CBF-QP filter
+        from AG3S.trajopt import refiner as _refiner_mod
+        from AG3S.trajopt.cbf_filter import CbfSafetyFilter, apply_cbf_overrides
+        apply_cbf_overrides(args.cbf_gamma, args.cbf_slack_weight)
+        _refiner_mod.OPTIMIZER_CLASS = CbfSafetyFilter
+        logging.warning("AG3S safety filter: CBF-QP (T94q) gamma=%g slack_weight=%g — TrajOpt replaced",
+                        CbfSafetyFilter.gamma, CbfSafetyFilter.slack_weight)
+    elif args.cbf_gamma is not None or args.cbf_slack_weight is not None:
+        ap.error("--cbf-gamma / --cbf-slack-weight 는 --safety-filter cbf 와 함께")
     try:
         prepare_run_outputs(args, {"record_constraints": "constraints"})
         configure_run_logging("serve_safe")

@@ -47,6 +47,9 @@ from AG3S.trajopt.sqp import TrajectoryOptimizer
 from AG3S.trajopt.types import ChunkLayout, TrajOptResult, TrajOptStatus
 
 
+#: T94q — `serve_safe --safety-filter cbf` sets this to `cbf_filter.CbfSafetyFilter`; None = TrajOpt (as before).
+OPTIMIZER_CLASS = None
+
 class TrajOptChunkRefiner(DecodedChunkRefiner):
     """Refines a decoded physical-space chunk against AG3S's collision scene.
 
@@ -85,7 +88,7 @@ class TrajOptChunkRefiner(DecodedChunkRefiner):
                                                  self.config.horizon.planned),
                          "plan_horizon": None}}
         )
-        self.optimizer = TrajectoryOptimizer(robot_model, layout, self.limits, planning)
+        self.optimizer = (OPTIMIZER_CLASS or TrajectoryOptimizer)(robot_model, layout, self.limits, planning)
         self.last_result: Optional[TrajOptResult] = None
         #: 마지막으로 `scene_fn` 이 던진 예외의 요약, 또는 `None`.
         self.last_failure: Optional[str] = None
