@@ -202,6 +202,14 @@ class SafePolicy:
     _last_neighbour_palm_contact: dict = {}
     #: SL6-H (HSR6 ⑤) — same reason: no placement-contact record.
     _last_placement_contact: dict = {}
+    #: SL-GTTO4 F3 — same reason: the held-beneath contact rule off, no record.
+    held_beneath_contact: bool = False
+    held_beneath_hand: bool = False
+    _last_held_beneath: dict = {}
+    #: SL-GTTO5 F4 — same reason: the approach-zone release off.
+    grasp_zone_release: bool = False
+    #: SL-GTTO6 F5 — same reason: occluded frames stay uncertified for the TO.
+    occluded_certify: bool = False
     #: SL6-A — robot injections, class defaults = the RB-Y1 behaviour (test doubles built without `__init__` too):
     #: HSR6 ④ scope (`"all"`: NBC, A4 and G1 withheld unless HSR6 = grasp), the arm joints by hand (None = the
     #: `{hand}_arm_{j}` rule), the NBC finger links by hand (None = grasp link minus trailing digits), the A6 site
@@ -362,10 +370,25 @@ class SafePolicy:
         self.latch_phase: bool = False
         #: V11AB-pb4 — HELD: the grasping hand's rows on the object it holds are dropped (`SceneSnapshot.grasp_contact`).
         self.held_hand_exempt: bool = False
+        #: SL-GTTO4 F3 — HELD with an attached held object: SL6-H's placement-contact rule (the held object's own rows
+        #: are not blocked by a surface beneath it, `CollisionLinearizer._placement_contact_margin`) on the latch alone,
+        #: without HSR6 (`_held_beneath_contact`). Off = as before.
+        self.held_beneath_contact: bool = False
+        #: SL-GTTO7 F3b — with `held_beneath_contact`: the grasping hand's authorized rows get the same beneath test.
+        self.held_beneath_hand: bool = False
+        self._last_held_beneath: dict[str, Any] = {}
         #: V11AB-pb5 — LATCHED / CLOSING: the grasp zone (m allowance, m horizontal radius) for the hand's contact links
         #: on the target and the support right under it. ``None`` = off.
         self.grasp_zone_allowance: Optional[float] = None
         self.grasp_zone_radius: float = 0.10
+        #: SL-GTTO5 F4 — LATCHED / CLOSING: the hand's authorized rows within `grasp_zone_radius` (horizontal) of the
+        #: manipulated object are released whatever surface is nearest (cuRobo `plan_grasp`: no hand-world collision on
+        #: the final approach). Off = as before.
+        self.grasp_zone_release: bool = False
+        #: SL-GTTO6 F5 — the TO (sqp: pass-through, status) reads an `occluded_target` frame (no target this frame, the
+        #: rest certified, the manipulated object occluded with its contact permission kept) as certified, the way the
+        #: verdict already executes it (`_occluded_certified`). Off = `geometry_certified` alone, as before.
+        self.occluded_certify: bool = False
         #: V11AB-pb7 (SL5i) — CLOSING with the latch evidence ``closed`` / ``not_empty`` / ``blocked`` all true (the fingers
         #: stopped on something): the held exemption's rule (the grasping hand's authorized rows on the manipulated object
         #: are dropped) applies to that call too. ``False`` (default) = pb6 / V11AB.
@@ -1141,7 +1164,8 @@ class SafePolicy:
             # V11AB-pb4 / pb5 — grasp contact rows changed on this chunk's plan (only when on).
             **({"grasp_contact": dict(getattr(getattr(getattr(self.refiner, "optimizer", None), "linearizer", None),
                                               "_last_grasp_contact", None) or {})}
-               if (self.held_hand_exempt or self.grasp_zone_allowance is not None or self.closing_hand_exempt)
+               if (self.held_hand_exempt or self.grasp_zone_allowance is not None or self.closing_hand_exempt
+                   or self.grasp_zone_release)
                else {}),
             # V11AB-pb4 — the contact phase the constraints were built with (only when the latch picked it).
             **({"contact_phase": dict(self._last_contact_phase)}
@@ -1149,6 +1173,14 @@ class SafePolicy:
             # V11AB-pb2 — minimal intervention gate (only when on).
             **({"minimal_intervention": _jsonable(metrics["minimal_intervention"])}
                if "minimal_intervention" in metrics else {}),
+            # SL-GTTO4 F3 — only when on.
+            **({"held_beneath_contact": self._held_beneath_record()} if self.held_beneath_contact else {}),
+            # SL-GTTO5 — T88's pass-through decision (reason: clear / collision / path / limit, reference violation);
+            # only when `sqp.passthrough_when_clear` put it in the metrics (record only).
+            **({"passthrough_clear": _jsonable(metrics["passthrough_clear"])}
+               if "passthrough_clear" in metrics else {}),
+            **({"ee_action_qp": _jsonable(metrics["ee_action_qp"])}          # SL-GTTO9 F7 (only when it ran)
+               if "ee_action_qp" in metrics else {}),
             "reference_deviation": round(
                 float(getattr(result, "reference_deviation", 0.0) or 0.0), 6),
         }
@@ -1358,6 +1390,8 @@ class SafePolicy:
             snapshot = self._hsr6_target_gate(snapshot, constraint_set)   # AG3S-CORE-EVAL-HSR6 ③ (off: never called)
         if snapshot is not None and self.hsr6 is not None and self.hsr6.placement_contact:
             snapshot = self._hsr6_placement_contact(snapshot)   # SL6-H (HSR6 ⑤; off: never called)
+        if snapshot is not None and self.held_beneath_contact:
+            snapshot = self._held_beneath_contact(snapshot)     # SL-GTTO4 F3 (off: never called)
         # 판정이 위반 행을 **최적화기가 본 것과 같은 씬으로** 다시 분류한다 (T23, `_verdict`).
         self._last_snapshot = snapshot
         # 촬영 시점 중 **가장 최신** 자세가 TO 가 계획을 시작하는 곳이다. AG3S 도 같은 규칙을
@@ -1368,6 +1402,8 @@ class SafePolicy:
         # SUBTASK-e: 판정(`_verdict`)과 **같은 규칙**. 여기서 다르면 sqp 가 `violated` 로 내린 청크를
         # 판정이 인증됐다고 읽는다 (또는 그 반대) — HOLD 를 만드는 두 곳이 같은 술어를 쓴다.
         certified = geometry_certified(constraint_set)
+        if not certified and self.occluded_certify and self._occluded_certified(constraint_set):
+            certified = True     # SL-GTTO6 F5 (off: never reached); the verdict keeps its `occluded_target` reason
         # IFG-NBC: the grasping fingers' light contact with a neighbour object (pre-grasp, near the target).
         nbc = self._neighbour_contact_gate(q_now, manipulators)
         if nbc is not None:
@@ -1595,6 +1631,7 @@ class SafePolicy:
 
         self._pending["hsr6"] = record
         self._last_placement_contact = {}    # SL6-H (HSR6 ⑤) — this request's record is set in `_scene_fn`
+        self._last_held_beneath = {}         # SL-GTTO4 F3 — likewise
         p = record.get("p") if isinstance(record, dict) else None
         self._last_hsr6 = {
             "phase": phase_of(record),
@@ -1745,6 +1782,45 @@ class SafePolicy:
         if not applied:
             return snapshot
         return dataclasses.replace(snapshot, placement_contact=placement_contact_spec())
+
+    def _held_beneath_contact(self, snapshot):
+        """SL-GTTO4 F3 (`--held-beneath-contact`) — latch HELD ∧ an attached held object in the snapshot ∧ a field →
+        the snapshot with SL6-H's `placement_contact` spec (`hsr6.placement_contact_spec`: the held object's own query
+        rows whose nearest surface lies beneath it, inside its xy footprint, cannot bind; hand / finger / arm rows and
+        surfaces beside or above keep their margins). Unlike SL6-H the trigger is the grasp latch only (no HSR6 phase:
+        SL6-H's classifier said `transport` over the plate, so the rule rarely ran). An already set spec (SL6-H on and
+        active) is kept. Record `self._last_held_beneath` (`to.held_beneath_contact`, with the final check's released
+        rows)."""
+        from AG3S.trajopt.hsr6 import placement_contact_spec
+
+        latch = getattr(self._latch.phase, "value", str(self._latch.phase))
+        pts = getattr(snapshot, "attached_points", None)
+        attached = pts is not None and len(pts) > 0
+        field = getattr(snapshot, "esdf", None) is not None
+        applied = bool(latch == "held" and attached and field)
+        self._last_held_beneath = {"latch": latch, "attached": bool(attached), "applied": applied,
+                                   "n_held_rows": int(len(pts)) if attached else 0}
+        if not applied or getattr(snapshot, "placement_contact", None) is not None:
+            return snapshot
+        spec = placement_contact_spec()
+        if self.held_beneath_hand:
+            spec = {**spec, "hand_rows": True}     # SL-GTTO7 F3b
+        return dataclasses.replace(snapshot, placement_contact=spec)
+
+    def _held_beneath_record(self) -> dict:
+        """SL-GTTO4 F3 — this request's `_last_held_beneath` + the final check's released rows (`to.metrics`)."""
+        rec = dict(self._last_held_beneath or {})
+        if rec.get("applied"):
+            result = getattr(self.refiner, "last_result", None)
+            rows = (getattr(result, "metrics", None) or {}).get("placement_contact") if result is not None else None
+            if isinstance(rows, dict):
+                rec["rows_released"] = int(rows.get("rows_released", 0) or 0)
+                rec["held_rows_released"] = int(rows.get("held_rows_released", 0) or 0)
+                if rows.get("min_clearance_released_m") is not None:
+                    rec["min_clearance_released_m"] = round(float(rows["min_clearance_released_m"]), 6)
+                if "hand_rows_released" in rows:   # SL-GTTO7 F3b
+                    rec["hand_rows_released"] = int(rows["hand_rows_released"])
+        return rec
 
     def _hsr6_placement_contact_result(self) -> None:
         """⑤ — after the solve: the held rows the returned trajectory's final check released
@@ -2005,7 +2081,8 @@ class SafePolicy:
         The authorized links are the ones the constraints were built with (`_authorized_links`, the clearance policy's
         contact links: palm + fingers), the same set the verdict classifies with — not the latch's grasp links (the
         fingers only, which left the palm out in the first pb4/pb5 runs, commit 38722284)."""
-        if not self.held_hand_exempt and self.grasp_zone_allowance is None and not self.closing_hand_exempt:
+        if (not self.held_hand_exempt and self.grasp_zone_allowance is None and not self.closing_hand_exempt
+                and not self.grasp_zone_release):
             return None
         names = list(getattr(self.constraint_robot_model, "sphere_link_names", ()) or ())
         allowed = set(self._authorized_links(constraint_set))
@@ -2018,6 +2095,8 @@ class SafePolicy:
                "zone_radius": float(self.grasp_zone_radius), "centroid": centroid}
         if self.closing_hand_exempt:
             out["closing_exempt"] = self.closing_exempt_now()
+        if self.grasp_zone_release:   # SL-GTTO5 F4 (off: no key)
+            out["zone_release"] = True
         return out
 
     #: V11AB-pb7: the latch checks that together say "the fingers closed and stopped on something".
@@ -3289,6 +3368,16 @@ class SafePolicy:
             return dict(rec()) if callable(rec) else {}
         except Exception:  # noqa: BLE001 — 기록을 못 읽는 것으로 판정이 죽지 않는다
             return {}
+
+    def _occluded_certified(self, cs) -> bool:
+        """SL-GTTO6 F5 — the `occluded_target` condition of `_certification_reason` (no_target, the rest of the
+        geometry certified, the manipulated object `occluded` with its contact permission in this constraint set)."""
+        if cs is None:
+            return False
+        status = getattr(getattr(cs, "status", None), "value", None)
+        return bool(status == "no_target" and getattr(cs, "geometry_certified", False)
+                    and self._manipulated_record(cs).get("state") == "occluded"
+                    and getattr(cs, "manipulated", None) is not None)
 
     def _certification_reason(self, cs) -> dict[str, Any]:
         """기하 미인증을 `occluded_target` · `uncertified_waived` · `uncertified` 로 가른다.

@@ -162,6 +162,8 @@ class ChunkToJointPolicy:
         self.kin = kin
         self.last: Optional[pa.Conversion] = None
         self.last_result_actions = None
+        #: SL-GTTO9 (F7): the TrajectoryOptimizer that gets this request's action map (``--ee-action-qp``), else None
+        self.ee_optimizer = None
 
     @property
     def metadata(self):
@@ -185,8 +187,38 @@ class ChunkToJointPolicy:
         self.last = pa.delta_chunk_to_joint_chunk(self.kin, delta, q_now, np.asarray(panda[KEY_T_WORLD_BASE]),
                                                   prev_step_world=prev)
         self.last_result_actions = delta
+        if self.ee_optimizer is not None:   # SL-GTTO9 (F7): this chunk's action map, before the TO runs
+            self.ee_optimizer.last_ee_action = None
+            self.ee_optimizer.ee_action_map = pa.ee_action_map(self.kin, self.last, int(PANDA_HORIZON["plan_horizon"]))
         result["actions"] = self.last.joint_chunk
         return result
+
+
+#: SL-GTTO9 (F7): the returned refined arm rows must equal the action QP's trajectory to this tolerance (rad) for its
+#: actions to be sent; otherwise (a HOLD, a pass-through, a later change by SafePolicy) conversion C's actions stay.
+EE_ACTION_MATCH_RAD = 1e-4
+
+
+def ee_action_actions(optimizer, conv, refined, actions):
+    """SL-GTTO9 (F7) — when the TO solved this chunk in action space (``TrajectoryOptimizer._solve_ee_action``) and
+    SafePolicy returned that trajectory, send ``clip(a_ref + Da)`` on the TO rows instead of conversion C's rows.
+    Returns ``(actions, record)``."""
+    last = getattr(optimizer, "last_ee_action", None)
+    if last is None:
+        return actions, {"used": False, "why": "no action QP on this chunk"}
+    traj = np.asarray(last["trajectory"], np.float64)       # (7, H)
+    da = np.asarray(last["delta_action"], np.float64)        # (H, 6)
+    H = traj.shape[1]
+    arm = np.asarray(refined, np.float64)[:H, :pa.ARM_DOF]
+    diff = float(np.max(np.abs(arm - traj.T), initial=0.0))
+    if diff > EE_ACTION_MATCH_RAD:
+        return actions, {"used": False, "why": "the returned chunk is not the action-QP trajectory",
+                         "max_diff_rad": diff}
+    out = np.array(actions, copy=True)
+    a_ref = np.clip(np.asarray(conv.delta[:H, :6], np.float64), -pa.OSC_INPUT_CLIP, pa.OSC_INPUT_CLIP)
+    out[:H, :6] = np.clip(a_ref + da, -pa.OSC_INPUT_CLIP, pa.OSC_INPUT_CLIP).astype(out.dtype)
+    return out, {"used": True, "rows": int(H), "max_abs_delta_action": float(np.max(np.abs(da), initial=0.0)),
+                 "max_diff_rad": diff}
 
 
 class PandaSafeServer:
@@ -268,6 +300,8 @@ class PandaSafeServer:
         if conv is None or reference is None:
             raise RuntimeError("SafePolicy returned no reference chunk for the Panda conversion")
         actions, rec = pa.joint_chunk_to_delta_chunk(self.chunk_policy.kin, conv, refined, reference, mode=self.mode)
+        if getattr(self.chunk_policy, "ee_optimizer", None) is not None:   # SL-GTTO9 (F7)
+            actions, rec["ee_action_qp"] = ee_action_actions(self.chunk_policy.ee_optimizer, conv, refined, actions)
         deferred = self._g1_deferred()
         if deferred:
             # SL6-A A8 — G1 deferred the close on this chunk: send the refined (open) gripper rows (G1 off: never here)
@@ -298,6 +332,9 @@ class PandaSafeServer:
         surface = surface_call_record(self._policy)
         if surface is not None:   # SL7i — key only with the attention-surface extent on (V11AB / pb / pc responses unchanged)
             response["panda/surface"] = surface
+        gt = gt_perception_call_record(self._policy)
+        if gt is not None:   # SL-GTTO — key only with the GT perception on (every other response unchanged)
+            response["panda/gt_perception"] = gt
         return response
 
 
@@ -339,6 +376,46 @@ def surface_call_record(safe) -> Optional[dict]:
     return _jsonable(rec)
 
 
+def _scalars(d) -> Optional[dict]:
+    return ({k: v for k, v in d.items() if isinstance(v, (bool, int, float, str)) or v is None}
+            if isinstance(d, dict) else None)
+
+
+def gt_perception_call_record(safe) -> Optional[dict]:
+    """SL-GTTO — this call's GT-perception record for the client's ``*_calls.jsonl`` (logging only, read after the
+    solve; the smoke keys of task §5-7): ``grounding`` = ``metrics["grounding_source"]`` scalars (``source`` = oracle,
+    ``n_code1`` points this request, ``why``, grounding ``status``), ``oracle`` = the fine target-free layer's oracle
+    record (``stats["target_free"]["oracle"]`` scalars: ``applied``, ``why``, ``identity_mode``, ``code``, ...) and its
+    memory counts. ``None`` unless the version uses the oracle extent or the GT grounding (no key)."""
+    ag3s = getattr(safe, "ag3s", None)
+    cfg = getattr(ag3s, "config", None)
+    if ag3s is None or cfg is None:
+        return None
+    oracle_on = getattr(cfg.esdf, "target_extent", None) == "oracle_visible"
+    grounding_on = getattr(cfg.clustering, "grounding_source", "attention") == "oracle"
+    if not (oracle_on or grounding_on):
+        return None
+    from AG3S.trajopt.safe_policy import _jsonable
+
+    rec: dict[str, Any] = {"grounding_source": str(getattr(cfg.clustering, "grounding_source", "attention")),
+                           "target_extent": str(cfg.esdf.target_extent)}
+    gf = getattr(ag3s, "_grounding_frame", None)
+    rec["grounding"] = _scalars(gf) if gf is not None else None
+    if isinstance(gf, dict):
+        rec["grounding"]["cameras"] = list(gf.get("cameras") or [])
+        # SL-GTTO2: the F1 / F2 records (keys exist only with `--oracle-admissible` / `--oracle-held-target`)
+        for key in ("admissibility_would_refuse", "exclusion_gate_would_refuse", "held_target_mask"):
+            if key in gf:
+                rec["grounding"][key] = gf[key]
+    field = getattr(ag3s, "_last_esdf_field", None)
+    tf = (getattr(field, "stats", None) or {}).get("target_free") if field is not None else None
+    orc = tf.get("oracle") if isinstance(tf, dict) else None
+    rec["oracle"] = _scalars(orc)
+    if isinstance(orc, dict) and isinstance(orc.get("memory"), dict):
+        rec["oracle"]["memory"] = _scalars(orc["memory"])
+    return _jsonable(rec)
+
+
 def _replace_horizon_limits(to_config):
     h = dataclasses.replace(to_config.horizon, **PANDA_HORIZON)
     lim = dataclasses.replace(to_config.limits, source="urdf", model_xml=None,
@@ -361,7 +438,7 @@ UNPORTED_FINAL_CONFIG_DESTS: tuple[str, ...] = (
     'geo_w_rot', 'geo_wrist_check', 'grasp_anchor_radius_mm', 'grasp_goal_box', 'grasp_goal_window', 'held_3d_max_m',
     'held_3d_rule', 'held_permission_parent_links', 'hybrid_identity', 'hybrid_other_exclude_voxels',
     'latch_carry_from_closing', 'latch_reach_hand_relative', 'latch_reach_kept_unseen',
-    'nonauthorized_target_margin', 'nontarget_shell_voxels', 'oracle_extent_identity', 'oracle_max_dist_voxels',
+    'nonauthorized_target_margin', 'nontarget_shell_voxels',
     'owned_ambiguous', 'owned_tie_voxels', 'owned_unowned', 'palm_cover', 'palm_cover_overflow',
     'palm_shell_overflow', 'profile_substages', 'qp_backend', 'recovery_retreat', 'robot_free_shrink_mm',
     'robot_mask', 'robot_occupied_free', 'roi_pad_mm', 'stem_cap_bottom_fit_frac', 'stem_cap_radius_mm',
@@ -411,7 +488,27 @@ PORTED_FINAL_CONFIG_DESTS: tuple[str, ...] = (
     # SL7f (lead self-ruling 2026-11-04, user autonomous window): ATS gate of the surface seed map (esdf key via
     # serve_safe.target_exclusion_section, like the other surface flags)
     'surface_seed_ats_gate',
+    # SL-GTTO (task SL-GTTO §3-3): the GT perception of the common-TO check -- the visible-target oracle extent
+    # (`--target-extent oracle-visible`, T46e; the client sends the code images, libero_safe_client --oracle-seg) with
+    # its identity / candidate reach, and the GT grounding input (`--grounding-source oracle`, clustering key)
+    'grounding_source', 'oracle_extent_identity', 'oracle_max_dist_voxels',
+    # SL-GTTO2 (task SL-GTTO2 §1): the GT cluster is not refused by admissibility (F1), the held GT target's pixels
+    # are masked out of the TSDF (F2) -- both clustering keys through serve_safe.t43t_identity_section
+    'oracle_admissible', 'oracle_held_target',
+    # SL-GTTO4 F3 (lead self-ruling 2026-11-05): SL6-H's held-object placement contact on the latch alone (SafePolicy
+    # switch through serve_safe.apply_grasp_contact_flags, which this server already calls)
+    'held_beneath_contact',
+    # SL-GTTO5 F4 (user ruling 2026-11-05 ~09:3x "best direction"): the approach-zone release, same SafePolicy path
+    'grasp_zone_release',
+    # SL-GTTO6 F5: occluded_target frames certified for the TO (SafePolicy switch, same path)
+    'occluded_certify',
+    # SL-GTTO7 F3b: the hand rows join the held-beneath rule (SafePolicy switch, same path)
+    'held_beneath_hand',
+    # SL-GTTO9 F7: the TO solves in the policy's action space (server wiring in build_safe_server)
+    'ee_action_qp',
 )
+#: SL-GTTO — the target extents the Panda server runs (``--target-extent``; SL7 attention-surface, SL-GTTO oracle-visible).
+PORTED_TARGET_EXTENTS: tuple[str, ...] = ("estimated", "attention-surface", "oracle-visible")
 
 
 def _hidden_probe_source(args) -> bool:
@@ -436,11 +533,12 @@ def check_unported_flags(args, ap) -> None:
     elif ss.hsr6_flags_from_args(args) is not None and not getattr(args, "hsr6_probe", None):
         message = ("--robot panda: --hsr6-* needs --hsr6-probe FILE (the Panda probe, SL6-B B4); the default probe is "
                    "the RB-Y1 one (kv_L4 of another policy and robot)")
-    elif getattr(args, "target_extent", None) not in (None, "estimated", "attention-surface"):
-        # SL7: the extent flag itself is ported, but only the attention-surface one (oracle-visible reads the client's
-        # GT segmentation, the hybrid needs the RB-Y1 ball-owned split protection and a rendered-robot mask)
-        message = (f"--robot panda: --target-extent {args.target_extent} is not ported (SL7 ported attention-surface "
-                   "only; oracle-visible needs the client's GT segmentation, attention-surface-hybrid is RB-Y1's)")
+    elif getattr(args, "target_extent", None) not in (None,) + PORTED_TARGET_EXTENTS:
+        # SL7: the extent flag itself is ported, the attention-surface one; SL-GTTO: + oracle-visible (the LIBERO
+        # clients send the GT code images with --oracle-seg). The hybrid needs the RB-Y1 ball-owned split protection
+        # and a rendered-robot mask.
+        message = (f"--robot panda: --target-extent {args.target_extent} is not ported (ported: "
+                   f"{', '.join(PORTED_TARGET_EXTENTS)}; attention-surface-hybrid is RB-Y1's)")
     elif _hidden_probe_source(args):
         # main 02fe59e6 merge: the hidden-probe target map is a probe trained on RB-Y1 16D hidden states (3 cameras)
         message = ("--robot panda: --attention-source hidden_probe is an RB-Y1-trained probe (not ported; needs a "
@@ -726,6 +824,9 @@ def build_safe_server(policy, args, *, attention_model=None, gpu_warm_up: bool =
                       finger_map=FingerJointMap(constraint, convention=panda_gripper_convention()), hands=HANDS,
                       **final_kw)
     grasp_contact = ss.apply_grasp_contact_flags(safe, args)  # V11AB-pb4 / pb5 (all off = V11AB)
+    if getattr(args, "ee_action_qp", False):   # SL-GTTO9 (F7): the TO solves in the policy's action space
+        chunk_policy.ee_optimizer = safe.refiner.optimizer
+        grasp_contact = {**grasp_contact, "ee_action_qp": True}
     gpu = gpu_seeds_setup(safe, to_config, warm_up=gpu_warm_up)
     inert = []
     ss.announce_subtask_from_latch(args)   # SL7 (T92): one start line when on
@@ -790,6 +891,30 @@ def surface_record(args, ag3s) -> dict:
             "robot_mask": e.robot_mask, "arm": asurf.ARM_SPHERES if e.robot_mask != "render" else asurf.ARM_RENDER,
             "hull_fill_palm_point": "mean of the grasping gripper's finger-link constraint spheres "
                                     "(pipeline._grasp_palm_points; the A6 hold site is not used here)"}
+
+
+def _gt_perception_on(args) -> bool:
+    return (getattr(args, "target_extent", None) == "oracle-visible"
+            or getattr(args, "grounding_source", "attention") == "oracle")
+
+
+def gt_perception_record(ag3s) -> dict:
+    """SL-GTTO -- the GT perception the server applies (task SL-GTTO §2): the oracle extent's AG3S config keys, the
+    grounding source, and where the code images come from."""
+    from AG3S.ag3s.runtime import oracle_segmentation as osg
+
+    e, c = ag3s.config.esdf, ag3s.config.clustering
+    return {"target_extent": e.target_extent, "oracle_extent_identity": e.oracle_extent_identity,
+            "oracle_max_dist_voxels": float(e.oracle_max_dist_voxels), "grounding_source": c.grounding_source,
+            # SL-GTTO2: only when on (the AG3S-commonto-gt record is unchanged)
+            **{k: True for k in ("oracle_admissible", "oracle_held_target") if getattr(c, k, False)},
+            "codes": {"none_robot": osg.CODE_NONE, "target": osg.CODE_TARGET, "static": osg.CODE_STATIC,
+                      "object_base": osg.CODE_OBJECT_BASE, "version": osg.CODE_VERSION},
+            "client": "libero_safe_client / libero_safety_client --oracle-seg (benchmark/adapters/libero_panda/"
+                      "oracle_codes.py: BDDL goal target = 1, fixtures / table / walls / floor = 2, robot = 0, every "
+                      "other object = 3, 4, ...), from the --capture-segmentation geom-id images (OpenCV rows, the "
+                      "depth grid)",
+            "segmentation_required": True}
 
 
 def subtask_latch_record(safe) -> dict:
@@ -861,6 +986,8 @@ def final_config_record(args, safe, to_config, attn_rec: dict, gpu: Optional[dic
         **({"attention_surface": surface_record(args, safe.ag3s)} if getattr(args, "target_extent", None) == "attention-surface"
            else {}),
         **({"subtask_from_latch": subtask_latch_record(safe)} if ss.subtask_from_latch_on(args) else {}),
+        # SL-GTTO — key only with the GT perception on (the earlier versions' dump is unchanged)
+        **({"gt_perception": gt_perception_record(safe.ag3s)} if _gt_perception_on(args) else {}),
         "inert_on_panda": inert,
         "request_count_rules_unchanged": "hold_follow_to / geo_close_timeout / geo_carry_requests / HSR6 raw argmax are "
                                          "request counts; Panda requests are 0.25 s apart (RB-Y1 0.53 s)",

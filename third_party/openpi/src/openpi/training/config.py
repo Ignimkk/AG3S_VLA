@@ -782,6 +782,32 @@ _CONFIGS = [
         pytorch_weight_path="/path/to/your/pytorch_weight_path",
         num_train_steps=30_000,
     ),
+    # BM-SETUP-B hook H1 (2026-11-04): the official LIBERO-Safety fine-tune ``LIBERO-Safety/pi05_libero_safety``
+    # (HF @e66d84bf). Same model as pi05_libero (pi05, horizon 10); norm stats under ``assets/lerobot``. Serving only --
+    # the training hyper-parameters below are pi05_libero's (LIBERO-Safety paper App. C: 30k steps, batch 256,
+    # peak LR 5e-5, EMA 0.999), not a reproduction recipe.
+    TrainConfig(
+        name="pi05_libero_safety",
+        model=pi0_config.Pi0Config(pi05=True, action_horizon=10, discrete_state_input=False),
+        data=LeRobotLiberoDataConfig(
+            repo_id="LIBERO-Safety/libero_safety",
+            assets=AssetsConfig(asset_id="lerobot"),
+            base_config=DataConfig(prompt_from_task=True),
+            extra_delta_transform=False,
+        ),
+        batch_size=256,
+        lr_schedule=_optimizer.CosineDecaySchedule(
+            warmup_steps=10_000,
+            peak_lr=5e-5,
+            decay_steps=1_000_000,
+            decay_lr=5e-5,
+        ),
+        optimizer=_optimizer.AdamW(clip_gradient_norm=1.0),
+        ema_decay=0.999,
+        weight_loader=weight_loaders.CheckpointWeightLoader("gs://openpi-assets/checkpoints/pi05_base/params"),
+        pytorch_weight_path="/path/to/your/pytorch_weight_path",
+        num_train_steps=30_000,
+    ),
     #
     # Fine-tuning Aloha configs.
     #

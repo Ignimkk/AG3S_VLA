@@ -16,7 +16,7 @@ PANELS = [('safelibero_spatial_t0_e0', 30), ('safelibero_spatial_t0_e1', 40), ('
           ('safelibero_spatial_t2_e2', 25), ('safelibero_spatial_t3_e0', 25), ('safelibero_spatial_t3_e2', 30)]   # fixed before looking at scores
 SHOW = ['gsam2_track__instruction', 'gsam_v1__phrase', 'yoloe005__phrase']
 COL = {'gsam2_track__instruction': '#2a6df4', 'gsam_v1__phrase': '#e8a600', 'yoloe005__phrase': '#8a3ffc'}
-RAW = Path('/mnt/dev/AG3S_VLA-storage/results/benchmark/20261017T151126_38722284e2fa_sl5f-safelibero-LI-dev-LI-vla_only/episodes')
+RAW = Path(__import__('os').environ.get('AG3S_SL_SOURCE_RUN', '/mnt/dev/AG3S_VLA-storage/results/benchmark/20261017T151126_38722284e2fa_sl5f-safelibero-LI-dev-LI-vla_only')) / 'episodes'  # nb1104: env override, default unchanged
 
 
 def project(points, K, T):

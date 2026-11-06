@@ -56,7 +56,17 @@ def test_every_head_version_keeps_its_argv(gpu_ok):
     from AG3S.adapters.panda import profile as pf
 
     old = _head_module("AG3S/adapters/panda/profile.py", "_panda_profile_head")
-    assert set(old.AG3S_VERSIONS) == set(pf.AG3S_VERSIONS) - {PC} - set(pf.P0M_VERSIONS) - set(pf.PC_LATCH_VERSIONS) - set(pf.PC_NOPROBE_VERSIONS)   # SL7 P0m, SL7d/e pc variants
+    assert set(old.AG3S_VERSIONS) == (set(pf.AG3S_VERSIONS) - {PC} - set(pf.P0M_VERSIONS) - set(pf.PC_LATCH_VERSIONS)
+                                      - set(pf.PC_NOPROBE_VERSIONS)   # SL7 P0m, SL7d/e pc variants
+                                      - set(getattr(pf, "GT_VERSIONS", ()))   # SL-GTTO
+                                      - set(getattr(pf, "GT2_VERSIONS", ()))   # SL-GTTO2
+                                      - set(getattr(pf, "GT3_VERSIONS", ()))   # SL-GTTO3
+                                      - set(getattr(pf, "GT4_VERSIONS", ()))   # SL-GTTO4
+                                      - set(getattr(pf, "GT5_VERSIONS", ()))   # SL-GTTO5
+                                      - set(getattr(pf, "GT6_VERSIONS", ()))   # SL-GTTO6
+                                      - set(getattr(pf, "GT7_VERSIONS", ()))   # SL-GTTO7
+                                      - set(getattr(pf, "GT8_VERSIONS", ()))   # SL-GTTO8
+                                      - set(getattr(pf, "GT9_VERSIONS", ())))   # SL-GTTO9
     assert pf.FINAL_CONFIG_VERSIONS == old.FINAL_CONFIG_VERSIONS + (PC,)
     for name, flags in old.AG3S_VERSIONS.items():
         assert pf.AG3S_VERSIONS[name] == flags, name

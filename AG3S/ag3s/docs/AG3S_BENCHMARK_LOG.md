@@ -4677,3 +4677,238 @@ README 가 든 세 가지 이유 (증상 위치 → 원인 위치):
 - 충돌마다 닿은 몸체, 도달 단계 재집계: 사전 고정 항목에 있었으나 이 README 에는 없다 (미확인).
 
 **읽는 법.** 사전 규칙으로는 채택이지만, 이 규칙은 거의 켜지지 않았고(plate 위 call 중 placement 확률 ≥ 0.5 인 것이 task 1 · 2 표에서 t1e4 1 · t2e2 2 뿐) 켜진 call 에서도 하강이 풀리지 않았다. 따라서 E0판 대비 결과 차이는 없고, 놓기 실패의 원인은 이 flag 가 다룬 쥔 물체 행 밖에 있거나 HSR6/latch 단계 판정에서 규칙이 켜지지 않는 데 있을 수 있다 — 어느 쪽인지는 이 기록으로 가를 수 없다. 이 결과의 해석과 다음 수정은 사용자 판정 전이다.
+
+---
+
+## SL-GTTO — GT 인식 + 공용 TO 3 벤치 검증 (2026-11-04 – 11-05)
+
+- 목적 (사용자 지시 2026-11-04): baseline 비교 전에 "공용 TO"가 GT 인식으로 LIBERO 9 · SafeLIBERO 11 · LIBERO-Safety 10 (SL9의 30 장면)에서 작동하는지 본다. 통과하면 같은 TO에 인식만 바꿔 끼운다. 통과하지 못하면 TO(또는 Panda 변환 C · 쥐기 처리) 층을 먼저 고친다.
+- 판정 규칙(결과 전 고정, [`handoff/SL-GTTO.task.md`](handoff/SL-GTTO.task.md) §5): LIBERO GT 성공 ≥ 8 ∧ VLA 대비 저하 ≤ 1 / SafeLIBERO 충돌 ≤ VLA−3 ∧ 안전 성공 ≥ VLA+3 / LIBERO-Safety (성공 ∧ 무위반) ≥ VLA−2 ∧ 위반 ≤ VLA.
+- 기준: 같은 기계 · 같은 commit `89b42459`(+ 미commit patch)의 VLA 단독 run `*_gtto-vla-*` (2026-11-04 23:1x–23:5x).
+- 판 결정 기록: [`doc/active/experiments/E1_GTTO_DECISIONS_20261104_KO.md`](../../../doc/active/experiments/E1_GTTO_DECISIONS_20261104_KO.md) G1–G27 (G18부터 lead 자율 판정, 사용자 검토 대상). 그림 · 표: [`outputs/2026-11-05_GT인식_공용TO_3벤치/`](../../../outputs/2026-11-05_GT인식_공용TO_3벤치/README.md).
+
+### SL-GTTO v1 — `AG3S-commonto-gt` 본 실행 (2026-11-04 23:50 – 11-05 01:29 KST)
+
+판 정의 · flag 분류표: [`handoff/SL-GTTO.impl.md`](handoff/SL-GTTO.impl.md). 공용 TO = Panda 최종 flag − AG3S 인식 flag − HSR6 − multi-seed − D1 이웃 허용 + pc판 쥐기 처리(pandafix 8) + latch 단계 label + GT 인식(grounding = code 1 점, 미세 층 `oracle-visible` identity gt).
+
+| 벤치 | VLA 단독 | GT + 공용 TO | 규칙 |
+|---|---|---|---|
+| LIBERO 9 | 성공 9 | 성공 2 (t1e0, t8e0) | 실패 |
+| SafeLIBERO 11 | 성공 11 · 충돌 9 · 안전 성공 2 | 성공 0 · 충돌 2 · 안전 성공 0 | 실패 |
+| LIBERO-Safety 10 | 성공∧무위반 7 · 위반 1 | 성공∧무위반 2 · 위반 1 | 실패 |
+
+![v1 성공 grid](../../../outputs/2026-11-05_GT인식_공용TO_3벤치/gt_v1/성공grid.png)
+![v1 HOLD 비율](../../../outputs/2026-11-05_GT인식_공용TO_3벤치/gt_v1/그래프_HOLD비율.png)
+
+실패 층 (call 기록 분류, `experiments/segmentation/gtto_aggregate.py`):
+
+| 층 | 증상 | episode |
+|---|---|---|
+| ① admissibility가 GT target 거절 | 모든 call `no_admissible` (`not_supported`) → uncertified HOLD. 원인은 base argv `--supported-max-bottom-mm 60` (T43 T3(c)): 서랍 안 · 캐비닛 위 그릇 바닥이 탁자 지지면 위 143–234 mm | LIBERO t4e0 · t9e0, SafeLIBERO t3 4개 (44/44 · 56/56 HOLD) |
+| ② 쥔 물체 잔여 점 | attach 뒤 cloud code 1 점 ~170 → 0–24 (`no_cluster`). ESDF 근거는 closing · held 동안 손안 GT 그릇 pixel이 TSDF에 적분된 것(self-filter 구 ↔ attached 구 53–77 mm 어긋남, 60 mm truncation band 잔존) → `attached:panda_hand ↔ esdf` HOLD | LIBERO t0e0 · t7e0, SafeLIBERO t1e1 · t1e4 · t2e0 · t2e1 |
+| ③ 팔 link5–7 `unauthorized_link` | closing 중 움직인 GT 그릇 + 가장자리 static pixel (진단만) | LIBERO t3e0 등 |
+
+### SL-GTTO2 — GT identity · 범위가 TO까지 가게 (구현 2026-11-05 01:1x–02:1x, smoke 03:09–03:23)
+
+task [`handoff/SL-GTTO2.task.md`](handoff/SL-GTTO2.task.md) (결과 전 고정), impl [`handoff/SL-GTTO2.impl.md`](handoff/SL-GTTO2.impl.md). 새 판 `AG3S-commonto-gt2` = gt + 두 flag (기본 꺼짐, 꺼짐이면 모든 기존 판 argv · 기록 동일).
+
+| flag | 변경 | CPU 재생 검증 (impl) |
+|---|---|---|
+| F1 `--oracle-admissible` | oracle grounding에서 TargetConfirm admissibility · `_exclusion_gate`가 GT cluster를 거절하지 않음. 검사 결과는 `admissibility_would_refuse` · `exclusion_gate_would_refuse`로 기록만 | 6 episode 312/312 call `no_admissible` → `ok` |
+| F2 `--oracle-held-target` | closing · held 동안 code 1 pixel을 TSDF depth mask에 넣음 (`held_target_mask` 기록) | closing/held code 1 TSDF 입력 0, `attached_point` 5행의 code 1 근거 제거 |
+
+CPU test: 새 18 + 기존 SL-GTTO 46 + 주변 344 passed, 환경 문제 4 (worktree venv 부재), SL5a golden 차이 24 = 변경 전과 같음.
+
+GPU smoke (SOLO, 4 episode):
+
+| episode | 확인 키 (task §2) | 키 | 공식 결과 | 남은 증상 |
+|---|---|---|---|---|
+| LIBERO t4e0 | 첫 call grounding ok, HOLD 없음 | 통과 | 실패 (max_steps) | latched 42 call 중 C 포화 36, attach 없음. HOLD 14 (`answer_excludes_target` hand · `unauthorized_link` link6 coarse) |
+| SafeLIBERO t3e0 | 첫 call grounding ok, HOLD 없음 | 통과 | 실패 (max_steps, 충돌 없음) | latched 27 중 포화 22, attach 없음 |
+| LIBERO t0e0 | attach 뒤 `attached_point` 0 | 통과 | 실패 (max_steps) | held 20 call 모두 C 포화, dA 1.5–1.9, 놓기(placed) 뒤 성공 판정 없음 |
+| SafeLIBERO t1e1 | attach 뒤 `attached_point` 0 | 통과 | **성공 · 충돌 없음** | — |
+
+판정 G25: 키 통과 → gt2 30 장면 본 실행 (queue 41–47, 결과는 아래에 추가).
+
+### 새 층 ④ — TO 경로 수정이 변환 C 포화로 (2026-11-05 03:3x–03:5x, 기록 분석)
+
+![C 포화](../../../outputs/2026-11-05_GT인식_공용TO_3벤치/gt2_smoke/그래프_C포화.png)
+
+| `reference_deviation` | call | C 포화 (≥5/10행) | median `max_abs_correction` |
+|---|---:|---:|---:|
+| 0 | 289 | 0 | 0.00 |
+| < 0.01 | 172 | 1 | 0.05 |
+| 0.01–0.05 | 227 | 52 | 1.46 |
+| 0.05–0.2 | 386 | 269 | 3.91 |
+| ≥ 0.2 | 315 | 310 | 12.33 |
+
+(v1 30 + gt2 smoke 4 episode, HOLD 아닌 call. source `gt2_smoke/saturation.json`, script `experiments/segmentation/gtto_saturation.py`.)
+
+- held 구간의 `trajopt_status = violated`는 모두 verdict `budget_only` (SQP 반복 상한 3, 최종 검사 통과)다. 위반이 아니라 경로 수정이다.
+- 성공한 episode(LIBERO t1e0 v1, SafeLIBERO t1e1 gt2)도 held 구간에서 같은 포화가 있다. 포화가 곧 실패는 아니다 — 실패 episode와의 차이는 본 실행 30 장면으로 센다.
+- 공용 TO는 `--continuity-after-grasp --deflection-rate-after-grasp`를 켜고(V11AB 무게 0.5 / 20) pass-through가 없다. SL5b/pb2 기록은 이 두 항이 위반 없는 chunk에서도 VLA의 새 chunk를 이전 계획 쪽으로 당긴다고 진단했다.
+- SL7b(P0m 위 같은 변경, 모두 1/9)의 "TO는 원인 아님"은 인식이 먼저 막고 있던 조건의 결론이다.
+
+### SL-GTTO2 본 실행 — `AG3S-commonto-gt2` 30 장면 (2026-11-05 05:31 – 07:00 KST, 판정 G28)
+
+같은 기계 · commit `89b42459` + GTTO · GTTO2 patch, seed 7, conversion C. 집계 `experiments/segmentation/gtto_aggregate.py --arm gt2` → [`outputs/2026-11-05_GT인식_공용TO_3벤치/gt_v2/`](../../../outputs/2026-11-05_GT인식_공용TO_3벤치/gt_v2/) (`결과표.md` · `summary.json` · 그림).
+
+| 벤치 | VLA 단독 | v1 (`-gt`) | gt2 | §5 규칙 | 판정 |
+|---|---|---|---|---|---|
+| LIBERO 9 공식 성공 | 9 | 2 | **2** | GT ≥ 8 ∧ VLA − GT ≤ 1 | 실패 |
+| SafeLIBERO 11 공식 성공 / 충돌 / 안전 성공 | 11 / 9 / 2 | 0 / 2 / 0 | **4 / 6 / 2** | 충돌 ≤ VLA − 3 (= 6 ✓) ∧ 안전 성공 ≥ VLA + 3 (= 5 ✗) | 실패 |
+| LIBERO-Safety 10 성공∧무위반 / 위반 | 7 / 1 | 2 / 1 | **2 / 0** | ≥ VLA − 2 (= 5) ∧ 위반 ≤ VLA | 실패 |
+| episode 평균 C 포화 call 비율 (LIBERO / SafeLIBERO / LIBERO-Safety) | – | 0.31 / 0.39 / 0.50 | 0.48 / 0.61 / 0.49 | – | – |
+
+- F1 은 SafeLIBERO t3 (캐비닛 위 그릇) 2 episode 에서 attach 를 열었다 (v1 은 t3 4 episode 모두 attach 없음). F2 뒤에도 `attached_point` HOLD 가 LIBERO t1e0 14 · t3e0 5, SafeLIBERO t2e3 14 call 남는다.
+- 결정성: LIBERO t1e0 은 v1 · gt2 의 seq 0–12 기록(tip · 목표 centroid · reference deviation)이 같고, seq 13 에서 손가락 닫힘 결과(개도 0.025 vs 0.059)가 갈린 뒤 달라진다 — 같은 조건의 반복 차이가 아니라 TO 출력 차이에서 갈린다.
+
+#### 새 층 ⑤ — 쥔 물체 모델이 실제보다 아래 (기록 + sim 진실, G29)
+
+| 측정 (held call, HOLD 제외) | 수치 |
+|---|---|
+| VLA reference 경로 중 attached 질의 구 최저점 − 지지면 < 15 mm 인 call | gt2 LIBERO: t0e0 11/20 · t1e0 4/7 · t2e0 10/15 · t6e0 3/5 · t8e0 3/6 (v1 도 같은 경향: t2e0 21/26) |
+| 그때 `reference_deviation` 중앙값 vs 그 밖 | gt2 t0e0 0.29 vs 0.18, t1e0 0.27 vs 0.06, t2e0 0.18 vs 0.03 · v1 t2e0 0.25 vs 0.03 |
+| row 0 자세의 모델 바닥 − 실제 물체 바닥 (sim, 중앙값) | gt2 −98 · −106 · −34 · −74 · −50 · −4 · −15 mm (t0 · t1 · t2 · t3 · t6 · t7 · t8), v1 −50 … +17 mm |
+
+해석: 놓기 하강에서 쥔 모델이 지지면 · plate 안으로 들어가므로, TO 가 하강을 위로 고치고 (④b 의 held 구간 포화) 더 깊으면 `attached_point` HOLD 가 된다.
+snapshot 시점 가설(마지막 관측 frame 의 자세 × 들기 전 기하)은 finger 정지 frame 으로 바꾼 반사실 계산에서 오차가 줄지 않아 기각했다.
+SL6 E0판 진단의 "놓기 하강 뒤집힘" 과 같은 증상이다. SL6-H 의 행 규칙은 HSR6 분류기가 plate 위를 `transport` 로 보아 거의 켜지지 않았다 (위 SL6-H 절).
+
+![쥔 모델 바닥 vs TO 경로 수정, 모델 바닥 오차](../../../outputs/2026-11-05_GT인식_공용TO_3벤치/gt_v2/그래프_쥔모델.png)
+
+source: `experiments/segmentation/gtto_held_model.py` → `gt_v2/held_model.json`.
+
+#### SL-GTTO4 — F3 `--held-beneath-contact` (구현 2026-11-05 07:1x–07:2x, 판정 G29 · G30)
+
+task [`handoff/SL-GTTO4.task.md`](handoff/SL-GTTO4.task.md) (결과 전 고정). SL6-H 의 placement-contact 행 규칙(쥔 물체 자신의 행 중 아래 표면에 대한 행만 풀림, 손 · 손가락 · 팔 · 옆 장애물은 그대로)을 HSR6 없이 **latch HELD + attach** 로 켠다.
+변경: `SafePolicy._held_beneath_contact` · `_held_beneath_record` (+ `_scene_fn` hook, `to.held_beneath_contact` 기록), serve_safe `--held-beneath-contact` (`apply_grasp_contact_flags`), Panda server ported 목록 1줄, profile `AG3S-commonto-gt2-hbc` · `AG3S-commonto-gt2-termsoff-hbc`.
+CPU test `tests/trajopt/test_sl_gtto4_held_beneath.py` 10개 + 관련 suite 108 passed, 의존 suite 195 passed / 5 skipped. 기본 꺼짐: 다른 판의 argv · 기록 key 불변.
+
+### SL-GTTO3 — gt2 위 TO 변형 3판 (등록 2026-11-05 03:5x, 실행 대기)
+
+task [`handoff/SL-GTTO3.task.md`](handoff/SL-GTTO3.task.md) (결과 전 고정). profile 등록만, 새 code 없음: `AG3S-commonto-gt2-termsoff` (두 항 끔, 3판 · SL7b (c)와 같은 변경), `-pass` (`--passthrough-when-clear`, T88), `-termsoff-pass`. test `tests/benchmark/test_sl_gtto3_versions.py` 등 96 passed / 5 skipped.
+LIBERO 9로 가르고, gt2보다 ≥ 2 episode 높은 판이 있으면 SafeLIBERO · LIBERO-Safety까지 돌려 §5 전체를 판정한다. 공용 TO 정의를 바꾸는 것 자체는 사용자 판정으로 남긴다.
+
+#### SL-GTTO3 결과 — LIBERO 9 (2026-11-05 07:00 – 07:42 KST, 판정 G31)
+
+| 판 | 공식 성공 | 성공 episode | episode 평균 C 포화 call 비율 | HOLD call (9 episode 합) |
+|---|---:|---|---:|---:|
+| gt2 (기준) | 2 | t2 · t8 | 0.477 | 82 |
+| termsoff | 3 | t0 · t2 · t8 | 0.405 | 67 |
+| pass | 3 | t1 · t2 · t8 | 0.2185 | 8 |
+| termsoff-pass | 4 | t1 · t2 · t7 · t8 | 0.2189 | 14 |
+
+- 규칙 1 을 글자대로 적용하면 pass (포화 0.0003 낮음) → 규칙 2 (≥ gt2 + 2) 불성립. lead 는 차이가 해상도 아래라 보고 termsoff-pass 를 SafeLIBERO · LIBERO-Safety 에 **정보용으로** 돌린다 (규칙 이탈, G31).
+- 예측 대조: ④a (t4 · t9 서랍 · 캐비닛 못 바꿈) 맞음 — 4 판 모두 attach 없이 실패. termsoff 가 held 포화를 줄여 t0e0 되찾음 (포화 call 24 → 5). "pass 효과 없음" 예측은 틀림: HOLD 82 → 8, t1e0 · t7e0 회복.
+- 새 실패: pass 두 판 t0e0 · t6e0 은 attach 없음 — TO 는 통과(dev 0)인데 VLA 가 빈손 닫힘 · 재시도를 반복 (경로가 앞 call 에서 갈린 뒤).
+- 그림 · 표: `outputs/2026-11-05_GT인식_공용TO_3벤치/gt3_*/`.
+
+#### SL-GTTO4 결과 — F3 LIBERO 9 (2026-11-05 07:42 – 08:27 KST, 판정 G32)
+
+| 짝 | 짝 성공 | F3 판 성공 | F3 판 포화 비율 | F3 판 HOLD 합 |
+|---|---:|---:|---:|---:|
+| gt2 → hbc | 2 | 2 | 0.463 (gt2 0.477) | 61 (gt2 82) |
+| termsoff → termsoff-hbc | 3 | 2 | 0.386 (0.405) | 51 (67) |
+| termsoff-pass → termsoff-pass-hbc | 4 | 3 | 0.191 (0.219) | 16 (14) |
+
+- F3 는 작동했다: hbc 의 held call 63 개 모두 applied, 43 call 에서 행을 풀었다 (`to.held_beneath_contact`). 그래도 held 구간에서 reference 가 지지면 근처일 때 deviation 중앙값이 줄지 않았다 (t2e0 0.18 → 0.24).
+- **판정: F3 는 실패를 설명하지 못한다 (SL-GTTO4 §3-3). ⑤ 의 "쥔 모델이 held 경로 수정을 만든다" 해석은 철회** (상관이었음). 모델 바닥 −15 … −106 mm 오차 측정은 그대로 남는다.
+- 다음 진단: 제약 기록(`--record-constraints occupancy`)으로 held 구간에서 어떤 행이 경로를 미는지 직접 본다 (gt2 t0e0 · t2e0).
+- 그림 · 표: `outputs/2026-11-05_GT인식_공용TO_3벤치/gt4_*/` (`gt4_hbc/held_model.json` · `그래프_쥔모델.png` = gt2 vs hbc).
+
+#### termsoff-pass 세 벤치 (정보용, G31 · G36) 와 단계 분석 (2026-11-05 10:0x – 10:2x KST, G37 · G38)
+
+| 벤치 | VLA 단독 | gt2 | termsoff-pass | §5 |
+|---|---|---|---|---|
+| LIBERO 9 성공 | 9 | 2 | 4 | 실패 |
+| SafeLIBERO 11 공식 성공 / 충돌 / 안전 성공 | 11 / 9 / 2 | 4 / 6 / 2 | 1 / 3 / 0 | 실패 |
+| LIBERO-Safety 10 성공∧무위반 / 위반 | 7 / 1 | 2 / 0 | **5 / 0** | **통과** |
+
+단계 정의 (sim 진실, 모든 판 공통): 쥐기 전 = 첫 gripper 닫힘 명령 전 · 쥐는 중 = 닫힘 ~ target 3 cm 들림 · 쥔 후 = 그 뒤. script `experiments/segmentation/gtto_phase.py`.
+
+| 판 | 벤치 | n | 성공 | 실패: 쥐기 전 | 쥐는 중 | 쥔 후 | 쥐기 전 step | 쥐는 중 step | 쥔 후 step | HOLD 비율 전/중/후 | dev 중앙값 전/중/후 | C 포화 전/중/후 | |Δa| 전/중/후 |
+|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---|---|---|---|
+| vla | LIBERO | 9 | 9 | 0 | 0 | 0 | 43.0 | 18.0 | 38.0 | – / – / – | – / – / – | – / – / – | – / – / – |
+| vla | SafeLIBERO | 11 | 11 | 0 | 0 | 0 | 29.0 | 19.0 | 63.0 | – / – / – | – / – / – | – / – / – | – / – / – |
+| vla | LIBERO-Safety | 10 | 7 | 0 | 1 | 2 | 53.0 | 27.0 | 77.0 | – / – / – | – / – / – | – / – / – | – / – / – |
+| gt | LIBERO | 9 | 2 | 2 | 0 | 5 | 53.0 | 23.0 | 133.0 | 0.0 / 0.0 / 0.0 | 0.0 / 0.011 / 0.118 | 0.0 / 0.25 / 0.533 | 0.006 / 0.12 / 0.397 |
+| gt | SafeLIBERO | 11 | 0 | 4 | 0 | 7 | 38.0 | 27.0 | 221.0 | 0.0 / 0.167 / 0.512 | 0.0 / 0.093 / 0.053 | 0.167 / 0.5 / 0.571 | 0.088 / 0.522 / 0.381 |
+| gt | LIBERO-Safety | 10 | 2 | 0 | 1 | 7 | 65.5 | 63.5 | 448.0 | 0.098 / 0.059 / 0.185 | 0.0 / 0.042 / 0.104 | 0.143 / 0.433 / 0.545 | 0.114 / 0.375 / 0.43 |
+| gt2 | LIBERO | 9 | 2 | 1 | 1 | 5 | 52.0 | 20.5 | 142.0 | 0.0 / 0.0 / 0.062 | 0.0 / 0.012 / 0.059 | 0.0 / 0.292 / 0.545 | 0.008 / 0.232 / 0.37 |
+| gt2 | SafeLIBERO | 11 | 4 | 0 | 2 | 5 | 38.0 | 22.0 | 178.0 | 0.0 / 0.2 / 0.023 | 0.0 / 0.084 / 0.165 | 0.167 / 0.5 / 0.842 | 0.171 / 0.458 / 0.505 |
+| gt2 | LIBERO-Safety | 10 | 2 | 0 | 2 | 6 | 64.5 | 78.5 | 419.0 | 0.098 / 0.005 / 0.093 | 0.0 / 0.023 / 0.135 | 0.148 / 0.29 / 0.562 | 0.147 / 0.297 / 0.508 |
+| gt3termsoff | LIBERO | 9 | 3 | 1 | 1 | 4 | 52.0 | 20.5 | 142.0 | 0.0 / 0.0 / 0.036 | 0.0 / 0.009 / 0.029 | 0.0 / 0.292 / 0.333 | 0.008 / 0.227 / 0.335 |
+| gt3pass | LIBERO | 9 | 3 | 0 | 2 | 4 | 55.0 | 21.0 | 58.0 | 0.0 / 0.0 / 0.0 | 0.0 / 0.0 / 0.037 | 0.0 / 0.12 / 0.2 | 0.045 / 0.093 / 0.133 |
+| gt3termsoff-pass | LIBERO | 9 | 4 | 0 | 2 | 3 | 55.0 | 22.0 | 72.0 | 0.0 / 0.0 / 0.0 | 0.0 / 0.0 / 0.0 | 0.0 / 0.12 / 0.0 | 0.045 / 0.093 / 0.025 |
+| gt3termsoff-pass | SafeLIBERO | 11 | 1 | 0 | 4 | 6 | 34.0 | 103.0 | 202.0 | 0.0 / 0.0 / 0.25 | 0.0 / 0.0 / 0.033 | 0.2 / 0.333 / 0.429 | 0.144 / 0.147 / 0.278 |
+| gt3termsoff-pass | LIBERO-Safety | 10 | 5 | 0 | 2 | 3 | 56.5 | 91.0 | 268.0 | 0.0 / 0.005 / 0.087 | 0.0 / 0.0 / 0.04 | 0.143 / 0.12 / 0.452 | 0.118 / 0.162 / 0.361 |
+| gt4hbc | LIBERO | 9 | 2 | 1 | 1 | 5 | 52.0 | 20.5 | 142.0 | 0.0 / 0.0 / 0.036 | 0.0 / 0.012 / 0.094 | 0.0 / 0.292 / 0.654 | 0.008 / 0.232 / 0.486 |
+| gt4termsoff-hbc | LIBERO | 9 | 2 | 1 | 1 | 5 | 52.0 | 20.5 | 142.0 | 0.0 / 0.0 / 0.062 | 0.0 / 0.009 / 0.006 | 0.0 / 0.292 / 0.296 | 0.008 / 0.227 / 0.314 |
+| gt4termsoff-pass-hbc | LIBERO | 9 | 3 | 0 | 2 | 4 | 55.0 | 22.0 | 72.0 | 0.0 / 0.0 / 0.0 | 0.0 / 0.0 / 0.0 | 0.0 / 0.12 / 0.0 | 0.045 / 0.093 / 0.02 |
+
+step = 중앙값 (그 단계에 들어간 episode 만). HOLD · dev · C 포화 · |Δa| = episode 별 값의 중앙값. |Δa| = 실행 − 정책 action xyz 평균 (TO 개입 크기).
+
+![단계별 결과와 TO 개입](../../../outputs/2026-11-05_GT인식_공용TO_3벤치/단계분석/그래프_단계별.png)
+
+- 쥐기 전 실패는 드물고, 실패는 쥐는 중 (닫았는데 못 듦) 과 쥔 후 (들었는데 못 놓음) 에 몰린다. TO 개입은 모든 판에서 쥐기 전 < 쥐는 중 < 쥔 후.
+- termsoff-pass 쥔 후 changed call 은 모두 `budget_only` — reference 를 막은 행이 기록에 없어 T88 `passthrough_clear` 기록을 `to` 에 싣도록 했다 (기록만).
+
+#### SL-GTTO5 · SL-GTTO6 — 최소 개입 + 쥐기 직전 손 행 해제 + 가려진 쥔 물체 인증 (2026-11-05 09:4x – 11:5x KST, G34 – G42)
+
+사용자 지시 (09:3x): Panda TO · 충돌회피 논문 13 편 조사 뒤 "최선의 방향으로 바꾸세요". 문헌의 VLA safety filter (AEGIS · KNOWS · multi-link · VLPSA · OSCBF) 는 모두 `min ‖u − u_nom‖²` + 비활성이면 통과, cuRobo `plan_grasp` · MoveIt MTC 는 마지막 접근에서 손–world 충돌을 끈다.
+
+| 판 | 정의 | LIBERO 9 | SafeLIBERO 11 (성공 / 충돌 / 안전 성공) | LIBERO-Safety 10 |
+|---|---|---:|---|---|
+| termsoff-pass | 연속성 · 꺾임 항 0 + 위반 없으면 통과 | 4 | 1 / 3 / 0 | **5 / 0 (통과)** |
+| **zr** (F4) | + LATCHED · CLOSING 손 · 손가락 행 중 target 수평 100 mm 안 해제 | **6** | **5 / 5 / 4** (안전 성공 규칙 ≥ 5 에 1 부족) | 4 / 1 (≥ 5 에 1 부족) |
+| zr-oc (F5) | + 판정의 `occluded_target` frame 을 TO 에도 인증 | 5 | — | — |
+| zr-oc-hbc | + F3 (쥔 물체 아래 표면 행 해제) | 6 | — | — |
+
+- F4 는 쥐는 중 실패를 LIBERO 에서 0 으로 만들었다 (termsoff-pass 2). 남은 LIBERO 실패 t4 · t6 · t9 는 모두 쥔 후.
+- 쥔 후 원인 (새 기록 `to.passthrough_clear`): zr HELD call 의 통과 거절 = 기하 미인증 67 · 충돌 6 · 한계 6. F5 는 미인증을 0 으로 만들었으나 (거절 = 충돌 32 · 한계 14) LIBERO 는 5 (1 episode 차이는 구분 못 함).
+- SafeLIBERO t3 (캐비닛 위 그릇) 4/4 실패: latched 구간 통과 거절이 충돌 22 · 한계 13–18, HOLD 행 = 손 ↔ 비-target (F4 영역 밖) · 팔 link5 · 7.
+- 기록 추가 (동작 불변): `to.passthrough_clear` (T88 결정), 그 안의 `limit_overshoot` (어느 한계를 얼마나 넘었나, `sqp._clear_passthrough`).
+
+#### SL-GTTO7 · SL-GTTO8 — 쥔 동안 손 행 해제 (F3b) 와 TO 개입 증폭 진단 (2026-11-05 12:3x – 15:4x KST, G44 – G46)
+
+| 판 | 정의 | LIBERO 9 | 실패 (단계) | held collision 거절 |
+|---|---|---:|---|---:|
+| zr-oc-hbc | zr + F5 + F3 | 6 | t4 · t7 · t9 | 30 |
+| zr-oc-hbch (F3b) | + HELD 에서 손 · 손가락 행도 "아래 · 쥔 물체 발자국 안" 표면 해제 | 6 | t4 (쥔 후) · t7 (쥐는 중) · t9 (쥔 후) | 8 |
+| zr-it8 (F6) | zr + `--sqp-min-iterations 8 --sqp-max-iterations 8` | 6 | t4 · t7 (쥐는 중) · t9 | — |
+
+- F3b 는 작동했으나 (손 행 해제 call 당 수백 행, 거절 30 → 8) 성공을 바꾸지 못함 → gate (≥ 7) 닫힘, SafeLIBERO · LIBERO-Safety 미실행.
+- **증폭 진단** (`experiments/segmentation/gtto_amplification.py`, `outputs/2026-11-05_GT인식_공용TO_3벤치/증폭진단/`): collision 으로 pass-through 가 거절된 call 은 zr 세 벤치 · oc · ochbc · hbch 모두 SQP 반복 cap 3 에 100 % 도달, 궤적 변경 / 정책 위반 중앙값 2.3–3.2 (변경 p90 79–171 mm), C 포화 행 비율 중앙값 0.6–1.0, \|Δa\| 중앙값 1.24–1.6 (±1 범위). 실패 episode 의 이런 call 은 episode 당 7.1 (zr) vs 성공 1.5 (상관).
+- F6 (반복 8, 15:31–15:43): 6/9, 변경/위반 중앙값 3.02 → 2.43 (결과 전 규칙 "절반 이하" 불성립), 반복 8 에서도 cap 97 %, 변경 p90 101 → 63 mm. → 반복 수는 원인 층이 아니다; 증폭은 joint 공간 TO + conversion C 구조 쪽 (EE-delta QP 는 사용자 판정, G46).
+
+![증폭](../../../outputs/2026-11-05_GT인식_공용TO_3벤치/증폭진단/그래프_증폭.png)
+
+#### SL-GTTO9 — F7 정책 action 공간 QP (`--ee-action-qp`) 세 벤치 (2026-11-05 17:4x – 20:2x KST, G47 – G50)
+
+- 구현 (17:4x): pass-through 가 거절된 chunk 에서 joint SQP 대신 `min ‖Δa‖²` (정책 OSC action 공간), 제약 = 같은 선형화 충돌 행 `value + g·M Δa + s ≥ backoff`
+  + action box (hard), 4 회 재선형화, OSQP. M = `AG3S/adapters/panda/action.py` `ee_action_map` (OSC 응답 모델 × base 회전 × EE Jacobian 감쇠 pseudo-inverse).
+  결과 궤적은 기존 `_finish` 를 거치고 SafePolicy 가 그 궤적을 반환할 때만 server 가 `clip(a_ref + Δa)` 를 보낸다. 판 `AG3S-commonto-gt2-termsoff-pass-zr-ee`. test 7 (`tests/trajopt/test_sl_gtto9_ee_action_qp.py`).
+- run: LIBERO 18:37–18:48, SafeLIBERO 18:48–19:23, LIBERO-Safety 19:23–20:23 (SOLO, gate LIBERO ≥ 7 열림).
+
+| 벤치 | VLA 단독 | zr | **zr-ee (F7)** | §5 |
+|---|---|---|---|---|
+| LIBERO 9 성공 | 9 | 6 | **8** | ✓ (처음) |
+| SafeLIBERO 11 공식 / 충돌 / 안전 성공 | 11 / 9 / 2 | 5 / 5 / 4 | **6 / 3 / 6** | ✓ (처음) |
+| LIBERO-Safety 10 성공∧무위반 / 위반 | 7 / 1 | 4 / 1 | 3 / 0 | ✗ (기준 5) |
+| └ human_safety (4) | 3 | 1 | 0 | |
+| 개입 call C 포화 중앙값 LIBERO · SafeLIBERO · LIBERO-Safety | — | 0.9 · 0.9 · 0.6 | 0.0 · 0.2 · 0.5 | |
+| 개입 call \|Δa\| 중앙값 | — | 1.6 · 1.34 · 1.24 | 1.16 · 0.95 · 0.73 | |
+
+- LIBERO-Safety 실패 7 모두 쥔 후, 쥔 후 HOLD 비율 0.356 (zr 0.03). HOLD 충돌 행 step 0 = 188 · 1 = 132 · 2–4 = 69 — 지금 자세가 이미 위반이면 어떤 action 으로도
+  못 고치고 (step 1 도 action 1 당 3.6 mm), hard box 의 F7 은 slack → 최종 검사 HOLD → 접촉 자세에서 deadlock. 원인 층 = 쥔 후 grasp handling · 판정 규칙 (solver 아님).
+- 한계: OSQP 대부분 `maximum iterations reached` (20000), solve ~1.5 s. offline (scratchpad `ee_qp_scaling.py`) 행 정규화 + quadratic slack 은 150 회 · 5 ms 에 엄밀해 — 미적용 (사용자 판정).
+- 그림: `outputs/2026-11-05_GT인식_공용TO_3벤치/gt10_ee/` (`성공grid.png`, `그래프_HOLD비율.png`, `결과표.md`), `단계분석/`, `증폭진단/`.
+
+![F7 성공 grid](../../../outputs/2026-11-05_GT인식_공용TO_3벤치/gt10_ee/성공grid.png)
+
+### 측정하지 않은 것 (현재)
+
+- gt2 30 장면 본 실행 · SL-GTTO3 결과 (queue 대기, 이 절에 추가 예정).
+- ③ 팔 link 충돌은 고치지 않았다. `answer_excludes_target` (서랍 · 캐비닛 같은 실제 비-target 기하와 손 · 손가락) 행은 세기만 했다.
+- 변환 C 자체(포화 시 부족분 처리)는 바꾸지 않았다.

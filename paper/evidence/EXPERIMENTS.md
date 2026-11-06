@@ -39,6 +39,8 @@ Updated: 2026-10-05 19:45 KST
 | P003 | E003_ablation | Grounding, target contact policy, safety field, refinement, gate의 기여 분리 | P001·P002 metric, action modification | `PLANNED` |
 | P004 | E004_generalization | Unseen object/obstacle/layout/occlusion과 scene별 평가 | 조건별 task·safety, split provenance | `PLANNED` |
 | P005 | E005_runtime | 같은 측정 경계의 latency, cold/warm start, deadline miss, memory | End-to-end 및 stage timing | `PLANNED` |
+| P007 | E1a SafeLIBERO baseline R (2026-11-04 추가) | 같은 π0.5-LIBERO · 공식 evaluator(policy 300/550 step)에서 VLA 단독 · AEGIS/multi-link/KNOWS port(detector · privileged GT), test init 5–14 우선 | TSR · SSR · CAR · ETS, SBU · CNF; CSC 산출 불가 | `PLANNED`; [protocol](../experiments/configs/E1_SAFELIBERO_LIBEROSAFETY_BASELINE_PROTOCOL_20261104_KO.md), 표본 사용자 판정 대기 |
+| P008 | E1b LIBERO-Safety baseline R (2026-11-04 추가) | 공식 `pi05_libero_safety`로 원문 Table 3과 같은 조건의 π0.5 | SR · CR (suite × level) | `PLANNED`, `BLOCKED` (H1 checkpoint·config, H2 controller, B1 cost) |
 | P006 | E006_real_robot | Simulator에서 확인한 범위를 hardware에서 확인할 수 있는가? | Hardware task·contact, emergency stop, 시간 경계 | `OPTIONAL_PLANNED`; 실행·자료 없음 |
 
 원문 E001–E006은 제안된 파일명이며 실행 완료를 뜻하지 않는다. 계획은 이 문서에서

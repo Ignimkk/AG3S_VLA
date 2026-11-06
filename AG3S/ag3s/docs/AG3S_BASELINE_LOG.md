@@ -41,6 +41,7 @@
 | **BL-10** MULTIBENCH-2D | LIBERO · SafeLIBERO · LIBERO-Safety 정적 80 장면의 2D 분할 · 상자 가림 · 정답 위치 단서 · 가림 추적 (2026-11-01) | **측정 완료, 사후 기록 (자체 보고), 사용자 판정 대기.** ATS 는 평가하지 않음 | BL-10 (아래) |
 | **BL-11** CBF-QP-SAFELIBERO | SafeLIBERO Level I dev 20 episode closed loop, Multi-link CBF-QP · KNOWS × GT / detector 장애물 (2026-11-03) | **측정 완료 4 arm (README 자체 보고), 사용자 판정 대기.** AEGIS-style 2 arm 은 **미실행** | BL-11 (아래) |
 | **BL-12** SAFELIBERO-SEG-ATS | SafeLIBERO 20 episode 796 frame 에서 외부 segmenter 10 arm 대 실제 ATS 4 arm 의 target · obstacle 분할 (2026-11-03) | **측정 완료 (README 자체 보고), 사용자 판정 대기.** 외부 mask 를 서버에 넣은 closed loop 는 하지 않음 | BL-12 (아래) |
+| **BL-13** SAME-MACHINE-REMEASURE | 새 GPU container에서 VLA 단독 · AEGIS / KNOWS / multi-link × (detector, GT 장애물) · AG3S 최종(재현 HSR6 probe) · AG3S pb7을 SafeLIBERO spatial LI · LII dev 20 episode로 같은 기계 재측정 + LIBERO-Safety L0 VLA 단독 | **측정 완료 (2026-11-04 04:52–10:46 KST, 야간 자율 수행, commit 안 함), 사용자 판정 대기** | [BL-13](#bl-13--same-machine-remeasure-새-기계에서-baseline-vs-ag3s-closed-loop-재측정-2026-11-04) |
 
 ### 사용자 · lead 결정 기록
 
@@ -3202,3 +3203,40 @@ fig3 의 6 개 panel 은 `figures.json` 에 task 0–3 의 고정 episode · ste
 
 - `outputs/paper_baselines_smoke/`: BL-0 이 이미 "implementer smoke 는 이 폴더에 둔다"고 적었다(공통 고정 사항 표). smoke 는 배선 확인이며 이 파일의 규칙상 수치를 옮기지 않으므로 새 절을 만들지 않았다.
 - `outputs/baseline_eval_smoke/1ep/`: 파일 수정 시각 2026-10-23 18:39–18:51 UTC = 2026-10-24 03:39–03:51 KST(근사)의 1 episode(`libero_spatial_t0_e0`, cloud labeling 21 call) 배선 smoke 로그 (`cloud.log` · `native.log` · `filters.log` · `guidance.log` · `summarize.log`)다. BASELINE-EVAL(BL-3) 시기의 것으로 보이나 누가 어떤 STEP 으로 돌렸는지는 **미확인**이다. 이 로그에 이전에 언급이 없었으므로 여기에 존재만 적는다. smoke 수치는 측정이 아니어서 옮기지 않았다.
+
+
+## BL-13 — SAME-MACHINE-REMEASURE: 새 기계에서 baseline vs AG3S closed-loop 재측정 (2026-11-04)
+
+> **번호 메모 (2026-11-04 18:3x KST):** 이 절은 처음 BL-9 로 썼으나, 다른 GPU 서버의 commit `fccaabb0` 이 11-01~03 소급 기록에 BL-9 ~ BL-12 를 먼저 썼으므로 pull 할 때 BL-13 으로 바꿨다. 내용은 그대로다.
+
+> 2026-11-04 04:46–11:30 KST, 사용자 지시("baseline · benchmark 비교 실험을 확인하고 추가 실험을 11:30까지 스스로 판정해 수행")에 따른 야간 자율 수행. checkout `feature/panda-benchmark` `fe3abf21`(dirty), 새 GPU container(H200 NVL 1장, 다른 세션 없음).
+> 결과 문서: [`doc/active/experiments/BASELINE_VS_AG3S_SAME_MACHINE_RESULTS_20261104_KO.md`](../../../doc/active/experiments/BASELINE_VS_AG3S_SAME_MACHINE_RESULTS_20261104_KO.md) · 판정 기록: [`OVERNIGHT_AUTONOMOUS_DECISIONS_20261104_KO.md`](../../../doc/active/experiments/OVERNIGHT_AUTONOMOUS_DECISIONS_20261104_KO.md) · 요약: [`OVERNIGHT_SUMMARY_20261104_KO.md`](../../../doc/active/experiments/OVERNIGHT_SUMMARY_20261104_KO.md).
+> 집계 · figure: `experiments/segmentation/nb1104_aggregate.py`, `nb1104_scene_figure.py`, `nb1104_safety_aggregate.py` → `outputs/nb1104/agg/`(git 제외). 원시 run: storage `results/benchmark/*_nb1104-*`.
+> **판정은 사용자 판정 대기. dev 집합, arm당 n = 20. 검정력이 낮아 p값이 크다고 차이 없음으로 쓰지 않는다.**
+
+### 이 STEP 이 답하는 질문 (BL-13)
+
+새 기계에는 이전 run 기록(sl5f 등)이 없어, BL-7 pilot · 11-03 CBF · SL6 AG3S 결과를 한 표에 둘 수 없었다. 같은 기계 · 같은 episode(task 0–3 × init 0–4, seed 7)에서 VLA 단독, 기존 safety filter 3종(detector / GT 장애물), AG3S 두 판의 SS(성공 ∧ 충돌 없음)를 다시 잰다.
+
+### 결과 (SS / TSR / 충돌, n = 20)
+
+| arm | LI SS | LI TSR | LI 충돌 | LII SS | LII TSR | LII 충돌 |
+|---|---:|---:|---:|---:|---:|---:|
+| VLA 단독 | 2 | 14 | 18 | 4 | 15 | 16 |
+| AEGIS detector / GT | 7 / 10 | 10 / 12 | 12 / 10 | 4 / 10 | 10 / 16 | 11 / 10 |
+| KNOWS detector / GT | 1 / 10 | 4 / 16 | 19 / 10 | 1 / 7 | 6 / 14 | 17 / 13 |
+| Multi-link detector / GT | 3 / 10 | 8 / 14 | 15 / 7 | 5 / 12 | 10 / 15 | 9 / 6 |
+| AG3S 최종 v3-e0to (재현 probe) | 0 | 0 | 10 | 2 | 2 | 11 |
+| AG3S V11AB-pb7 | 2 | 2 | 9 | — | — | — |
+
+LIBERO-Safety VLA 단독(각 10 ep): L0 3 suite 공식 위반 0 · 0 · 1(full-trace 0 · 0 · 5), L1 2 suite 0 · 0, L2 obstacle_avoidance 6 (성공 1) · human_safety 0 (성공 5).
+
+### 관찰
+
+- GT 장애물 filter는 VLA 대비 SS를 올린다(불일치 쌍 3–9 대 0–1). detector 장애물에서는 효과가 작거나 없다 → 인식이 병목이라는 11-03 관찰과 같은 방향(원인 분리 실험은 아님).
+- AG3S 두 판은 작업 성공을 크게 잃는다(VLA만 성공한 쌍 12–14 대 0). 실패 층은 놓기 단계(SL6-H 진단)와 task 3 미파지. pb7은 이전 기계 SL5i(3 · 8 · 3)와 같은 수준(2 · 9 · 2)으로 재현됐다.
+- HSR6-Panda probe를 같은 코드로 이 기계에서 재현했다(VB3: macro-F1 0.822, grasp recall 0.879; 원래 0.834 · 0.851). SHA가 다르므로 AG3S 최종 결과는 "재현 probe" 조건이다.
+
+### 범위 밖 · 다음
+
+offline 분할 재현(입력만 준비), F2 · F6 cell(외부 / GT mask를 AG3S 제약에 주입), guidance arm, 다른 suite · test split, LIBERO-Safety L1 · L2와 그 위 AG3S · filter arm.

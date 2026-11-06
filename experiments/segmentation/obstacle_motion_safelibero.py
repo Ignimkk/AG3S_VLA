@@ -11,7 +11,7 @@ if client_env.needs_reexec():
 import libero_pi05_client as base
 import libero_safe_client as safe
 
-RUN = pathlib.Path('/mnt/dev/AG3S_VLA-storage/results/benchmark/20261017T151126_38722284e2fa_sl5f-safelibero-LI-dev-LI-vla_only')
+RUN = pathlib.Path(__import__('os').environ.get('AG3S_SL_SOURCE_RUN', '/mnt/dev/AG3S_VLA-storage/results/benchmark/20261017T151126_38722284e2fa_sl5f-safelibero-LI-dev-LI-vla_only'))  # nb1104: env override, default unchanged
 WAIT = 20
 
 

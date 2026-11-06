@@ -713,7 +713,8 @@ def _cl3_chunks(n=6):
 
 
 @needs_cl3
-@pytest.mark.parametrize("path", _cl3_chunks(), ids=lambda p: f"{p.parents[2].name}/{p.name}")
+@pytest.mark.parametrize("path", _cl3_chunks(),   # SL-GTTO: id of the empty (NOTSET) case when CL3 is not mounted
+                         ids=lambda p: f"{p.parents[2].name}/{p.name}" if hasattr(p, "parents") else str(p))
 def test_cl3_off_replay_is_still_the_record(path):
     """`rebuild_target_free` after moving its tail into `_replay_layer`: the recorded fine target-free layer, bit for
     bit (float16 as recorded), on CL3 C1a chunks (the record T46e's oracle arm is compared with)."""

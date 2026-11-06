@@ -15,7 +15,7 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 from Baseline.paper_baselines.interface import TargetQuery, validate_results
 
-RUN = Path('/mnt/dev/AG3S_VLA-storage/results/benchmark/20261017T151126_38722284e2fa_sl5f-safelibero-LI-dev-LI-vla_only')
+RUN = Path(__import__('os').environ.get('AG3S_SL_SOURCE_RUN', '/mnt/dev/AG3S_VLA-storage/results/benchmark/20261017T151126_38722284e2fa_sl5f-safelibero-LI-dev-LI-vla_only'))  # nb1104: env override, default unchanged
 CAMS = (('head', 'obs_agentview_image'), ('left_wrist', 'obs_robot0_eye_in_hand_image'))
 PHRASE = re.compile(r'^\s*(?:pick up|pick|grab|pass me) the (?P<target>.+?)(?: and (?:place|put|bring|cut)\b.*|\s*[.!]?\s*$)', re.I)
 

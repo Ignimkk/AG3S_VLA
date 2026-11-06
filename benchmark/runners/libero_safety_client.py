@@ -577,6 +577,7 @@ def build_parser():
     parser.add_argument("--action-adapter", choices=ACTION_ADAPTERS, default=None,
                         help="default: the checkpoint's (pi05_libero -> libero_to_safety)")
     parser.add_argument("--max-steps", type=int, default=None, help="override MAX_STEPS[suite] (recorded)")
+    sc.add_oracle_arguments(parser)   # SL-GTTO (default off)
     return parser
 
 
@@ -593,6 +594,7 @@ def main(argv=None):
     args = resolve_defaults(build_parser().parse_args(argv))
     args.capture_geometry = True  # the request carries the camera geometry in both modes (as libero_safe_client)
     base.check_geometry_arguments(args)
+    sc.check_oracle_arguments(args)   # SL-GTTO
     run_dir = base.validate_run_dir(args.run_dir)
     extra = {"libero_safety_env": activate_libero_safety(), "level": args.level,
              "libero_safety_protocol": protocol(), "policy_checkpoint": args.policy_checkpoint,
@@ -610,16 +612,24 @@ def main(argv=None):
             raise ValueError("task id {} outside level of {} tasks".format(task_id, task_suite.n_tasks))
     max_steps = args.max_steps or MAX_STEPS[args.task_suite_name]
     ws, connector = base.make_policy_client(args.host, args.port)
+    oracle_check = sc.check_server_oracle(ws.get_server_metadata(), args.oracle_seg)   # SL-GTTO: refuse at connect
 
     def policy_for(task_id, episode_idx):
-        client = sc.SafeClient(ws, args.seed, task_id, episode_idx, args.replan_steps)
+        oracle = None
+        if args.oracle_seg:   # SL-GTTO (off: SafeClient as before)
+            oracle, rec = sc.oracle_coder_for(task_suite.get_task(task_id))
+            oracle.record = dict(rec, connect=oracle_check)
+        client = sc.SafeClient(ws, args.seed, task_id, episode_idx, args.replan_steps, oracle=oracle)
         return client, connector, dict(extra)
 
     def observer_for(client, geometry, task_id, episode_idx):
         return client.observer(geometry)
 
     def after_episode(client, stem, row):
-        return {"safe_client": client.save(episodes_dir, stem)}
+        out = {"safe_client": client.save(episodes_dir, stem)}
+        if client.oracle is not None:   # SL-GTTO (off: no key)
+            out["oracle_seg"] = sc.oracle_record(client.oracle, client.oracle.record)
+        return out
 
     with jsonl:
         errors = run_tasks(args, run_dir, jsonl, task_suite, max_steps, policy_for,
