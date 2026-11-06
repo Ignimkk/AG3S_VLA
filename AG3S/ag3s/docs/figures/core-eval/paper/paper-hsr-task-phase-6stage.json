@@ -1,0 +1,166 @@
+{
+ "asset": "AG3S/ag3s/docs/figures/core-eval/paper/paper-hsr-task-phase-6stage.png",
+ "script": "paper/tools/plotting/hsr6_task_phase_figure.py",
+ "renderer": "MuJoCo 3.11.0 replay of recorded qpos (paperbanana_render.Run/Scene)",
+ "is_measured_result": false,
+ "episode": "T53 C1a ep1842 (pear touching an orange); T64 Part B re-simulation is bit-identical",
+ "frame_rule": "middle chunk of each ground-truth stage segment (fixed before rendering)",
+ "frames": {
+  "Approach": 8,
+  "Grasp": 19,
+  "Lift": 23,
+  "Transport": 26,
+  "Place": 29,
+  "Retreat": 53
+ },
+ "cameras": {
+  "Approach": {
+   "lookat": [
+    0.4818347434735679,
+    -0.31612013213225826,
+    0.9304179300709786
+   ],
+   "dist": 0.5,
+   "az": 155,
+   "el": -22
+  },
+  "Grasp": {
+   "lookat": [
+    0.4586835844441957,
+    -0.31411426677899457,
+    0.783125175493535
+   ],
+   "dist": 0.5,
+   "az": 155,
+   "el": -22
+  },
+  "Lift": {
+   "lookat": [
+    0.4829973182338529,
+    -0.3232523700881613,
+    0.9882177843695058
+   ],
+   "dist": 0.5,
+   "az": 155,
+   "el": -22
+  },
+  "Transport": {
+   "lookat": [
+    0.49493329495898974,
+    -0.2232862139648276,
+    1.0098001254154378
+   ],
+   "dist": 0.5,
+   "az": 155,
+   "el": -22
+  },
+  "Place": {
+   "lookat": [
+    0.5101813873644236,
+    -0.06488167588452828,
+    1.011273791217459
+   ],
+   "dist": 0.5,
+   "az": 155,
+   "el": -22
+  },
+  "Retreat": {
+   "lookat": [
+    0.5099915770767227,
+    -0.24949558270282302,
+    0.9877507993786837
+   ],
+   "dist": 0.5,
+   "az": 155,
+   "el": -22
+  }
+ },
+ "truth_segments": [
+  [
+   "Approach",
+   0,
+   17
+  ],
+  [
+   "Grasp",
+   18,
+   20
+  ],
+  [
+   "Lift",
+   21,
+   25
+  ],
+  [
+   "Transport",
+   26,
+   27
+  ],
+  [
+   "Place",
+   28,
+   31
+  ],
+  [
+   "Retreat",
+   32,
+   74
+  ]
+ ],
+ "hsr_segments": [
+  [
+   "Approach",
+   0,
+   17
+  ],
+  [
+   "Grasp",
+   18,
+   20
+  ],
+  [
+   "Lift",
+   21,
+   23
+  ],
+  [
+   "Transport",
+   24,
+   28
+  ],
+  [
+   "Place",
+   29,
+   32
+  ],
+  [
+   "Retreat",
+   33,
+   74
+  ]
+ ],
+ "agreement_frames": [
+  71,
+  75
+ ],
+ "printed_numbers": [],
+ "encoding": {
+  "Stage (physics)": "T64 Part B physics ground truth (MuJoCo contact, height, basket region)",
+  "Stage (HSR)": "six-class linear probe on prefix KV layer 4, raw argmax, offline on recorded features",
+  "Grasp state": "recorded gripper-latch state of the run"
+ },
+ "sources": {
+  "/mnt/dev/AG3S_VLA-storage/results/development/20261029T013324+0900_b3b69311f948_7da63daefa49/verify/T64/partB/partB.json": "60212202c44a07eea6aae0fd273b7e0f386a13d035d81a67aab56cf6ad7d554b",
+  "paper/figures/paperbanana/figure3/assets_v2/f3v2_hsr_timeline.json": "fc5436ce2c598db68fe041c5d78c22ef4609ccbaaf998c08dece28511f906818",
+  "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/runs/C1a/R/C1a_ep1842_s18421/ag3s/run_0000/step_00008.npz": "7b7133e8d5a7ec12384378a2b1e4478c0c78260a9f306447b90243eb027cd121",
+  "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/runs/C1a/R/C1a_ep1842_s18421/ag3s/run_0000/step_00019.npz": "0b5ca463f284038317bdc687ba08bca7a30660c3855a4faab3e4c4e42b2f7d84",
+  "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/runs/C1a/R/C1a_ep1842_s18421/ag3s/run_0000/step_00023.npz": "8059abb3106ae8d30708770dd946215ee97edded1a26185a4c3998744fad089c",
+  "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/runs/C1a/R/C1a_ep1842_s18421/ag3s/run_0000/step_00026.npz": "9d5e5b5eea91b95a1316be4bd2428dffb2811c4876396e558ee50edc2b6c0742",
+  "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/runs/C1a/R/C1a_ep1842_s18421/ag3s/run_0000/step_00029.npz": "f80b783c0ad8165c83f66452b860bd0826a27b02b801b1eb7cceeeb6b63acca2",
+  "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/runs/C1a/R/C1a_ep1842_s18421/ag3s/run_0000/step_00053.npz": "8e466265a601e06f1896052648bcbb6be5538a016e2fc4a70ec68e333beeb7f8"
+ },
+ "limits": [
+  "One episode, illustration.",
+  "HSR here is the offline six-stage probe on recorded features; serving at recording time used three phases."
+ ]
+}

@@ -1,0 +1,141 @@
+{
+ "asset": "AG3S/ag3s/docs/figures/core-eval/paper/paper-lte-link-field-v2.png",
+ "script": "paper/tools/plotting/lte_link_field_v2.py",
+ "panels_a_c": {
+  "source": "AG3S/ag3s/docs/figures/core-eval/paper/paper-lte-link-field.png",
+  "sha256": "562e39c2708bc9e2005297e4f57021950f146de3548f54e00fd7ef435cd2e13a",
+  "crop_px": [
+   0,
+   0,
+   1180,
+   629
+  ]
+ },
+ "panel_d": "redrawn from the per-voxel diagnosis; class rule unchanged (nearest GT sample within 8 mm)",
+ "diagnosis": {
+  "dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261030T010317+0900_8ab3c7ef7757_84f01c245c44/verify/LTE-REMOVED-VOXELS",
+  "sha256_voxels": "a1fd7c27525daf6fc457f6dbbf09ebd74208447c738058cd5bac8f5f02e6803f"
+ },
+ "printed_numbers": {
+  "Target apple": 80.04538247752568,
+  "No surface within 8 mm": 15.73557213210876,
+  "Grasping-hand surface": 2.4092679117486977,
+  "Adjacent fruit": 1.80977747861686,
+  "Obstacle / table / basket": 0.0,
+  "apple_surface_removed_median": 82.5
+ },
+ "summary": {
+  "n_removed_total": 380323,
+  "class_counts": {
+   "apple": 210443,
+   "none": 59846,
+   "apple_inside": 75771,
+   "apple_stem_leaf": 18217,
+   "robot": 9163,
+   "fruit": 6883
+  },
+  "class_percent": {
+   "apple": 55.332704043668144,
+   "none": 15.73557213210876,
+   "apple_inside": 19.92280246001425,
+   "apple_stem_leaf": 4.7898759738432855,
+   "robot": 2.4092679117486977,
+   "fruit": 1.80977747861686
+  },
+  "target_apple_percent": 80.04538247752568,
+  "apple_surface_removed_percent_median": 82.5,
+  "none": {
+   "d_apple_surface_mm_pct5_25_50_75_95": [
+    8.26,
+    9.49,
+    11.93,
+    16.91,
+    31.28
+   ],
+   "frac_d_apple_le_12": 0.505380476556495,
+   "frac_d_apple_le_20": 0.8377168064699395,
+   "nearest_class_beyond_8mm": {
+    "apple": 37684,
+    "table": 16395,
+    "apple_stem_leaf": 1529,
+    "robot": 1603,
+    "fruit": 2635
+   },
+   "in_served_target_ball": 0.43267720482571936,
+   "per_run": {
+    "가림121_k0": 1526,
+    "가림122_k0": 1674,
+    "가림123_k0": 1376,
+    "가림121_k1": 2054,
+    "가림122_k1": 4815,
+    "가림123_k1": 1617,
+    "회귀211_k0": 6960,
+    "회귀320_k0": 2204,
+    "회귀954_k0": 17838,
+    "회귀250_k0": 2395,
+    "회귀119_k0": 1780,
+    "회귀850_k0": 1429,
+    "회귀211_k1": 2385,
+    "회귀320_k1": 2282,
+    "회귀954_k1": 3407,
+    "회귀250_k1": 2600,
+    "회귀119_k1": 1847,
+    "회귀850_k1": 1657
+   }
+  },
+  "robot": {
+   "bodies": {
+    "ee_finger_l2": 3688,
+    "EE_BODY_L": 2383,
+    "EE_BODY_R": 1483,
+    "ee_finger_r1": 1099,
+    "ee_finger_r2": 98,
+    "ee_finger_l1": 412
+   },
+   "d_robot_mm_pct5_50_95": [
+    1.17,
+    3.74,
+    7.24
+   ],
+   "frac_also_within_8mm_of_apple": 0.39015606242497,
+   "frac_within_12mm_of_apple": 0.7103568700207356,
+   "per_run": {
+    "가림121_k0": 133,
+    "가림122_k0": 227,
+    "가림123_k0": 96,
+    "가림121_k1": 125,
+    "가림122_k1": 1577,
+    "가림123_k1": 256,
+    "회귀211_k0": 2225,
+    "회귀320_k0": 37,
+    "회귀954_k0": 1166,
+    "회귀250_k0": 53,
+    "회귀119_k0": 192,
+    "회귀850_k0": 211,
+    "회귀211_k1": 894,
+    "회귀320_k1": 52,
+    "회귀954_k1": 1318,
+    "회귀250_k1": 54,
+    "회귀119_k1": 304,
+    "회귀850_k1": 243
+   }
+  },
+  "example": {
+   "run": "회귀954_k1",
+   "request": 23,
+   "class_counts": {
+    "fruit": 50,
+    "none": 146,
+    "apple": 505,
+    "robot": 226,
+    "apple_inside": 234,
+    "apple_stem_leaf": 48
+   },
+   "sources": [
+    "/mnt/dev/AG3S_VLA-storage/results/development/20261028T224856+0900_b3b69311f948_8784a1265958/verify/AG3S-CORE-EVAL/REG_k1/runs/B_ROI_FPR/B_ROI_FPR_ep954_s9543/ag3s/run_0000/step_00023.npz",
+    "/mnt/dev/AG3S_VLA-storage/results/development/20261028T224856+0900_b3b69311f948_8784a1265958/verify/AG3S-CORE-EVAL/REG_k1/runs/server_8293_20261028T140957/server_constraints/run_0000/chunk_00094.npz"
+   ]
+  }
+ },
+ "is_measured_result": true
+}

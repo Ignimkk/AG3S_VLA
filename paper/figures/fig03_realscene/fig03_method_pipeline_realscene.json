@@ -1,0 +1,356 @@
+{
+ "asset": "paper/figures/fig03_realscene/fig03_method_pipeline_realscene.png",
+ "script": "paper/tools/plotting/fig03_realscene_compose.py",
+ "layout": {
+  "path": "Method-Pipeline-Redraw-image-1.png",
+  "sha256": "4e0a42b7587dc7f2ed38deff187fac0d4199a190ca35a2879771c7996a787cd2",
+  "size": [
+   1584,
+   672
+  ],
+  "origin": "Figure Labs draft"
+ },
+ "scale": 3,
+ "size_px": [
+  4752,
+  2016
+ ],
+ "width_in": 7.16,
+ "is_measured_result": false,
+ "renderer": "MuJoCo 3.11.0 replays of recorded qpos (existing assets, read only)",
+ "slots": {
+  "head": {
+   "box_layout_px": [
+    17,
+    92,
+    148,
+    207
+   ],
+   "source": "paper/figures/paperbanana/figure3/assets_v2/panels/01a_input_head.png",
+   "sha256": "eb05a13acbbdac660ddee5bff0ee3484929dc60e6c098a19d230cffcd73bf384",
+   "fit": "cover",
+   "focus": [
+    0.5,
+    0.5
+   ],
+   "precrop_src_px": null,
+   "zoom": 1.0,
+   "shows": "ep1842 f016 head camera"
+  },
+  "left_wrist": {
+   "box_layout_px": [
+    164,
+    92,
+    294,
+    207
+   ],
+   "source": "paper/figures/paperbanana/figure3/assets_v2/panels/01b_input_left_wrist.png",
+   "sha256": "8b8b6aff725d018661cb325b14ad0097f895bd844cff342345e34ef60e237ed7",
+   "fit": "cover",
+   "focus": [
+    0.5,
+    0.5
+   ],
+   "precrop_src_px": null,
+   "zoom": 1.0,
+   "shows": "ep1842 f016 left wrist"
+  },
+  "right_wrist": {
+   "box_layout_px": [
+    310,
+    92,
+    441,
+    207
+   ],
+   "source": "paper/figures/paperbanana/figure3/assets_v2/panels/01c_input_right_wrist.png",
+   "sha256": "7f1f31b2ad11b3390896961ff142d03a5bca9805d17e3172d445f5c414701053",
+   "fit": "cover",
+   "focus": [
+    0.55,
+    0.55
+   ],
+   "precrop_src_px": null,
+   "zoom": 1.0,
+   "shows": "ep1842 f016 right wrist"
+  },
+  "attention": {
+   "box_layout_px": [
+    324,
+    289,
+    412,
+    375
+   ],
+   "source": "paper/figures/ifg_overview/assets/p_att_2.png",
+   "sha256": "4af35e6f0076030ccc0d47c66d344949239eb3dd3d23ac8b25561e69a2ac0c61",
+   "fit": "cover",
+   "focus": [
+    0.46,
+    0.5
+   ],
+   "precrop_src_px": null,
+   "zoom": 1.0,
+   "shows": "ep1842 f016 right wrist, noun attention (L10 H7)"
+  },
+  "seeds": {
+   "box_layout_px": [
+    505,
+    92,
+    621,
+    207
+   ],
+   "source": "paper/figures/paperbanana/figure3/assets_v2/panels/02_ats_seed_patches.png",
+   "sha256": "d12d92397e69aaaae661d7862bfedd0a976d2fd2afdc73752b0c591fc2ce25e3",
+   "fit": "cover",
+   "focus": [
+    0.45,
+    0.55
+   ],
+   "precrop_src_px": null,
+   "zoom": 1.0,
+   "shows": "ep1842 f016 seed patches"
+  },
+  "grow": {
+   "box_layout_px": [
+    661,
+    92,
+    776,
+    207
+   ],
+   "source": "paper/figures/paperbanana/figure3/assets_v2/panels/03_ats_membership.png",
+   "sha256": "c8b2b403de9c44038a6055c9debb1d0548c78eb52ca562bb0f1b2914f29e8662",
+   "fit": "cover",
+   "focus": [
+    0.5,
+    0.5
+   ],
+   "precrop_src_px": null,
+   "zoom": 1.0,
+   "shows": "ep1842 f016 graph membership"
+  },
+  "surface": {
+   "box_layout_px": [
+    817,
+    92,
+    932,
+    207
+   ],
+   "source": "paper/figures/paperbanana/figure3/assets_v2/panels/04_ats_target_surface.png",
+   "sha256": "adb018b6ca546dec5c9eef02861fe9b80c890059d1ae31174b365bc06f927626",
+   "fit": "cover",
+   "focus": [
+    0.55,
+    0.5
+   ],
+   "precrop_src_px": null,
+   "zoom": 1.0,
+   "shows": "ep1842 f016 target (orange) vs neighbour (blue)"
+  },
+  "map_other": {
+   "box_layout_px": [
+    980,
+    92,
+    1133,
+    255
+   ],
+   "source": "AG3S/ag3s/docs/figures/core-eval/paper/paper-lte-link-field.png",
+   "sha256": "562e39c2708bc9e2005297e4f57021950f146de3548f54e00fd7ef435cd2e13a",
+   "fit": "cover",
+   "focus": [
+    0.5,
+    0.5
+   ],
+   "precrop_src_px": [
+    496,
+    139,
+    657,
+    310
+   ],
+   "zoom": 1.0,
+   "shows": "core eval regression 954 k1 req 23, full-scene field (wrist, arm links)"
+  },
+  "map_contact": {
+   "box_layout_px": [
+    1148,
+    92,
+    1300,
+    255
+   ],
+   "source": "AG3S/ag3s/docs/figures/core-eval/paper/paper-lte-link-field.png",
+   "sha256": "562e39c2708bc9e2005297e4f57021950f146de3548f54e00fd7ef435cd2e13a",
+   "fit": "cover",
+   "focus": [
+    0.5,
+    0.5
+   ],
+   "precrop_src_px": [
+    880,
+    139,
+    1041,
+    310
+   ],
+   "zoom": 1.0,
+   "shows": "same request, target-free field (fingers, palm) + contact-link spheres"
+  },
+  "attached": {
+   "box_layout_px": [
+    1249,
+    346,
+    1303,
+    420
+   ],
+   "source": "paper/figures/paperbanana/figure2/assets/v2_role_attached.png",
+   "sha256": "3eea88442bbbfacd08adf2b93a220255a6b74f07e9c1e79b51556f80cdc348d7",
+   "fit": "cover",
+   "focus": [
+    0.58,
+    0.48
+   ],
+   "precrop_src_px": null,
+   "zoom": 2.5,
+   "shows": "ep1982 chunk 22, attached sphere"
+  },
+  "refine": {
+   "box_layout_px": [
+    1340,
+    92,
+    1565,
+    285
+   ],
+   "source": "paper/figures/paperbanana/figure3/assets_v2/panels/09_ccr_refined_path.png",
+   "sha256": "b6c3c8df77686a55fba4947882707ea9601d9caa3615895c379e6bf36c71214d",
+   "fit": "cover",
+   "focus": [
+    0.5,
+    0.5
+   ],
+   "precrop_src_px": null,
+   "zoom": 1.0,
+   "shows": "ep1982 chunk 20, reference vs refined"
+  },
+  "s_approach": {
+   "box_layout_px": [
+    134,
+    485,
+    364,
+    607
+   ],
+   "source": "paper/figures/ifg_overview/assets/p_strip_M1_approach.png",
+   "sha256": "c090e959d053482bb97cf4675bd1366e8509de934e3d0ae4c7c5b77d6b0f5b18",
+   "fit": "cover",
+   "focus": [
+    0.5,
+    0.55
+   ],
+   "precrop_src_px": null,
+   "zoom": 1.0,
+   "shows": "ep1842 f010 (truth: approach)"
+  },
+  "s_grasp": {
+   "box_layout_px": [
+    373,
+    485,
+    603,
+    607
+   ],
+   "source": "paper/figures/ifg_overview/assets/p_strip_M3_grasp.png",
+   "sha256": "d92c8b38c8129f0558b294152b1d4309484420e22a193f80862cdf6b7085ddbf",
+   "fit": "cover",
+   "focus": [
+    0.5,
+    0.5
+   ],
+   "precrop_src_px": null,
+   "zoom": 1.0,
+   "shows": "ep1842 f020 (truth: grasp)"
+  },
+  "s_lift": {
+   "box_layout_px": [
+    612,
+    485,
+    842,
+    607
+   ],
+   "source": "paper/figures/ifg_overview/assets/p_strip_M4_carry.png",
+   "sha256": "50078bebf7fd26de5b587d3bd3ea5afa0b1df7577ea59d1a53d9475d235c1f7b",
+   "fit": "cover",
+   "focus": [
+    0.5,
+    0.5
+   ],
+   "precrop_src_px": null,
+   "zoom": 1.0,
+   "shows": "ep1842 f025 (truth: lift)"
+  },
+  "s_transport": {
+   "box_layout_px": [
+    852,
+    485,
+    1081,
+    607
+   ],
+   "source": "paper/figures/paperbanana/figure3/assets_v2/panels/08_lte_attached_object.png",
+   "sha256": "38a03e69fe75526ad52b9330318074b37f0af582b350b5c59598a9e237bb4dd9",
+   "fit": "cover",
+   "focus": [
+    0.6,
+    0.58
+   ],
+   "precrop_src_px": null,
+   "zoom": 1.0,
+   "shows": "ep1842 chunk 26 (truth: transport), attached sphere"
+  },
+  "s_place": {
+   "box_layout_px": [
+    1091,
+    485,
+    1321,
+    607
+   ],
+   "source": "paper/figures/ifg_overview/assets/p_strip_M5_pre_place.png",
+   "sha256": "f9b228a2ccf0bbc32bf6a1234d75cc82bf0318c682c324f23dad11fc6cf8d5de",
+   "fit": "cover",
+   "focus": [
+    0.5,
+    0.55
+   ],
+   "precrop_src_px": null,
+   "zoom": 1.0,
+   "shows": "ep1842 f031 (truth: placement)"
+  },
+  "s_retreat": {
+   "box_layout_px": [
+    1330,
+    485,
+    1560,
+    607
+   ],
+   "source": "paper/figures/ifg_overview/assets/p_strip_M7_retreat.png",
+   "sha256": "969582ce3271cfea79d3ad5c170bf3ccaa7822c2412b889171a0eae59c81352a",
+   "fit": "cover",
+   "focus": [
+    0.5,
+    0.55
+   ],
+   "precrop_src_px": null,
+   "zoom": 1.0,
+   "shows": "ep1842 f037 (truth: retreat)"
+  }
+ },
+ "strip_stage_truth": {
+  "episode": "T53 C1a ep1842 (re-simulated in T64 Part B, bit-identical)",
+  "source": "/mnt/dev/AG3S_VLA-storage/results/development/20261029T013324+0900_b3b69311f948_7da63daefa49/verify/T64/partB/partB.json",
+  "rule": "frame index -> physics ground-truth stage; 0-17 approach, 18-20 grasp, 21-25 lift, 26-27 transport, 28-31 placement, 32+ retreat"
+ },
+ "episodes": {
+  "ep1842": "pear touching an orange (inputs, attention, segmentation, strip)",
+  "regression 954 k1": "apple next to a banana, core evaluation 2026-10-28 (collision-map panels)",
+  "ep1982": "apple carried over a bar (refinement, attached-object icon)"
+ },
+ "limits": [
+  "Panels come from three recorded episodes; the caption must not imply one episode.",
+  "The collision-map panels are cropped from paper-lte-link-field.png (b, c); its legend is replaced by in-slot keys.",
+  "The transport frame (ep1842 chunk 26) uses a different camera from the other five strip frames.",
+  "Layout text is the Figure Labs raster upscaled x3; final text should be re-set as vector.",
+  "No performance number is printed in any panel."
+ ]
+}

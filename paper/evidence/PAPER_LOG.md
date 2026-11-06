@@ -396,3 +396,78 @@ Step 4 종료 시점의 다음 구성 작업은 Step 5: 공식 template과 manus
 - 참고문헌 21편 추가 (유사 논문 KNOWS · VLSA 의 참고문헌 구성 참고, 고전 포함): RT-1, RT-2, OpenVLA, Octo, Grounding DINO, SAM, DINO, normalized cuts, Felzenszwalb graph segmentation, random walker, local-global consistency, Khatib potential field, CHOMP, TrajOpt, CBF (Ames 2019), Voxblox, MoveIt, VoxPoser, ReKep, SafeVLA, LIBERO. 서지는 모두 1차 기록 (Crossref DOI, PMLR v229 · v270 목록, NeurIPS 목록, JOSER 사본) 과 대조. 기존 nvblox · Curless 1996 · YOLOE 를 본문에서 인용하도록 연결.
 - Contemporaneous 확인: agarwal2026multilink (v1 2026-09-30), guo2026nudge (v1 2026-09-28) 는 2026-09-15 이후 → 인용 · 논의로 충분.
 - 빌드: BUILD_PASS, overfull 0, 미정의 참조 0, BibTeX 경고 0.
+
+## 2026-10-30 00:42 KST — Fig 3 (method pipeline) Figure Labs 레이아웃에 실제 씬 렌더 채움
+
+- 입력: Figure Labs 초안 `Method-Pipeline-Redraw-image-1.png` (1584 × 672, 그림 속 로봇 · 과일은 생성 이미지). 레이아웃 글자 · 화살표는 그대로 두고 이미지 칸 17 개만 기존 MuJoCo replay 렌더로 교체 (기존 자산은 읽기 전용).
+- 출력: `paper/figures/fig03_realscene/fig03_method_pipeline_realscene.{png,pdf,json}` (× 3, 4752 × 2016). 스크립트 `paper/tools/plotting/fig03_realscene_compose.py`. sidecar 에 칸별 출처 · sha256 · crop 을 기록.
+- 출처 episode 3 개: ep1842 (배 + 오렌지; 입력 · 명사 attention L10H7 · 분할 3 단계 · 하단 6 단계), 회귀 954 k1 요청 23 (핵심 평가 10-28; 충돌 지도 두 칸, `paper-lte-link-field.png` (b)(c) 에서 범례 위 같은 창으로 잘라 칸 안 색 표시로 대체), ep1982 (허들; 궤적 보정 · attached 아이콘). caption 이 한 episode 처럼 읽히지 않게 할 것.
+- 하단 6 단계 라벨은 T64 Part B 의 ep1842 물리 정답 (0–17 approach · 18–20 grasp · 21–25 lift · 26–27 transport · 28–31 placement · 32+ retreat) 에 맞춤: f010 · f020 · f025 · chunk 26 · f031 · f037. Transport 칸만 카메라가 다름 (attached 구 렌더).
+- 한계: 레이아웃 글자는 래스터 × 3 확대라 최종본은 벡터 글자로 다시 조판 필요. 레이아웃 원본 글자 크기가 전폭 7.16 in 에서 약 4–5 pt 로 7 pt 기준보다 작음. 그림에 성능 수치 없음.
+
+## 2026-10-30 KST — HSR 6 단계 그림 (paper-hsr-task-phase-6stage) 추가
+
+- 새 그림 `AG3S/ag3s/docs/figures/core-eval/paper/paper-hsr-task-phase-6stage.{png,pdf,json}` (기존 `paper-hsr-task-phase.png` 는 덮어쓰지 않음). 스크립트 `paper/tools/plotting/hsr6_task_phase_figure.py`.
+- 위: T53 C1a ep1842 기록 상태의 MuJoCo replay 6 장 (쥐는 손을 따라가는 외부 카메라). 프레임 규칙은 렌더 전에 고정: 물리 정답 단계 구간의 가운데 chunk → 8 · 19 · 23 · 26 · 29 · 53.
+- 아래: T64 Part B 물리 정답 단계 대 6 단계 HSR probe (기록 feature 에 offline 적용, raw argmax) 대 기록된 grasp latch 상태. 이 episode 에서 단계 일치 71 / 75 chunk (sidecar 에만 기록, 그림에는 수치 없음).
+- 한계: 이 episode 를 기록할 때 서빙은 3 단계 HSR 이었다. 그림의 6 단계 HSR 은 offline probe 출력이다.
+
+## 2026-10-30 01:28 KST — LTE 그림 (d) 재작성 (paper-lte-link-field-v2) 과 지운 voxel 위치 진단
+
+- 진단: 핵심 평가 18 run 의 쥐기 전 요청, `module_eval.py` 와 같은 입력 · 같은 class 규칙 (8 mm). class 개수가 기록과 voxel 단위로 같음 (380,323). 원시: storage `20261030T010317+0900_8ab3c7ef7757_84f01c245c44/verify/LTE-REMOVED-VOXELS/`. 보기: `outputs/2026-10-30_LTE_지운voxel_표면없음_손_위치진단/`.
+- "표면 없음" 15.7 %: 사과 표면까지 중앙값 11.9 mm (50.5 % 가 8–12 mm), 8 mm 밖 최근접 사과 63 % · 탁자 27 %. 사과 바로 바깥 띠 (사과-탁자 둘레 포함). 30 % 가 회귀 954 흔들림 없음 한 run.
+- "손" 2.4 %: 쥐는 손의 손가락 · 손 몸체 표면 (로봇 표면까지 중앙값 3.7 mm), 39 % 는 사과 8 mm 안에도 있음.
+- 새 그림 `AG3S/ag3s/docs/figures/core-eval/paper/paper-lte-link-field-v2.{png,pdf,json}`: (a)–(c) 그대로, (d) 를 사과 합계 80.0 % 로 묶고 라벨 수정, 관측 사과 표면 제거 82.5 % (`apple_left_frac_median` 0.175) 주석. 기존 v1 그림은 보존.
+
+## 2026-11-01 22:20 KST — Method (03_method.tex) 을 Fig 3 패널 이름으로 다시 씀
+
+- 요청: Fig 3 (`figures/cvpr_v1/fig03_method_pipeline_realscene.png`) 의 패널로 Method 목차를 나눈다. 약 2.5 page, action refinement 는 최소, target segmentation · task stage recognition · contact-aware collision map 에 집중. 내부 코드 (ATS · HSR · LTE · CCR) 대신 그림의 이름을 쓴다.
+- 구조: 3.1 Frozen VLA and problem setting · 3.2 Target segmentation · 3.3 Task stage recognition · 3.4 Contact-aware collision map · 3.5 Action refinement. 이전 `\label` (sec:grounding · memory · phase · contact · refine · exemption · overview, eq:clearance · energy) 은 유지.
+- 바뀐 내용 (출처 = `doc/active/reviews/AG3S_decision/ADOPTED_KO.md` A9 · `METHOD_STATUS_KO.md` · `AG3S_RULES_REGISTRY.md`): (1) 로봇 지우기는 렌더 depth 일치 mask 가 아니라 로봇 충돌 구 mask (렌더 mask 미채택, ATS-15). (2) 표면 graph: 5 mm node · depth 도약 10 mm · node 거리 15 mm, seed = noun attention 상위 5 patch (LTE-11). 분할 `--surface-split` 은 폐기 (LTE-15) 라 쓰지 않음. (3) centered feature 기반 identity switch · confidence alert 는 최종 구성에 없어 (confidence gate 꺼짐, T79 offline) 뺌; identity 는 3 요청 연속 규칙 + 영역 겹침 검사. (4) 단계 분류기: 3 단계 (pick · place · home) 대신 5 단계 (approach · grasp · transport · place · retreat), VLM hidden layer 4 (카메라 3 대 image token 평균 + 마지막 text token, 8192 차원), 물리 정답 라벨, layer · pooling 은 train-only grouped CV (T77). (5) 제약 링크는 양손 palm · 손가락 (`--links gripper`) 이라 이전 문장의 "손목 · 반대 팔은 전체 장면" 을 뺌. (6) Action refinement 는 수식 없이 한 문단.
+- 수치 (`\pend`): CV macro-F1 0.969 (layer 4) · 범위 0.960–0.969 · held-out 정확도 0.72 대 0.64 · 빈손 운반 오판 2.2 % 대 28 % = `verify/T77/probe/t77_probe.json` (storage run 20261030T004052+0900_8ab3c7ef7757_1c61eaabd79c) 와 `ADOPTED_KO.md` A9.2. EVIDENCE 등록 전 (offline 측정, closed-loop 아님).
+- `figures/fig03_attention_to_3d/figure_cvpr_v1.tex` 를 새 PNG + 새 caption 으로 교체 (옛 `fig03_pipeline.pdf` 는 보존, include 만 뺌).
+- 빌드: BUILD_PASS, overfull 0, 미정의 참조 0. Method 는 p.4 중간 – p.6 하단 (figure · table 포함 약 2.6 page).
+- 남은 불일치: Fig 3 은 6 단계 (Lift 와 Transport 분리), 본문 · Table 1 은 5 단계. 다른 절 (Intro · Experiments · Fig 1/2) 의 ATS · HSR · LTE · CCR 표기는 그대로.
+
+## 2026-11-04 20:56 KST — Method (03_method.tex) 를 최종 구성 P0m 기준으로 다시 씀
+
+- 요청: P0m 으로 방법론 작성. Intro · Related 는 사용자가 고친 상태라 건드리지 않음. `papers/cvpr2026` 4 편 (ACoT-VLA · AVA-VLA · ActiveVLA · ForceVLA2) 의 방법론 구조 · figure 연결 · 말투를 참고. 미확정 · 미흡한 곳은 빨간 글씨.
+- 참고 논문에서 가져온 틀: (1) 문제 정식화 절을 먼저 두고 intro 의 한계를 수식 위에서 다시 말함, (2) 첫 문단에서 Fig. 3 패널 → 절 번호를 하나씩 대응, (3) 각 절 첫 문단 = intro 의 한계 → "we therefore …", (4) bold run-in 문단 제목 · 수식 뒤 "where …" · `Remark.` 문단.
+- 구조: 3.1 Problem formulation · 3.2 Target segmentation · 3.3 Spatiotemporal object memory (새 절, intro 기여 2 에 대응) · 3.4 Task stage recognition · 3.5 Contact-aware collision map · 3.6 Action refinement. 기존 label 유지, 새 label `eq:policy` · `eq:region` · `eq:qp`, `eq:probe` 삭제 (다른 곳에서 참조 없음).
+- P0m 에 맞춘 내용 (출처 `AG3S/ag3s/docs/handoff/P0_FINAL_CONFIG_FOR_BENCHMARK_20261103_KO.md` §1–2, `ADOPTED_KO.md` A9 [P0m], `METHOD_STATUS_KO.md` §2–5, `T78b.task.md` · `T78f.task.md`, `AG3S/trajopt/config.py`): 단계는 hidden-state probe 가 아니라 grasp latch (searching · latched · closing · held · placed) 와 손바닥–target 거리에서; 3 단계 gate 도 latch 에서 (`--subtask-from-latch`); 표면 추출 + 겹침 검사 · 기권 시 직전 영역 · 쥐는 동안 고정 · 공 없음; target seed 제외식 (소유 비교 ρ = 30 mm · 접촉 여유 10 mm · 쥐기 직전 hull 5 mm · 지지면 guard) 을 Eq. (region) 으로; SQP 목적함수 (손목 0.1 배 · 꺾임 변화율 · 연속성은 쥔 뒤만 · slack) 와 HOLD 대신 최대 3 chunk 실행.
+- 빨간 글씨 12 곳 · `\tbd` 4 곳: attention head 선택 절차, 그리퍼 폭 후보 거르기, target lost 판정 시간, latch 문턱의 그리퍼 의존, place 단계 정의 · 목적지 접촉, 접촉 여유 · hull 의 benchmark ablation 대기, 부호 재계산, 접촉 여유 안 이웃 seed 제거, 손목 · 팔뚝 · 몸통 비제약, 이웃 접촉 허용 (데모 profile 만), 손목 가중치 이유; `\tbd` = Fig. 3 에 memory 패널 없음 · 단계 출처 불일치, intro 기여 2 의 hidden feature memory 가 P0m 에 없음, hidden-state probe (offline \pend{0.72} · \pend{2.2 %}, T77) 를 분석으로 둘지.
+- 수치: 방법 설정값만 씀. 결과 수치는 `\tbd` 안 T77 두 개 (`verify/T77/probe/t77_probe.json`, storage run 20261030T004052+0900_8ab3c7ef7757_1c61eaabd79c) 뿐.
+- 빌드 (`paper/tools/latex/build_cvpr_v1.py`): BUILD_PASS, 12 page, 참고문헌 p.12 시작 (이전 p.11), overfull 0, 미정의 참조 0.
+- 건드리지 않은 불일치: Fig. 3 caption (hidden state 로 단계 분류), Fig. 2 caption (centered features · rendered robot mask), Experiments 의 `sec:featureresults` 등 이전 방법 표현.
+
+## 2026-11-04 KST — Method v2: intro 의 문제 · contribution 중심 재구성, 약 2.5 page 로 축소
+
+- 사용자 지적 두 가지: (1) 참고 논문 4 편은 방법론을 intro 에서 말한 문제와 contribution 중심으로 쓴다, (2) 분량이 그림 포함 약 2.5 page 로 같다. v1 은 둘 다 반영되지 않았다 (구현 세부 중심, 약 3.7 page).
+- 참고 논문 분량 (같은 방식으로 잼): ACoT ≈ 2.3 · AVA ≈ 2.6 · ActiveVLA ≈ 2.75 · ForceVLA2 ≈ 2.5 page.
+- 구조: 3.1 Problem formulation (intro 의 두 bold 문제 → Eq. 1–2 위에서 "π 가 내놓지 않는 세 양 T_t · s_t · contact link" 로 정식화, overview 문단에서 Fig. 3 패널 대응) · 3.2 Attention-guided 3D segmentation · 3.3 Spatiotemporal 3D object memory (= contribution 2 의 두 module, 절 이름도 intro 용어 그대로) · 3.4 Task-conditioned collision constraints (intro 의 "according to manipulation stages and robot links") · 3.5 Constrained action refinement (intro 의 "trajectory optimization … preserving the intended manipulation objective"). 각 절은 "Sec. 1 의 한계 → To this end → 수식 → Therefore, 기여" 순서.
+- 뺀 것: Table (stage → constraint), 문턱 값 전부 (파일 머리 주석에 목록, 빨간 글씨로 "supplementary" 표시), latch 상태 세부, ROI carve, 손바닥 껍질, HOLD 대신 3 chunk 실행 규칙.
+- 빨간 글씨 7 곳 · `\tbd` 2 곳 (Fig. 3 의 memory 패널 없음 · 단계를 hidden state 로 그림; hidden-state 단계 probe 미사용).
+- 빌드: BUILD_PASS, 11 page (참고문헌 p.10), overfull 0, 미정의 참조 0. Method = p.4 오른쪽 단 – p.7 첫 줄 (Fig. 3 포함 약 2.55 page). 이전판 백업: session scratchpad `03_method.v1.tex`.
+
+## 2026-11-04 (UTC 14:35, KST = +9 h) — Method v3: 빨간 글씨 용도 정정
+
+- 사용자 지시: 빨간 글씨는 "안 됐다 · 보류" 같은 메모가 아니라, 방법을 그대로 서술한 뒤 검증이 부족한 서술 부분만 빨간색으로 표시.
+- 삭제한 메모: Fig. 3 \tbd, hidden-state feature descriptor 미사용 문장, hidden-state 단계 probe \tbd (0.72), 접촉 여유 ablation 보류 문장, 데모 profile 이웃 접촉 허용 문장.
+- 빨간색으로 남긴 방법 서술 (4곳): 고정 head 를 development episode 로 한 번 선택; target 주변 contact allowance ε_c; 제약은 양손 손바닥 · 손가락 구에만 (팔뚝 · 몸통 · self-collision 제외, 출처 P0_FINAL_CONFIG §제약 링크 `--links gripper --no-self-collision`); 손목 관절 가중치 약화와 직전 chunk continuity 항.
+- 검정으로 바꾼 문장: "The thresholds are given in the supplementary material." (supplementary 는 아직 없음).
+- 빌드: build_cvpr_v1.py, overfull 0, undefined 0, 참고문헌 p.10. 이전 판 백업: scratchpad 03_method.v2.tex.
+
+## 2026-11-04 (UTC 16:09, KST = +9 h) — Method 알고리즘 상자 비교본 (원고 미반영)
+
+- 참고 논문 4편 (papers/cvpr2026) 원문 검색: 알고리즘 상자 사용 0편.
+- 비교본: scratchpad 사본에서만 빌드 (원고 03_method.tex · preamble 변경 없음; algpseudocode 는 preamble 에 이미 있음). Alg. 1 = 요청 한 번의 실행 흐름 (분할 → memory 판정 · abstain · 쥐는 중 고정 → grasp 상태 · 단계 → 두 거리장 → SQP → safety check · HOLD), 3.1 overview · 3.3 Temporal association · 3.5 safety check 문장을 줄여 상자로 옮김.
+- 분량 (CVPR 줄 번호 기준): 상자 없음 p.4 l.232 – p.6 l.413 ≈ 2.5 page; 상자 있음 p.4 l.232 – p.7 l.410 ≈ 2.8 page (+0.3). 둘 다 overfull 0.
+- 빌드 제약: offline tectonic cache 에 cmr9 · cmmi8 · cmsy6 등 9 pt 이하 수식 글꼴이 없어 상자는 본문 크기 (\normalsize) 로만 빌드됨.
+
+## 2026-11-06 (UTC, KST = +9 h) — Method v4: 알고리즘 상자 적용 (사용자 지시 "알고리즘 박스 적용한거로 수정")
+- 변경 파일: `paper/latex/sections/03_method.tex` 만. intro · related · Fig. 3 caption · preamble 무수정.
+- Alg. 1 (`alg:request`, request 한 번의 순서) 을 3.1 끝에 추가. 줄 번호는 `\label` 로 참조 (3.3 Temporal association → lines 6–12, 3.5 safety check → line 18). 비교본의 `\ref` 깨짐(`\r` 문자) 은 바로잡음.
+- 분량 유지용 산문 축소 (내용 삭제 없이 문장 압축): 3.2 도입 끝 · 3.2 마지막 문장, 3.3 도입 · Spatial relationships, Temporal association 과 memory 맺음 문단 병합, 3.4 Task stage recognition, 3.5 safety check 문장.
+- 빨간 글씨 5 곳 그대로 (head 선택 · 접촉 여유 ε_c · 양손 palm/finger 만 제약 · wrist 가중 · continuity term). 새 빨간 글씨 없음.
+- Build: BUILD_PASS, 11 pages, overfull 0, undefined 0. Method = p.4 아래 → p.7 왼쪽 열 위 (Experiments 가 p.7 왼쪽 열 21 번째 text 줄). Alg. 1 은 p.5 왼쪽 열 Fig. 3 아래. v3 대비 약 0.1 page 길다.
+- 백업: scratchpad `03_method.v3.tex` (알고리즘 상자 이전).
