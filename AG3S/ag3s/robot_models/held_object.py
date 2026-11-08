@@ -875,6 +875,69 @@ def held_observation_check(*, observed_centroid, held_centre, held_centre_at_att
             "object_rise_m": float(u @ (oc - oa))}
 
 
+# --- SL-GTTO17 (B, user ruling 2026-11-08) — begin
+def point_model_spheres(points: np.ndarray, spacing: float, *,
+                        support: Optional[tuple[np.ndarray, float]] = None,
+                        max_fill: float = 0.10) -> tuple[list[tuple[np.ndarray, float]], dict]:
+    """The held object as a **shell of small spheres** on its observed points (B) — `([(centre, radius)], record)`, base.
+
+    The body cover (`body_cover_spheres`) wraps a 108 x 105 x 55 mm bowl in two 62 mm spheres: their bottoms sit ~35 mm below
+    the bowl, so a collision-free carry reads 20-24 mm violations (F12 calibration) and the accepted tolerance that hides
+    them also hides a real held <-> obstacle row. Here the observed points (the object at the capture pose) are binned on a
+    `spacing` grid in the support frame (normal `n`; base +z without a support): each occupied footprint column is filled
+    from the floor (the support plane when the lowest point is within `max_fill` of it -- the object rested there -- else the
+    lowest observed point) up to its highest point, footprint holes are filled (2-D), and every voxel with an empty
+    6-neighbour gets one sphere of radius `spacing * sqrt(3) / 2` at its centre (it covers the whole voxel).
+    """
+    from scipy import ndimage
+
+    pts = np.asarray(points, np.float64).reshape(-1, 3)
+    s = float(spacing)
+    if not len(pts) or not s > 0.0:
+        return [], {"applied": False, "why": "no points" if not len(pts) else "spacing <= 0"}
+    if support is not None:
+        n = np.asarray(support[0], np.float64).reshape(3)
+        n = n / float(np.linalg.norm(n))
+        off = float(support[1])
+    else:
+        n, off = np.array([0.0, 0.0, 1.0]), None
+    a = np.array([1.0, 0.0, 0.0]) if abs(n[0]) < 0.9 else np.array([0.0, 1.0, 0.0])
+    u = np.cross(n, a)
+    u /= float(np.linalg.norm(u))
+    v = np.cross(n, u)
+    h, x, y = pts @ n, pts @ u, pts @ v
+    floor = float(h.min())
+    to_support = bool(off is not None and -s <= floor - off <= float(max_fill))
+    if to_support:
+        floor = float(off)
+    x0, y0 = float(x.min()), float(y.min())
+    ix = np.floor((x - x0) / s).astype(int)
+    iy = np.floor((y - y0) / s).astype(int)
+    iz = np.clip(np.floor((h - floor) / s).astype(int), 0, None)
+    nx, ny, nz = int(ix.max()) + 1, int(iy.max()) + 1, int(iz.max()) + 1
+    top = np.full((nx, ny), -1, int)
+    np.maximum.at(top, (ix, iy), iz)
+    foot = top >= 0
+    filled = ndimage.binary_fill_holes(foot)
+    top = np.where(filled & ~foot, 0, top)
+    occ = np.arange(nz)[None, None, :] <= top[:, :, None]
+    padded = np.pad(occ, 1)
+    inner = (padded[2:, 1:-1, 1:-1] & padded[:-2, 1:-1, 1:-1] & padded[1:-1, 2:, 1:-1] & padded[1:-1, :-2, 1:-1]
+             & padded[1:-1, 1:-1, 2:] & padded[1:-1, 1:-1, :-2])
+    shell = occ & ~inner
+    i, j, k = np.nonzero(shell)
+    centres = ((x0 + (i + 0.5) * s)[:, None] * u + (y0 + (j + 0.5) * s)[:, None] * v
+               + (floor + (k + 0.5) * s)[:, None] * n)
+    r = s * np.sqrt(3.0) / 2.0
+    out = [(c, float(r)) for c in centres]
+    return out, {"applied": True, "spacing_mm": round(s * 1000.0, 3), "radius_mm": round(r * 1000.0, 3),
+                 "n_points": int(len(pts)), "n_voxels": int(occ.sum()), "n_spheres": len(out),
+                 "n_holes_filled": int((filled & ~foot).sum()), "filled_to_support": to_support,
+                 "extent_mm": [round(float(np.ptp(x)) * 1000.0, 1), round(float(np.ptp(y)) * 1000.0, 1),
+                               round(float(h.max() - floor) * 1000.0, 1)]}
+# --- SL-GTTO17 (B) — end
+
+
 __all__ = [
     "HELD_BODY_SLIP_M",
     "HELD_CAP_DEDUPE_TOL_M",
@@ -899,6 +962,7 @@ __all__ = [
     "held_observation_check",
     "held_spheres_of",
     "lift_off_support",
+    "point_model_spheres",
     "near_support",
     "palm_link_for",
     "sphere_volume_points",

@@ -101,7 +101,7 @@ def test_profile_version(gpu_ok):
     assert pf.version_flag_values(args)["grasp_zone_release"] is True
     assert "grasp_zone_release" not in pf.version_flag_values(_args("AG3S-commonto-gt2-termsoff-pass"))
     for name, flags in pf.AG3S_VERSIONS.items():
-        if name != v and name not in getattr(pf, "GT6_VERSIONS", ()) + getattr(pf, "GT7_VERSIONS", ()) + getattr(pf, "GT8_VERSIONS", ()) + getattr(pf, "GT9_VERSIONS", ()):   # build on zr
+        if name != v and name not in getattr(pf, "GT6_VERSIONS", ()) + getattr(pf, "GT7_VERSIONS", ()) + getattr(pf, "GT8_VERSIONS", ()) + getattr(pf, "GT9_VERSIONS", ()) + getattr(pf, "GT10_VERSIONS", ()) + getattr(pf, "GT11_VERSIONS", ()) + getattr(pf, "GT12_VERSIONS", ()) + getattr(pf, "GT13_VERSIONS", ()) + getattr(pf, "GT14_VERSIONS", ()) + getattr(pf, "GT15_VERSIONS", ()):   # build on zr
             assert "--grasp-zone-release" not in flags, name
 
 

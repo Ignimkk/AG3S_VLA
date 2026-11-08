@@ -73,7 +73,7 @@ def test_profile_version(gpu_ok):
     assert pf.version_flag_values(args)["occluded_certify"] is True
     assert "occluded_certify" not in pf.version_flag_values(_args("AG3S-commonto-gt2-termsoff-pass-zr"))
     for name, flags in pf.AG3S_VERSIONS.items():
-        if name not in pf.GT6_VERSIONS + pf.GT7_VERSIONS:
+        if name not in pf.GT6_VERSIONS + pf.GT7_VERSIONS + getattr(pf, "GT13_VERSIONS", ()) + getattr(pf, "GT14_VERSIONS", ()) + getattr(pf, "GT15_VERSIONS", ()):   # SL-GTTO13 = F8 + F5
             assert "--occluded-certify" not in flags, name
 
 

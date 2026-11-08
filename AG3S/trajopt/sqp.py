@@ -82,6 +82,13 @@ class TrajectoryOptimizer:
     last_ee_action = None
     ee_action_iterations = 4
     ee_action_slack_weight = 1.0e6
+    #: SL-GTTO11 F9a (`--ee-action-qp-scaled`, default off): row-normalised collision rows + quadratic slack penalty (the
+    #: offline check of G50: the unscaled form stops on OSQP's 20000-iteration cap, this one converges in ~150 / 5 ms to the
+    #: hard-QP solution). Rows whose action gradient is ~0 (step 0 = q_now, no action reaches it) are left out of the QP
+    #: (counted in `ee_action_qp.n_rows_unreachable`); the final check still sees them.
+    ee_action_scaled = False
+    ee_action_scaled_quad_weight = 1.0e4
+    ee_action_scaled_linear_weight = 1.0e2
 
     def __init__(
         self,
@@ -1342,17 +1349,59 @@ class TrajectoryOptimizer:
             record["reason"] = "collision off"
         elif cfg.safety.require_certified_geometry and not geometry_certified:
             record["reason"] = "geometry not certified"
-        elif reference_violation > 0.0:
+        elif reference_violation > float(getattr(cfg.sqp, "passthrough_tolerance", 0.0) or 0.0):   # SL-GTTO14 (0 = T88)
             record["reason"] = "collision"
+        elif self._obstacle_row_refuses(reference, q_now, scene, record):   # SL-GTTO16 (A; None = off, not called)
+            record["reason"] = "obstacle"
         elif self.path is not None and self._path_violation(reference, scene) > 0.0:
             record["reason"] = "path"
-        elif max((over := self._limit_overshoot(reference, q_now, envelope)).values()) > _LIMIT_TOLERANCE:
+        elif max((over := self._limit_overshoot(reference, q_now, envelope)).values()) > max(
+                _LIMIT_TOLERANCE, float(getattr(cfg.sqp, "passthrough_limit_tolerance", 0.0) or 0.0)):   # SL-GTTO15 (0 = strict)
             record["reason"] = "limit"
             # SL-GTTO6 (record only): which limit the reference overshoots, and by how much
             record["limit_overshoot"] = {k: round(float(v), 6) for k, v in over.items() if v > _LIMIT_TOLERANCE}
         else:
             record.update(applied=True, reason="clear")
+        if float(getattr(cfg.sqp, "passthrough_tolerance", 0.0) or 0.0) > 0.0:   # SL-GTTO14: key only when on
+            record["tolerance_m"] = float(cfg.sqp.passthrough_tolerance)
+        if float(getattr(cfg.sqp, "passthrough_tolerance", 0.0) or 0.0) > 0.0 and reference_violation > 0.0:
+            # SL-GTTO15 (record only, G71): which row of the VLA reference makes the violation (link · block · tier ·
+            # field label · point) -- the split between obstacle rows and self / target / support rows is read from it.
+            try:
+                _, pair = self.linearizer.worst_row(reference, q_now, scene, steps=self.lookahead_from)
+                record["reference_worst"] = ({k: pair.get(k) for k in ("block", "step", "link", "obstacle", "tier",
+                                                                       "clearance_m", "point_m")} if pair else None)
+            except Exception as exc:   # a record must never change the decision
+                record["reference_worst"] = {"error": repr(exc)}
+        if float(getattr(cfg.sqp, "passthrough_limit_tolerance", 0.0) or 0.0) > 0.0:   # SL-GTTO15: key only when on
+            record["limit_tolerance"] = float(cfg.sqp.passthrough_limit_tolerance)
+            if record.get("applied"):   # what the passed reference overshoots (within the tolerance)
+                over = self._limit_overshoot(reference, q_now, envelope)
+                record["limit_overshoot"] = {k: round(float(v), 6) for k, v in over.items() if v > _LIMIT_TOLERANCE}
         return record["applied"], record
+
+    def _obstacle_row_refuses(self, reference, q_now, scene, record) -> bool:
+        """SL-GTTO16 (A) — with `sqp.passthrough_obstacle_tolerance` set, the τ of `passthrough_tolerance` does not
+        cover an obstacle-object row (`linearizer.obstacle_object_rows`): such a row of the executed window below its
+        floor by more than this tolerance refuses the pass-through. `None` (default): not called, `False`."""
+        tol = getattr(self.config.sqp, "passthrough_obstacle_tolerance", None)
+        if tol is None:
+            return False
+        try:
+            full = bool(getattr(self.config.sqp, "passthrough_obstacle_full_horizon", False))   # SL-GTTO22
+            worst, pair = self.linearizer.obstacle_object_rows(
+                reference, q_now, scene, steps=None if full else self.lookahead_from,
+                beneath=bool(getattr(self.config.sqp, "passthrough_obstacle_beneath", False)))
+        except Exception as exc:   # fail closed: an unreadable classification is not a clear chunk
+            import traceback
+            record["obstacle_rows"] = {"error": repr(exc), "where": traceback.format_exc(limit=-3)[-900:]}
+            return True
+        violation = max(0.0, -float(worst)) if np.isfinite(worst) else 0.0
+        record["obstacle_rows"] = {"tolerance_m": float(tol), "violation_m": violation,
+                                   "worst": pair if pair is None else {k: pair.get(k) for k in (
+                                       "step", "link", "obstacle", "clearance_m", "point_m", "n_obstacle_rows",
+                                       "n_rows", "n_beneath", "n_object_points")}}
+        return violation > float(tol)
 
     def _finish_passthrough(self, reference, q_now, scene, template, reference_violation, previous_chunk, notes,
                             started, geometry_certified, envelope, record) -> TrajOptResult:
@@ -1412,9 +1461,21 @@ class TrajectoryOptimizer:
             G = np.einsum("nj,njx->nx", rows.gradient[ks, rs],
                           M.reshape(H, nq, n_x)[ks])                        # (n, n_x)
             b = backoff - rows.value[ks, rs] + G @ x
-            n = ks.size
-            P = sp.block_diag([sp.identity(n_x), sp.identity(n) * 1e-6], format="csc")
-            q = np.concatenate([np.zeros(n_x), np.full(n, float(self.ee_action_slack_weight))])
+            if self.ee_action_scaled:   # SL-GTTO11 F9a (off: the F7 form below, unchanged)
+                gn = np.linalg.norm(G, axis=1)
+                reach = gn > 1e-9
+                rec.setdefault("n_rows_unreachable", []).append(int((~reach).sum()))
+                G, b = G[reach] / gn[reach, None], b[reach] / gn[reach]
+                if G.shape[0] == 0:
+                    rec["status"].append("no reachable row")
+                    break
+            n = G.shape[0]
+            if self.ee_action_scaled:
+                P = sp.block_diag([sp.identity(n_x), sp.identity(n) * float(self.ee_action_scaled_quad_weight)], format="csc")
+                q = np.concatenate([np.zeros(n_x), np.full(n, float(self.ee_action_scaled_linear_weight))])
+            else:
+                P = sp.block_diag([sp.identity(n_x), sp.identity(n) * 1e-6], format="csc")
+                q = np.concatenate([np.zeros(n_x), np.full(n, float(self.ee_action_slack_weight))])
             A = sp.vstack([sp.hstack([sp.csc_matrix(G), sp.identity(n)]),
                            sp.hstack([sp.identity(n_x), sp.csc_matrix((n_x, n))]),
                            sp.hstack([sp.csc_matrix((n, n_x)), sp.identity(n)])], format="csc")
@@ -1430,7 +1491,11 @@ class TrajectoryOptimizer:
                 notes.append(f"F7 action QP: solver returned no solution ({status}); keeping the last iterate")
                 break
             x = np.clip(res.x[:n_x], lo_x, hi_x)
-            rec["slack_max_m"] = float(max(0.0, np.max(res.x[n_x:], initial=0.0)))
+            rec.setdefault("osqp_iter", []).append(int(getattr(res.info, "iter", -1)))
+            if self.ee_action_scaled:   # slack back in metres: the worst unmet row of the unscaled constraint
+                rec["slack_max_m"] = float(max(0.0, np.max(b * gn[reach] - (G * gn[reach, None]) @ x, initial=0.0)))
+            else:
+                rec["slack_max_m"] = float(max(0.0, np.max(res.x[n_x:], initial=0.0)))
             trajectory = np.array(reference, np.float64) + (M @ x).reshape(H, nq).T
             if rec["slack_max_m"] <= 1e-6 and it >= 2 and self.linearizer.full_violation(
                     trajectory, q_now, scene) <= cfg.safety.violation_tolerance:

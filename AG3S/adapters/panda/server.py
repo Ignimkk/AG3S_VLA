@@ -77,7 +77,8 @@ def gripper_gap_calibration() -> dict:
     return json.loads(GRIPPER_GAP_CALIBRATION.read_text())
 
 
-def panda_latch_config(gap_opening: bool = False, placed_rearm: bool = False, opening_rule: bool = False):
+def panda_latch_config(gap_opening: bool = False, placed_rearm: bool = False, opening_rule: bool = False,
+                       opening_rule_moved: Optional[float] = None):
     """V11AB ``LatchConfig`` defaults with only ``empty_below`` calibrated for the Panda gripper.
 
     SL11 §5 ``gap_opening``: the latch's opening is the two-finger gap (:func:`gripper_gap_norm`), so the three thresholds that
@@ -87,7 +88,8 @@ def panda_latch_config(gap_opening: bool = False, placed_rearm: bool = False, op
     """
     from AG3S.trajopt.grasp_latch import LatchConfig
 
-    extra = {**({"placed_rearm": True} if placed_rearm else {}), **({"opening_rule": True} if opening_rule else {})}   # SL14 --placed-rearm / --grasp-opening-rule (off: no key, the config as before)
+    extra = {**({"placed_rearm": True} if placed_rearm else {}), **({"opening_rule": True} if opening_rule else {}),
+             **({"opening_rule_moved_min": float(opening_rule_moved)} if opening_rule_moved is not None else {})}   # SL-GTTO11   # SL14 --placed-rearm / --grasp-opening-rule (off: no key, the config as before)
     if not gap_opening:
         return LatchConfig(empty_below=float(gripper_calibration()["panda"]["empty_below"]), **extra)
     c = gripper_gap_calibration()["thresholds"]
@@ -683,6 +685,27 @@ PORTED_FINAL_CONFIG_DESTS: tuple[str, ...] = (
     # SL-GTTO2 (task SL-GTTO2 §1): the GT cluster is not refused by admissibility (F1), the held GT target's pixels
     # are masked out of the TSDF (F2) -- both clustering keys through serve_safe.t43t_identity_section
     'oracle_admissible', 'oracle_held_target',
+    # SL-GTTO10 F8a (lead self-ruling G53, 2026-11-07): the GT destination injection (clustering key, same section) and the
+    # held rows' destination margin (AG3S `contact.destination_margin`, through serve_safe.destination_margin_section)
+    'oracle_destination', 'destination_margin_mm',
+    # SL-GTTO11 F9a: the scaled form of the F7 action QP (SafePolicy optimizer attribute, set below)
+    'ee_action_qp_scaled',
+    # SL-GTTO11 (c'): the opening rule's `moved` check (LatchConfig.opening_rule_moved_min, through panda_latch_config)
+    'grasp_opening_rule_moved',
+    # SL-GTTO14 (G69): the accepted model violation tau (sqp.passthrough_tolerance + safety.violation_tolerance, through
+    # serve_safe.trajopt_config_from_args, which this server already calls)
+    'violation_tolerance_mm',
+    # SL-GTTO15 (G70): GT robot pixels out of the TSDF (clustering key, same section as F2) and the pass-through's joint-limit
+    # tolerance (sqp.passthrough_limit_tolerance, through serve_safe.trajopt_config_from_args)
+    'oracle_robot_mask', 'passthrough_limit_tolerance',
+    # SL-GTTO16 (A): tau not applied to obstacle-object rows (sqp.passthrough_obstacle_tolerance, same path)
+    'passthrough_obstacle_tolerance_mm',
+    # SL-GTTO17 (B): the held object as a shell of small spheres (AG3S attribute through build_panda_ag3s)
+    'held_point_model_mm',
+    # SL-GTTO16 A': the beneath rule of the obstacle-object rows (sqp.passthrough_obstacle_beneath)
+    'passthrough_obstacle_beneath',
+    # SL-GTTO19 (A''): GT obstacle-object points to the TO (clustering key, same section as the other oracle flags)
+    'oracle_obstacle_objects', 'scene_obstacle_objects', 'oracle_obstacle_support', 'passthrough_obstacle_full_horizon',
     # SL-GTTO4 F3 (lead self-ruling 2026-11-05): SL6-H's held-object placement contact on the latch alone (SafePolicy
     # switch through serve_safe.apply_grasp_contact_flags, which this server already calls)
     'held_beneath_contact',
@@ -694,6 +717,8 @@ PORTED_FINAL_CONFIG_DESTS: tuple[str, ...] = (
     'held_beneath_hand',
     # SL-GTTO9 F7: the TO solves in the policy's action space (server wiring in build_safe_server)
     'ee_action_qp',
+    # SL-QE1 (dev-e5, 2026-11-08): G3's live-camera exception (esdf key through serve_safe.dynamic_field_section)
+    'esdf_dead_camera_seen_ok',
 )
 #: SL-GTTO — the target extents the Panda server runs (``--target-extent``; SL7 attention-surface, SL-GTTO oracle-visible).
 PORTED_TARGET_EXTENTS: tuple[str, ...] = ("estimated", "attention-surface", "oracle-visible")
@@ -1053,7 +1078,7 @@ def build_safe_server(policy, args, *, attention_model=None, gpu_warm_up: bool =
                  **({"hsr6_objective_scope": scope} if scope != "all" else {}),
                  **ss.subtask_from_latch_kwargs(args)}   # SL7 (T92): {} unless --subtask-from-latch
                 if final_options_on(args) else {})
-    safe = SafePolicy(chunk_policy, ag3s=ag3s, to_config=to_config, attention_fn=attention_fn, latch=panda_latch_config(gap_opening=gap_opening, placed_rearm=bool(getattr(args, "placed_rearm", False)), opening_rule=bool(getattr(args, "grasp_opening_rule", False))),
+    safe = SafePolicy(chunk_policy, ag3s=ag3s, to_config=to_config, attention_fn=attention_fn, latch=panda_latch_config(gap_opening=gap_opening, placed_rearm=bool(getattr(args, "placed_rearm", False)), opening_rule=bool(getattr(args, "grasp_opening_rule", False)), opening_rule_moved=getattr(args, "grasp_opening_rule_moved", None)),
                       grasp_links=dict(profile.PANDA_GRASP_LINKS), hold_links=dict(profile.PANDA_HOLD_LINKS),
                       static_geometry=None, recorder=recorder, shadow=bool(getattr(args, "shadow", False)),
                       layout=pa.panda_chunk_layout(constraint.joint_names), gripper_columns=GRIPPER_COLUMNS,
@@ -1065,6 +1090,9 @@ def build_safe_server(policy, args, *, attention_model=None, gpu_warm_up: bool =
     if getattr(args, "ee_action_qp", False):   # SL-GTTO9 (F7): the TO solves in the policy's action space
         chunk_policy.ee_optimizer = safe.refiner.optimizer
         grasp_contact = {**grasp_contact, "ee_action_qp": True}
+        if getattr(args, "ee_action_qp_scaled", False):   # SL-GTTO11 F9a (off: the F7 QP as before)
+            safe.refiner.optimizer.ee_action_scaled = True
+            grasp_contact = {**grasp_contact, "ee_action_qp_scaled": True}
     gpu = gpu_seeds_setup(safe, to_config, warm_up=gpu_warm_up)
     inert = []
     ss.announce_subtask_from_latch(args)   # SL7 (T92): one start line when on
@@ -1170,7 +1198,7 @@ def gt_perception_record(ag3s) -> dict:
     return {"target_extent": e.target_extent, "oracle_extent_identity": e.oracle_extent_identity,
             "oracle_max_dist_voxels": float(e.oracle_max_dist_voxels), "grounding_source": c.grounding_source,
             # SL-GTTO2: only when on (the AG3S-commonto-gt record is unchanged)
-            **{k: True for k in ("oracle_admissible", "oracle_held_target") if getattr(c, k, False)},
+            **{k: True for k in ("oracle_admissible", "oracle_held_target", "oracle_destination", "oracle_robot_mask") if getattr(c, k, False)},
             "codes": {"none_robot": osg.CODE_NONE, "target": osg.CODE_TARGET, "static": osg.CODE_STATIC,
                       "object_base": osg.CODE_OBJECT_BASE, "version": osg.CODE_VERSION},
             "client": "libero_safe_client / libero_safety_client --oracle-seg (benchmark/adapters/libero_panda/"

@@ -450,6 +450,38 @@ class ClusteringConfig:
     #: TSDF band behind code-1 pixels the self-filter left unmasked (held: 40–160 px/frame; closing: thousands).
     oracle_held_target: bool = False
     # --- SL-GTTO2 — end
+    # --- SL-GTTO10 — begin (lead self-ruling G53, 2026-11-07; user caution 2 "놓을 때 쥔 물체와 목적지의 접촉은 허용")
+    #: **GT destination (F8a).** With `grounding_source == "oracle"` and the client naming the BDDL goal's destination
+    #: (`ag3s/oracle_seg_meta["destination"]`, its code from the same legend), every frame the fused points whose every
+    #: labelled observation reads the destination's code are injected as the destination (`TargetConfirm.inject_destination`,
+    #: the T26 caller-named path): the field labels them and only the **held** rows get `contact.destination_margin`
+    #: against them (robot links keep the full margin). No destination name / code / point on a frame: the last one stays
+    #: (sticky, as any injection). Record: `metrics["grounding_source"]["destination"]`. Measured need: F7 LIBERO-Safety
+    #: human_safety t0e0 — the 76 carry HOLD rows are the held bowl's query sphere against the human hand the goal puts it
+    #: on (`On akita_black_bowl_1 left_hand_1`), with no destination named (G53).
+    oracle_destination: bool = False
+    # --- SL-GTTO10 — end
+    #: SL-GTTO15 (G70, 2026-11-07) — **the robot's own pixels never reach the TSDF.** Every request, the GT code-0 pixels
+    #: with a valid depth (the robot: ``robot0_*`` / ``gripper0_*`` / ``mount0_*`` bodies) are added to each camera's TSDF
+    #: depth mask (neither surface nor free space), as F2 does for the held target. The sphere self-filter leaves part of
+    #: the arm / hand unmasked: on the VLA's own collision-free LIBERO path (GT12 observe, seed 11) arm rows HOLD against
+    #: the arm's own voxels and hand rows against the hand's. Record: `metrics["grounding_source"]["robot_mask"]`.
+    oracle_robot_mask: bool = False
+    #: SL-GTTO19 (A'', user ruling 2026-11-08: "장애물 물체 = GT 기준 target · 목적지가 아닌 물체") -- every request, the fused
+    #: points whose every labelled observation reads a GT object code (>= 3) other than the target, the destination and the
+    #: object the target rests on (found once per episode under the target's footprint) are handed to the TO as the
+    #: obstacle-object surface (`CollisionConstraintSet.obstacle_object_points`, union of the last 3 requests, 15 mm voxels).
+    oracle_obstacle_objects: bool = False
+    #: SL-GTTO20 (A'' without GT, 2026-11-08) -- the same obstacle-object surface from AG3S's own perception: connected
+    #: components (15 mm voxels, 26-neighbourhood) of the self-filtered cloud without the support-plane points, minus the
+    #: component(s) of the manipulated object, the components under its footprint (its support) and the perceived
+    #: destination's. Needs no GT; the TO reads it exactly as `oracle_obstacle_objects`.
+    scene_obstacle_objects: bool = False
+    #: SL-GTTO21 (2026-11-08 03:4x) — how `oracle_obstacle_objects` finds the object the target rests on: "near" (SL-GTTO19:
+    #: any object with points 0-30 mm below the target's lowest point within 30 mm of any target point -- it also took an
+    #: obstacle standing next to the bowl, B'' SafeLIBERO t2e0) or "under" (only points under the target's base: within
+    #: 10 mm of the target points that are within 10 mm of its lowest point).
+    oracle_obstacle_support: str = "near"
     #: **T43 T 3(b) — release an identity the exclusion gate keeps refusing.** An integer N = when
     #: `AG3S._exclusion_gate` refuses the manipulated object because it overlaps the destination on
     #: N consecutive grounding calls (and nothing is frozen), the identity is let go at the start of
@@ -660,7 +692,8 @@ class ClusteringConfig:
         if self.grounding_source not in self.GROUNDING_SOURCES:   # SL-GTTO
             raise AG3SConfigError(f"clustering.grounding_source must be one of {self.GROUNDING_SOURCES}, "
                                   f"got {self.grounding_source!r}")
-        for name in ("oracle_admissible", "oracle_held_target"):   # SL-GTTO2
+        for name in ("oracle_admissible", "oracle_held_target", "oracle_destination", "oracle_robot_mask",
+                     "oracle_obstacle_objects"):   # SL-GTTO2 / 10 / 15 / 19
             value = getattr(self, name)
             if not isinstance(value, bool):
                 raise AG3SConfigError(f"clustering.{name} must be true or false, got {value!r}")
@@ -670,6 +703,12 @@ class ClusteringConfig:
         if not isinstance(self.held_slip_detach, bool):
             raise AG3SConfigError(
                 f"clustering.held_slip_detach must be true or false, got {self.held_slip_detach!r}")
+        if self.oracle_obstacle_support not in ("near", "under"):   # SL-GTTO21
+            raise AG3SConfigError(f"clustering.oracle_obstacle_support must be 'near' or 'under', got {self.oracle_obstacle_support!r}")
+        if not isinstance(self.scene_obstacle_objects, bool):   # SL-GTTO20
+            raise AG3SConfigError(f"clustering.scene_obstacle_objects must be true or false, got {self.scene_obstacle_objects!r}")
+        if self.scene_obstacle_objects and self.oracle_obstacle_objects:
+            raise AG3SConfigError("clustering.scene_obstacle_objects and oracle_obstacle_objects are two sources of one set")
         if not isinstance(self.latch_reach_hand_relative, bool):  # T46g
             raise AG3SConfigError(
                 f"clustering.latch_reach_hand_relative must be true or false, "
@@ -1212,6 +1251,11 @@ class EsdfConfig:
     #: (같은 판정을 torch 로 GPU 에서 — 점유 voxel · 투영 · 영역 최솟값 filter 가 GPU 에 머물고 개수만 host 로 온다).
     #: 판정 규칙은 같다 (float64 투영의 마지막 bit 차이만 가능, `roi_carve_profile --compare-gpu` 로 잰다).
     roi_carve_device: str = "cpu"
+    #: **SL-QE1 (dev-e5, 2026-11-08) — G3 (`esdf_dead_camera`) 의 '살아 있는 카메라' 예외.** True = 이 episode 에서 이미 voxel 을
+    #: 쓴 카메라가 범위 안 유효 depth (`n_in_range_px` > 0) 를 가진 채 `n_updated` 0 이면 (점이 모두 workspace bounds 밖 —
+    #: 손목 카메라가 탁자 아래 바닥을 봄) DEGRADED 대신 VALID + note `esdf_camera_outside_workspace`. 한 번도 못 쓴 카메라
+    #: (extrinsics 오류) · 범위 안 depth 가 없는 카메라는 그대로 DEGRADED. 꺼짐(기본) = 비트 동일.
+    dead_camera_seen_ok: bool = False
     ROI_CARVE_DEVICE = ("cpu", "cuda")
     #: Recompute the distance transform only inside the changed region, padded by `max_distance`.
     incremental: bool = True
@@ -1970,6 +2014,8 @@ class EsdfConfig:
             raise AG3SConfigError(f"esdf.roi_carve_footprint_robot 는 {self.ROI_CARVE_FOOTPRINT_ROBOT} 중 하나여야 합니다: {self.roi_carve_footprint_robot!r}")
         if self.roi_carve_footprint and not self.roi_carve:
             raise AG3SConfigError("esdf.roi_carve_footprint 는 esdf.roi_carve 의 판정 방식이다 — roi_carve 와 함께 켠다")
+        if not isinstance(self.dead_camera_seen_ok, bool):   # SL-QE1
+            raise AG3SConfigError(f"esdf.dead_camera_seen_ok 는 true 또는 false 여야 합니다: {self.dead_camera_seen_ok!r}")
         if self.roi_carve_device not in self.ROI_CARVE_DEVICE:
             raise AG3SConfigError(f"esdf.roi_carve_device 는 {self.ROI_CARVE_DEVICE} 중 하나여야 합니다: {self.roi_carve_device!r}")
         if self.roi_carve_device != "cpu" and not self.roi_carve:

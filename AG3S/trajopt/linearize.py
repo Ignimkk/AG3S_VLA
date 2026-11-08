@@ -73,6 +73,11 @@ _OBSTACLE, _TARGET, _SUPPORT, _HELD = 0, 1, 2, 3
 OBSTACLE_CLASSES = ("obstacle", "target", "support", "held")
 #: 지지면 판정 허용오차 = 이 수 × 가장 미세한 계층의 복셀. 근거는 `_obstacle_rows` docstring.
 _SUPPORT_TOL_VOXELS = 2.0
+#: SL-GTTO16 A' — horizontal reach of the beneath rule while grasping (Panda max opening 80 mm, `obstacle_object_rows`).
+_BENEATH_REACH_M = 0.08
+#: SL-GTTO19 (A'') — a row's nearest surface point is "on" a GT obstacle object within this distance (15 mm voxel centroids
+#: of the observed surface + the 5 mm field's zero-crossing offset).
+_OBJECT_SURFACE_TOL_M = 0.02
 #: T43 HM — 쥔 물체 자신의 잔상 판정 허용오차 = 이 수 × 가장 미세한 계층의 복셀 (10 mm).
 #: 근거: V7g · V8 기록에서 잔상 행 (사과 자신의 상, lift 6 행) 은 attach 부피에서 ≤ 7.3 mm,
 #: 나머지 행은 ≥ 199 mm (허들 199.1 · crate 307.7, `T43HM.impl.md`, `outputs/impl/T43HM/`).
@@ -245,6 +250,9 @@ class SceneSnapshot:
     #: 않았고, `use_support_planes=False` 가 끄는 `plane_active` 와도 무관하다. 위 여유가 "최근접
     #: 표면이 지지면인가" 를 물을 때만 읽는다. `None` = 지지면 없음 (전부 장애물로 본다).
     support_planes: Optional[np.ndarray] = None
+    #: SL-GTTO19 (A'') — `(K, 3)` base: the GT obstacle-object surface (AG3S `oracle_obstacle_objects`); with it the
+    #: obstacle-object rows of `obstacle_object_rows` are the rows whose nearest surface point is on these points.
+    obstacle_object_points: Optional[np.ndarray] = None
     #: V11AB-pb4 / pb5 (benchmark branch, 2026-10-17) — grasp contact rules from the caller's grasp latch. ``None``
     #: (default) = V11AB: nothing below changes. Otherwise ``{"latch": "latched"|"closing"|"held"|..., "authorized":
     #: (n_spheres,) bool (the grasping hand's contact links), "held_exempt": bool, "zone_allowance": m | None,
@@ -1946,6 +1954,141 @@ class CollisionLinearizer:
             return float(self.full_violation(trajectory, q_now, scene, states)), None
         return worst, best
 
+    # --- SL-GTTO16 (A) — begin: the obstacle-object rows of a trajectory (read only by `sqp._clear_passthrough`)
+    def obstacle_object_rows(self, trajectory: np.ndarray, q_now: np.ndarray, scene: SceneSnapshot,
+                             steps: Optional[int] = None, beneath: bool = False) -> tuple[float, Optional[dict]]:
+        """`(worst clearance over the ESDF rows whose nearest surface is an obstacle object, identity)` — `inf`, `None`
+        when there is no such row (or no field).
+
+        A row is an *obstacle-object* row unless its nearest surface is (in this order)
+        the manipulated object (`|d − d_object| ≤ voxel`, any link — the permission split is not a question here),
+        inside the target volume, a support plane (`|d − s| ≤ 2 voxel`), the destination (field label),
+        or — for a held row — the held object's own remnant (`_held_rows_class`).
+        The clearance is the same number every check uses (`_esdf_clearance`: `d − r − margin`, the 10 mm obstacle
+        floor included). Used by `sqp.passthrough_obstacle_tolerance`: the accepted-violation tolerance τ is meant for
+        the model error on contact surfaces (fingers ↔ target / destination / table), never for an obstacle object.
+        """
+        if scene.esdf is None:
+            return float("inf"), None
+        states = self.sphere_states(trajectory, q_now)
+        centres = np.asarray(states[0], np.float64)
+        shape = tuple(centres.shape[:2])                       # (H, n_query) -- every array below is read to this
+        size = shape[0] * shape[1]
+
+        def rows(x, what):
+            x = np.asarray(x, np.float64).reshape(-1)
+            if x.size != size:
+                raise ValueError(f"obstacle_object_rows: {what} has {x.size} values for {shape} rows")
+            return x.reshape(shape)
+
+        clear = np.asarray(self._esdf_clearance(centres, scene), np.float64)
+        if not clear.size:
+            return float("inf"), None
+        clear = rows(clear, "clearance")
+        flat = centres.reshape(-1, 3)
+        d = rows(scene.esdf.distance(flat), "distance")
+        n_query = shape[1]
+        if scene.target_free_mask is not None:
+            mask = np.asarray(scene.target_free_mask, bool).reshape(-1)
+            if mask.shape[0] < n_query:
+                mask = np.concatenate([mask, np.zeros(n_query - mask.shape[0], bool)])
+            free = getattr(scene.esdf, "target_free_distance", None)
+            if mask.any() and free is not None:
+                d = np.where(mask[None, :n_query], rows(free(flat), "target_free_distance"), d)
+        tol = float(scene.esdf.grid.voxel_size)
+        obst = np.ones(shape, bool)
+        if scene.manipulated_spheres is not None and len(scene.manipulated_spheres):
+            mc = np.asarray(scene.manipulated_spheres, np.float64).reshape(-1, 3)
+            mr = np.asarray(scene.manipulated_sphere_radii, np.float64).reshape(-1)
+            d_object = (np.linalg.norm(flat[:, None, :] - mc[None, :, :], axis=2) - mr[None, :]).min(axis=1)
+        else:
+            d_object = self._manipulated_distance(flat, scene)
+        if d_object is not None:
+            obst &= ~(np.abs(d - rows(d_object, "manipulated distance")) <= tol)
+        if getattr(scene, "target_volume", None) is not None:
+            obst &= ~rows(self.in_target_volume(d, flat, scene), "target volume").astype(bool)
+        planes = getattr(scene, "support_planes", None)
+        if planes is not None:
+            planes = np.asarray(planes, np.float64).reshape(-1, 4)
+            if planes.shape[0]:
+                sd = flat @ planes[:, :3].T - planes[None, :, 3]
+                on = (np.abs(sd - d.reshape(-1, 1)) <= _SUPPORT_TOL_VOXELS * tol).any(axis=1)
+                obst &= ~on.reshape(shape)
+        if scene.destination_label and getattr(scene.esdf, "has_labels", False):
+            obst &= ~rows(scene.esdf.is_label(flat, scene.destination_label), "destination label").astype(bool)
+        n = self.n_spheres
+        if n_query > n:
+            pts = centres[:, n:].reshape(-1, 3)
+            obst[:, n:] &= (np.asarray(self._held_rows_class(d[:, n:], pts, scene)).reshape(shape[0], -1) == _OBSTACLE)
+        n_beneath = 0
+        oop = getattr(scene, "obstacle_object_points", None)
+        if oop is not None:
+            # SL-GTTO19 (A''): the GT says which surfaces are obstacle objects -- a row is an obstacle-object row iff its
+            # nearest surface point lies on them (the class tests above and the beneath rule are not used).
+            oop = np.asarray(oop, np.float64).reshape(-1, 3)
+            g = np.asarray(scene.esdf.gradient(flat), np.float64).reshape(-1, 3)
+            gn = np.linalg.norm(g, axis=1, keepdims=True)
+            ok = gn[:, 0] > _EPS
+            surf = flat - d.reshape(-1, 1) * np.where(ok[:, None], g / np.maximum(gn, _EPS), 0.0)
+            if len(oop):
+                from scipy.spatial import cKDTree
+                on = (cKDTree(oop).query(surf)[0] <= _OBJECT_SURFACE_TOL_M) & ok
+            else:
+                on = np.zeros(len(flat), bool)
+            obst = on.reshape(shape)
+            beneath = False
+        if beneath and obst.any():
+            # SL-GTTO16 A' (2026-11-08) — what the grasped object rests on is not an obstacle object for the hand: while
+            # LATCHED / CLOSING a robot row whose nearest surface point lies under the manipulated object's footprint (the
+            # target's support: a cabinet top is no support *plane*), and while HELD a robot row whose nearest surface point
+            # lies under the held object's footprint at that step (where it is being put down). The held object's own rows
+            # are never exempted here (a held bowl over a moka pot stays an obstacle row).
+            gc = getattr(scene, "grasp_contact", None) or {}
+            latch = str(gc.get("latch")) if gc else None
+            g = np.asarray(scene.esdf.gradient(flat), np.float64).reshape(-1, 3)
+            gn = np.linalg.norm(g, axis=1, keepdims=True)
+            ok = gn[:, 0] > _EPS
+            surf = (flat - d.reshape(-1, 1) * np.where(ok[:, None], g / np.maximum(gn, _EPS), 0.0)).reshape(*shape, 3)
+            under = np.zeros(shape, bool)
+            pad = 2.0 * tol
+            if latch in ("latched", "closing"):
+                obj = getattr(scene, "manipulated_points", None)
+                if obj is not None and len(obj):
+                    obj = np.asarray(obj, np.float64).reshape(-1, 3)
+                    from scipy.spatial import cKDTree
+                    dxy = cKDTree(obj[:, :2]).query(surf[:, :n].reshape(-1, 3)[:, :2])[0].reshape(shape[0], n)
+                    # the open fingers straddle the object: the outer finger comes down beside it, 44-58 mm outside the
+                    # observed bowl points over the cabinet top (F13b s10 t4) -> the reach is the gripper's max opening
+                    under[:, :n] = (dxy <= _BENEATH_REACH_M) & (surf[:, :n, 2] <= float(obj[:, 2].min()) + pad)
+            elif latch == "held" and n_query > n:
+                hc = centres[:, n:]                                        # (H, A, 3) the held rows at each step
+                hr = np.asarray(self.query_radii, np.float64).reshape(-1)[n:n_query]
+                dxy = (np.linalg.norm(surf[:, :n, None, :2] - hc[:, None, :, :2], axis=3) - hr[None, None, :]).min(axis=2)
+                bottom = (hc[:, :, 2] - hr[None, :]).min(axis=1)           # (H,)
+                under[:, :n] = (dxy <= pad) & (surf[:, :n, 2] <= bottom[:, None] + pad)
+            under &= ok.reshape(shape)
+            n_beneath = int((under & obst).sum())
+            obst &= ~under
+        if steps is not None:
+            clear, obst, centres = clear[:steps], obst[:steps], centres[:steps]
+        if not obst.any():
+            # record only: with the GT / scene obstacle set, say how large it was (0 rows is not "no set")
+            return float("inf"), (None if oop is None else {"n_obstacle_rows": 0, "n_rows": int(obst.size),
+                                                           "n_object_points": int(len(oop))})
+        masked = np.where(obst, clear, np.inf)
+        flat_i = int(np.argmin(masked))
+        value = float(masked.reshape(-1)[flat_i])
+        if not np.isfinite(value):
+            return float("inf"), None
+        step, query = np.unravel_index(flat_i, masked.shape)
+        point = np.asarray(centres[step, query], np.float64)
+        return value, {"step": int(step), "query": int(query), "link": self._query_name(int(query)),
+                       "clearance_m": value, "point_m": [round(float(x), 4) for x in point],
+                       "obstacle": self._esdf_label_name(point, scene),
+                       "n_obstacle_rows": int(obst.sum()), "n_rows": int(obst.size), "n_beneath": n_beneath,
+                       **({} if oop is None else {"n_object_points": int(len(oop))})}
+    # --- SL-GTTO16 (A) — end
+
     def _identify(self, block: str, idx, centres: np.ndarray, scene: SceneSnapshot,
                   value: float, esdf_block: Optional[np.ndarray] = None) -> dict:
         """`worst_row` 가 고른 인덱스를 **사람이 읽을 이름**으로. 계산은 하지 않는다."""
@@ -2618,6 +2761,11 @@ def scene_from_constraint_set(constraint_set, robot_radii: np.ndarray,
         if spheres:
             attached_points = np.asarray([c for c, _ in spheres], np.float64).reshape(-1, 3)
             attached_radii = np.asarray([r for _, r in spheres], np.float64)
+    hp = (getattr(constraint_set, "metrics", None) or {}).get("held_point_model") if attached is not None else None
+    if hp and hp.get("spheres") and str(hp.get("parent_link")) == str(attached_link):
+        # SL-GTTO17 (B): the held object's query spheres = AG3S's point model (a shell of small spheres on its points)
+        arr = np.asarray(hp["spheres"], np.float64).reshape(-1, 4)
+        attached_points, attached_radii = arr[:, :3].copy(), arr[:, 3].copy()
     if attached_points is not None and len(attached_points) == 0:
         attached_points, attached_link, attached_radii = None, None, None
     # 목적지 마진. AG3S 가 정책에서 뽑아 실어 보낸 값을 그대로 읽는다 — 여기서 다시 계산하지
@@ -2760,6 +2908,7 @@ def scene_from_constraint_set(constraint_set, robot_radii: np.ndarray,
             attached_points=attached_points, attached_parent_link=attached_link,
             attached_radii=attached_radii,
             destination_label=destination_label,
+            obstacle_object_points=getattr(constraint_set, "obstacle_object_points", None),
             destination_margin=float(destination_margin), **obstacle)
         return empty
     scene = SceneSnapshot.from_spec(spec, radii)
@@ -2782,6 +2931,7 @@ def scene_from_constraint_set(constraint_set, robot_radii: np.ndarray,
             attached_points=attached_points, attached_parent_link=attached_link,
             attached_radii=attached_radii,
             destination_label=destination_label,
+            obstacle_object_points=getattr(constraint_set, "obstacle_object_points", None),
             destination_margin=float(destination_margin), **obstacle)
 
     if not getattr(config.collision, "use_support_planes", True):

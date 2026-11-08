@@ -4912,3 +4912,145 @@ step = 중앙값 (그 단계에 들어간 episode 만). HOLD · dev · C 포화 
 - gt2 30 장면 본 실행 · SL-GTTO3 결과 (queue 대기, 이 절에 추가 예정).
 - ③ 팔 link 충돌은 고치지 않았다. `answer_excludes_target` (서랍 · 캐비닛 같은 실제 비-target 기하와 손 · 손가락) 행은 세기만 했다.
 - 변환 C 자체(포화 시 부족분 처리)는 바꾸지 않았다.
+
+## SL-GTTO10/11 — 쥔 물체 · 목적지 접촉 · 작업 단계 (2026-11-07 00:2x – KST, 사용자 주의 1–3)
+
+판정 정본 `doc/active/experiments/E1_GTTO_DECISIONS_20261104_KO.md` G51–G55+, 보고 `doc/active/experiments/E1_GTTO_REPORT_20261107_KO.md`.
+merge `ff21caa5` (원격 SL9–SL16 + SL-GTTO) 위 미commit patch. 평가 규약은 원격 것 (LIBERO 9 × seed 7·8·9 = 27, LS 10, SafeLIBERO 11).
+
+### 진단 (00:2x – 02:3x)
+
+- **00:21 사고:** 진단 run 을 바깥 `flock` 안에서 띄워 launcher 내부 lock 과 self-deadlock (GPU 미사용 1.5 시간). 01:58 lock 없이 재실행 (`AG3S_GPU_LOCK_HELD=1` 없이 바깥 flock 금지).
+- **J0:** F7 LS human_safety e0 기록 재실행이 원래 run 과 call 배열 · env action bit 동일 → merge · 기록이 F7 동작 불변.
+- **voxel 주인 (새 도구 `gtto_ls_geomsnap.py` · `gtto_held_voxel_origin.py`):** e0 carry HOLD 76 행 = 쥔 그릇 ↔ **사람 손 (목적지)**, e2 carry HOLD 58 행 = 손 ↔ **로봇 손 자기 voxel** (손 주변에 쥔 그릇 voxel 1571 / call).
+  human_safety 다섯 과제는 모두 `On(쥔 물체, 사람 손 | 손 위 접시)` + `CheckRobotContact` — 쥔 물체는 닿아야, 로봇은 닿으면 안 된다. GT code image 에 목적지가 없어 서버 `destination = null`.
+- **LS VLA 기준:** 이 기계 VLA 단독 human_safety 두 run (다른 commit) 이 bit 동일 → 7/10 이 이 기계 값, 원격 10/10 은 다른 기계.
+
+![F7 e0 voxel 주인](../../../outputs/2026-11-07_쥔물체_놓기접촉_단계진단/voxel출처/장면_human_safety_L0_t0_e0_seq44.png)
+
+### F8 `AG3S-commonto-gt2-termsoff-pass-zr-ee-hdp` (02:37 – )
+
+F7 + (F8a) 새 `--oracle-destination` (BDDL 목적지 code 의 fused 점을 매 frame 목적지로 주입, 쥔 물체 행만 destination margin) + 새 `--destination-margin-mm 0` + F3 `--held-beneath-contact`;
+(F8b) 원격 `--held-free-query-spheres` + `--hand-voxel-carve current 20`; (F8c) 원격 `--grasp-opening-rule`. test 새 7 + 관련 suite passed.
+
+| | VLA 단독 | F7 | **F8** |
+|---|---|---|---|
+| LIBERO-Safety 10 성공∧무위반 (위반) | 7 (1) | 3 (0) | **7 (0)** |
+| human_safety · obstacle · affordance | 3/4 · 3/4 · 1/2 | 0/4 · 3/4 · 0/2 | 3/4 · 4/4 · 0/2 |
+| LIBERO seed 7 · 8 · 9 | 9 · 9 · 9 = 27/27 | 8 · 6 · 6 = 20/27 | **8 · 7 · 7 = 22/27** |
+| SafeLIBERO 성공 · 충돌 · 안전 성공 | 11 · 9 · 2 | 6 · 3 · 6 | **7 · 3 · 5** |
+
+- 기제 (human_safety, F7 같은 episode): 목적지 보유 0 → 1.00, carry `attached_point` HOLD 행 82 → 0, 손 · 쥔 물체 HOLD 행 165 → 0, carry 중 latch held 0.77 → 0.96 (모두 G53 규칙 통과).
+- **F8 의 남은 실패 = 원격 opening rule 의 '열린 손 attach'** (닫힘 명령 첫 call 의 개도 변화 < settle 0.02 를 정지로 읽음): LIBERO 실패 5 개 전부 + LS human_safety e3. attach 25 회 중 7 회가 개도 > 0.9.
+
+![F7 vs F8 실제 장면](../../../outputs/2026-11-07_F8_쥔물체목적지단계/장면영상/장면비교_F7_vs_F8_hs.png)
+
+### F9 `…-hdp-qs` (등록 03:0x, queue `gtto11_queue.sh`)
+
+F8 + (a) `--ee-action-qp-scaled` (행 정규화 + quadratic slack) + (c′) `--grasp-opening-rule-moved 0.05` (마지막 열림 명령 때 개도 − 지금 개도 ≥ 0.05 일 때만 attach). test 새 13.
+
+**F8 판정 (G57):** 원격 후보 규칙 (LIBERO ≥ 17/27 · LS ≥ 6 ∧ 위반 0 · SafeLIBERO 충돌 ≤ 5 ∧ 안전 성공 ≥ 1) 세 벤치 모두 처음 통과. §5 는 LIBERO seed 별 ≥ 8 만 미달.
+
+| (04:45 – 06:13) | F8 | **F9** |
+|---|---|---|
+| LIBERO seed 7 · 8 · 9 | 22 (8 · 7 · 7) | **23 (7 · 8 · 8)** |
+| SafeLIBERO 성공 · 충돌 · 안전 성공 | 7 · 3 · 5 | **10 · 5 · 6** |
+| LIBERO-Safety (위반) [aff · hs · oa] | 7 (0) [0 · 3 · 4] | **8 (0) [0 · 4 · 4]** |
+| OSQP 상한 도달 · 반복 중앙값 | 0.89 · 20000 | 0.20 · 300 |
+| 개도 > 0.9 attach | 16 | 0 |
+
+- **F9 채택 판정 (G54 규칙, G59): 미달** — OSQP 상한 0.20 > 0.10 (상한 풀이의 92 % 는 slack > 1 mm 실현 불가능 풀이), SafeLIBERO 충돌 5 > F8 + 1. 후보 = F8. 사용자 판정 항목.
+- 남은 실패 층: LIBERO t4 (서랍) 접근 단계 collision 개입, 쥔 뒤 팔 link7 `unauthorized_link` HOLD (F9 s7 t7, SafeLIBERO t1e4 (F8)),
+  affordance 의 closing 중 아주 작은 관절 한계 초과 (위치 0.009 rad, 가속도 0.0007) 로 pass-through 거절 → |Δa| 0.2–0.9 개입.
+
+![27/10/11](../../../outputs/2026-11-07_결과_27_10_11/그래프_27_10_11.png)
+
+![F8 vs F9 실제 장면](../../../outputs/2026-11-07_F9_스케일QP_닫힘확인/장면영상/장면비교_F8_vs_F9_열린손attach.png)
+
+### seed 8 짝 확인 · HVC 가설 (06:24 – 08:24, G56 · G61 · G63 · G64)
+
+- **후보 F8 (G54 gate 가 F9 를 탈락시킴) seed 8:** LS 5 (위반 1) · SafeLIBERO 성공 9 / 충돌 3 / 안전 성공 7 — VLA seed 8 (LS 6 · 위반 2, SafeLIBERO 9 / 9 / 2) 대비 G56 세 규칙 모두 통과.
+  F8 의 첫 공식 위반 = seed 8 oa e0 쥔 그릇 ↔ 장애물 (서버 필드가 직전에 위반을 못 봄; 기록 없음).
+- VLA 단독 LIBERO seed 8 · 9 = 9 · 9 → 이 기계에서도 27/27.
+- **HVC 가설 기각:** F7 · F8 SafeLIBERO t2 기록 run (채점 run 과 call 배열 bit 동일) 의 t2e4 seq 3 필드에서 머그컵 GT 표면 3 cm 안 점유 voxel 9768 · 9753.
+  F8 · F9 의 t2e4 충돌은 reference 위반 0.12 mm vs 0 의 문턱 뒤집힘.
+
+![seed 7 vs 8](../../../outputs/2026-11-07_후보_seed8확인/그래프_seed7_8.png)
+- **F9 seed 8 (정보용, 08:24 – 09:40):** LS 2 (위반 1) [aff 0 · hs 1 · oa 1] · SafeLIBERO 6 / 6 / 3 → seed 8 규칙 셋 중 둘 미달 (F8 은 셋 다 통과).
+  hs 실패 = (c′) 로 attach 가 늦어 닫는 동안 손가락 ↔ 쥘 물체 행이 남아 쥐기 반복. oa e1 · e3 = 놓기 단계 손 step 0 deadlock (`panda_hand` ↔ coarse −20.7 mm, 손이 탁자 높이)
+  — 승인 계획 (b) CBF 회복 규칙이 겨냥하는 첫 실제 사례. **최종 후보 = F8** (G66).
+- test (09:0x): `tests/benchmark` + `tests/trajopt/test_sl_gtto*` 에서 기존 실패 밖의 새 실패 0 (env.sh 환경). `test_tool_does_not_modify_server_adapter_or_recorder` 는 미commit 수정 때문에 실패.
+
+## SL-GTTO12–15 — LIBERO 동률 (2026-11-07 19:10–21:52 KST, 사용자 판정 19:1x)
+
+**판정:** "LIBERO 에서 VLA 단독이 충돌 없이 성공한 episode 는 우리 모듈에서도 반드시 성공해야 한다 — 제약을 느슨하게 해서 LIBERO 성공률을 VLA 단독과 같게." 판정 기록 G67–G73.
+
+| 시각 (KST) | 일 | 결과 |
+|---|---|---|
+| 19:1x | F7 · F8 · F9 LIBERO 27 의 '바꾼 · 멈춘 call' 원인 분류 (`gtto_libero_fp.py`) | F8: 인증 안 됨 188 (175 는 VLA 경로 위반 0) · collision 36 (중앙값 8 mm) · HOLD 쥔 물체 119 |
+| 19:20–20:09 | GT12 관찰 전용 F8 — LIBERO seed 10 · 11, SafeLIBERO seed 10, `--record-constraints full` | VLA 성공 17 episode 에서 바꿨을 162 · 멈췄을 9; SafeLIBERO VLA 충돌 10/11, F8 충돌 전 개입 10/10 |
+| 19:4x | 남은 거짓 양성 voxel 주인 (geom snapshot) | 열린 손 attach (개도 0.986 · 0.988) 로 쥔 물체 구가 탁자 속 −84 mm; 팔 · 손 행 ↔ 로봇 자기 voxel |
+| 19:3x–20:0x | 새 기본 꺼짐 flag: `--violation-tolerance-mm` (pass-through + 최종 판정 τ), `--oracle-robot-mask` (GT code 0 pixel 을 TSDF 에서 뺌), `--passthrough-limit-tolerance`; 기록 전용 `passthrough_clear.reference_worst` | test `tests/trajopt/test_sl_gtto14_violation_tolerance.py` 9 + 판 · T88 suite 171 passed |
+| 20:09–20:31 | GT14 관찰 전용 F11 (F8 + F5 + (c′) + robot mask + τ 25 + limit 0.01) — seed 10 · 11 | 바꿨을 7 · 멈췄을 0, 남은 7 개 모두 관절 한계 추정치 초과 (acc 최대 0.128) |
+| 20:32–21:00 | **F12** (`…-hdp-loose2`, limit 0.2) closed loop LIBERO 27 | **27/27 = VLA**, 27 episode 모두 개입 0 · HOLD 0 |
+| 21:00–21:52 | F12 SafeLIBERO 11 · LIBERO-Safety 10 | SafeLIBERO 9 · 충돌 8 · 안전 성공 3 (VLA 11 · 9 · 2, F8 7 · 3 · 5); LS 7 (1) = VLA |
+
+**결론:** LIBERO 동률은 달성했으나 SafeLIBERO 충돌 회피는 거의 VLA 수준으로 돌아갔다 (결과 전 F8 관찰 계산: τ 25 → 충돌 전 개입 10/10 → 4/10). F8 의 SafeLIBERO 회피 일부는 '인증 안 됨' QP 의 흔들림이 만든 우연이었다 (충돌 직전 VLA 경로 위반 0). F12 가 놓친 진짜 위험은 쥔 물체 ↔ 장애물 행 (−20.4 mm) 이었다. **다음 판 제안:** 장애물 물체 (GT code ≥ 3, target · 목적지 아님) 행에는 τ 를 적용하지 않음. 산출: `outputs/2026-11-07_LIBERO_과민제약_진단/`, `outputs/2026-11-07_LIBERO_동률_F12/`.
+
+
+## AG3S 모듈별 리뷰 · 검증 (offline, 2026-11-08 00:45 – KST, 세션 dev-49)
+
+**사용자 지시 (2026-11-08 00:5x):** 로봇 마스크처럼 AG3S 의 모든 모듈을 같은 방식으로 검증한다. 잘 되면 잘 됐다, 안 되면 이유를 적고 넘어간다. 13:00 까지 자율 판정한다.
+
+- **정본:** `doc/active/experiments/AG3S_MODULE_REVIEW_20261108_KO.md` (요약 판정표 + §1–§20).
+- **방법:** 모두 CPU offline 이다. GPU 는 dev-ec 가 독점으로 쓰고 있었다.
+  - 기록된 run 의 장면을 rollout env 이력 그대로 재구성했다 (RGB bit 동일 확인).
+  - 서버 함수를 기록 입력에 다시 돌려 MuJoCo 진실 (image instant segmentation · 접촉 · geom 표면) 과 대조했다.
+- **공유 코드는 수정하지 않았다.** figure 와 스크립트는 `outputs/2026-11-08_*` 에 있다.
+
+| 판정 | 모듈 |
+|---|---|
+| 잘 됨 | depth → point cloud (오차 중앙 1.1 / 0.3 mm) · RGB 매핑 (unmirror) · Panda 수정 render mask (recall 0.96–1.00) · attach 판정 (26 / 26 양손 접촉) |
+| 부분 | attention (접근 단계만) · TSDF / ESDF (보이는 면만, 뒷면 2–3 cm 그림자) · target-free 층 · sphere clearance (놓침 45 / 132, 거짓 566) · 응답 모델 (개입 call 33–39 mm 오차) · zone release (코드상 구멍) |
+| 안 됨 | GT 없는 grounding (접근 정답 0.54) · P0m surface extent (쥐기 전 target 표면 ~6 % 만 지움; 두 번째 RANSAC 평면) · latch × grounding (틀린 첫 identity 고정, 0.54 → 0.44) · HVC (7 / 7 episode 에서 장애물 voxel 8215 개 지움) · 동적 거리장 (ghost) · F12 τ 25 mm (SafeLIBERO 충돌 8 / 8 통과) |
+
+
+### AG3S 모듈 리뷰 — 추가 (2026-11-08 04:00–09:30 KST, 세션 dev-49)
+
+정본: `doc/active/experiments/AG3S_MODULE_REVIEW_20261108_KO.md`. dev-ec 의 아침 run 기록 (gt19pts · B3 gt21pts · B5 gt23t100 · GT 없는 B5 gt24att) 을 같은 방식 (장면 재구성 + MuJoCo 진실 대조) 으로 다시 쟀다.
+
+| 항목 | 결과 |
+|---|---|
+| HVC (§17.5–17.7) | 켜면 최신 closed-loop 에서도 9 / 11 episode 에서 장애물 voxel 을 지운다. 공통 9 episode 장애물 놓침: gt19pts 16 / 16, B3 (끔) 4 / 34, B5 10 / 11 (빈손 deadlock 한 순간) |
+| HVC 끔의 비용 (§17.6) | B3 t3 e3: 쓰러진 와인병의 경로 ghost 로 HOLD 45 call. 근본은 동적 거리장 (Panda 미이식) |
+| 쥔 물체 점 모델 (§13.5) | 들어 올린 뒤 그릇 아랫면이 모델에서 빠진다 (바닥이 8–45 mm 위). 반쯤 닫힌 attach (개도 0.375) 뒤 덮임이 0.39 → 0.06 |
+| 판정 층 (§14.4) | gt19pts 충돌 5 / 11: 쥔 물체 행 통과 1 · 장애물 τ 10 통과 1 · TO 개입 후 충돌 3 |
+| latch (§6.7–6.8) | reach 문턱 120 mm 로 판당 4–6 / 48 episode 가 attach 못 함. B5 t3 e0 는 빈손 CLOSING + 손목 카메라 기여 0 으로 HOLD deadlock |
+| GT 없는 판 closed-loop (§21) | LIBERO s7: 7 task 는 target 을 맞게 잡음. task 4 · 9 는 다른 물체를 target 으로 잡아 그것을 지우고 실패 (offline 예측과 일치) |
+
+## SL-GTTO16–24 — 장애물 행 엄격 (A) · 쥔 물체 점모델 (B) · GT 없는 판 (2026-11-08 00:25–10:4x KST, 세션 dev-ec)
+
+**사용자 지시 (00:2x):** A (τ 를 장애물에 적용 안 함) → B (쥔 물체를 실제 형상 점으로) → 각 실패 원인 분석, 13:00 까지 자율. 목표: LIBERO · SafeLIBERO 성공률 VLA 대비 ≤ 10 %p 차 + 충돌 회피 훨씬 좋게; 좋으면 GT 없이. 판정 기록 `doc/active/experiments/E1_GTTO_DECISIONS_20261104_KO.md` G74–G99, 요약 `outputs/2026-11-08_최종요약/README.md`.
+
+| 시각 | 일 | 결과 |
+|---|---|---|
+| 00:3x–01:3x | A (`--passthrough-obstacle-tolerance-mm`, TO 표면 분류) · 보정 | 첫 실행 shape 오류로 무효 → 고침; seed 10 거짓 양성 6/9 episode (접시 · 캐비닛 윗면이 장애물로) |
+| 01:3x–02:1x | A′ (beneath + τ_obs 10) 관찰 · B (`--held-point-model-mm 20`) 구현 | A′ 보정 3/17; SafeLIBERO 충돌 전 개입 8/10 |
+| 02:09–02:46 | B′ closed loop | LIBERO 23/27 (A′ 분류 실패) |
+| 02:3x–04:22 | A″ (`--oracle-obstacle-objects`, GT code ≥ 3 − target · 목적지 · 받침) + B = B″ | LIBERO 27/27 · SafeLIBERO 7 · 5 · LS 7 (0) |
+| 03:4x–06:55 | 받침 'under' + HVC · held-free carve 끔 (dev-49 §14) → A‴ · B‴ | A‴ 27 · 10 · 6 · 6 (1); **B‴ 27 · 10 · 6 · 7 (0)** |
+| 04:3x–08:12 | B5 = B‴ + 장애물 행 chunk 전체 + 일반 τ 100 | 27 · 9 · 2 · **9 (0)** |
+| 08:51–09:52 | SafeLIBERO seed 8 (B‴ · B5) | 2 seed 22: VLA 20 · 실제 충돌 11, **B‴ 18 (−9.1 %p) · 4**, B5 17 (−13.6 %p) · 4 (기록상 7) |
+| 08:11–10:4x | GT 없는 B5 (`--scene-obstacle-objects`) | LIBERO 17/27 · SafeLIBERO 4/11 · LS 3 (0); 거절 행 옆 = target 자신 49/62 (인식 병목) |
+| 01:5x– | SafeLIBERO '충돌' 재생 분석 (`gtto_collision_contacts.py`) | 공식 1 mm 규칙의 충돌 중 다수는 로봇 접촉 없음 (VLA seed 7: 9 중 4) |
+
+**결론:** 목표 (성공 ≤ 10 %p + 충돌 회피 훨씬 좋게) 를 채운 판 = **B‴** `AG3S-commonto-gt2-termsoff-pass-zr-ee-hdp-loose2-obst3-pts-nocarve` (GT 인식). 회피 최우선이면 B5. 남은 한계: SafeLIBERO t3 팔 행 반복 개입, 빈손 닫힘 → 손목 카메라 dead → HOLD 고리, TSDF decay 부재, GT 없는 target identity. 실제 장면: 판마다 `outputs/2026-11-08_*/영상_agent+wrist/` · `AG3S_기능장면/`. 모든 새 flag 기본 꺼짐; commit 안 함.
+
+
+### AG3S 모듈 리뷰 — 마감 추가 (2026-11-08 09:30–11:30 KST, 세션 dev-49)
+
+| 항목 | 결과 (정본 `doc/active/experiments/AG3S_MODULE_REVIEW_20261108_KO.md`) |
+|---|---|
+| noun head L8H6 (§2.5, GPU 10:5x–11:15 offline 추출, lock 사용 · peer 알림) | head approach target mass 0.45 (L8H2 0.21), 쥔 뒤에도 target 유지 (wrist 0.90). 대신 같은 범주 distractor 0.24 |
+| P0m 본판 서버 경로 (§5.7) | noun head 로도 쥐기 전 target 표면의 평균 11 % 만 지움 (L8H2 6 %). memory 의 35 % 는 distractor |
+| GT 없는 판 closed-loop (§21, B5 att LIBERO 27 + SafeLIBERO) | LIBERO 실패 10 중 8 이 identity (task 3 · 4 · 9: 다른 물체를 target 으로 잡아 그것을 지움), 2 는 운반 중 obstacle 거절 (task 7). SafeLIBERO t3 는 모두 다른 물체. offline 예측 (§4 · §16) 과 일치 |

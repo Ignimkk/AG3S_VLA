@@ -92,7 +92,8 @@ def test_each_new_version_is_the_base_plus_exactly_its_flags():
         assert pf.version_server_flags(v)[-2:] == ["--hsr6-probe", pf.PANDA_HSR6_PROBE]     # takes the HSR6 probe like pc
     # the new flags belong to no other version
     for flag in ("--smooth-on-deviation", "--observe-only"):
-        assert [n for n, f in reg.items() if flag in f and not n.endswith("-lsfork")] == ([SDEV] if flag == "--smooth-on-deviation" else [OBS])
+        assert [n for n, f in reg.items() if flag in f and not n.endswith("-lsfork")
+                and n not in getattr(pf, "GT12_VERSIONS", ()) + getattr(pf, "GT14_VERSIONS", ()) + getattr(pf, "GT15_VERSIONS", ())] == ([SDEV] if flag == "--smooth-on-deviation" else [OBS])   # SL-GTTO12 observes F8
     assert "--minimal-intervention-mm" not in reg[PC]
 
 

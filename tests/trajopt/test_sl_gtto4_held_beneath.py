@@ -122,7 +122,8 @@ def test_profile_versions(gpu_ok):
         assert pf.version_flag_values(args)["held_beneath_contact"] is True
     for v in pf.AG3S_VERSIONS:
         if v not in pf.GT4_VERSIONS and v not in ("AG3S-commonto-gt2-termsoff-pass-zr-oc-hbc",
-                                                   "AG3S-commonto-gt2-termsoff-pass-zr-oc-hbch"):   # G42 / G44 combine F3
+                                                   "AG3S-commonto-gt2-termsoff-pass-zr-oc-hbch") \
+                and v not in getattr(pf, "GT10_VERSIONS", ()) + getattr(pf, "GT11_VERSIONS", ()) + getattr(pf, "GT12_VERSIONS", ()) + getattr(pf, "GT13_VERSIONS", ()) + getattr(pf, "GT14_VERSIONS", ()) + getattr(pf, "GT15_VERSIONS", ()):   # G42 / G44 / G53 combine F3
             assert "--held-beneath-contact" not in pf.AG3S_VERSIONS[v], v
     # gt2's record keeps its keys (the new dest joins only when set)
     assert "held_beneath_contact" not in pf.version_flag_values(_args(gt2))

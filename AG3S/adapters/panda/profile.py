@@ -717,7 +717,8 @@ def is_gtto_version(version: str) -> bool:
     run ``--target-extent oracle-visible`` with their own client path (``--oracle-seg``, ``gtto_oracle_codes.py``), so the SL12
     client path (:func:`needs_oracle_segmentation`) leaves them out and :func:`version_requires_oracle_segmentation` takes them."""
     return str(version) in (GT_VERSIONS + GT2_VERSIONS + GT3_VERSIONS + GT4_VERSIONS + GT5_VERSIONS + GT6_VERSIONS
-                            + GT7_VERSIONS + GT8_VERSIONS + GT9_VERSIONS)
+                            + GT7_VERSIONS + GT8_VERSIONS + GT9_VERSIONS + GT10_VERSIONS + GT11_VERSIONS
+                            + GT12_VERSIONS + GT13_VERSIONS + GT14_VERSIONS + GT15_VERSIONS)
 
 
 def needs_oracle_segmentation(version: str) -> bool:
@@ -850,6 +851,196 @@ GT9_FLAGS: tuple[str, ...] = ("--ee-action-qp",)
 GT9_VERSIONS: tuple[str, ...] = ("AG3S-commonto-gt2-termsoff-pass-zr-ee",)
 AG3S_VERSIONS["AG3S-commonto-gt2-termsoff-pass-zr-ee"] = GT3_TERMSOFF_FLAGS + P0M_PASS_FLAGS + GT5_FLAGS + GT9_FLAGS
 # --- SL-GTTO9 — end
+# --- SL-GTTO10 — begin: held object, destination contact and grasp phase on F7 (lead self-ruling G53, 2026-11-07;
+#: user cautions 1-3 of 11-07 00:1x). F7 LIBERO-Safety human_safety record run (G52/G53, `--record-constraints full`):
+#: t0e0's 76 carry HOLD rows = the held bowl's query sphere against the human hand the goal puts it on (no destination was
+#: named); t0e2's 58 = the hand's rows against the robot hand's own voxels, with the held bowl's voxels around the hand.
+#:   F8a (caution 2): ``--oracle-destination`` (GT destination injected each frame, T26 path) + ``--destination-margin-mm 0``
+#:        (held rows may touch it, robot links keep their margin) + F3 ``--held-beneath-contact`` (held rows over a surface
+#:        beneath them cannot bind: the sphere model of the held object is larger than the object).
+#:   F8b (caution 1): SL10d ``--held-free-query-spheres`` (the TSDF frees the held query spheres too) + SL16 HVC
+#:        ``--hand-voxel-carve current --hand-voxel-carve-mm 20`` (the hand's own voxels).
+#:   F8c (caution 3): SL14 ``--grasp-opening-rule`` (attach / detach on the gripper command and opening; re-grasp allowed).
+GT10_FLAGS: tuple[str, ...] = ("--oracle-destination", "--destination-margin-mm", "0", "--held-beneath-contact",
+                               "--held-free-query-spheres", "--hand-voxel-carve", "current", "--hand-voxel-carve-mm", "20",
+                               "--grasp-opening-rule")
+GT10_VERSIONS: tuple[str, ...] = ("AG3S-commonto-gt2-termsoff-pass-zr-ee-hdp",)
+AG3S_VERSIONS["AG3S-commonto-gt2-termsoff-pass-zr-ee-hdp"] = (GT3_TERMSOFF_FLAGS + P0M_PASS_FLAGS + GT5_FLAGS + GT9_FLAGS
+                                                            + GT10_FLAGS)
+# --- SL-GTTO10 — end
+# --- SL-GTTO11 — begin: F9a = F8 + the scaled action QP (approved plan item (a), lead self-ruling G54, 2026-11-07)
+#: (c') the opening rule's `moved` check (F8 LS t0e3: attach on the first close-command call, fingers still open).
+GT11_FLAGS: tuple[str, ...] = ("--ee-action-qp-scaled", "--grasp-opening-rule-moved", "0.05")
+GT11_VERSIONS: tuple[str, ...] = ("AG3S-commonto-gt2-termsoff-pass-zr-ee-hdp-qs",)
+AG3S_VERSIONS["AG3S-commonto-gt2-termsoff-pass-zr-ee-hdp-qs"] = tuple(AG3S_VERSIONS["AG3S-commonto-gt2-termsoff-pass-zr-ee-hdp"]) + GT11_FLAGS
+# --- SL-GTTO11 — end
+# --- SL-GTTO12 — begin: F8 observe-only (user ruling 2026-11-07 19:1x: a LIBERO episode the VLA alone succeeds must succeed
+#: with the module too -> catalogue every call where F8 would change / stop the VLA chunk on the VLA's own path).
+#: SL11 ``--observe-only``: the client executes the policy chunk bit for bit, the server records what it would have sent.
+GT12_VERSIONS: tuple[str, ...] = ("AG3S-commonto-gt2-termsoff-pass-zr-ee-hdp-obs",)
+AG3S_VERSIONS["AG3S-commonto-gt2-termsoff-pass-zr-ee-hdp-obs"] = (tuple(AG3S_VERSIONS["AG3S-commonto-gt2-termsoff-pass-zr-ee-hdp"])
+                                                                + OBSERVE_ONLY_FLAGS)
+# --- SL-GTTO12 — end
+# --- SL-GTTO13 — begin: F10 = F8 + F5 ``--occluded-certify`` (lead G68, 2026-11-07): on the VLA's own LIBERO path (GT12
+#: observe) F8's would-be changes are 'geometry not certified' calls, all of them occluded_target frames (the held object
+#: hidden by the hand) -- the TO then refuses the pass-through and runs the QP on a clear chunk. F5 gives the TO the
+#: verdict's reading of such a frame; the collision check is unchanged.
+GT13_VERSIONS: tuple[str, ...] = ("AG3S-commonto-gt2-termsoff-pass-zr-ee-hdp-oc",)
+AG3S_VERSIONS["AG3S-commonto-gt2-termsoff-pass-zr-ee-hdp-oc"] = (tuple(AG3S_VERSIONS["AG3S-commonto-gt2-termsoff-pass-zr-ee-hdp"])
+                                                               + GT6_FLAGS)
+# --- SL-GTTO13 — end
+# --- SL-GTTO14 — begin: F11 = F8 loosened for LIBERO parity (user ruling 2026-11-07 19:1x; lead G70). Each part answers one
+#: kind of false positive on the VLA's own collision-free LIBERO path (GT12 observe, calibration seeds 10 · 11):
+#:   F5 ``--occluded-certify``        the held object hidden by the hand -> 'geometry not certified' (118 + 19 calls)
+#:   (c') ``--grasp-opening-rule-moved 0.05``  attach with open fingers (s11 t1 / t2, held model -83 / -84 mm)
+#:   ``--oracle-robot-mask``          arm / hand rows against the robot's own voxels (s11 t1 / t2)
+#:   ``--violation-tolerance-mm 25``  model violation of a collision-free path (sphere model + 5 mm field), max 23.9 mm
+#:   ``--passthrough-limit-tolerance 0.01``  a 0.0005 acceleration overshoot refusing the pass-through (s11 t4)
+GT14_FLAGS: tuple[str, ...] = ("--occluded-certify", "--grasp-opening-rule-moved", "0.05", "--oracle-robot-mask",
+                               "--violation-tolerance-mm", "25", "--passthrough-limit-tolerance", "0.01")
+GT14_VERSIONS: tuple[str, ...] = ("AG3S-commonto-gt2-termsoff-pass-zr-ee-hdp-loose", "AG3S-commonto-gt2-termsoff-pass-zr-ee-hdp-loose-obs")
+AG3S_VERSIONS["AG3S-commonto-gt2-termsoff-pass-zr-ee-hdp-loose"] = (tuple(AG3S_VERSIONS["AG3S-commonto-gt2-termsoff-pass-zr-ee-hdp"])
+                                                                  + GT14_FLAGS)
+AG3S_VERSIONS["AG3S-commonto-gt2-termsoff-pass-zr-ee-hdp-loose-obs"] = (tuple(AG3S_VERSIONS["AG3S-commonto-gt2-termsoff-pass-zr-ee-hdp-loose"])
+                                                                      + OBSERVE_ONLY_FLAGS)   # calibration check
+# --- SL-GTTO14 — end
+# --- SL-GTTO15 — begin: F12 = F11 with the pass-through's joint-limit tolerance 0.2 (lead G72, 2026-11-07 20:3x). F11 observe on
+#: the calibration seeds 10 · 11: the 7 calls F11 still changes on a VLA-success episode are all joint-limit refusals of the
+#: VLA's own chunk (max overshoot velocity 0.055 · acceleration 0.128 · position 0.02); 0.2 = the smallest of 0.01 · 0.02 ·
+#: 0.05 · 0.1 · 0.2 above 0.128. Everything else is F11's.
+GT15_FLAGS: tuple[str, ...] = tuple("0.2" if (i > 0 and GT14_FLAGS[i - 1] == "--passthrough-limit-tolerance") else t
+                                    for i, t in enumerate(GT14_FLAGS))
+GT15_VERSIONS: tuple[str, ...] = ("AG3S-commonto-gt2-termsoff-pass-zr-ee-hdp-loose2",)
+AG3S_VERSIONS["AG3S-commonto-gt2-termsoff-pass-zr-ee-hdp-loose2"] = (tuple(AG3S_VERSIONS["AG3S-commonto-gt2-termsoff-pass-zr-ee-hdp"])
+                                                                   + GT15_FLAGS)
+# --- SL-GTTO15 — end
+# --- SL-GTTO16 — begin (A, user ruling 2026-11-08 00:2x): F13 = F12 whose tau does not cover obstacle-object rows. F12 passed a
+#: held-object <-> moka-pot row at -20.4 mm (SafeLIBERO t2e0 obs 75, collision 2 steps later) because tau 25 mm is blind to what
+#: the row touches; LIBERO's tau-passed rows were fingers <-> target / destination / table and link7 <-> target. Registered in
+#: GT15_VERSIONS (the LIBERO-parity family) so every GT15 rule (final base argv, no probe, test exclusions) applies unchanged.
+GT16_FLAGS: tuple[str, ...] = GT15_FLAGS + ("--passthrough-obstacle-tolerance-mm", "0")
+GT16_VERSIONS: tuple[str, ...] = ("AG3S-commonto-gt2-termsoff-pass-zr-ee-hdp-loose2-obst",
+                                  "AG3S-commonto-gt2-termsoff-pass-zr-ee-hdp-loose2-obst-obs")
+AG3S_VERSIONS["AG3S-commonto-gt2-termsoff-pass-zr-ee-hdp-loose2-obst"] = (tuple(AG3S_VERSIONS["AG3S-commonto-gt2-termsoff-pass-zr-ee-hdp"])
+                                                                        + GT16_FLAGS)
+AG3S_VERSIONS["AG3S-commonto-gt2-termsoff-pass-zr-ee-hdp-loose2-obst-obs"] = (
+    tuple(AG3S_VERSIONS["AG3S-commonto-gt2-termsoff-pass-zr-ee-hdp-loose2-obst"]) + OBSERVE_ONLY_FLAGS)   # calibration
+#: A' (2026-11-08 01:3x, F13 observe seed 10: 8 refused calls on VLA-success paths, owners by MuJoCo geom = plate (destination,
+#: label missed) 3 · cabinet top under the bowl 3 · cookies box 1 (7.1 mm) · none 1): the beneath rule + tau_obs 10 mm (= the
+#: obstacle margin: an obstacle row may use its 10 mm buffer, never reach the model's contact level).
+GT16_FLAGS_B: tuple[str, ...] = GT15_FLAGS + ("--passthrough-obstacle-tolerance-mm", "10", "--passthrough-obstacle-beneath")
+GT16_VERSIONS = GT16_VERSIONS + ("AG3S-commonto-gt2-termsoff-pass-zr-ee-hdp-loose2-obst2",
+                                 "AG3S-commonto-gt2-termsoff-pass-zr-ee-hdp-loose2-obst2-obs")
+AG3S_VERSIONS["AG3S-commonto-gt2-termsoff-pass-zr-ee-hdp-loose2-obst2"] = (
+    tuple(AG3S_VERSIONS["AG3S-commonto-gt2-termsoff-pass-zr-ee-hdp"]) + GT16_FLAGS_B)
+AG3S_VERSIONS["AG3S-commonto-gt2-termsoff-pass-zr-ee-hdp-loose2-obst2-obs"] = (
+    tuple(AG3S_VERSIONS["AG3S-commonto-gt2-termsoff-pass-zr-ee-hdp-loose2-obst2"]) + OBSERVE_ONLY_FLAGS)
+GT15_VERSIONS = GT15_VERSIONS + GT16_VERSIONS
+# --- SL-GTTO16 — end
+# --- SL-GTTO17 — begin (B, user ruling 2026-11-08): F14 = F13 whose held object is a shell of 20 mm voxel spheres on its observed
+#: points (radius 17.3 mm) instead of the two ~62 mm body-cover spheres (bowl 108 x 105 x 55 mm: bottoms ~35 mm below it).
+GT17_FLAGS: tuple[str, ...] = GT16_FLAGS + ("--held-point-model-mm", "20")
+GT17_FLAGS_B: tuple[str, ...] = GT16_FLAGS_B + ("--held-point-model-mm", "20")   # B on A' (2026-11-08 01:3x)
+GT17_VERSIONS: tuple[str, ...] = ("AG3S-commonto-gt2-termsoff-pass-zr-ee-hdp-loose2-obst-pts",
+                                  "AG3S-commonto-gt2-termsoff-pass-zr-ee-hdp-loose2-obst-pts-obs")
+AG3S_VERSIONS["AG3S-commonto-gt2-termsoff-pass-zr-ee-hdp-loose2-obst-pts"] = (
+    tuple(AG3S_VERSIONS["AG3S-commonto-gt2-termsoff-pass-zr-ee-hdp"]) + GT17_FLAGS)
+AG3S_VERSIONS["AG3S-commonto-gt2-termsoff-pass-zr-ee-hdp-loose2-obst-pts-obs"] = (
+    tuple(AG3S_VERSIONS["AG3S-commonto-gt2-termsoff-pass-zr-ee-hdp-loose2-obst-pts"]) + OBSERVE_ONLY_FLAGS)
+GT17_VERSIONS = GT17_VERSIONS + ("AG3S-commonto-gt2-termsoff-pass-zr-ee-hdp-loose2-obst2-pts",
+                                 "AG3S-commonto-gt2-termsoff-pass-zr-ee-hdp-loose2-obst2-pts-obs")
+AG3S_VERSIONS["AG3S-commonto-gt2-termsoff-pass-zr-ee-hdp-loose2-obst2-pts"] = (
+    tuple(AG3S_VERSIONS["AG3S-commonto-gt2-termsoff-pass-zr-ee-hdp"]) + GT17_FLAGS_B)
+AG3S_VERSIONS["AG3S-commonto-gt2-termsoff-pass-zr-ee-hdp-loose2-obst2-pts-obs"] = (
+    tuple(AG3S_VERSIONS["AG3S-commonto-gt2-termsoff-pass-zr-ee-hdp-loose2-obst2-pts"]) + OBSERVE_ONLY_FLAGS)
+GT15_VERSIONS = GT15_VERSIONS + GT17_VERSIONS
+# --- SL-GTTO17 — end
+# --- SL-GTTO18 — begin (user ruling 2026-11-08: "결과 좋으면 GT 사용하지 않고 AG3S 사용해서 각 벤치마크"): F14 without GT. The GT
+#: perception (oracle-visible extent, GT identity, oracle grounding) and the GT-only flags (oracle admissible / held target /
+#: destination / robot mask) are removed; the final configuration's attention grounding comes back (split, partition,
+#: supersedes-anchor, non-target evidence; ``--attention-source`` left at the server default ``action:last:L8H2`` -- the noun
+#: cell L8H6 could not tell the two black bowls apart, SL6 §6.1). Everything else (TO, A, B, latch) is F14's.
+_NONGT_DROP = {"--target-extent": 1, "--oracle-extent-identity": 1, "--grounding-source": 1, "--oracle-admissible": 0,
+               "--oracle-held-target": 0, "--oracle-destination": 0, "--oracle-robot-mask": 0}
+ATT_PERCEPTION_FLAGS: tuple[str, ...] = ("--attention-split-radius-mm", "12", "--attention-split-ratio-source", "raw",
+                                         "--attention-split-partition", "--split-supersedes-anchor",
+                                         "--nontarget-evidence", "surface")
+GT18_VERSIONS: tuple[str, ...] = ("AG3S-commonto-att-termsoff-pass-zr-ee-hdp-loose2-obst-pts",
+                                  "AG3S-commonto-att-termsoff-pass-zr-ee-hdp-loose2-obst2-pts")
+for _v in GT18_VERSIONS:
+    AG3S_VERSIONS[_v] = (_drop_flags(tuple(AG3S_VERSIONS[_v.replace("-att-", "-gt2-")]), _NONGT_DROP)
+                         + ATT_PERCEPTION_FLAGS)
+del _v
+GT15_VERSIONS = GT15_VERSIONS + GT18_VERSIONS
+# --- SL-GTTO19 (A'', lead G84, 2026-11-08 02:3x): B' LIBERO s7 failed t0 (held point-model row vs the plate = destination,
+#: 17.3 mm) and t4 (finger vs the cabinet top under the bowl, 101 mm from its centroid, 16.0 mm) -- both are the TO class
+#: rule calling a destination / the target's support an obstacle. A'' takes the user's GT definition: obstacle objects =
+#: GT objects (code >= 3) other than the target, the destination and the object the target rests on.
+GT19_FLAGS: tuple[str, ...] = GT15_FLAGS + ("--passthrough-obstacle-tolerance-mm", "10", "--oracle-obstacle-objects")
+GT19_VERSIONS: tuple[str, ...] = ("AG3S-commonto-gt2-termsoff-pass-zr-ee-hdp-loose2-obst3",
+                                  "AG3S-commonto-gt2-termsoff-pass-zr-ee-hdp-loose2-obst3-obs",
+                                  "AG3S-commonto-gt2-termsoff-pass-zr-ee-hdp-loose2-obst3-pts")
+AG3S_VERSIONS["AG3S-commonto-gt2-termsoff-pass-zr-ee-hdp-loose2-obst3"] = (
+    tuple(AG3S_VERSIONS["AG3S-commonto-gt2-termsoff-pass-zr-ee-hdp"]) + GT19_FLAGS)
+AG3S_VERSIONS["AG3S-commonto-gt2-termsoff-pass-zr-ee-hdp-loose2-obst3-obs"] = (
+    tuple(AG3S_VERSIONS["AG3S-commonto-gt2-termsoff-pass-zr-ee-hdp-loose2-obst3"]) + OBSERVE_ONLY_FLAGS)
+AG3S_VERSIONS["AG3S-commonto-gt2-termsoff-pass-zr-ee-hdp-loose2-obst3-pts"] = (
+    tuple(AG3S_VERSIONS["AG3S-commonto-gt2-termsoff-pass-zr-ee-hdp-loose2-obst3"]) + ("--held-point-model-mm", "20"))
+GT15_VERSIONS = GT15_VERSIONS + GT19_VERSIONS
+#: SL-GTTO20 (2026-11-08 03:3x): B'' without GT -- the GT perception / GT-only flags dropped (as SL-GTTO18), the attention
+#: grounding back, and the obstacle-object surface from AG3S's own perception (``--scene-obstacle-objects``).
+GT20_VERSIONS: tuple[str, ...] = ("AG3S-commonto-att-termsoff-pass-zr-ee-hdp-loose2-obst4-pts",)
+AG3S_VERSIONS["AG3S-commonto-att-termsoff-pass-zr-ee-hdp-loose2-obst4-pts"] = (
+    _drop_flags(tuple(AG3S_VERSIONS["AG3S-commonto-gt2-termsoff-pass-zr-ee-hdp-loose2-obst3-pts"]),
+                {"--target-extent": 1, "--oracle-extent-identity": 1, "--grounding-source": 1, "--oracle-admissible": 0,
+                 "--oracle-held-target": 0, "--oracle-destination": 0, "--oracle-robot-mask": 0,
+                 "--oracle-obstacle-objects": 0})
+    + ATT_PERCEPTION_FLAGS + ("--scene-obstacle-objects",))
+GT15_VERSIONS = GT15_VERSIONS + GT20_VERSIONS
+#: SL-GTTO21 (lead G88, 2026-11-08 03:5x; dev-49 review §14): SL16 HVC (``--hand-voxel-carve current 20``) frees real obstacle
+#: voxels next to the hand (SafeLIBERO s10 t2/t3 F8 records: 38 % of freed voxels were obstacles; t2e1 hand -1..-13 mm inside
+#: the box while the field read +8..+38 mm), and ``--held-free-query-spheres`` frees whatever lies inside the held query
+#: spheres. In the GT versions the robot's own pixels (--oracle-robot-mask) and the held object's (--oracle-held-target) are
+#: already kept out of the TSDF, so both carves are dropped.
+_CARVE_DROP = {"--hand-voxel-carve": 1, "--hand-voxel-carve-mm": 1, "--held-free-query-spheres": 0}
+#: + (G88b) the target's support only from under its base (`--oracle-obstacle-support under`): "near" took the moka pot standing
+#: next to the bowl as the bowl's support (B'' SafeLIBERO t2e0: no obstacle row before the collision at 77).
+GT21_VERSIONS: tuple[str, ...] = ("AG3S-commonto-gt2-termsoff-pass-zr-ee-hdp-loose2-obst3-pts-nocarve",)
+AG3S_VERSIONS["AG3S-commonto-gt2-termsoff-pass-zr-ee-hdp-loose2-obst3-pts-nocarve"] = _drop_flags(
+    tuple(AG3S_VERSIONS["AG3S-commonto-gt2-termsoff-pass-zr-ee-hdp-loose2-obst3-pts"]), _CARVE_DROP) + (
+    "--oracle-obstacle-support", "under")
+GT15_VERSIONS = GT15_VERSIONS + GT21_VERSIONS
+#: SL-GTTO22 (G89): B4 = B3 + the obstacle-object rows over the whole chunk (one call earlier).
+GT22_VERSIONS: tuple[str, ...] = ("AG3S-commonto-gt2-termsoff-pass-zr-ee-hdp-loose2-obst3-pts-nocarve-fh",)
+AG3S_VERSIONS["AG3S-commonto-gt2-termsoff-pass-zr-ee-hdp-loose2-obst3-pts-nocarve-fh"] = tuple(
+    AG3S_VERSIONS["AG3S-commonto-gt2-termsoff-pass-zr-ee-hdp-loose2-obst3-pts-nocarve"]) + ("--passthrough-obstacle-full-horizon",)
+GT15_VERSIONS = GT15_VERSIONS + GT22_VERSIONS
+#: SL-GTTO23 (G91, 04:3x): B5 = B4 with the general tau 25 -> 100 mm. With the GT obstacle-object rows strict (tau_obs 10 mm; the
+#: LIBERO-Safety human is an object, `left_hand_1` code 6), the general tau only guards contact surfaces (target / support /
+#: table / destination); every refusal of that kind in B2's evaluation was model error on a path the VLA completes (27-54 mm:
+#: link7 <-> target while grasping, hand <-> table on the coarse tier while holding). The later flag wins (argparse).
+GT23_VERSIONS: tuple[str, ...] = ("AG3S-commonto-gt2-termsoff-pass-zr-ee-hdp-loose2-obst3-pts-nocarve-fh-t100",)
+AG3S_VERSIONS["AG3S-commonto-gt2-termsoff-pass-zr-ee-hdp-loose2-obst3-pts-nocarve-fh-t100"] = tuple(
+    AG3S_VERSIONS["AG3S-commonto-gt2-termsoff-pass-zr-ee-hdp-loose2-obst3-pts-nocarve-fh"]) + ("--violation-tolerance-mm", "100")
+GT15_VERSIONS = GT15_VERSIONS + GT23_VERSIONS
+#: SL-GTTO24 (G92): B5 without GT -- GT perception / GT-only flags dropped, attention grounding back, the obstacle-object surface
+#: from AG3S's own perception (--scene-obstacle-objects, base-only support rule).
+GT24_VERSIONS: tuple[str, ...] = ("AG3S-commonto-att-termsoff-pass-zr-ee-hdp-loose2-obst4-pts-nocarve-fh-t100",)
+AG3S_VERSIONS["AG3S-commonto-att-termsoff-pass-zr-ee-hdp-loose2-obst4-pts-nocarve-fh-t100"] = (
+    _drop_flags(tuple(AG3S_VERSIONS["AG3S-commonto-gt2-termsoff-pass-zr-ee-hdp-loose2-obst3-pts-nocarve-fh-t100"]),
+                {"--target-extent": 1, "--oracle-extent-identity": 1, "--grounding-source": 1, "--oracle-admissible": 0,
+                 "--oracle-held-target": 0, "--oracle-destination": 0, "--oracle-robot-mask": 0,
+                 "--oracle-obstacle-objects": 0, "--oracle-obstacle-support": 1})
+    + ATT_PERCEPTION_FLAGS + ("--scene-obstacle-objects",))
+GT15_VERSIONS = GT15_VERSIONS + GT24_VERSIONS
+#: (G88c, 03:5x) the A-alone ablation queued as ``…-obst3`` (gtto23, not started yet) gets the same two fixes, so A alone and
+#: A + B differ only by the held point model: ``…-obst3`` := A'' + no carve + support "under" (``…-obst3-pts`` = B'' keeps
+#: the flags it was evaluated with -- it was built above from the earlier definition).
+AG3S_VERSIONS["AG3S-commonto-gt2-termsoff-pass-zr-ee-hdp-loose2-obst3"] = _drop_flags(
+    tuple(AG3S_VERSIONS["AG3S-commonto-gt2-termsoff-pass-zr-ee-hdp-loose2-obst3"]), _CARVE_DROP) + (
+    "--oracle-obstacle-support", "under")   # the same final base argv / no-probe rules (no GT despite the family)
+del _NONGT_DROP
+# --- SL-GTTO18 — end
 #: SL6-B B4 — the Panda HSR6 probe (5 classes, no retreat; labels approved by the user 2026-10-29), the default
 #: ``--hsr6-probe`` of the final versions, and its SHA-256 (recorded by the server, checked by the test when present).
 #: SL7 (0.7): found under the shared storage root (``AG3S_STORAGE_ROOT``, default the checkout's sibling
@@ -876,7 +1067,10 @@ def is_final_version(version: str) -> bool:
             or str(version) in GT3_VERSIONS or str(version) in GT4_VERSIONS              # SL-GTTO3 / SL-GTTO4
             or str(version) in GT5_VERSIONS or str(version) in GT6_VERSIONS              # SL-GTTO5 / 6
             or str(version) in GT7_VERSIONS or str(version) in GT8_VERSIONS              # SL-GTTO7 / 8
-            or str(version) in GT9_VERSIONS)                                             # SL-GTTO9
+            or str(version) in GT9_VERSIONS or str(version) in GT10_VERSIONS            # SL-GTTO9 / 10
+            or str(version) in GT11_VERSIONS or str(version) in GT12_VERSIONS            # SL-GTTO11 / 12
+            or str(version) in GT13_VERSIONS or str(version) in GT14_VERSIONS            # SL-GTTO13 / 14
+            or str(version) in GT15_VERSIONS)                                            # SL-GTTO15
 
 
 def version_server_flags(version: str, *, hsr6_probe: Optional[str] = None,
@@ -893,7 +1087,9 @@ def version_server_flags(version: str, *, hsr6_probe: Optional[str] = None,
     base = _lsfork_base(version)   # SL11: the probe rules of X-lsfork are X's
     if (version in GT_VERSIONS or version in GT2_VERSIONS or version in GT3_VERSIONS
             or version in GT4_VERSIONS or version in GT5_VERSIONS or version in GT6_VERSIONS
-            or version in GT7_VERSIONS or version in GT8_VERSIONS or version in GT9_VERSIONS):   # SL-GTTO(2-9): no HSR6 rule -> no probe; GT grounding -> no cell
+            or version in GT7_VERSIONS or version in GT8_VERSIONS or version in GT9_VERSIONS
+            or version in GT10_VERSIONS or version in GT11_VERSIONS or version in GT12_VERSIONS
+            or version in GT13_VERSIONS or version in GT14_VERSIONS or version in GT15_VERSIONS):   # SL-GTTO(2-11): no HSR6 rule -> no probe; GT grounding -> no cell
         if hsr6_probe is not None or attention_source is not None:
             raise ValueError(f"{version}: the GT-perception versions use no HSR6 rule and no ATS grounding, so "
                              "--hsr6-probe / --attention-source have nothing to feed")
@@ -1063,6 +1259,26 @@ def version_flag_values(args: argparse.Namespace) -> dict[str, Any]:
     gt9 = [d for d in _version_dests(GT9_VERSIONS) if d not in seen9]
     if any(getattr(args, d, None) != parser.get_default(d) for d in gt9):
         dests = sorted(seen9 | set(gt9))
+    # SL-GTTO10: the F8a options join only when set (the remote flags it also uses have their own blocks above)
+    seen10 = set(dests) | seen9 | set(gt9)
+    gt10 = [d for d in _version_dests(GT10_VERSIONS) if d not in seen10]
+    if any(getattr(args, d, None) != parser.get_default(d) for d in gt10):
+        dests = sorted(seen10 | set(gt10))
+    # SL-GTTO11: the F9a option joins only when set
+    seen11 = set(dests) | seen10 | set(gt10)
+    gt11 = [d for d in _version_dests(GT11_VERSIONS) if d not in seen11]
+    if any(getattr(args, d, None) != parser.get_default(d) for d in gt11):
+        dests = sorted(seen11 | set(gt11))
+    # SL-GTTO14: the F11 options join only when set
+    seen14 = set(dests) | seen11 | set(gt11)
+    gt14 = [d for d in _version_dests(GT14_VERSIONS) if d not in seen14]
+    if any(getattr(args, d, None) != parser.get_default(d) for d in gt14):
+        dests = sorted(seen14 | set(gt14))
+    # SL-GTTO16+: the options of the later LIBERO-parity versions (registered in GT15_VERSIONS) join only when set
+    seen16 = set(dests) | seen14 | set(gt14)
+    gt16 = [d for d in _version_dests(GT15_VERSIONS) if d not in seen16]
+    if any(getattr(args, d, None) != parser.get_default(d) for d in gt16):
+        dests = sorted(seen16 | set(gt16))
     return {d: _jsonable(getattr(args, d, None)) for d in dests}
 
 
@@ -1402,6 +1618,8 @@ def build_panda_ag3s(*, esdf_bounds: str = "panda", extra_overrides: Optional[Ma
         ag3s.held_free_query_spheres = True
     if kw.get("hand_voxel_carve"):   # SL16 HVC -- key in `info` only when on
         ag3s.hand_voxel_carve = dict(kw["hand_voxel_carve"])
+    if kw.get("held_point_model") is not None:   # SL-GTTO17 (B) -- key in `info` only when on
+        ag3s.held_point_model_m = float(kw["held_point_model"])
     if getattr(ag3s.config.esdf, "target_extent", "estimated") == "attention_surface":
         # SL7 -- the surface selection needs head / left_wrist / right_wrist views; the Panda has no right wrist
         # (pi05_libero's third image is a masked zero image), so that view is a dummy (attention_surface.dummy_view).
@@ -1428,6 +1646,8 @@ def build_panda_ag3s(*, esdf_bounds: str = "panda", extra_overrides: Optional[Ma
         info["held_free_query_spheres"] = True
     if ag3s.hand_voxel_carve:   # SL16 HVC -- key only when on
         info["hand_voxel_carve"] = _jsonable(ag3s.hand_voxel_carve)
+    if getattr(ag3s, "held_point_model_m", None) is not None:   # SL-GTTO17 (B) -- key only when on
+        info["held_point_model_m"] = float(ag3s.held_point_model_m)
     if getattr(models.constraint, "palm_shell_report", None) is not None:
         info["palm_shell"] = _jsonable(models.constraint.palm_shell_report)
     return ag3s, info

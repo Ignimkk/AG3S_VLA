@@ -934,11 +934,40 @@ class SqpConfig:
     #: (`TrajectoryOptimizer._finish` still measures it; `to.metrics.passthrough_clear`). A chunk with a violation, an
     #: uncertified geometry (when certification is required) or collision off is optimized as before.
     passthrough_when_clear: bool = False
+    #: SL-GTTO14 (G69, 2026-11-07): the reference may violate the floors by up to this much and still pass through (m);
+    #: 0 (default) = T88 as before. Set together with `safety.violation_tolerance` (`serve_safe --violation-tolerance-mm`).
+    passthrough_tolerance: float = 0.0
+    #: SL-GTTO15 (G70): the reference may overshoot a joint limit (position · velocity · acceleration · anchor, in their own
+    #: units) by up to this much and still pass through; 0 (default) = the strict test (1e-6). The final check only notes
+    #: an overshoot (it does not change the status), so a passed chunk is executed as the VLA would.
+    passthrough_limit_tolerance: float = 0.0
+    #: SL-GTTO16 (A, 2026-11-08): with a value, `passthrough_tolerance` does not cover the rows whose nearest surface is an
+    #: obstacle object (`linearize.obstacle_object_rows`: not the target · a support plane · the destination · the held
+    #: object's own remnant); such a row below its floor by more than this (m) refuses the pass-through. None = off.
+    passthrough_obstacle_tolerance: Optional[float] = None
+    #: SL-GTTO16 A' (2026-11-08): with the obstacle tolerance, robot rows whose nearest surface lies under the manipulated
+    #: (LATCHED / CLOSING) or held (HELD) object's footprint are not obstacle-object rows (`obstacle_object_rows(beneath=)`).
+    passthrough_obstacle_beneath: bool = False
+    #: SL-GTTO22 (2026-11-08 04:0x): the obstacle-object rows are checked over the whole chunk (look-ahead tail included), not
+    #: the executed window only -- B2 SafeLIBERO tripped in the same call as the collision (t3e3) or one call before (t2e4).
+    passthrough_obstacle_full_horizon: bool = False
     # --- T88 — end ---
 
     def validate(self) -> None:
         if not isinstance(self.passthrough_when_clear, bool):   # T88
             raise TrajOptConfigError(f"sqp.passthrough_when_clear must be a bool, got {self.passthrough_when_clear!r}")
+        if not (math.isfinite(float(self.passthrough_tolerance)) and float(self.passthrough_tolerance) >= 0.0):   # SL-GTTO14
+            raise TrajOptConfigError(f"sqp.passthrough_tolerance must be >= 0, got {self.passthrough_tolerance!r}")
+        if not (math.isfinite(float(self.passthrough_limit_tolerance)) and float(self.passthrough_limit_tolerance) >= 0.0):
+            raise TrajOptConfigError(f"sqp.passthrough_limit_tolerance must be >= 0, got {self.passthrough_limit_tolerance!r}")
+        if not isinstance(self.passthrough_obstacle_full_horizon, bool):   # SL-GTTO22
+            raise TrajOptConfigError("sqp.passthrough_obstacle_full_horizon must be a bool")
+        if not isinstance(self.passthrough_obstacle_beneath, bool):   # SL-GTTO16 A'
+            raise TrajOptConfigError(f"sqp.passthrough_obstacle_beneath must be a bool, got {self.passthrough_obstacle_beneath!r}")
+        if self.passthrough_obstacle_tolerance is not None and not (   # SL-GTTO16
+                math.isfinite(float(self.passthrough_obstacle_tolerance)) and float(self.passthrough_obstacle_tolerance) >= 0.0):
+            raise TrajOptConfigError(
+                f"sqp.passthrough_obstacle_tolerance must be None or >= 0, got {self.passthrough_obstacle_tolerance!r}")
         if isinstance(self.multi_seed, bool) or not isinstance(self.multi_seed, int) or self.multi_seed < 0:
             raise TrajOptConfigError(f"sqp.multi_seed must be an int >= 0, got {self.multi_seed!r}")
         if self.gpu_seeds not in ("off", "curobo"):   # AG3S-PRE-CORE-TO E3-b
@@ -1509,6 +1538,11 @@ _OMIT_WHEN_DEFAULT.update({("cost", k): v for k, v in {
 # --- T88 — begin ---
 #: T88 — the pass-through-when-clear switch: without `--passthrough-when-clear` the config dump keeps the keys it had before.
 _OMIT_WHEN_DEFAULT.update({("sqp", "passthrough_when_clear"): False})
+_OMIT_WHEN_DEFAULT.update({("sqp", "passthrough_tolerance"): 0.0})   # SL-GTTO14
+_OMIT_WHEN_DEFAULT.update({("sqp", "passthrough_limit_tolerance"): 0.0})   # SL-GTTO15
+_OMIT_WHEN_DEFAULT.update({("sqp", "passthrough_obstacle_tolerance"): None})   # SL-GTTO16
+_OMIT_WHEN_DEFAULT.update({("sqp", "passthrough_obstacle_beneath"): False})
+_OMIT_WHEN_DEFAULT.update({("sqp", "passthrough_obstacle_full_horizon"): False})   # SL-GTTO22   # SL-GTTO16 A'
 # --- T88 — end ---
 #: T72 — the grasp-set reach constraint: without `--grasp-set-to` the config dump keeps the keys it had before.
 _OMIT_WHEN_DEFAULT.update({("cost", k): v for k, v in {

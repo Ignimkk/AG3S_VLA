@@ -1103,9 +1103,12 @@ def t43t_identity_section(args) -> dict:
     out.update(identity_rules_section(args))   # SL8b (off: {})
     if getattr(args, "grounding_source", "attention") not in (None, "attention"):
         out["grounding_source"] = str(args.grounding_source)   # SL-GTTO (default attention: no key)
-    for name in ("oracle_admissible", "oracle_held_target"):   # SL-GTTO2 (off: no key)
+    for name in ("oracle_admissible", "oracle_held_target", "oracle_destination", "oracle_robot_mask",
+                 "oracle_obstacle_objects", "scene_obstacle_objects"):   # SL-GTTO2 / 10 / 15 / 19 / 20 (off: no key)
         if getattr(args, name, False):
             out[name] = True
+    if getattr(args, "oracle_obstacle_support", None) is not None:   # SL-GTTO21 (off: no key)
+        out["oracle_obstacle_support"] = str(args.oracle_obstacle_support)
     if getattr(args, "refused_identity_release", None) is not None:
         out["refused_identity_release_frames"] = int(args.refused_identity_release)
     if getattr(args, "supported_max_bottom_mm", None) is not None:
@@ -1235,6 +1238,8 @@ def dynamic_field_section(args) -> dict:
         out["target_layer_reset_m"] = float(args.target_layer_reset_mm) / 1000.0
     if getattr(args, "roi_carve", False):
         out["roi_carve"] = True
+    if getattr(args, "esdf_dead_camera_seen_ok", False):   # SL-QE1 (off: no key)
+        out["dead_camera_seen_ok"] = True
     if getattr(args, "roi_pad_mm", None) is not None:
         out["roi_pad"] = float(args.roi_pad_mm) / 1000.0
     if getattr(args, "roi_carve_footprint", False):
@@ -1301,6 +1306,15 @@ def nonauthorized_target_margin_section(args) -> dict:
     v = getattr(args, "nonauthorized_target_margin", None)
     return {} if v is None else {"nonauthorized_target_margin": str(v)}
 # T44e A9 — end
+
+
+# SL-GTTO10 — begin
+def destination_margin_section(args) -> dict:
+    """SL-GTTO10 F8a — `--destination-margin-mm MM` → AG3S `contact.destination_margin` (m); 안 줬으면 `{}` (config 기본 20 mm).
+    `build_ag3s(contact=...)` 가 키 생존을 확인한다."""
+    v = getattr(args, "destination_margin_mm", None)
+    return {} if v is None else {"destination_margin": float(v) / 1000.0}
+# SL-GTTO10 — end
 
 
 # T44b A4 — begin
@@ -1384,7 +1398,8 @@ def ag3s_from_args(args, *, plan_horizon_steps, rows_per_step):
                                          **target_free_coarse_sign_section(args),  # T44c A6
                                          **target_free_coarse_support_section(args)}  # T44e A8
                                         or None),
-                      contact=nonauthorized_target_margin_section(args) or None,  # T44e A9
+                      contact=({**nonauthorized_target_margin_section(args),   # T44e A9
+                                **destination_margin_section(args)} or None),   # SL-GTTO10
                       held_free_observed_pad=(
                           None if args.held_free_observed_mm is None
                           else float(args.held_free_observed_mm) / 1000.0),
@@ -1395,7 +1410,10 @@ def ag3s_from_args(args, *, plan_horizon_steps, rows_per_step):
                       # SL10d (benchmark branch) -- off by default.
                       held_free_query_spheres=bool(getattr(args, "held_free_query_spheres", False)),
                       # SL16 HVC -- off by default (None: the AG3S is as before).
-                      hand_voxel_carve=hand_voxel_carve_section(args) or None)
+                      hand_voxel_carve=hand_voxel_carve_section(args) or None,
+                      # SL-GTTO17 (B) -- off by default (key only when on).
+                      **({} if getattr(args, "held_point_model_mm", None) is None
+                         else {"held_point_model": float(args.held_point_model_mm) / 1000.0}))
 
 
 #: SL16 HVC -- the `current` mode's default growth (mm): the fixed rule's cap (p90 of the hand-voxel distance 23.6 mm, capped at 20).
@@ -1436,6 +1454,7 @@ def build_ag3s(model_xml: str, *, voxel: float, range_max: float, links: str,
                reach_at_capture: bool = False,
                held_free_query_spheres: bool = False,
                hand_voxel_carve: dict | None = None,
+               held_point_model: float | None = None,
                target_exclusion: dict | None = None,
                contact: dict | None = None,
                confidence_gate=None):
@@ -1828,6 +1847,9 @@ def build_ag3s(model_xml: str, *, voxel: float, range_max: float, links: str,
         # SL10d -- the held frees also the spheres the solver is queried with (pipeline.held_free_query_spheres).
         ag3s.held_free_query_spheres = True
         logging.warning("AG3S held_free: + the spheres the solver is queried with this frame (SL10d)")
+    if held_point_model is not None:
+        # SL-GTTO17 (B) -- the TO's held query spheres = a shell of small spheres on the observed points.
+        ag3s.held_point_model_m = float(held_point_model)
     if hand_voxel_carve:
         # SL16 HVC -- the fine TSDF's occupied voxels inside the hand's volume are freed (pipeline.hand_voxel_carve).
         ag3s.hand_voxel_carve = dict(hand_voxel_carve)
@@ -2424,6 +2446,12 @@ def build_parser() -> argparse.ArgumentParser:
                          "초과가 없으면 최적화 없이 reference 를 그대로 낸다 (gripper 열 포함). 위반이 있으면 지금과 같은 최적화. "
                          "기록 to.metrics.passthrough_clear = {applied, reference_violation_m, reason}. TO 가 있어야 한다")
     # --- T88 — end ---
+    ap.add_argument("--violation-tolerance-mm", type=float, default=None, metavar="MM",
+                    help="SL-GTTO14 (benchmark branch, G69): the accepted model violation tau (mm) -- the VLA chunk passes "
+                         "through when its violation of the floors is <= tau (T88's test is > 0), and the final check / "
+                         "verdict accept a returned chunk up to tau (safety.violation_tolerance, default 0.1 mm). The sphere "
+                         "model and the 5 mm field overstate the robot, so on LIBERO the VLA's own collision-free path reads "
+                         "as a violation of up to ~25 mm. Needs --passthrough-when-clear. Not given = as before")
     ap.add_argument("--no-limit-projection", action="store_true",
                     help="T31 G2-ii 를 끈다: limit 만 어긴 reference 에 받아들여진 후보가 없을 때 "
                          "최소 투영 대신 T24 규칙대로 거절된 QP 후보(best_unaccepted)를 반환한다 "
@@ -2496,6 +2524,10 @@ def build_parser() -> argparse.ArgumentParser:
                     help="① pixel · voxel 소유 거리 (기본 config esdf.target_layer_pixel_tol = 10 mm)")
     ap.add_argument("--target-layer-reset-mm", type=float, default=None, metavar="MM",
                     help="① 물체 중심 이동 판정 (기본 config esdf.target_layer_reset_m = 10 mm)")
+    ap.add_argument("--esdf-dead-camera-seen-ok", action="store_true",
+                    help="SL-QE1 (dev-e5, 2026-11-08) — G3 esdf_dead_camera 의 예외: 이 episode 에서 voxel 을 쓴 카메라가 범위 안 "
+                         "depth 를 가진 채 점이 모두 workspace bounds 밖이면 DEGRADED 대신 note 만 (esdf.dead_camera_seen_ok). "
+                         "B5 SafeLIBERO t3e0 의 빈손 닫힘 뒤 손목 카메라 → 미인증 HOLD 고리 (G97)")
     ap.add_argument("--roi-carve", action="store_true",
                     help="AG3S-TASK-DYNAMIC-MAP ② — manipulated 물체 · 목적지 · 손 실행 경로 상자 ± pad 안에서만 이번 "
                          "depth 광선이 지나간 TSDF 점유 voxel 을 free 로. 명시하면 가장자리 보존 없는 판정 (E2). "
@@ -2595,6 +2627,55 @@ def build_parser() -> argparse.ArgumentParser:
                          "attached 구 · 손 행의 장애물 (표면 + truncation band) 이 되지 않는다. fused cloud · grounding 은 "
                          "그대로 (clustering.oracle_held_target, 기록 metrics.grounding_source.held_target_mask)")
     # SL-GTTO2 — end
+    ap.add_argument("--oracle-robot-mask", action="store_true",
+                    help="SL-GTTO15 (G70) — --grounding-source oracle 에서만. 매 요청 GT code 0 (로봇) 이면서 depth 가 있는 pixel 을 "
+                         "TSDF depth mask 에 더한다 (적분하지 않음) — 구 self-filter 가 남긴 팔 · 손 자기 voxel 이 팔 · 손 행의 장애물이 "
+                         "되지 않는다 (clustering.oracle_robot_mask, 기록 metrics.grounding_source.robot_mask)")
+    ap.add_argument("--oracle-obstacle-support", choices=("near", "under"), default=None,
+                    help="SL-GTTO21 — --oracle-obstacle-objects 의 target 받침 찾기: near (기본, SL-GTTO19) · under (target 바닥 바로 아래만)")
+    ap.add_argument("--scene-obstacle-objects", action="store_true",
+                    help="SL-GTTO20 (A'' GT 없이) — AG3S 자기 인식으로 장애물 물체 표면: 받침면 점을 뺀 점군의 연결 성분 (15 mm voxel) "
+                         "중 조작 대상 · 그 발자국 아래 (받침) · 인식된 목적지 성분이 아닌 것 (clustering.scene_obstacle_objects)")
+    ap.add_argument("--oracle-obstacle-objects", action="store_true",
+                    help="SL-GTTO19 (A'') — --grounding-source oracle 에서만. GT 장애물 물체 (code ≥ 3 중 target · 목적지 · target 이 "
+                         "놓인 물체가 아닌 것) 의 점을 TO 에 넘긴다: 최근접 표면이 그 점인 행만 장애물 행 "
+                         "(--passthrough-obstacle-tolerance-mm 의 분류, clustering.oracle_obstacle_objects)")
+    ap.add_argument("--passthrough-limit-tolerance", type=float, default=None, metavar="X",
+                    help="SL-GTTO15 (G70) — --passthrough-when-clear 에서만. VLA chunk 의 관절 한계 초과 (position · velocity · "
+                         "acceleration · anchor, 각자 단위) 가 X 이하면 그대로 통과 (기본 1e-6 엄격). 최종 검사는 초과를 note 로만 "
+                         "적는다 (상태 불변)")
+    ap.add_argument("--held-point-model-mm", type=float, default=None, metavar="MM",
+                    help="SL-GTTO17 (B) — --held-body-cover 와 함께만. 쥔 물체의 TO 질의 구를 몸통 덮개 구 (그릇에 반지름 62 mm "
+                         "두 개) 대신 관측 점 위 MM 격자의 껍질 구 (반지름 MM·√3/2) 로 — 받침면까지 채움, 들어올림 규칙은 그대로. "
+                         "self-filter · spec 의 구는 몸통 덮개 그대로")
+    ap.add_argument("--passthrough-obstacle-full-horizon", action="store_true",
+                    help="SL-GTTO22 — --passthrough-obstacle-tolerance-mm 와 함께만. 장애물 물체 행을 실행 창이 아니라 chunk 전체 "
+                         "(look-ahead 꼬리 포함) 에서 본다 — 한 call 먼저 개입")
+    ap.add_argument("--passthrough-obstacle-beneath", action="store_true",
+                    help="SL-GTTO16 A' — --passthrough-obstacle-tolerance-mm 와 함께만. 잡는 중 (LATCHED · CLOSING) 대상 물체 발자국 "
+                         "아래 표면 · 쥔 중 (HELD) 쥔 물체 발자국 아래 표면에 가장 가까운 로봇 행은 장애물 물체 행이 아니다 (쥔 물체 자신의 "
+                         "행은 그대로)")
+    ap.add_argument("--passthrough-obstacle-tolerance-mm", type=float, default=None, metavar="MM",
+                    help="SL-GTTO16 (A) — --passthrough-when-clear 에서만. --violation-tolerance-mm 의 τ 를 장애물 물체 행 "
+                         "(최근접 표면이 target · 받침면 · 목적지 · 쥔 물체 자기 흔적이 아닌 행) 에는 적용하지 않는다: 그 행이 floor 보다 "
+                         "MM 넘게 모자라면 pass-through 거절 (sqp.passthrough_obstacle_tolerance)")
+    # SL-GTTO10 — begin (lead self-ruling G53, 2026-11-07; user caution 2)
+    ap.add_argument("--oracle-destination", action="store_true",
+                    help="SL-GTTO10 F8a — --grounding-source oracle 에서만. client 가 oracle_seg_meta['destination'] 으로 "
+                         "BDDL 목적지 이름을 주면 그 code 의 fused 점을 매 frame 목적지로 주입한다 (T26 주입 경로; 필드 라벨 · "
+                         "쥔 물체 행에만 contact.destination_margin, 로봇 link 는 원래 margin) (clustering.oracle_destination, "
+                         "기록 metrics.grounding_source.destination)")
+    ap.add_argument("--grasp-opening-rule-moved", type=float, default=None, metavar="OPEN",
+                    help="SL-GTTO11 (c') — --grasp-opening-rule 에서만. attach 에 '손가락이 실제로 닫혔다' 검사를 더한다: 마지막 열림 "
+                         "명령 때 개도 − 지금 개도 ≥ OPEN (정규화 개도). 닫힘 명령 첫 call 의 '정지' 오판 (F8 LS t0e3) 을 막는다")
+    ap.add_argument("--ee-action-qp-scaled", action="store_true",
+                    help="SL-GTTO11 F9a — --ee-action-qp 에서만. action 공간 QP 의 충돌 행을 행 norm 으로 정규화하고 slack 을 "
+                         "quadratic 벌점 (1e4) + 선형 1e2 로 푼다 (G50 offline: 20000 회 미수렴 → ~150 회). action 이 닿지 않는 행 "
+                         "(step 0) 은 QP 에서 빼고 최종 검사만 본다. 기록 to.ee_action_qp.n_rows_unreachable · osqp_iter")
+    ap.add_argument("--destination-margin-mm", type=float, default=None, metavar="MM",
+                    help="SL-GTTO10 F8a — contact.destination_margin (기본 config 20 mm): 쥔 물체 행이 목적지 라벨 표면에 "
+                         "요구받는 여유. 0 = 쥔 물체가 목적지에 닿아도 된다 (On(쥔 물체, 목적지) 과제의 놓기). 로봇 link 는 바뀌지 않는다")
+    # SL-GTTO10 — end
     # IFG-CL2 — begin
     ap.add_argument("--hybrid-identity", choices=("both", "instance", "centre"), default=None,
                     help="IFG-CL2 — attention-surface-hybrid 의 identity 안전장치 (기본 both: config "
@@ -4167,7 +4248,12 @@ def reject_bad_flag_combinations(ap: argparse.ArgumentParser, args, *, seed_map_
             ap.error("--grounding-source oracle 는 AG3S 의 grounding flag 입니다 (--no-safe · --no-perception 은 "
                      "그것을 안 만듭니다)")
     # SL-GTTO2 — the two GT flags act on the GT grounding only
-    for flag in ("oracle_admissible", "oracle_held_target"):
+    if getattr(args, "grasp_opening_rule_moved", None) is not None and not getattr(args, "grasp_opening_rule", False):   # SL-GTTO11
+        ap.error("--grasp-opening-rule-moved 는 --grasp-opening-rule 의 attach 검사입니다 — 함께 주십시오")
+    if getattr(args, "ee_action_qp_scaled", False) and not getattr(args, "ee_action_qp", False):   # SL-GTTO11
+        ap.error("--ee-action-qp-scaled 는 --ee-action-qp 의 QP 형태만 바꿉니다 — 함께 주십시오")
+    for flag in ("oracle_admissible", "oracle_held_target", "oracle_destination", "oracle_robot_mask",
+                 "oracle_obstacle_objects"):   # + SL-GTTO10 / 15 / 19
         if getattr(args, flag, False) and getattr(args, "grounding_source", "attention") != "oracle":
             ap.error(f"--{flag.replace('_', '-')} 는 --grounding-source oracle 에서만 읽힙니다 (GT 가 target 을 "
                      "말할 때만 뜻이 있다) — 그대로 띄우면 효과가 있었다고 믿게 됩니다")
@@ -4615,6 +4701,32 @@ def reject_bad_flag_combinations(ap: argparse.ArgumentParser, args, *, seed_map_
                         ("--sqp-max-iterations", getattr(args, "sqp_max_iterations", None))):
         if value is not None and value < 1:
             ap.error(f"{flag} 는 1 이상이어야 합니다 (got {value})")
+    if getattr(args, "passthrough_limit_tolerance", None) is not None:   # SL-GTTO15
+        if not getattr(args, "passthrough_when_clear", False):
+            ap.error("--passthrough-limit-tolerance 는 --passthrough-when-clear 와 함께만")
+        if not (float(args.passthrough_limit_tolerance) > 0.0 and math.isfinite(float(args.passthrough_limit_tolerance))):
+            ap.error(f"--passthrough-limit-tolerance 는 0 보다 커야 합니다 (got {args.passthrough_limit_tolerance})")
+    if getattr(args, "oracle_obstacle_support", None) is not None and not getattr(args, "oracle_obstacle_objects", False):
+        ap.error("--oracle-obstacle-support 는 --oracle-obstacle-objects 의 받침 찾기입니다 — 함께 주십시오")
+    if getattr(args, "held_point_model_mm", None) is not None:   # SL-GTTO17
+        if not getattr(args, "held_body_cover", False):
+            ap.error("--held-point-model-mm 는 --held-body-cover 와 함께만 (몸통 덮개의 들어올림 규칙을 그대로 쓴다)")
+        if not (5.0 <= float(args.held_point_model_mm) <= 60.0):
+            ap.error(f"--held-point-model-mm 는 5 ~ 60 mm (got {args.held_point_model_mm})")
+    if getattr(args, "passthrough_obstacle_full_horizon", False) and getattr(args, "passthrough_obstacle_tolerance_mm", None) is None:
+        ap.error("--passthrough-obstacle-full-horizon 는 --passthrough-obstacle-tolerance-mm 와 함께만")
+    if getattr(args, "passthrough_obstacle_beneath", False) and getattr(args, "passthrough_obstacle_tolerance_mm", None) is None:
+        ap.error("--passthrough-obstacle-beneath 는 --passthrough-obstacle-tolerance-mm 의 행 분류입니다 — 함께 주십시오")
+    if getattr(args, "passthrough_obstacle_tolerance_mm", None) is not None:   # SL-GTTO16
+        if not getattr(args, "passthrough_when_clear", False):
+            ap.error("--passthrough-obstacle-tolerance-mm 는 --passthrough-when-clear 와 함께만")
+        if not (float(args.passthrough_obstacle_tolerance_mm) >= 0.0 and math.isfinite(float(args.passthrough_obstacle_tolerance_mm))):
+            ap.error(f"--passthrough-obstacle-tolerance-mm 는 0 이상이어야 합니다 (got {args.passthrough_obstacle_tolerance_mm})")
+    if getattr(args, "violation_tolerance_mm", None) is not None:   # SL-GTTO14
+        if not getattr(args, "passthrough_when_clear", False):
+            ap.error("--violation-tolerance-mm 는 --passthrough-when-clear 와 함께만 (pass-through 와 최종 판정에 같은 허용치)")
+        if not (float(args.violation_tolerance_mm) > 0.0 and math.isfinite(float(args.violation_tolerance_mm))):
+            ap.error(f"--violation-tolerance-mm 는 0 보다 커야 합니다 (got {args.violation_tolerance_mm})")
     if getattr(args, "passthrough_when_clear", False) and args.no_safe:   # T88
         ap.error("--passthrough-when-clear 는 TO 를 고치는 flag 입니다 (--no-safe 는 TO 를 아예 안 돌립니다). "
                  "그대로 띄우면 효과가 있었다고 믿게 됩니다")
@@ -4758,7 +4870,18 @@ def sqp_overrides(args) -> dict:
 # --- T88 — begin ---
 def passthrough_overrides(args) -> dict:
     """T88 — `--passthrough-when-clear` → `sqp.passthrough_when_clear`. Not given (default) → `{}`: no key."""
-    return {"passthrough_when_clear": True} if getattr(args, "passthrough_when_clear", False) else {}
+    out = {"passthrough_when_clear": True} if getattr(args, "passthrough_when_clear", False) else {}
+    if getattr(args, "violation_tolerance_mm", None) is not None:   # SL-GTTO14
+        out["passthrough_tolerance"] = float(args.violation_tolerance_mm) / 1000.0
+    if getattr(args, "passthrough_limit_tolerance", None) is not None:   # SL-GTTO15
+        out["passthrough_limit_tolerance"] = float(args.passthrough_limit_tolerance)
+    if getattr(args, "passthrough_obstacle_tolerance_mm", None) is not None:   # SL-GTTO16
+        out["passthrough_obstacle_tolerance"] = float(args.passthrough_obstacle_tolerance_mm) / 1000.0
+    if getattr(args, "passthrough_obstacle_beneath", False):   # SL-GTTO16 A'
+        out["passthrough_obstacle_beneath"] = True
+    if getattr(args, "passthrough_obstacle_full_horizon", False):   # SL-GTTO22
+        out["passthrough_obstacle_full_horizon"] = True
+    return out
 # --- T88 — end ---
 
 
@@ -5213,7 +5336,10 @@ def trajopt_config_from_args(args):
         # 끈다 — 인증할 기하가 애초에 없다).
         "safety": {"require_certified_geometry": not args.allow_uncertified,
                    # IFG-REC — only when given.
-                   **({"recovery_retreat": True} if getattr(args, "recovery_retreat", False) else {})},
+                   **({"recovery_retreat": True} if getattr(args, "recovery_retreat", False) else {}),
+                   # SL-GTTO14 — only when given.
+                   **({"violation_tolerance": float(args.violation_tolerance_mm) / 1000.0}
+                      if getattr(args, "violation_tolerance_mm", None) is not None else {})},
         # 다듬는 창. `execution` 이면 `horizon.execution_length` 를 따라가므로 실행 길이가
         # 두 번 적히지 않는다 (`config.PLAN_EXECUTION_WINDOW` 머리말).
         "horizon": {"plan_horizon": resolve_plan_horizon(args.plan_horizon), **ta_horizon,

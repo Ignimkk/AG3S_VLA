@@ -87,7 +87,7 @@ def test_the_version_is_the_openrule_flags_plus_the_two_options(gpu_ok, monkeypa
     assert {k: x for k, x in vals.items() if k not in ("hand_voxel_carve", "hand_voxel_carve_mm")} == bvals      # nothing else joined
     assert "hand_voxel_carve" not in bvals and "hand_voxel_carve_mm" not in bvals
     for v in pf.AG3S_VERSIONS:                                                       # no earlier version's record gains a key
-        if v != HVC:
+        if v != HVC and v not in getattr(pf, "GT10_VERSIONS", ()) + getattr(pf, "GT11_VERSIONS", ()) + getattr(pf, "GT12_VERSIONS", ()) + getattr(pf, "GT13_VERSIONS", ()) + getattr(pf, "GT14_VERSIONS", ()) + getattr(pf, "GT15_VERSIONS", ()):   # SL-GTTO10 / 11 (later) use the flag
             got = pf.version_flag_values(_args(v, monkeypatch))
             assert "hand_voxel_carve" not in got and "hand_voxel_carve_mm" not in got, v
 

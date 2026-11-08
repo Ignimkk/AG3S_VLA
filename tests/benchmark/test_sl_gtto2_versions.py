@@ -48,7 +48,7 @@ def test_no_other_version_gets_a_new_flag_or_key(gpu_ok):
     for name in pf.AG3S_VERSIONS:
         if (name == GT2 or name in getattr(pf, "GT3_VERSIONS", ()) or name in getattr(pf, "GT4_VERSIONS", ())
                 or name in getattr(pf, "GT5_VERSIONS", ()) or name in getattr(pf, "GT6_VERSIONS", ())
-                or name in getattr(pf, "GT7_VERSIONS", ()) or name in getattr(pf, "GT8_VERSIONS", ()) or name in getattr(pf, "GT9_VERSIONS", ())):
+                or name in getattr(pf, "GT7_VERSIONS", ()) or name in getattr(pf, "GT8_VERSIONS", ()) or name in getattr(pf, "GT9_VERSIONS", ()) or name in getattr(pf, "GT10_VERSIONS", ()) or name in getattr(pf, "GT11_VERSIONS", ()) or name in getattr(pf, "GT12_VERSIONS", ()) or name in getattr(pf, "GT13_VERSIONS", ()) or name in getattr(pf, "GT14_VERSIONS", ()) or name in getattr(pf, "GT15_VERSIONS", ())):
             # SL-GTTO3 / SL-GTTO4 variants carry the GT2 flags
             continue
         assert not set(NEW_FLAGS) & set(pf.AG3S_VERSIONS[name]), name

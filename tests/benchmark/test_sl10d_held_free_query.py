@@ -292,7 +292,7 @@ def test_versions_are_their_bases_plus_the_one_flag(gpu_ok):
         # the HSR6 probe like the base (SL10b rule)
         assert pf.version_server_flags(v)[-2:] == ["--hsr6-probe", pf.PANDA_HSR6_PROBE]
         assert pf.version_server_flags(v)[:-3] == pf.version_server_flags(base)[:-2] + []
-    assert not any(FLAG in f for n, f in pf.AG3S_VERSIONS.items() if n not in VERSIONS)
+    assert not any(FLAG in f for n, f in pf.AG3S_VERSIONS.items() if n not in VERSIONS and not pf.is_gtto_version(n))   # SL-GTTO10 came later
 
 
 @pytest.mark.parametrize("version", sorted(VERSIONS))

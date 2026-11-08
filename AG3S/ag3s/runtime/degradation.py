@@ -89,6 +89,9 @@ CODES: dict[str, str] = {
     "esdf_dead_camera":
         "pipeline(_esdf_coverage, G3): 어떤 카메라가 이 프레임에 voxel 을 하나도 안 썼다. "
         "정상 프레임에서는 카메라마다 13k~150k 개를 쓰므로 조용한 프레임이 아니라 깨진 것이다",
+    "esdf_camera_outside_workspace":
+        "pipeline(_esdf_coverage, SL-QE1 esdf.dead_camera_seen_ok): 이 episode 에서 voxel 을 쓴 적 있는 카메라가 범위 안 depth 는 "
+        "있으나 그 점이 모두 workspace bounds 밖이라 이번 frame 에 voxel 0 — 깨진 카메라가 아니므로 DEGRADED 로 내리지 않는다 (기록만)",
     "spheres_outside_grid":
         "pipeline(_esdf_coverage, G4): 제약 구 일부가 coverage 격자 밖이다. 거리장은 그 구에 "
         "무엇이 있든 outside_distance 를 답하므로 그 구들은 제약을 받지 않는다",

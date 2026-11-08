@@ -298,6 +298,11 @@ class LatchConfig:
     opening_rule_empty_below: float = 0.02
     #: HELD 의 놓음 판정: 열림 명령이고 개도가 attach 때보다 이만큼 넘게 커졌으면 detach.
     opening_rule_release_rise: float = 0.02
+    #: SL-GTTO11 (lead G54, 2026-11-07; `--grasp-opening-rule-moved`): **None (기본) = SL14 그대로.** 값이 있으면 attach 에
+    #: `moved` 검사를 더한다: 마지막 열림 명령 때의 개도 (없으면 1.0) − 지금 개도 ≥ 이 값 (손가락이 실제로 닫혔다).
+    #: F8 LIBERO-Safety human_safety t0e3: 닫힘 명령 첫 call 에서 개도 0.998 → 0.989 (차 0.009 < settle 0.02) 라 `settled` 가
+    #: 참이 되어 손가락이 열린 채 attach → 부착 구가 탁자 속 76–91 mm → 78 call HOLD.
+    opening_rule_moved_min: Optional[float] = None
 
 
 @dataclasses.dataclass(frozen=True)
@@ -474,6 +479,8 @@ class GraspLatch:
         self._open_streak = 0
         #: SL14 `opening_rule`: the last executed gripper command, kept across detach / re-grasp (a HOLD chunk executes none).
         self._rule_command: Optional[float] = None
+        #: SL-GTTO11: the opening at the last executed **open** command (`opening_rule_moved_min`; None until one is seen).
+        self._rule_open_ref: Optional[float] = None
         self._reset_grasp()
 
     # --- 조회 --------------------------------------------------------------------------
@@ -859,6 +866,10 @@ class GraspLatch:
                       "settled": delta is not None and delta < float(cfg.settle_epsilon),
                       "opening_min": opening is not None and opening >= float(cfg.opening_rule_min),
                       "reach": reach_m is not None and float(reach_m) <= float(cfg.reach)}
+            if cfg.opening_rule_moved_min is not None:   # SL-GTTO11 (off: the SL14 checks as they were)
+                ref = 1.0 if self._rule_open_ref is None else float(self._rule_open_ref)
+                checks["moved"] = opening is not None and ref - opening >= float(cfg.opening_rule_moved_min)
+                rec["open_ref"] = ref
             ev["checks"] = checks
             if all(checks.values()):
                 attach = True
@@ -870,6 +881,8 @@ class GraspLatch:
                         f"{cfg.reach * 1000.0:.0f} mm (feedback seq {signal.feedback_seq})")
         if opening is not None:
             self._last_opening = opening
+            if cfg.opening_rule_moved_min is not None and open_cmd:   # SL-GTTO11
+                self._rule_open_ref = opening
         self._track_open(signal, opening)
         self._last_grasp = self._event(attach, detach, note, ev)
         return self._last_grasp
@@ -1137,6 +1150,7 @@ class GraspLatch:
         self.phase = GraspPhase.SEARCHING
         self._open_streak = 0
         self._rule_command = None
+        self._rule_open_ref = None
         self._reset_grasp()
 
 

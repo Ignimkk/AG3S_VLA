@@ -116,7 +116,9 @@ def test_only_the_gt_versions_require_the_segmentation():
          + list(getattr(pf, "GT6_VERSIONS", ()))                                      # + SL-GTTO6
          + list(getattr(pf, "GT7_VERSIONS", ()))                                      # + SL-GTTO7
          + list(getattr(pf, "GT8_VERSIONS", ()))                                      # + SL-GTTO8
-         + list(getattr(pf, "GT9_VERSIONS", ())))                                     # + SL-GTTO9
+         + list(getattr(pf, "GT9_VERSIONS", ()))                                      # + SL-GTTO9
+         + list(getattr(pf, "GT10_VERSIONS", ()))                                     # + SL-GTTO10
+         + list(getattr(pf, "GT11_VERSIONS", ())) + list(getattr(pf, "GT12_VERSIONS", ())) + list(getattr(pf, "GT13_VERSIONS", ())) + list(getattr(pf, "GT14_VERSIONS", ())) + [v for v in getattr(pf, "GT15_VERSIONS", ()) if "-att-" not in v])   # + SL-GTTO11 (2026-11-08: the non-GT "-att-" versions ride in GT15 for its rules but read no GT)
     assert not pf.version_requires_oracle_segmentation("no-such-version")
 
 
@@ -156,7 +158,9 @@ def test_every_other_version_is_the_base_commits(gpu_ok):
                                                                    | set(getattr(pf, "GT6_VERSIONS", ()))   # + SL-GTTO6
                                                                    | set(getattr(pf, "GT7_VERSIONS", ()))   # + SL-GTTO7
                                                                    | set(getattr(pf, "GT8_VERSIONS", ()))   # + SL-GTTO8
-                                                                   | set(getattr(pf, "GT9_VERSIONS", ())))   # + SL-GTTO9
+                                                                   | set(getattr(pf, "GT9_VERSIONS", ()))
+                                                                   | set(getattr(pf, "GT10_VERSIONS", ()))
+                                                                   | set(getattr(pf, "GT11_VERSIONS", ())) | set(getattr(pf, "GT12_VERSIONS", ())) | set(getattr(pf, "GT13_VERSIONS", ())) | set(getattr(pf, "GT14_VERSIONS", ())) | set(getattr(pf, "GT15_VERSIONS", ())))   # + SL-GTTO9 / 10 / 11
     for name, flags in old.AG3S_VERSIONS.items():
         assert pf.AG3S_VERSIONS[name] == flags, name
         assert pf.version_server_argv(name) == old.version_server_argv(name), name

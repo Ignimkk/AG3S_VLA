@@ -503,6 +503,10 @@ class AG3S:
         self._oracle_pending = None
         self._oracle_frame = None
         self._grounding_frame = None   # SL-GTTO
+        self._obstacle_frame = None   # SL-GTTO19
+        self._esdf_cameras_seen = set()   # SL-QE1: cameras that wrote voxels this episode (read only with esdf.dead_camera_seen_ok)
+        self._obstacle_history = []
+        self._target_support_code = None
         if self._oracle_memory is not None:
             self._oracle_memory.reset()
         self._surface_frame = None   # IFG-CL1
@@ -875,6 +879,212 @@ class AG3S:
         return AttentionPointCloud(attention_cloud.cloud, att, att.copy()), ~code1, rec
     # --- SL-GTTO — end
 
+    # --- SL-GTTO10 F8a — begin
+    def _oracle_destination_points(self, fusion):
+        """SL-GTTO10 F8a (`clustering.oracle_destination`) — `(points or None, record)`: the fused points (base frame) whose
+        every labelled observation reads the code the client's legend gives the BDDL destination
+        (`ag3s/oracle_seg_meta["destination"]`), the same unanimity rule as the code-1 points of
+        `_oracle_grounding_input`. `None` when the client named no destination, the legend has no code for it, or no
+        point carries it this frame (the caller then keeps the last injection)."""
+        seg = self._oracle_pending
+        meta = dict((seg or {}).get("meta") or {})
+        labels = dict((seg or {}).get("labels") or {})
+        name = meta.get("destination")
+        rec: dict[str, Any] = {"name": name, "code": None, "n_points": 0, "why": None}
+        code = (meta.get("codes") or {}).get(str(name)) if name else None
+        if not name:
+            rec["why"] = "no_destination_named"
+            return None, rec
+        if code is None:
+            rec["why"] = "destination_not_in_legend"
+            return None, rec
+        rec["code"] = int(code)
+        if fusion is None or not labels:
+            rec["why"] = "no_fusion" if fusion is None else "no_segmentation"
+            return None, rec
+        fused = fusion.cloud
+        if len(fused) == 0 or fused.n_observations == 0:
+            rec["why"] = "no_points"
+            return None, rec
+        no_label = np.uint8(255)
+        obs_code = np.full(fused.n_observations, no_label, np.uint8)
+        for ci, cam in enumerate(fused.cameras):
+            lab = labels.get(getattr(cam, "value", str(cam)))
+            if lab is None:
+                continue
+            lab = np.asarray(lab)
+            sel = np.flatnonzero(fused.obs_camera == ci)
+            if not sel.size:
+                continue
+            uv = fused.obs_uv[sel]
+            h, w = lab.shape[:2]
+            inside = (uv[:, 0] >= 0) & (uv[:, 0] < w) & (uv[:, 1] >= 0) & (uv[:, 1] < h)
+            codes = np.full(sel.size, no_label, np.uint8)
+            codes[inside] = lab[uv[inside, 1], uv[inside, 0]]
+            obs_code[sel] = codes
+        starts = fused.obs_offset[:-1]
+        labelled = np.add.reduceat((obs_code != no_label).astype(np.int64), starts)
+        hits = np.add.reduceat((obs_code == np.uint8(code)).astype(np.int64), starts)
+        mask = (labelled > 0) & (hits == labelled)
+        rec["n_points"] = int(mask.sum())
+        if not mask.any():
+            rec["why"] = "no_destination_point"
+            return None, rec
+        pts = np.asarray(fused.points, np.float64).reshape(-1, 3)[mask]
+        rec["centroid"] = [round(float(v), 4) for v in pts.mean(axis=0)]
+        return pts, rec
+    # --- SL-GTTO10 F8a — end
+
+    # --- SL-GTTO19 (A'') — begin
+    def _oracle_code_of_points(self, fusion):
+        """Per fused point: the GT code when every labelled observation agrees, else 255 (unlabelled / mixed)."""
+        seg = self._oracle_pending
+        labels = dict((seg or {}).get("labels") or {})
+        fused = fusion.cloud
+        no_label = np.uint8(255)
+        obs_code = np.full(fused.n_observations, no_label, np.uint8)
+        for ci, cam in enumerate(fused.cameras):
+            lab = labels.get(getattr(cam, "value", str(cam)))
+            if lab is None:
+                continue
+            lab = np.asarray(lab)
+            sel = np.flatnonzero(fused.obs_camera == ci)
+            if not sel.size:
+                continue
+            uv = fused.obs_uv[sel]
+            h, w = lab.shape[:2]
+            inside = (uv[:, 0] >= 0) & (uv[:, 0] < w) & (uv[:, 1] >= 0) & (uv[:, 1] < h)
+            codes = np.full(sel.size, no_label, np.uint8)
+            codes[inside] = lab[uv[inside, 1], uv[inside, 0]]
+            obs_code[sel] = codes
+        starts = fused.obs_offset[:-1]
+        labelled = (obs_code != no_label)
+        first = np.full(len(starts), 255, np.int64)
+        # the code of the first labelled observation of each point, then: all labelled observations equal to it
+        idx = np.arange(fused.n_observations)
+        lab_idx = np.where(labelled, idx, fused.n_observations)
+        first_i = np.minimum.reduceat(lab_idx, starts)
+        has = first_i < fused.n_observations
+        first[has] = obs_code[first_i[has]]
+        point_of_obs = np.repeat(np.arange(len(starts)), np.diff(np.append(starts, fused.n_observations)))
+        bad = labelled & (obs_code.astype(np.int64) != first[point_of_obs])
+        mixed = np.add.reduceat(bad.astype(np.int64), starts) > 0
+        first[mixed] = 255
+        return first
+
+    def _oracle_obstacle_points(self, fusion):
+        """SL-GTTO19 (`clustering.oracle_obstacle_objects`) — `(points (K, 3) base or None, record)`: the GT obstacle-object
+        surface handed to the TO. Codes: every legend code >= 3 except the destination's and the target's support (the code
+        with the most points under the target's footprint, 0-30 mm below its lowest point, fixed once per episode); code 1 =
+        target, 2 = static, 0 = robot are never obstacles here. 15 mm voxel centroids, union of the last 3 requests."""
+        seg = self._oracle_pending
+        meta = dict((seg or {}).get("meta") or {})
+        legend = {str(k): int(v) for k, v in (meta.get("codes") or {}).items()}
+        rec: dict[str, Any] = {"n_points": 0, "why": None}
+        if fusion is None or not (seg or {}).get("labels") or len(fusion.cloud) == 0 or fusion.cloud.n_observations == 0:
+            rec["why"] = "no_segmentation"
+            hist = [h for h in getattr(self, "_obstacle_history", []) if len(h)]
+            return (np.concatenate(hist) if hist else None), rec
+        code = self._oracle_code_of_points(fusion)
+        pts = np.asarray(fusion.cloud.points, np.float64).reshape(-1, 3)
+        dest = legend.get(str(meta.get("destination"))) if meta.get("destination") else None
+        if getattr(self, "_target_support_code", None) is None:
+            tgt = pts[code == 1]
+            if len(tgt) >= 10:
+                from scipy.spatial import cKDTree
+                zmin = float(tgt[:, 2].min())
+                cand = (code >= 3) & (code != 255) & (pts[:, 2] <= zmin + 0.005) & (pts[:, 2] >= zmin - 0.03)
+                under = str(getattr(getattr(getattr(self, "config", None), "clustering", None),
+                                    "oracle_obstacle_support", "near")) == "under"
+                base = tgt[tgt[:, 2] <= zmin + 0.01] if under else tgt   # SL-GTTO21: the target's base only
+                if cand.any() and len(base):
+                    near = cKDTree(base[:, :2]).query(pts[cand, :2])[0] <= (0.01 if under else 0.03)
+                    vals, counts = np.unique(code[cand][near], return_counts=True)
+                    if len(vals) and counts.max() >= 10:
+                        self._target_support_code = int(vals[np.argmax(counts)])
+        excluded = {c for c in (dest, getattr(self, "_target_support_code", None)) if c is not None}
+        obst_codes = sorted(c for c in set(legend.values()) if c >= 3 and c not in excluded)
+        mask = np.isin(code, obst_codes)
+        sel = pts[mask]
+        if len(sel):
+            key = np.floor(sel / 0.015).astype(np.int64)
+            _, inv = np.unique(key, axis=0, return_inverse=True)
+            inv = inv.reshape(-1)
+            sums = np.zeros((inv.max() + 1, 3))
+            np.add.at(sums, inv, sel)
+            sel = sums / np.bincount(inv)[:, None]
+        hist = list(getattr(self, "_obstacle_history", []))[-2:] + [sel]
+        self._obstacle_history = hist
+        allp = [h for h in hist if len(h)]
+        out = np.concatenate(allp) if allp else None
+        names = {v: k for k, v in legend.items()}
+        rec.update(n_points=0 if out is None else int(len(out)), n_this_frame=int(len(sel)),
+                   obstacle_objects=[names.get(c, str(c)) for c in obst_codes],
+                   excluded={"destination": names.get(dest) if dest is not None else None,
+                             "target_support": names.get(getattr(self, "_target_support_code", None))})
+        return out, rec
+    def _scene_obstacle_points(self, cloud, support_mask, target_points, destination_points):
+        """SL-GTTO20 (`clustering.scene_obstacle_objects`) — `(points (K, 3) or None, record)`: the obstacle-object surface
+        from AG3S's own perception (no GT). Connected components of the self-filtered, non-support cloud on a 15 mm grid;
+        excluded: components within 15 mm of the manipulated object's points (the last observed geometry while occluded /
+        held), components with points under its footprint 0-30 mm below its lowest point (its support), components within
+        15 mm of the perceived destination. Voxel centroids of the rest, union of the last 3 requests."""
+        from scipy import ndimage
+        from scipy.spatial import cKDTree
+
+        v = 0.015
+        pts = np.asarray(getattr(cloud, "points", cloud), np.float64).reshape(-1, 3)
+        if support_mask is not None and len(np.asarray(support_mask).reshape(-1)) == len(pts):
+            pts = pts[~np.asarray(support_mask, bool).reshape(-1)]
+        rec: dict[str, Any] = {"source": "scene", "n_points": 0}
+        sel = np.zeros((0, 3))
+        if len(pts):
+            lo = pts.min(axis=0)
+            ijk = np.floor((pts - lo) / v).astype(np.int64)
+            dims = ijk.max(axis=0) + 1
+            if int(np.prod(dims)) <= 8_000_000:
+                occ = np.zeros(tuple(int(x) for x in dims), bool)
+                occ[ijk[:, 0], ijk[:, 1], ijk[:, 2]] = True
+                lab, n = ndimage.label(occ, structure=np.ones((3, 3, 3), bool))
+                comp = lab[ijk[:, 0], ijk[:, 1], ijk[:, 2]]
+                drop = set()
+                tgt = None if target_points is None else np.asarray(target_points, np.float64).reshape(-1, 3)
+                tree = cKDTree(pts)
+                if tgt is not None and len(tgt):
+                    for ids in tree.query_ball_point(tgt, v):
+                        drop.update(int(comp[i]) for i in ids)
+                    zmin = float(tgt[:, 2].min())
+                    under = (pts[:, 2] <= zmin + 0.005) & (pts[:, 2] >= zmin - 0.03)
+                    base = tgt[tgt[:, 2] <= zmin + 0.01]   # SL-GTTO21: only what is under the target's base
+                    if under.any():
+                        near = cKDTree(base[:, :2]).query(pts[under, :2])[0] <= 0.01
+                        drop.update(int(c) for c in np.unique(comp[under][near]))
+                n_target_support = len(drop)
+                if destination_points is not None and len(destination_points):
+                    for ids in tree.query_ball_point(np.asarray(destination_points, np.float64).reshape(-1, 3), v):
+                        drop.update(int(comp[i]) for i in ids)
+                keep = ~np.isin(comp, sorted(drop)) & (comp > 0)
+                sel = pts[keep]
+                if len(sel):
+                    key = np.floor(sel / v).astype(np.int64)
+                    _, inv = np.unique(key, axis=0, return_inverse=True)
+                    inv = inv.reshape(-1)
+                    sums = np.zeros((inv.max() + 1, 3))
+                    np.add.at(sums, inv, sel)
+                    sel = sums / np.bincount(inv)[:, None]
+                rec.update(n_components=int(n), n_dropped_target_support=n_target_support,
+                           n_dropped_total=len(drop), has_target=tgt is not None,
+                           has_destination=destination_points is not None)
+            else:
+                rec["why"] = "grid too large"
+        hist = list(getattr(self, "_obstacle_history", []))[-2:] + [sel]
+        self._obstacle_history = hist
+        allp = [h for h in hist if len(h)]
+        out = np.concatenate(allp) if allp else None
+        rec.update(n_points=0 if out is None else int(len(out)), n_this_frame=int(len(sel)))
+        return out, rec
+    # --- SL-GTTO19 (A'') — end
+
     # --- SL-GTTO2 F2 — begin
     def _oracle_held_target_mask(self, cameras):
         """SL-GTTO2 F2 (`clustering.oracle_held_target`) — `cameras` with this request's code-1 pixels added to each
@@ -920,6 +1130,40 @@ class AG3S:
         rec["why"] = None
         return out
     # --- SL-GTTO2 F2 — end
+
+    # --- SL-GTTO15 — begin
+    def _oracle_robot_mask(self, cameras):
+        """SL-GTTO15 (`clustering.oracle_robot_mask`) — `cameras` with this request's GT code-0 pixels that carry a valid
+        depth (the robot) added to each camera's TSDF depth mask, every request. Record:
+        `metrics["grounding_source"]["robot_mask"]` = {n_px, n_px_new} per camera (new = not already in the sphere mask)."""
+        from AG3S.ag3s.runtime.oracle_segmentation import CODE_NONE
+
+        rec: dict[str, Any] = {"n_px": {}, "n_px_new": {}}
+        if self._grounding_frame is not None:
+            self._grounding_frame["robot_mask"] = rec
+        labels = dict((self._oracle_pending or {}).get("labels") or {})
+        if not labels:
+            rec["why"] = "no_segmentation"
+            return cameras
+        out = []
+        for cam in cameras:
+            lab = labels.get(cam.name)
+            depth = np.asarray(cam.depth)
+            if lab is None or np.asarray(lab).shape[:2] != depth.shape[:2]:
+                out.append(cam)
+                continue
+            d = depth.reshape(depth.shape[:2])
+            robot = (np.asarray(lab).reshape(depth.shape[:2]) == CODE_NONE) & np.isfinite(d) & (d > 0.0)
+            old = (np.zeros(depth.shape[:2], bool) if cam.robot_mask is None
+                   else np.asarray(cam.robot_mask, bool).reshape(depth.shape[:2]))
+            rec["n_px"][cam.name] = int(robot.sum())
+            rec["n_px_new"][cam.name] = int((robot & ~old).sum())
+            if rec["n_px_new"][cam.name]:
+                cam = dataclasses.replace(cam, robot_mask=old | robot, device_depth=None)
+            out.append(cam)
+        rec["why"] = None
+        return out
+    # --- SL-GTTO15 — end
 
     def _surface_memory_evidence(self, geometry, support_surfaces, ball):
         """T78 A3 (`esdf.surface_keep_last`) — `(OracleVisibleEvidence, record)` from the memory's code-1 samples.
@@ -2255,6 +2499,24 @@ class AG3S:
                             # the lift direction (the attach plane's normal) in the parent frame
                             "lift_dir": (None if plane is None else
                                          T_parent[:3, :3] @ np.asarray(plane[0], np.float64))}
+        # --- SL-GTTO17 (B) — begin: the TO's held query rows = a shell of small spheres on the observed points
+        #     (`held_object.point_model_spheres`); the body spheres above stay for the self-filter / spec / records.
+        spacing = getattr(self, "held_point_model_m", None)
+        if spacing is not None:
+            from AG3S.ag3s.robot_models.held_object import point_model_spheres
+
+            pbody, prec = point_model_spheres(pts, float(spacing), support=plane)
+            plifted = pbody
+            if pbody and band is not None and plane is not None:
+                plifted, plift = lift_off_support(pbody, plane[0], plane[1], clearance=band,
+                                                  relative_poses=[T_rel], snapshot_clearance=0.0)
+                prec["lift_max_mm"] = round(max([float(p.get("lift_mm", 0.0) or 0.0)
+                                                 for p in plift.get("spheres", [])] or [0.0]), 3)
+            if pbody:
+                self._held_query["points"] = local(pbody)
+                self._held_query["points_lifted"] = local(plifted)
+            rec["point_model"] = prec
+        # --- SL-GTTO17 (B) — end
         rec["band_mm"] = None if band is None else round(band * 1000.0, 3)
         rec["hysteresis_mm"] = round(float(self.held_lift_hysteresis_m) * 1000.0, 3)
         rec["body_parent_frame"] = [
@@ -2282,6 +2544,7 @@ class AG3S:
         """
         held = self._attached
         query = self._held_query
+        self._held_point_frame = None   # SL-GTTO17 (B): set below only with the point model
         if held is None or query is None:
             return held
         from AG3S.ag3s.constraints.attached import _link_pose_numeric
@@ -2353,6 +2616,25 @@ class AG3S:
                            dimensions=np.full(3, float(r)), semantic_role=HELD_ROLE)
                  for c, r in chosen]
         self._frame_attached = dataclasses.replace(held, primitives=prims)
+        # --- SL-GTTO17 (B) — begin: the point-model spheres, chosen (lifted / not) and raised exactly as the body above
+        if query.get("points") is not None:
+            pchosen = query["points_lifted"] if near else query["points"]
+            if near and query.get("lift_dir") is not None:
+                u = np.asarray(query["lift_dir"], np.float64)
+                band = float(query["band"])
+                pc = np.asarray([c for c, _ in pchosen], np.float64)
+                pr = np.asarray([r for _, r in pchosen], np.float64)
+                need = np.zeros(len(pc))
+                for T, n, off in poses:
+                    gain = float(n @ (T[:3, :3] @ u))
+                    if gain > 0.1:
+                        gap_i = (pc @ T[:3, :3].T + T[:3, 3]) @ n - off - pr
+                        need = np.maximum(need, (band - gap_i) / gain)
+                pc = pc + np.maximum(need, 0.0)[:, None] * u[None, :]
+                pchosen = [(pc[i], float(pr[i])) for i in range(len(pc))]
+            self._held_point_frame = (str(query["parent_link"]),
+                                      [(np.asarray(c, np.float64), float(r)) for c, r in pchosen])
+        # --- SL-GTTO17 (B) — end
         if isinstance(self._held_record, dict) and isinstance(
                 self._held_record.get("body_cover"), dict):
             # New dicts, never mutated: a record handed out for an earlier frame keeps its values.
@@ -2748,6 +3030,16 @@ class AG3S:
         if cfg.clustering.grounding_source == "oracle":
             grounding_cloud, grounding_exclude, self._grounding_frame = self._oracle_grounding_input(
                 attention_cloud, support_mask, fusion)
+            # --- SL-GTTO10 F8a — begin: the GT destination is injected (off: not called, nothing recorded)
+            if cfg.clustering.oracle_destination:
+                dest_pts, dest_rec = self._oracle_destination_points(fusion)
+                if self._grounding_frame is not None:
+                    self._grounding_frame["destination"] = dest_rec
+                if dest_pts is not None:
+                    self._target_confirm.inject_destination(dest_pts)
+            # --- SL-GTTO10 F8a — end
+            if getattr(cfg.clustering, "oracle_obstacle_objects", False):   # SL-GTTO19 (off: not called)
+                self._obstacle_frame = self._oracle_obstacle_points(fusion)
         # --- SL-GTTO — end
         with profiler.stage("target_grounding"):
             grounding = ground_target(
@@ -2806,6 +3098,10 @@ class AG3S:
                                                 status=GroundingStatus.NO_ADMISSIBLE)
         destination = self._target_confirm.destination
         destination_points = None if destination is None else destination.points
+        if getattr(cfg.clustering, "scene_obstacle_objects", False):   # SL-GTTO20 (off: not called)
+            self._obstacle_frame = self._scene_obstacle_points(
+                cloud, support_mask, None if manipulated_geometry is None else getattr(manipulated_geometry, "points", None),
+                destination_points)
         if self._target_confirm.destinations.last_event == "registered":
             notes.append(
                 f"destination registered from perception: id={destination.id}, "
@@ -2935,6 +3231,8 @@ class AG3S:
                 if cfg.clustering.oracle_held_target:
                     cameras = self._oracle_held_target_mask(cameras)
                 # --- SL-GTTO2 F2 — end
+                if getattr(cfg.clustering, "oracle_robot_mask", False):   # SL-GTTO15 (off: not called)
+                    cameras = self._oracle_robot_mask(cameras)
                 # T46e A13: fold this request's GT segmentation into the episode's samples (every frame,
                 # target or not — the TSDF accumulates every frame too). Off: not called, nothing stored.
                 extent = getattr(cfg.esdf, "target_extent", "estimated")
@@ -3166,6 +3464,10 @@ class AG3S:
             constraint_set.metrics["confidence_gate"] = dict(self._gate_frame or {})
         if self._grounding_frame is not None:   # SL-GTTO (`grounding_source == "oracle"` only; off: no key)
             constraint_set.metrics["grounding_source"] = dict(self._grounding_frame)
+        of = getattr(self, "_obstacle_frame", None)
+        if of is not None:   # SL-GTTO19 (off: None, nothing attached)
+            object.__setattr__(constraint_set, "obstacle_object_points", of[0])
+            constraint_set.metrics["obstacle_objects"] = of[1]
         profiler.end_frame()
         self.frame_index += 1
         profile = profiler.last_frame_ms()
@@ -3376,6 +3678,11 @@ class AG3S:
     ):
         # T43 R2: the held query spheres of this frame. Off: `self._attached` itself (same object).
         attached = self._frame_held_attached(robot_state, surfaces, execution_path)
+        hp = getattr(self, "_held_point_frame", None)
+        if hp is not None and attached is not None:
+            # SL-GTTO17 (B): the TO reads its held query spheres here (`linearize.scene_from_constraints`)
+            metrics = {**dict(metrics or {}), "held_point_model": {
+                "parent_link": hp[0], "spheres": [[*(round(float(v), 6) for v in c), round(r, 6)] for c, r in hp[1]]}}
         # 목적지 마진은 `ClearancePolicy` 에서 나온다 — 마진이 나오는 곳은 하나여야 하고,
         # 소비 쪽(trajopt)은 그 값을 다시 계산하지 않고 읽기만 한다.
         has_destination = destination_points is not None and len(destination_points) > 0
@@ -3476,6 +3783,19 @@ class AG3S:
 
         per_camera = field.stats.get("per_camera", {}) or {}
         dead = sorted(n for n, s in per_camera.items() if int(s.get("n_updated", 0)) == 0)
+        if getattr(self.config.esdf, "dead_camera_seen_ok", False):   # SL-QE1 (off: not read, bit-identical)
+            seen = getattr(self, "_esdf_cameras_seen", None)
+            if seen is None:
+                seen = self._esdf_cameras_seen = set()
+            alive = sorted(n for n in dead if n in seen and int(per_camera[n].get("n_in_range_px", 0)) > 0)
+            seen.update(n for n, s in per_camera.items() if int(s.get("n_updated", 0)) > 0)
+            if alive:
+                notes.append(reason(
+                    "esdf_camera_outside_workspace",
+                    f"camera(s) {', '.join(alive)} wrote voxels earlier in this episode and have in-range depth "
+                    f"({', '.join(str(int(per_camera[n].get('n_in_range_px', 0))) for n in alive)} px) but every point "
+                    "falls outside the workspace bounds this frame; not counted as a dead camera"))
+                dead = [n for n in dead if n not in alive]
         if dead and len(dead) < len(per_camera):
             notes.append(reason(
                 "esdf_dead_camera",

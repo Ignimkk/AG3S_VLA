@@ -134,7 +134,7 @@ def test_flag_and_version(gpu_ok):
     assert pf.match_ag3s_version(args) == v and pf.version_flag_values(args)["ee_action_qp"] is True
     assert "ee_action_qp" not in pf.version_flag_values(_args("AG3S-commonto-gt2-termsoff-pass-zr"))
     for name, flags in pf.AG3S_VERSIONS.items():
-        if name != v:
+        if name != v and name not in getattr(pf, "GT10_VERSIONS", ()) + getattr(pf, "GT11_VERSIONS", ()) + getattr(pf, "GT12_VERSIONS", ()) + getattr(pf, "GT13_VERSIONS", ()) + getattr(pf, "GT14_VERSIONS", ()) + getattr(pf, "GT15_VERSIONS", ()):   # SL-GTTO10 / 11 build on F7
             assert "--ee-action-qp" not in flags, name
 
 

@@ -246,7 +246,10 @@ def oracle_coder_for(task):
     oc, tt = _oracle_modules()
     bddl = pathlib.Path(get_libero_path("bddl_files")) / task.problem_folder / task.bddl_file
     target, objects, rec = oc.bddl_oracle_target(bddl, tt)
-    return oc.OracleCoder(target, objects, source={"rule": rec["rule"]}), rec
+    # SL-GTTO10 F8a: the BDDL goal's destination joins the meta when there is one (the server reads it only with
+    # --oracle-destination; a goal without one sends the meta exactly as before)
+    source = {"rule": rec["rule"], **({"destination": str(rec["destination"])} if rec.get("destination") else {})}
+    return oc.OracleCoder(target, objects, source=source), rec
 
 
 def oracle_record(coder, rec):
