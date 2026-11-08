@@ -403,6 +403,9 @@ class SafePolicy:
         #: rest certified, the manipulated object occluded with its contact permission kept) as certified, the way the
         #: verdict already executes it (`_occluded_certified`). Off = `geometry_certified` alone, as before.
         self.occluded_certify: bool = False
+        #: SL-PE6 (`--no-target-certify`): a `no_target` frame with nothing latched / held, no contact permission and no
+        #: target-free carve is certified with every surface an obstacle (`_no_target_strict`). Off = as before.
+        self.no_target_certify: bool = False
         #: V11AB-pb7 (SL5i) — CLOSING with the latch evidence ``closed`` / ``not_empty`` / ``blocked`` all true (the fingers
         #: stopped on something): the held exemption's rule (the grasping hand's authorized rows on the manipulated object
         #: are dropped) applies to that call too. ``False`` (default) = pb6 / V11AB.
@@ -1342,6 +1345,8 @@ class SafePolicy:
 
         newest = max(observations, key=lambda o: o.timestamp)
         execution_path = self._execution_path(np.asarray(newest.robot_state, np.float64))
+        if bool(getattr(getattr(getattr(self.ag3s, "config", None), "clustering", None), "close_seed_grounding", False)):
+            self._close_seed_request(np.asarray(newest.robot_state, np.float64), manipulators)   # SL-PE1 (off: never)
         # T83 — the grasp corridor of this request (off: AG3S is never told).
         if bool(getattr(self.to_config.collision, "grasp_corridor_allow", False)):
             self._grasp_corridor_request(np.asarray(newest.robot_state, np.float64), manipulators)
@@ -1435,6 +1440,8 @@ class SafePolicy:
         # SUBTASK-e: 판정(`_verdict`)과 **같은 규칙**. 여기서 다르면 sqp 가 `violated` 로 내린 청크를
         # 판정이 인증됐다고 읽는다 (또는 그 반대) — HOLD 를 만드는 두 곳이 같은 술어를 쓴다.
         certified = geometry_certified(constraint_set)
+        if not certified and self.no_target_certify and self._no_target_strict(constraint_set):
+            certified = True     # SL-PE6 (off: never reached); the verdict gives `no_target_strict`
         if not certified and self.occluded_certify and self._occluded_certified(constraint_set):
             certified = True     # SL-GTTO6 F5 (off: never reached); the verdict keeps its `occluded_target` reason
         # IFG-NBC: the grasping fingers' light contact with a neighbour object (pre-grasp, near the target).
@@ -1456,6 +1463,40 @@ class SafePolicy:
             # T72 — last: the candidates are checked against this very snapshot (the scene the TrajOpt solves on).
             self._grasp_set_request(q_now, manipulators, context, debug, snapshot)
         return snapshot, q_now, certified
+
+    def _close_seed_request(self, q_now: np.ndarray, manipulators) -> None:
+        """SL-PE1 — where the incoming chunk closes the hand, given to AG3S before this request's grounding.
+
+        The seed is `fingertip_alignment`'s `plan_close` tip (finger-tip midpoint at the first chunk row whose gripper
+        command for this hand is below the latch threshold, planned arm pose, fingers at the measured opening) — the
+        quantity recorded as `grasp.tip_alignment.plan_close` since T43. Only before anything is attached (latch
+        SEARCHING / LATCHED / CLOSING): once held the closed command names the held object, not a target. Record:
+        `grasp.close_seed`."""
+        rec: dict[str, Any] = {"seed_m": None, "row": None, "phase": self._latch.phase.value}
+        seed = None
+        try:
+            if (self._latch.phase in (GraspPhase.SEARCHING, GraspPhase.LATCHED, GraspPhase.CLOSING)
+                    and getattr(self.ag3s, "attached", None) is None):
+                hand, parent_link, allowed = self._grasp_hand(manipulators)
+                hold = self.hold_links.get(hand, parent_link)
+                fingers = tuple(f for f in allowed if f != hold)
+                out = fingertip_alignment(
+                    self.constraint_robot_model, q_now, fingers, hold, np.zeros(3),
+                    chunk=self._pending.get("chunk"), layout=self.layout,
+                    gripper_column=self.gripper_columns[self._hand_index(hand)],
+                    closed_below=float(self._latch.config.gripper_closed_below))
+                pc = out.get("plan_close")
+                if pc:
+                    seed = np.asarray(pc["tip_m"], np.float64)
+                    rec.update(seed_m=[round(float(v), 5) for v in seed], row=int(pc["row"]))
+            else:
+                rec["why"] = "attached or not before the grasp"
+        except Exception as exc:  # noqa: BLE001 — no seed: grounding runs on attention as without the flag
+            rec["error"] = f"{type(exc).__name__}: {exc}"
+            seed = None
+        self.ag3s.set_close_seed(seed)
+        if isinstance(self._last_grasp_record, dict):
+            self._last_grasp_record["close_seed"] = rec
 
     def _grasp_set_request(self, q_now: np.ndarray, manipulators, context: dict, debug, snapshot) -> None:
         """T72 — the grasp set of this request (`GraspSetController.request`) and its reach anchor in `context`.
@@ -3558,6 +3599,18 @@ class SafePolicy:
         except Exception:  # noqa: BLE001 — 기록을 못 읽는 것으로 판정이 죽지 않는다
             return {}
 
+    def _no_target_strict(self, cs) -> bool:
+        """SL-PE6 — no target, the rest of the geometry certified, the latch SEARCHING, no manipulated object / contact
+        permission and no target-free exclusion: nothing is exempt from the field, so it is the strictest one."""
+        if cs is None:
+            return False
+        status = getattr(getattr(cs, "status", None), "value", None)
+        exclusion = (getattr(cs, "metrics", None) or {}).get("exclusion")
+        active = bool(exclusion.get("active")) if isinstance(exclusion, dict) else True
+        return bool(status == "no_target" and getattr(cs, "geometry_certified", False)
+                    and self._latch.phase is GraspPhase.SEARCHING
+                    and getattr(cs, "manipulated", None) is None and not active)
+
     def _occluded_certified(self, cs) -> bool:
         """SL-GTTO6 F5 — the `occluded_target` condition of `_certification_reason` (no_target, the rest of the
         geometry certified, the manipulated object `occluded` with its contact permission in this constraint set)."""
@@ -3593,6 +3646,10 @@ class SafePolicy:
                 f"no target this frame ({grounding}) but manipulated id={man.get('id')} is "
                 f"occluded (unseen {man.get('age_frames')} frame(s)); its last geometry keeps the "
                 "contact permission and the rest of the geometry is certified", **evidence)
+        if self.no_target_certify and self._no_target_strict(cs):   # SL-PE6 (off: never reached)
+            return wire.make_reason(
+                "no_target_strict", f"no target this frame ({grounding}), nothing latched or held, no contact "
+                "permission and no target-free carve: every surface is an obstacle", **evidence)
         if not bool(self.to_config.safety.require_certified_geometry):
             return wire.make_reason(
                 "uncertified_waived", f"geometry not certified (status={status}) but the server "

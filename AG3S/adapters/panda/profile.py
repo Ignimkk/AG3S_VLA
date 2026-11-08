@@ -1033,6 +1033,43 @@ AG3S_VERSIONS["AG3S-commonto-att-termsoff-pass-zr-ee-hdp-loose2-obst4-pts-nocarv
                  "--oracle-obstacle-objects": 0, "--oracle-obstacle-support": 1})
     + ATT_PERCEPTION_FLAGS + ("--scene-obstacle-objects",))
 GT15_VERSIONS = GT15_VERSIONS + GT24_VERSIONS
+#: SL-PE (dev-30, 2026-11-08 20:xx, decision log G150-): B5 without GT + the VLA's grasp point as the target identity.
+#: pe1 = + --close-seed-grounding (SL-PE1); pe123 = + --destination-after-held (PE2) + --scene-obstacle-held-exclude (PE3).
+PE_VERSIONS: tuple[str, ...] = ("AG3S-commonto-att-termsoff-pass-zr-ee-hdp-loose2-obst4-pts-nocarve-fh-t100-pe1",
+                                "AG3S-commonto-att-termsoff-pass-zr-ee-hdp-loose2-obst4-pts-nocarve-fh-t100-pe123")
+AG3S_VERSIONS[PE_VERSIONS[0]] = tuple(AG3S_VERSIONS[GT24_VERSIONS[0]]) + ("--close-seed-grounding",)
+AG3S_VERSIONS[PE_VERSIONS[1]] = tuple(AG3S_VERSIONS[PE_VERSIONS[0]]) + (
+    "--destination-after-held", "--scene-obstacle-held-exclude")
+GT15_VERSIONS = GT15_VERSIONS + PE_VERSIONS
+#: SL-PE v3 (dev-30, 2026-11-08 22:xx, G157): pe12345 = pe123 + --passthrough-obstacle-class-tests (PE4: the Panda held-object
+#: / support / destination row classes are not overridden by the scene obstacle set) + --destination-held-leader (PE5: the
+#: plate registers as the destination while held). PE1 itself also changed in v3 (graded seed attention, kept support plane).
+PE_VERSIONS = PE_VERSIONS + ("AG3S-commonto-att-termsoff-pass-zr-ee-hdp-loose2-obst4-pts-nocarve-fh-t100-pe12345",)
+AG3S_VERSIONS[PE_VERSIONS[2]] = tuple(AG3S_VERSIONS[PE_VERSIONS[1]]) + (
+    "--passthrough-obstacle-class-tests", "--destination-held-leader")
+GT15_VERSIONS = GT15_VERSIONS + PE_VERSIONS[2:]
+#: SL-PE (G158, 2026-11-08 22:4x): pe123456 = pe12345 + --no-target-certify (PE6: no HOLD on the first no-target calls; every
+#: surface an obstacle). pe125cls = the user-requested check of the earlier Panda method alone (G75 A'): the obstacle-object rows
+#: from the TO's row classes + the beneath rule, no scene obstacle set (so no PE3 / PE4); PE1 · PE2 · PE5 kept.
+PE_VERSIONS = PE_VERSIONS + ("AG3S-commonto-att-termsoff-pass-zr-ee-hdp-loose2-obst4-pts-nocarve-fh-t100-pe123456",
+                             "AG3S-commonto-att-termsoff-pass-zr-ee-hdp-loose2-obst2-pts-nocarve-fh-t100-pe125cls")
+AG3S_VERSIONS[PE_VERSIONS[3]] = tuple(AG3S_VERSIONS[PE_VERSIONS[2]]) + ("--no-target-certify",)
+AG3S_VERSIONS[PE_VERSIONS[4]] = tuple(x for x in AG3S_VERSIONS[PE_VERSIONS[2]] if x not in (
+    "--scene-obstacle-objects", "--scene-obstacle-held-exclude", "--passthrough-obstacle-class-tests")) + (
+    "--passthrough-obstacle-beneath",)
+GT15_VERSIONS = GT15_VERSIONS + PE_VERSIONS[3:]
+#: SL-PE7 (G159, 2026-11-09 00:3x): pe1234567 = pe123456 + --close-seed-attention-ratio 5 (the seed cut must carry attention).
+PE_VERSIONS = PE_VERSIONS + ("AG3S-commonto-att-termsoff-pass-zr-ee-hdp-loose2-obst4-pts-nocarve-fh-t100-pe1234567",)
+AG3S_VERSIONS[PE_VERSIONS[5]] = tuple(AG3S_VERSIONS[PE_VERSIONS[3]]) + ("--close-seed-attention-ratio", "5")
+GT15_VERSIONS = GT15_VERSIONS + PE_VERSIONS[5:]
+#: SL-QE2 (dev-e5, 2026-11-09 01:xx, G111): B5 (GT) / B5 without GT with the action QP bending the position only
+#: (--ee-action-qp-translation-only; E1a task 3: the F7 QP turned rx / ry / rz by ~1.0 and the grasp pose was lost, G110).
+QE2_VERSIONS: tuple[str, ...] = ("AG3S-commonto-gt2-termsoff-pass-zr-ee-hdp-loose2-obst3-pts-nocarve-fh-t100-tro",
+                                 "AG3S-commonto-att-termsoff-pass-zr-ee-hdp-loose2-obst4-pts-nocarve-fh-t100-tro")
+for _v in QE2_VERSIONS:
+    AG3S_VERSIONS[_v] = tuple(AG3S_VERSIONS[_v[:-len("-tro")]]) + ("--ee-action-qp-translation-only",)
+del _v
+GT15_VERSIONS = GT15_VERSIONS + QE2_VERSIONS
 #: (G88c, 03:5x) the A-alone ablation queued as ``…-obst3`` (gtto23, not started yet) gets the same two fixes, so A alone and
 #: A + B differ only by the held point model: ``…-obst3`` := A'' + no carve + support "under" (``…-obst3-pts`` = B'' keeps
 #: the flags it was evaluated with -- it was built above from the earlier definition).

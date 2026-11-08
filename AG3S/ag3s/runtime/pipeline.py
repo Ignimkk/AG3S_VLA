@@ -224,6 +224,12 @@ class AG3S:
         #: SL-GTTO: the last frame's GT grounding record (`metrics["grounding_source"]`). None unless
         #: `clustering.grounding_source == "oracle"`.
         self._grounding_frame: Optional[dict[str, Any]] = None
+        #: SL-PE1: this request's grasp seed (`set_close_seed`, consumed by the next grounding) and its record
+        #: (`metrics["close_seed"]`). Both None unless `clustering.close_seed_grounding`.
+        self._close_seed: Optional[np.ndarray] = None
+        self._close_seed_frame: Optional[dict[str, Any]] = None
+        #: SL-PE1: the last local support plane a seed cut stood on, kept for the episode (support test on calls without a seed).
+        self._close_seed_plane: Optional[np.ndarray] = None
         #: IFG-CL1: this frame's attention-surface record (`stats["target_free"]["attention_surface"]`) and code
         #: images (`{camera: (H, W) uint8}` or None), and this frame's render-mask record
         #: (`stats["robot_mask_render"]`). None unless `esdf.target_extent == "attention_surface"` /
@@ -503,6 +509,9 @@ class AG3S:
         self._oracle_pending = None
         self._oracle_frame = None
         self._grounding_frame = None   # SL-GTTO
+        self._close_seed = None   # SL-PE1
+        self._close_seed_frame = None
+        self._close_seed_plane = None
         self._obstacle_frame = None   # SL-GTTO19
         self._esdf_cameras_seen = set()   # SL-QE1: cameras that wrote voxels this episode (read only with esdf.dead_camera_seen_ok)
         self._obstacle_history = []
@@ -582,6 +591,77 @@ class AG3S:
         Given where `set_grasp_active` is. Only `clustering.latched_identity_hold` makes it a
         decision: then an unseen locked target is not switched away from (`TargetConfirm`)."""
         self._grasp_latched = bool(latched)
+
+    def set_close_seed(self, seed: Optional[Any]) -> None:
+        """SL-PE1 (`clustering.close_seed_grounding`): the point where the incoming chunk closes the hand (base frame,
+        finger-tip midpoint), or None. Consumed by the next grounding call; read only with the option on."""
+        self._close_seed = None if seed is None else np.asarray(seed, np.float64).reshape(3)
+
+    def _add_support_plane(self, plane: np.ndarray) -> None:
+        """SL-PE1: one more support plane for this call's T43 T 3(c) test (after the fitted ones `note_support` gave)."""
+        prev = getattr(self._target_confirm, "_support", None)
+        self._target_confirm.note_support(plane if prev is None else np.vstack([np.asarray(prev).reshape(-1, 4), plane]))
+
+    def _close_seed_grounding_input(self, attention_cloud, support_mask):
+        """SL-PE1 — `(cloud, exclude_mask)` for `ground_target`: with a seed and a cut, attention = raw = 1.0 on the object
+        cut out under the seed (`stages/close_seed.split_at_seed`, support-plane points excluded) and 0 elsewhere, the
+        exclude mask every other point (as `_oracle_grounding_input`); same cloud, same indices. No seed or no cut: the
+        inputs unchanged. `TargetConfirm.note_close_seed` tells the confirm stage whether this call's lead is the seed."""
+        from AG3S.ag3s.stages.close_seed import split_at_seed
+
+        seed, self._close_seed = self._close_seed, None
+        rec: dict[str, Any] = {"seed": seed is not None, "applied": False}
+        self._close_seed_frame = rec
+        self._target_confirm.note_close_seed(False)
+        if self._close_seed_plane is not None:
+            # the plane a seed cut found earlier in this episode still holds the object up on calls without a seed (pe123b
+            # s8 t4: the bowl in the drawer was `inadmissible_match` on every call between two seeds)
+            self._add_support_plane(self._close_seed_plane)
+            rec["kept_support_plane_z_m"] = round(float(self._close_seed_plane[0, 3]), 4)
+        if seed is None or attention_cloud is None or len(attention_cloud) == 0:
+            return attention_cloud, support_mask
+        pts = np.asarray(attention_cloud.cloud.points, np.float64).reshape(-1, 3)
+        idx, cut = split_at_seed(pts, seed, exclude_mask=support_mask)
+        rec["cut"] = cut
+        if idx is None:
+            return attention_cloud, support_mask
+        ratio = getattr(self.config.clustering, "close_seed_attention_ratio", None)
+        cur = getattr(self, "_manipulated", None)
+        same = (cur is not None and getattr(cur, "centroid", None) is not None
+                and float(np.linalg.norm(pts[idx].mean(axis=0) - np.asarray(cur.centroid, np.float64).reshape(3))) <= 0.06)
+        rec["same_as_identity"] = bool(same)
+        if ratio is not None and not same:
+            # SL-PE7: the attention must be on a cut that would *change* the identity (off: not read). A cut on the current
+            # object only refreshes its geometry -- vetting it left a stale shape while the fingers hid the bowl (pe1234567
+            # SafeLIBERO t3e4 call 14, 3.0 x median) and the moved bowl became an obstacle row for 19 calls.
+            raw = attention_cloud.raw_attention if attention_cloud.raw_attention is not None else attention_cloud.attention
+            raw = np.asarray(raw, np.float64).reshape(-1)
+            sup = (np.zeros(len(raw), bool) if support_mask is None or len(np.asarray(support_mask).reshape(-1)) != len(raw)
+                   else np.asarray(support_mask, bool).reshape(-1))
+            med = float(np.median(raw[~sup])) if (~sup).any() else 0.0
+            rel = float(raw[idx].mean() / med) if med > 0 else float("inf")
+            rec["attention_ratio"] = round(rel, 3) if np.isfinite(rel) else None
+            if rel < float(ratio):
+                rec["rejected"] = f"attention {rel:.2f} x median < {float(ratio)}"
+                return attention_cloud, support_mask
+        att = np.zeros(len(pts), np.float32)
+        # graded by the distance to the seed: when the grounding's clustering splits the cut (bowl + a drawer-edge strip),
+        # the part under the hand leads (pe123b s8 t4: equal attention let the strip win 4 times)
+        dist = np.linalg.norm(pts[idx] - seed, axis=1)
+        att[idx] = np.clip(1.0 - dist / 0.15, 0.2, 1.0).astype(np.float32)
+        rec["applied"] = True
+        self._target_confirm.note_close_seed(True)
+        # The local support the cut stood on (cabinet top, drawer floor, box lid) is this frame's evidence that the object
+        # rests on something: hand it to the T43 T 3(c) support test with the fitted planes (an object on a cabinet is
+        # 240 mm above the only fitted plane, the table, and was refused `not_supported` -- pe123 v1, LIBERO s8 t9 call 7).
+        top = cut.get("local_support_top_m")
+        if top is not None:
+            plane = np.array([[0.0, 0.0, 1.0, float(top) - 0.01]])   # free side z >= top - 10 mm (band top is <= 10 mm high)
+            if self._close_seed_plane is None or abs(float(self._close_seed_plane[0, 3]) - float(plane[0, 3])) > 1e-9:
+                self._add_support_plane(plane)
+            self._close_seed_plane = plane
+            rec["support_plane_z_m"] = round(float(top) - 0.01, 4)
+        return AttentionPointCloud(attention_cloud.cloud, att, att.copy()), att <= 0.0
 
     def set_subtask(self, p: Optional[Mapping[str, Any]]) -> None:
         """This request's subtask label probabilities (SUBTASK-c), as `set_grasp_active` is given.
@@ -1023,7 +1103,20 @@ class AG3S:
                    excluded={"destination": names.get(dest) if dest is not None else None,
                              "target_support": names.get(getattr(self, "_target_support_code", None))})
         return out, rec
-    def _scene_obstacle_points(self, cloud, support_mask, target_points, destination_points):
+    def _held_points_now(self, robot_state) -> Optional[np.ndarray]:
+        """SL-PE3 — the attached object's snapshot points where the hand holds them at `robot_state` (base frame), or
+        None when nothing is attached / no pose."""
+        if self._attached is None or robot_state is None:
+            return None
+        from AG3S.ag3s.constraints.attached import base_frame_points
+
+        try:
+            pts = base_frame_points(self._attached, self.constraint_robot_model, np.asarray(robot_state, np.float64))
+        except Exception:  # noqa: BLE001 — no pose: nothing extra is excluded (the SL-GTTO20 rules still apply)
+            return None
+        return pts if len(pts) else None
+
+    def _scene_obstacle_points(self, cloud, support_mask, target_points, destination_points, held_points=None):
         """SL-GTTO20 (`clustering.scene_obstacle_objects`) — `(points (K, 3) or None, record)`: the obstacle-object surface
         from AG3S's own perception (no GT). Connected components of the self-filtered, non-support cloud on a 15 mm grid;
         excluded: components within 15 mm of the manipulated object's points (the last observed geometry while occluded /
@@ -1060,6 +1153,11 @@ class AG3S:
                         near = cKDTree(base[:, :2]).query(pts[under, :2])[0] <= 0.01
                         drop.update(int(c) for c in np.unique(comp[under][near]))
                 n_target_support = len(drop)
+                if held_points is not None and len(held_points):   # SL-PE3: the object in the hand now
+                    before = len(drop)
+                    for ids in tree.query_ball_point(np.asarray(held_points, np.float64).reshape(-1, 3), v):
+                        drop.update(int(comp[i]) for i in ids)
+                    rec["n_dropped_held"] = len(drop) - before
                 if destination_points is not None and len(destination_points):
                     for ids in tree.query_ball_point(np.asarray(destination_points, np.float64).reshape(-1, 3), v):
                         drop.update(int(comp[i]) for i in ids)
@@ -3041,6 +3139,8 @@ class AG3S:
             if getattr(cfg.clustering, "oracle_obstacle_objects", False):   # SL-GTTO19 (off: not called)
                 self._obstacle_frame = self._oracle_obstacle_points(fusion)
         # --- SL-GTTO — end
+        if getattr(cfg.clustering, "close_seed_grounding", False):   # SL-PE1 (off: not called, nothing recorded)
+            grounding_cloud, grounding_exclude = self._close_seed_grounding_input(grounding_cloud, grounding_exclude)
         with profiler.stage("target_grounding"):
             grounding = ground_target(
                 grounding_cloud,
@@ -3057,6 +3157,11 @@ class AG3S:
                 grounding,
                 target=self._with_camera_provenance(grounding.target, fusion, grounding_cloud),
             )
+        if self._close_seed_frame is not None:   # SL-PE1: what grounding returned on the seed input
+            self._close_seed_frame["status"] = getattr(grounding.status, "value", str(grounding.status))
+            self._close_seed_frame["n_target_points"] = (
+                0 if grounding.target is None else int(len(grounding.target.point_indices)))
+            self._close_seed_frame["switched"] = bool(getattr(self._target_confirm, "close_seed_switched", False))
         if self._grounding_frame is not None:   # SL-GTTO: what grounding returned on the GT input
             self._grounding_frame["status"] = getattr(grounding.status, "value", str(grounding.status))
             self._grounding_frame["n_target_points"] = (
@@ -3101,7 +3206,9 @@ class AG3S:
         if getattr(cfg.clustering, "scene_obstacle_objects", False):   # SL-GTTO20 (off: not called)
             self._obstacle_frame = self._scene_obstacle_points(
                 cloud, support_mask, None if manipulated_geometry is None else getattr(manipulated_geometry, "points", None),
-                destination_points)
+                destination_points,
+                **({"held_points": self._held_points_now(robot_state)}   # SL-PE3 (off: the call is unchanged)
+                   if getattr(cfg.clustering, "scene_obstacle_held_exclude", False) else {}))
         if self._target_confirm.destinations.last_event == "registered":
             notes.append(
                 f"destination registered from perception: id={destination.id}, "
@@ -3464,6 +3571,8 @@ class AG3S:
             constraint_set.metrics["confidence_gate"] = dict(self._gate_frame or {})
         if self._grounding_frame is not None:   # SL-GTTO (`grounding_source == "oracle"` only; off: no key)
             constraint_set.metrics["grounding_source"] = dict(self._grounding_frame)
+        if self._close_seed_frame is not None:   # SL-PE1 (off: no key)
+            constraint_set.metrics["close_seed"] = dict(self._close_seed_frame)
         of = getattr(self, "_obstacle_frame", None)
         if of is not None:   # SL-GTTO19 (off: None, nothing attached)
             object.__setattr__(constraint_set, "obstacle_object_points", of[0])

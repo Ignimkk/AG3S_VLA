@@ -1956,7 +1956,8 @@ class CollisionLinearizer:
 
     # --- SL-GTTO16 (A) — begin: the obstacle-object rows of a trajectory (read only by `sqp._clear_passthrough`)
     def obstacle_object_rows(self, trajectory: np.ndarray, q_now: np.ndarray, scene: SceneSnapshot,
-                             steps: Optional[int] = None, beneath: bool = False) -> tuple[float, Optional[dict]]:
+                             steps: Optional[int] = None, beneath: bool = False,
+                             class_tests: bool = False) -> tuple[float, Optional[dict]]:
         """`(worst clearance over the ESDF rows whose nearest surface is an obstacle object, identity)` — `inf`, `None`
         when there is no such row (or no field).
 
@@ -2035,7 +2036,10 @@ class CollisionLinearizer:
                 on = (cKDTree(oop).query(surf)[0] <= _OBJECT_SURFACE_TOL_M) & ok
             else:
                 on = np.zeros(len(flat), bool)
-            obst = on.reshape(shape)
+            # SL-PE4 (`class_tests`): the set says "an obstacle object is the nearest surface", the class tests above may
+            # still say it is the manipulated / held object, a support or the destination -- both must agree. Off: the set
+            # alone decides (SL-GTTO19, the GT set).
+            obst = (on.reshape(shape) & obst) if class_tests else on.reshape(shape)
             beneath = False
         if beneath and obst.any():
             # SL-GTTO16 A' (2026-11-08) — what the grasped object rests on is not an obstacle object for the hand: while

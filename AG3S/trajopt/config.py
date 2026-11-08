@@ -951,6 +951,12 @@ class SqpConfig:
     #: SL-GTTO22 (2026-11-08 04:0x): the obstacle-object rows are checked over the whole chunk (look-ahead tail included), not
     #: the executed window only -- B2 SafeLIBERO tripped in the same call as the collision (t3e3) or one call before (t2e4).
     passthrough_obstacle_full_horizon: bool = False
+    #: SL-PE4 (dev-30, 2026-11-08): with an obstacle-object point set, a row is an obstacle-object row only if its nearest
+    #: surface is on that set AND the earlier class tests still call it an obstacle (not the manipulated object, not in the
+    #: target volume, not a support plane, not the destination label, not the held object's own remnant). The GT set (B3/B5)
+    #: needed no class tests; the GT-free scene set holds the held bowl / supports, and the SL-GTTO19 override switched off
+    #: the Panda held-object rules for exactly those rows (pe123b s8 t9 call 14-23). False = SL-GTTO19 as before.
+    passthrough_obstacle_class_tests: bool = False
     # --- T88 — end ---
 
     def validate(self) -> None:
@@ -962,6 +968,8 @@ class SqpConfig:
             raise TrajOptConfigError(f"sqp.passthrough_limit_tolerance must be >= 0, got {self.passthrough_limit_tolerance!r}")
         if not isinstance(self.passthrough_obstacle_full_horizon, bool):   # SL-GTTO22
             raise TrajOptConfigError("sqp.passthrough_obstacle_full_horizon must be a bool")
+        if not isinstance(self.passthrough_obstacle_class_tests, bool):   # SL-PE4
+            raise TrajOptConfigError("sqp.passthrough_obstacle_class_tests must be a bool")
         if not isinstance(self.passthrough_obstacle_beneath, bool):   # SL-GTTO16 A'
             raise TrajOptConfigError(f"sqp.passthrough_obstacle_beneath must be a bool, got {self.passthrough_obstacle_beneath!r}")
         if self.passthrough_obstacle_tolerance is not None and not (   # SL-GTTO16
@@ -1542,6 +1550,7 @@ _OMIT_WHEN_DEFAULT.update({("sqp", "passthrough_tolerance"): 0.0})   # SL-GTTO14
 _OMIT_WHEN_DEFAULT.update({("sqp", "passthrough_limit_tolerance"): 0.0})   # SL-GTTO15
 _OMIT_WHEN_DEFAULT.update({("sqp", "passthrough_obstacle_tolerance"): None})   # SL-GTTO16
 _OMIT_WHEN_DEFAULT.update({("sqp", "passthrough_obstacle_beneath"): False})
+_OMIT_WHEN_DEFAULT.update({("sqp", "passthrough_obstacle_class_tests"): False})   # SL-PE4
 _OMIT_WHEN_DEFAULT.update({("sqp", "passthrough_obstacle_full_horizon"): False})   # SL-GTTO22   # SL-GTTO16 A'
 # --- T88 — end ---
 #: T72 — the grasp-set reach constraint: without `--grasp-set-to` the config dump keeps the keys it had before.

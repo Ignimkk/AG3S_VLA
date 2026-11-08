@@ -166,6 +166,8 @@ SUBTASK_GATED = "subtask_gated"
 VACANCY_RELEASED = "vacancy_released"
 #: SL8b (`clustering.target_switch_window`): `ConfirmDecision.reason` of a `switch` that a window vote earned.
 WINDOW_VOTE = "window_vote"
+#: SL-PE1: this call's lead is the object cut out under the VLA's grasp point; adopted at once (before attach).
+CLOSE_SEED_SWITCH = "close_seed_switch"
 #: SL8b (`clustering.identity_attention_release`): `reason` of a `switch` to the cluster the seed attention
 #: points at, after the held object had been off-attention for K calls.
 ATTENTION_RELEASE = "attention_release"
@@ -748,6 +750,13 @@ class TargetConfirm:
         self.refused_release_frames: Optional[int] = None if rr is None else int(rr)
         #: The caller's grasp latch has the pick target locked or is closing (`note_latched`).
         self._latched = False
+        # --- SL-PE1 · PE2 (both off by default; off = not read anywhere) ---
+        self.close_seed_grounding = bool(getattr(cfg, "close_seed_grounding", False))
+        self.destination_after_held = bool(getattr(cfg, "destination_after_held", False))
+        self.destination_held_leader = bool(getattr(cfg, "destination_held_leader", False))   # SL-PE5
+        self._close_seed = False            # this call's clusters come from the grasp seed (`note_close_seed`)
+        self.close_seed_switched = False    # this call adopted the seed object by CLOSE_SEED_SWITCH
+        self._seed_adopted_id: Optional[int] = None   # the identity the grasp seed named (adopted or confirmed by it)
         #: This frame's 3(a) suppression (recorded in `ConfirmDecision.latched_hold`).
         self._latched_hold = False
         #: Consecutive grounding calls whose manipulated object the exclusion gate refused for a
@@ -943,6 +952,8 @@ class TargetConfirm:
         self._held = self._challenger = None
         self._streak = 0
         self._id = None
+        self._close_seed = self.close_seed_switched = False   # SL-PE1
+        self._seed_adopted_id = None
         self._next_id = 0
         self._switched_from = None
         self._geometry = None
@@ -997,6 +1008,11 @@ class TargetConfirm:
         """T43 T step 2: a grasp is in progress (closing) and nothing is attached yet. Given before
         each grounding call (as `freeze`); read only with `clustering.closing_keep_geometry`."""
         self._pre_attach_grasp = bool(on)
+
+    def note_close_seed(self, on: bool) -> None:
+        """SL-PE1: this grounding call's input is the object cut out under the grasp seed (given before each call by
+        `AG3S._close_seed_grounding_input`). Read only with `clustering.close_seed_grounding`."""
+        self._close_seed = bool(on)
 
     def note_latched(self, on: bool) -> None:
         """T43 T 3(a): the caller's grasp latch has the pick target locked or is closing. Given
@@ -1303,6 +1319,7 @@ class TargetConfirm:
         self._supersede = False
         self._subtask_blocked = self._subtask_would = None
         self.identity_record = None   # SL8b: per call
+        self.close_seed_switched = False   # SL-PE1: per call
         seeds, self._seeds = self._seeds, None
         self._release_if_placed_home()
         if self.refused_release_frames is not None:
@@ -1418,11 +1435,23 @@ class TargetConfirm:
         if held_rank is not None and lead == held_rank:
             # The held object is the best admissible candidate. Track it and forget any challenger:
             # leading again after a gap has to start the count over.
+            if self.close_seed_grounding and self._close_seed:   # SL-PE1: the seed confirms the held object
+                self._seed_adopted_id = self._id
             self._seen(clusters[held_rank], _at(adm, held_rank))
             self._challenger, self._streak = None, 0
             if self.switch_window is not None:
                 self._vote(None)   # SL8b: a call without a vote ages the window, it does not clear it
             return self._record(clusters[held_rank], held_rank, "keep", reason=reason)
+
+        # SL-PE1: the VLA's own grasp point names this object -- adopt it now, before the close. Once closing (frozen, not
+        # attached) only an identity the seed never named may still be replaced: a seed-named object is locked from the
+        # close command on (pe123 v1: the cut flipped between the bowl and drawer pieces while closing, s8 t4 · t9).
+        if (self.close_seed_grounding and self._close_seed and lead is not None
+                and (not self.frozen or (self._pre_attach_grasp and self._seed_adopted_id != self._id))):
+            self._adopt(clusters[lead], switched_from=self._id, adm=_at(adm, lead))
+            self._challenger, self._streak = None, 0
+            self.close_seed_switched = True
+            return self._record(clusters[lead], lead, "switch", reason=CLOSE_SEED_SWITCH)
 
         challenger = clusters[lead] if lead is not None else None
         counts = (challenger is not None and not self.frozen and not self._hand_occluded
@@ -1778,8 +1807,16 @@ class TargetConfirm:
         extents = [c.principal_extents if c.principal_extents is not None
                    else principal_extents(p) for c, p in zip(clusters, cluster_points)]
         grasp = [graspable(e, self.max_opening) for e in extents]
-        if not self.oracle_admissible:
-            self.destinations.observe(clusters, cluster_points, grasp, frame=self._frame)
+        # SL-PE2: with `destination_after_held`, perception registers / refreshes the destination only while an object
+        # is held (frozen, and not the pre-attach closing); off: every frame as before
+        if not self.oracle_admissible and (not self.destination_after_held
+                                           or (self.frozen and not self._pre_attach_grasp)):
+            reg_grasp = grasp
+            hand = getattr(self, "_frame_hand", None)
+            if self.destination_held_leader and self.frozen and not self._pre_attach_grasp and hand is not None:
+                # SL-PE5: holding something, a cluster away from the hand is not the next pick -- it is where to put it
+                reg_grasp = [False if hand.gap(p) > 0.06 else g for p, g in zip(cluster_points, grasp)]
+            self.destinations.observe(clusters, cluster_points, reg_grasp, frame=self._frame)
         # SL-GTTO2 F1: every GT cluster is the target, so none is registered as the destination (an injected
         # destination still applies).
         dest = self.destinations.current
@@ -1826,6 +1863,8 @@ class TargetConfirm:
         self._votes, self._attn_shares, self._attn_pending = [], [], False   # SL8b: a new object, new evidence
         self._id = self._next_id
         self._next_id += 1
+        if self.close_seed_grounding and self._close_seed:   # SL-PE1: this object was named by the grasp seed
+            self._seed_adopted_id = self._id
         self._switched_from = switched_from
         self._geometry = None  # the previous object's shape must never stand in for this one
         self._last_seen_time = None

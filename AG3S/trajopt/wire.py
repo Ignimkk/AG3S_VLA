@@ -141,6 +141,7 @@ T16 에서 `--no-collision` 인데도 34 청크 중 25 개가 HOLD 였다. 이�
 | `uncertified_waived` | 기하 미인증이지만 서버가 `require_certified_geometry=False` 로 떠 있다 | 실행 |
 | `subtask_no_target` | target 이 없는 이유가 **subtask gate** 다 (`grounding_status=subtask_gated` · `validity=valid` · carve 중인 대상 없음, `ag3s.types.subtask_no_target`). SUBTASK-f: gate on ∧ label `home` ∧ PLACED 도달 뒤의 `no_admissible` (잡을 것이 남지 않음) 도 같다. T46c W1 (`--placed-no-seed-certify`, 기본 off): 같은 조건의 `no_seed` 도 같다 — evidence 의 `grounding_status` 가 셋을 가른다. 이 기하는 **인증된 것으로 본다** (`geometry_certified=True`) — 이 사유는 "target 이 없는데 왜 실행했나" 를 남기는 기록이다 (SUBTASK-e) | 실행 |
 | `follow_to` | **T43 Z6** (`serve_safe --hold-follow-to N`, 기본 off): `collision` 행이 전부 margin 안쪽뿐 (ESDF − r ≥ 0) 이고 그 최소 clearance 가 현재 상태보다 작지 않으며 refined 가 정책 reference 가 아니다 — TO refined chunk 를 실행한다. 원래 `collision` 사유는 evidence `replaced` 에 | 실행 |
+| `no_target_strict` | **SL-PE6** (`serve_safe --no-target-certify`, 기본 off): `no_target` 이고 나머지 기하는 인증됐으며 (`validity=valid`), latch 가 SEARCHING, manipulated · 접촉 권한 · target-free 제외가 모두 없다 — 모든 표면이 장애물인 가장 엄격한 field 라 실행한다 (episode 첫 call 들의 미인증 HOLD, gt24att t4 3–8 call) | 실행 |
 | `collision` | 권한 없는 link, 또는 manipulated 가 아닌 물체와의 관통 (> tolerance) | HOLD |
 | `uncertified` | `geometry_certified=False` (위 `occluded_target` 이 아닌 것 전부. `subtask_no_target` 은 미인증이 아니다) | HOLD |
 | `unverified` | 최적화기가 검사하지 못했다 (`solver_failed` · `unconstrained`) | HOLD |
@@ -371,7 +372,7 @@ VERDICT_REASONS = "verdict_reasons"
 #: `subtask_no_target` (SUBTASK-e) 는 끝이 아니라 실행 쪽 자리에 넣었다 — 이 튜플의 순서를 읽는
 #: 곳은 없고 (`GATE_DEFAULT` 가 처리를 정한다), 표와 같은 순서가 읽기 쉽다.
 REASON_KINDS = ("allowed_contact", "budget_only", "occluded_target", "uncertified_waived",
-                "subtask_no_target", "follow_to",
+                "subtask_no_target", "follow_to", "no_target_strict",
                 "collision", "uncertified", "unverified", "comms", "no_perception",
                 "task_not_ready")
 
@@ -388,6 +389,9 @@ GATE_DEFAULT: dict[str, str] = {
     # SUBTASK-e — gate 가 일부러 비운 target. 기하는 인증됐다 (carve 없는 가장 보수적인 field).
     # 이 kind 를 모르는 옛 클라이언트는 HOLD 한다 (fail closed) — 서버와 같은 wire 를 써야 실행된다.
     "subtask_no_target": "execute",
+    # SL-PE6 (`--no-target-certify`, off by default): no target, nothing latched / held, no contact permission and no
+    # target-free carve -- every surface is an obstacle, the strictest field there is. A client without this kind HOLDs.
+    "no_target_strict": "execute",
     # T43 Z6 — `collision` rows that are margin-only and not worse than the current state; the TO's
     # refined chunk runs (`SafePolicy._follow_to`, `serve_safe --hold-follow-to`). A client that does
     # not know the kind holds (fail closed).

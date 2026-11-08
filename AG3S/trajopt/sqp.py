@@ -87,6 +87,11 @@ class TrajectoryOptimizer:
     #: hard-QP solution). Rows whose action gradient is ~0 (step 0 = q_now, no action reaches it) are left out of the QP
     #: (counted in `ee_action_qp.n_rows_unreachable`); the final check still sees them.
     ee_action_scaled = False
+    #: SL-QE2 (dev-e5, 2026-11-09, `--ee-action-qp-translation-only`, default off = None): action dims (column of ``a_ref``)
+    #: the action QP may not change (lower = upper = 0). Panda: (3, 4, 5) = the rotation part of ``[pos 3, rot 3]`` -- the
+    #: correction bends the policy's position only, as the E1a multi-link CBF does (E1a task 3: the F7 QP moved rx / ry / rz
+    #: by ~1.0 on the first intervention, the grasp pose was lost; G110).
+    ee_action_fixed_dims = None
     ee_action_scaled_quad_weight = 1.0e4
     ee_action_scaled_linear_weight = 1.0e2
 
@@ -1391,7 +1396,8 @@ class TrajectoryOptimizer:
             full = bool(getattr(self.config.sqp, "passthrough_obstacle_full_horizon", False))   # SL-GTTO22
             worst, pair = self.linearizer.obstacle_object_rows(
                 reference, q_now, scene, steps=None if full else self.lookahead_from,
-                beneath=bool(getattr(self.config.sqp, "passthrough_obstacle_beneath", False)))
+                beneath=bool(getattr(self.config.sqp, "passthrough_obstacle_beneath", False)),
+                **({"class_tests": True} if getattr(self.config.sqp, "passthrough_obstacle_class_tests", False) else {}))
         except Exception as exc:   # fail closed: an unreadable classification is not a clear chunk
             import traceback
             record["obstacle_rows"] = {"error": repr(exc), "where": traceback.format_exc(limit=-3)[-900:]}
@@ -1446,10 +1452,18 @@ class TrajectoryOptimizer:
             raise ValueError(f"ee_action_map M {M.shape} does not match the chunk ({H * nq}, {n_x})")
         lo_x = (-1.0 - a_ref).reshape(-1)
         hi_x = (1.0 - a_ref).reshape(-1)
+        fixed = self.ee_action_fixed_dims   # SL-QE2 (off: None, the box above unchanged)
+        if fixed:
+            fmask = np.zeros(a_ref.shape, bool)
+            fmask[:, list(fixed)] = True
+            lo_x[fmask.reshape(-1)] = 0.0
+            hi_x[fmask.reshape(-1)] = 0.0
         x = np.zeros(n_x)
         backoff = float(cfg.reduction.linearization_backoff)
         trajectory = np.array(reference, np.float64)
         rec = {"iterations": 0, "rows": [], "status": [], "slack_max_m": 0.0}
+        if fixed:
+            rec["fixed_dims"] = [int(d) for d in fixed]   # SL-QE2
         it = 0
         for it in range(1, int(self.ee_action_iterations) + 1):
             rows = self.linearizer.linearize(trajectory, q_now, scene, cfg)

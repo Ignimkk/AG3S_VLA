@@ -690,6 +690,7 @@ PORTED_FINAL_CONFIG_DESTS: tuple[str, ...] = (
     'oracle_destination', 'destination_margin_mm',
     # SL-GTTO11 F9a: the scaled form of the F7 action QP (SafePolicy optimizer attribute, set below)
     'ee_action_qp_scaled',
+    'ee_action_qp_translation_only',   # SL-QE2 (dev-e5, 2026-11-09)
     # SL-GTTO11 (c'): the opening rule's `moved` check (LatchConfig.opening_rule_moved_min, through panda_latch_config)
     'grasp_opening_rule_moved',
     # SL-GTTO14 (G69): the accepted model violation tau (sqp.passthrough_tolerance + safety.violation_tolerance, through
@@ -719,6 +720,15 @@ PORTED_FINAL_CONFIG_DESTS: tuple[str, ...] = (
     'ee_action_qp',
     # SL-QE1 (dev-e5, 2026-11-08): G3's live-camera exception (esdf key through serve_safe.dynamic_field_section)
     'esdf_dead_camera_seen_ok',
+    # SL-PE1-3 (dev-30, 2026-11-08): grasp-seed grounding, destination after held, held object out of the scene obstacles
+    # (clustering keys through serve_safe.t43t_identity_section; SafePolicy reads clustering.close_seed_grounding)
+    'close_seed_grounding', 'destination_after_held', 'scene_obstacle_held_exclude',
+    # SL-PE4 (sqp key through serve_safe, same path as passthrough_obstacle_beneath) · SL-PE5 (clustering key)
+    'passthrough_obstacle_class_tests', 'destination_held_leader',
+    # SL-PE6: no-target frames certified with every surface an obstacle (SafePolicy switch, same path as occluded_certify)
+    'no_target_certify',
+    # SL-PE7: the attention vets the grasp seed (clustering key)
+    'close_seed_attention_ratio',
 )
 #: SL-GTTO — the target extents the Panda server runs (``--target-extent``; SL7 attention-surface, SL-GTTO oracle-visible).
 PORTED_TARGET_EXTENTS: tuple[str, ...] = ("estimated", "attention-surface", "oracle-visible")
@@ -1093,6 +1103,9 @@ def build_safe_server(policy, args, *, attention_model=None, gpu_warm_up: bool =
         if getattr(args, "ee_action_qp_scaled", False):   # SL-GTTO11 F9a (off: the F7 QP as before)
             safe.refiner.optimizer.ee_action_scaled = True
             grasp_contact = {**grasp_contact, "ee_action_qp_scaled": True}
+        if getattr(args, "ee_action_qp_translation_only", False):   # SL-QE2 (off: every action dim free, as before)
+            safe.refiner.optimizer.ee_action_fixed_dims = (3, 4, 5)   # Panda a_ref = [pos 3, rot 3] (action.ee_action_map)
+            grasp_contact = {**grasp_contact, "ee_action_qp_translation_only": True}
     gpu = gpu_seeds_setup(safe, to_config, warm_up=gpu_warm_up)
     inert = []
     ss.announce_subtask_from_latch(args)   # SL7 (T92): one start line when on

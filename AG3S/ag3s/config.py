@@ -482,6 +482,35 @@ class ClusteringConfig:
     #: obstacle standing next to the bowl, B'' SafeLIBERO t2e0) or "under" (only points under the target's base: within
     #: 10 mm of the target points that are within 10 mm of its lowest point).
     oracle_obstacle_support: str = "near"
+    # --- SL-PE (dev-30, 2026-11-08) — begin
+    #: SL-PE1 -- target identity from where the VLA's chunk closes the hand. When the caller gives a seed point
+    #: (`AG3S.set_close_seed`: the finger-tip midpoint at the first row of the incoming chunk whose gripper command is below
+    #: the latch threshold, before anything is attached), grounding sees only the object cut out under that point
+    #: (`stages/close_seed.split_at_seed`: local upward support band removed, components, flat walls removed when the
+    #: component is too large) and `TargetConfirm` adopts it at once (reason `close_seed_switch`) instead of waiting for a
+    #: 3-frame streak. No seed this call (no close command in the chunk, or the cut found nothing) = attention grounding as
+    #: before. Evidence: gt24att records, nearest true object to the seed 2 calls before the close = target in 34/36 ep.
+    close_seed_grounding: bool = False
+    #: SL-PE2 -- the destination is registered from perception only while an object is held (frozen and attached). The
+    #: attention leads the not-graspable cabinet+bowl cluster before the grasp, which got registered as the destination
+    #: (LIBERO t9 / SafeLIBERO t3, dev-38) and put the real target inside the destination box.
+    destination_after_held: bool = False
+    #: SL-PE3 -- `scene_obstacle_objects` also drops, while an object is attached, the components within 15 mm of the held
+    #: object's points where the hand holds them now (attached points x T_base_parent(q)): the lifted bowl was left in the
+    #: obstacle-object set (LIBERO t7 s8/s9, 65/67 HELD chunks, 33 interventions; dev-38 held_m4).
+    scene_obstacle_held_exclude: bool = False
+    #: SL-PE5 -- while an object is held, the attention leader that is not in the hand (> 60 mm from every hand sphere) is
+    #: a destination candidate even when it is graspable-sized. A plate is 10.7 x 135 x 135 mm: "graspable" by its narrowest
+    #: extent, so the not-graspable rule never registered it and it stayed a scene obstacle at the place (pe123b s8 t9 / t3;
+    #: gt24att: no destination registered in any episode). Needs `destination_after_held`.
+    destination_held_leader: bool = False
+    #: SL-PE7 -- the attention vets the grasp seed: a cut is used only when its mean raw attention is at least this many times
+    #: the median raw attention of the non-support cloud. The seed once fell on the wine bottle next to the bowl (pe12345
+    #: SafeLIBERO t3e3 call 48-49, 0.45-0.97 x median) and adopting it removed the bottle from the obstacle set just before
+    #: the arm hid it (real collision). On the gt24att + pe12345 records 5 keeps 97.7 % of the target cuts (487) and drops
+    #: those three. None (default) = no vetting.
+    close_seed_attention_ratio: float | None = None
+    # --- SL-PE — end
     #: **T43 T 3(b) — release an identity the exclusion gate keeps refusing.** An integer N = when
     #: `AG3S._exclusion_gate` refuses the manipulated object because it overlaps the destination on
     #: N consecutive grounding calls (and nothing is frozen), the identity is let go at the start of
@@ -709,6 +738,23 @@ class ClusteringConfig:
             raise AG3SConfigError(f"clustering.scene_obstacle_objects must be true or false, got {self.scene_obstacle_objects!r}")
         if self.scene_obstacle_objects and self.oracle_obstacle_objects:
             raise AG3SConfigError("clustering.scene_obstacle_objects and oracle_obstacle_objects are two sources of one set")
+        for _name in ("close_seed_grounding", "destination_after_held", "scene_obstacle_held_exclude",
+                      "destination_held_leader"):   # SL-PE
+            if not isinstance(getattr(self, _name), bool):
+                raise AG3SConfigError(f"clustering.{_name} must be true or false, got {getattr(self, _name)!r}")
+        if self.close_seed_grounding and self.grounding_source != "attention":
+            raise AG3SConfigError("clustering.close_seed_grounding replaces the attention grounding input; "
+                                  f"grounding_source is {self.grounding_source!r}")
+        r = self.close_seed_attention_ratio   # SL-PE7
+        if r is not None and (isinstance(r, bool) or not isinstance(r, (int, float)) or not math.isfinite(float(r))
+                              or float(r) <= 0.0):
+            raise AG3SConfigError(f"clustering.close_seed_attention_ratio must be a positive number or None, got {r!r}")
+        if r is not None and not self.close_seed_grounding:
+            raise AG3SConfigError("clustering.close_seed_attention_ratio needs clustering.close_seed_grounding")
+        if self.destination_held_leader and not self.destination_after_held:
+            raise AG3SConfigError("clustering.destination_held_leader needs clustering.destination_after_held")
+        if self.scene_obstacle_held_exclude and not self.scene_obstacle_objects:
+            raise AG3SConfigError("clustering.scene_obstacle_held_exclude needs clustering.scene_obstacle_objects")
         if not isinstance(self.latch_reach_hand_relative, bool):  # T46g
             raise AG3SConfigError(
                 f"clustering.latch_reach_hand_relative must be true or false, "

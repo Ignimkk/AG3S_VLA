@@ -1107,6 +1107,12 @@ def t43t_identity_section(args) -> dict:
                  "oracle_obstacle_objects", "scene_obstacle_objects"):   # SL-GTTO2 / 10 / 15 / 19 / 20 (off: no key)
         if getattr(args, name, False):
             out[name] = True
+    for name in ("close_seed_grounding", "destination_after_held", "scene_obstacle_held_exclude",
+                 "destination_held_leader"):   # SL-PE1-3, 5 (off: no key)
+        if getattr(args, name, False):
+            out[name] = True
+    if getattr(args, "close_seed_attention_ratio", None) is not None:   # SL-PE7 (off: no key)
+        out["close_seed_attention_ratio"] = float(args.close_seed_attention_ratio)
     if getattr(args, "oracle_obstacle_support", None) is not None:   # SL-GTTO21 (off: no key)
         out["oracle_obstacle_support"] = str(args.oracle_obstacle_support)
     if getattr(args, "refused_identity_release", None) is not None:
@@ -2633,6 +2639,20 @@ def build_parser() -> argparse.ArgumentParser:
                          "되지 않는다 (clustering.oracle_robot_mask, 기록 metrics.grounding_source.robot_mask)")
     ap.add_argument("--oracle-obstacle-support", choices=("near", "under"), default=None,
                     help="SL-GTTO21 — --oracle-obstacle-objects 의 target 받침 찾기: near (기본, SL-GTTO19) · under (target 바닥 바로 아래만)")
+    ap.add_argument("--close-seed-grounding", action="store_true",
+                    help="SL-PE1 — target identity = 들어오는 chunk 가 손을 닫는 곳 (plan_close 손끝) 아래 물체. 그 점 주변의 국소 "
+                         "받침면 · 평평한 벽을 빼고 자른 성분만 grounding 입력으로, attach 전이면 바로 채택 (clustering.close_seed_grounding)")
+    ap.add_argument("--destination-after-held", action="store_true",
+                    help="SL-PE2 — 인식 목적지 등록 · 갱신을 쥔 동안 (frozen ∧ attach) 만 (clustering.destination_after_held)")
+    ap.add_argument("--close-seed-attention-ratio", type=float, default=None,
+                    help="SL-PE7 — --close-seed-grounding 과 함께. 자른 물체의 평균 raw attention 이 비-받침 점군 중앙값의 K 배 이상일 때만 "
+                         "seed 를 씀 (와인병으로 전환 → 충돌, pe12345 SafeLIBERO t3e3) (clustering.close_seed_attention_ratio)")
+    ap.add_argument("--destination-held-leader", action="store_true",
+                    help="SL-PE5 — --destination-after-held 와 함께. 쥔 동안 손 (60 mm) 밖 attention 1 위 cluster 는 잡을 수 있는 크기여도 "
+                         "목적지 후보 (접시 10.7 × 135 × 135 mm 는 가장 좁은 폭 때문에 등록되지 않았음) (clustering.destination_held_leader)")
+    ap.add_argument("--scene-obstacle-held-exclude", action="store_true",
+                    help="SL-PE3 — --scene-obstacle-objects 에서 attach 중이면 지금 손 안의 쥔 물체 점 15 mm 안 성분도 뺌 "
+                         "(clustering.scene_obstacle_held_exclude)")
     ap.add_argument("--scene-obstacle-objects", action="store_true",
                     help="SL-GTTO20 (A'' GT 없이) — AG3S 자기 인식으로 장애물 물체 표면: 받침면 점을 뺀 점군의 연결 성분 (15 mm voxel) "
                          "중 조작 대상 · 그 발자국 아래 (받침) · 인식된 목적지 성분이 아닌 것 (clustering.scene_obstacle_objects)")
@@ -2651,6 +2671,9 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--passthrough-obstacle-full-horizon", action="store_true",
                     help="SL-GTTO22 — --passthrough-obstacle-tolerance-mm 와 함께만. 장애물 물체 행을 실행 창이 아니라 chunk 전체 "
                          "(look-ahead 꼬리 포함) 에서 본다 — 한 call 먼저 개입")
+    ap.add_argument("--passthrough-obstacle-class-tests", action="store_true",
+                    help="SL-PE4 — 장애물 물체 점 집합이 있을 때도 기존 분류 (조작 대상 · target 부피 · 받침면 · 목적지 label · 쥔 물체 "
+                         "자기 잔재) 가 장애물이라고 해야 장애물 물체 행 (sqp.passthrough_obstacle_class_tests). GT 없는 scene 집합용")
     ap.add_argument("--passthrough-obstacle-beneath", action="store_true",
                     help="SL-GTTO16 A' — --passthrough-obstacle-tolerance-mm 와 함께만. 잡는 중 (LATCHED · CLOSING) 대상 물체 발자국 "
                          "아래 표면 · 쥔 중 (HELD) 쥔 물체 발자국 아래 표면에 가장 가까운 로봇 행은 장애물 물체 행이 아니다 (쥔 물체 자신의 "
@@ -2668,6 +2691,10 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--grasp-opening-rule-moved", type=float, default=None, metavar="OPEN",
                     help="SL-GTTO11 (c') — --grasp-opening-rule 에서만. attach 에 '손가락이 실제로 닫혔다' 검사를 더한다: 마지막 열림 "
                          "명령 때 개도 − 지금 개도 ≥ OPEN (정규화 개도). 닫힘 명령 첫 call 의 '정지' 오판 (F8 LS t0e3) 을 막는다")
+    ap.add_argument("--ee-action-qp-translation-only", action="store_true",
+                    help="SL-QE2 (dev-e5, 2026-11-09) — --ee-action-qp 에서만. action 공간 QP 가 위치 (x y z) action 만 고치고 회전 "
+                         "(rx ry rz) 은 policy 값 그대로 둔다 (optimizer.ee_action_fixed_dims = 회전 열). E1a task 3: F7 QP 의 첫 개입이 "
+                         "회전을 ~1.0 까지 바꿔 쥐는 자세를 잃음 (G110). 기록 to.ee_action_qp.fixed_dims")
     ap.add_argument("--ee-action-qp-scaled", action="store_true",
                     help="SL-GTTO11 F9a — --ee-action-qp 에서만. action 공간 QP 의 충돌 행을 행 norm 으로 정규화하고 slack 을 "
                          "quadratic 벌점 (1e4) + 선형 1e2 로 푼다 (G50 offline: 20000 회 미수렴 → ~150 회). action 이 닿지 않는 행 "
@@ -3202,6 +3229,9 @@ def build_parser() -> argparse.ArgumentParser:
                     help="V11AB-pb4 (benchmark branch): while the grasp latch is HELD, the grasping hand's contact-link "
                          "rows whose nearest surface is the manipulated object are dropped (the hand cannot collide "
                          "with what it holds). Off = V11AB")
+    ap.add_argument("--no-target-certify", action="store_true",
+                    help="SL-PE6 — target 이 없고 (no_target) latch 가 SEARCHING, 접촉 권한 · target-free 제외가 없으며 나머지 기하가 "
+                         "인증된 frame 을 미인증 HOLD 대신 '모든 표면이 장애물' 로 인증 (verdict no_target_strict = 실행)")
     ap.add_argument("--occluded-certify", action="store_true",
                     help="SL-GTTO6 F5 (benchmark branch): the TO (pass-through when clear, the solve status) reads a frame "
                          "the verdict already executes as occluded_target (no target this frame, the rest of the geometry "
@@ -4250,6 +4280,8 @@ def reject_bad_flag_combinations(ap: argparse.ArgumentParser, args, *, seed_map_
     # SL-GTTO2 — the two GT flags act on the GT grounding only
     if getattr(args, "grasp_opening_rule_moved", None) is not None and not getattr(args, "grasp_opening_rule", False):   # SL-GTTO11
         ap.error("--grasp-opening-rule-moved 는 --grasp-opening-rule 의 attach 검사입니다 — 함께 주십시오")
+    if getattr(args, "ee_action_qp_translation_only", False) and not getattr(args, "ee_action_qp", False):   # SL-QE2
+        ap.error("--ee-action-qp-translation-only 는 --ee-action-qp 의 QP 변수만 줄입니다 — 함께 주십시오")
     if getattr(args, "ee_action_qp_scaled", False) and not getattr(args, "ee_action_qp", False):   # SL-GTTO11
         ap.error("--ee-action-qp-scaled 는 --ee-action-qp 의 QP 형태만 바꿉니다 — 함께 주십시오")
     for flag in ("oracle_admissible", "oracle_held_target", "oracle_destination", "oracle_robot_mask",
@@ -4820,6 +4852,9 @@ def apply_grasp_contact_flags(safe, args) -> dict:
     if getattr(args, "occluded_certify", False):   # SL-GTTO6 F5 (off: no key)
         safe.occluded_certify = True
         out["occluded_certify"] = True
+    if getattr(args, "no_target_certify", False):   # SL-PE6 (off: no key)
+        safe.no_target_certify = True
+        out["no_target_certify"] = True
     if getattr(args, "grasp_zone_release", False):   # SL-GTTO5 F4 (off: no key)
         safe.grasp_zone_release = True
         out["grasp_zone_release"] = True
@@ -4879,6 +4914,8 @@ def passthrough_overrides(args) -> dict:
         out["passthrough_obstacle_tolerance"] = float(args.passthrough_obstacle_tolerance_mm) / 1000.0
     if getattr(args, "passthrough_obstacle_beneath", False):   # SL-GTTO16 A'
         out["passthrough_obstacle_beneath"] = True
+    if getattr(args, "passthrough_obstacle_class_tests", False):   # SL-PE4
+        out["passthrough_obstacle_class_tests"] = True
     if getattr(args, "passthrough_obstacle_full_horizon", False):   # SL-GTTO22
         out["passthrough_obstacle_full_horizon"] = True
     return out
