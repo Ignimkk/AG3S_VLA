@@ -1,4 +1,4 @@
-\begin{thebibliography}{18}
+\begin{thebibliography}{25}
 \providecommand{\natexlab}[1]{#1}
 \providecommand{\url}[1]{\texttt{#1}}
 \expandafter\ifx\csname urlstyle\endcsname\relax
@@ -9,6 +9,13 @@
 Yatharth Agarwal and Vijay Raghunathan.
 \newblock Multi-link safety filtering for {VLA} policies around moving hazards.
 \newblock arXiv preprint arXiv:2609.40007, 2026.
+
+\bibitem[Bhardwaj et~al.(2026)Bhardwaj, Duan, Dan, Ma, and
+  Culbertson]{bhardwaj2026progress}
+Atiksh Bhardwaj, Edward~Weiyi Duan, Prithwish Dan, Wei-Chiu Ma, and Preston
+  Culbertson.
+\newblock Decoding task progress from {VLA} representations.
+\newblock arXiv preprint arXiv:2608.13474, 2026.
 
 \bibitem[Black et~al.(2024)Black, Brown, Driess, et~al.]{black2024pi0}
 Kevin Black, Noah Brown, Danny Driess, et~al.
@@ -22,12 +29,29 @@ Rongxu Cui, Zongzheng Zhang, Jingrui Pang, et~al.
   safety in vision-language-action models.
 \newblock arXiv preprint arXiv:2606.23686, 2026.
 
+\bibitem[English et~al.(2026)English, Zheng, and
+  Ewetz]{english2026constrainedfm}
+William English, Hao Zheng, and Rickard Ewetz.
+\newblock Neuro-symbolic safety guidance for vision-language-action models via
+  constrained flow matching.
+\newblock arXiv preprint arXiv:2607.01378, 2026.
+
 \bibitem[Hu et~al.(2025)Hu, Liu, Liu, Cen, Meng, Wang, Li, and He]{hu2026vlsa}
 Songqiao Hu, Zeyi Liu, Shuang Liu, Jun Cen, Zihan Meng, Shihefeng Wang, Xiang
   Li, and Xiao He.
 \newblock {VLSA}: Vision-language-action models with plug-and-play safety
   constraint layer.
 \newblock arXiv preprint arXiv:2512.11891, 2025.
+
+\bibitem[Jia et~al.(2026)Jia, Yang, Ge, Nie, Zhou, Fan, Li, Chai, Jing, Liang,
+  Bu, Cao, Wu, Li, Yang, Zhang, Li, Wu, Yan, and Jiang]{jia2026guidedvla}
+Xiaosong Jia, Bowen Yang, Zuhao Ge, Xian Nie, Yuchen Zhou, Cunxin Fan, Yufeng
+  Li, Yilin Chai, Chao Jing, Zijian Liang, Qingwen Bu, Haidong Cao, Chao Wu,
+  Qifeng Li, Zhenjie Yang, Chenhe Zhang, Hongyang Li, Zuxuan Wu, Junchi Yan,
+  and Yu-Gang Jiang.
+\newblock {GuidedVLA}: Specifying task-relevant factors via plug-and-play
+  action attention specialization.
+\newblock arXiv preprint arXiv:2605.12369, 2026.
 
 \bibitem[Kim et~al.(2024)Kim, Pertsch, Karamcheti, Xiao, Balakrishna, Nair,
   Rafailov, Foster, Sanketi, Vuong, Kollar, Burchfiel, Tedrake, Sadigh, Levine,
@@ -46,6 +70,12 @@ Moo~Jin Kim, Chelsea Finn, and Percy Liang.
   success.
 \newblock In \emph{Robotics: Science and Systems (RSS)}, 2025.
 
+\bibitem[Li et~al.(2025)Li, Wen, Peng, Peng, Feng, and Zhu]{li2025pointvla}
+Chengmeng Li, Junjie Wen, Yan Peng, Yaxin Peng, Feifei Feng, and Yichen Zhu.
+\newblock {PointVLA}: Injecting the {3D} world into vision-language-action
+  models.
+\newblock arXiv preprint arXiv:2503.07511, 2025.
+
 \bibitem[Liu et~al.(2023)Liu, Zhu, Gao, Feng, Liu, Zhu, and
   Stone]{liu2023libero}
 Bo Liu, Yifeng Zhu, Chongkai Gao, Yihao Feng, Qiang Liu, Yuke Zhu, and Peter
@@ -62,6 +92,13 @@ Shilong Liu, Zhaoyang Zeng, Tianhe Ren, Feng Li, Hao Zhang, Jie Yang, et~al.
   open-set object detection.
 \newblock In \emph{European Conference on Computer Vision (ECCV)}, pages
   38--55, 2024.
+
+\bibitem[Liu et~al.(2026)Liu, Gu, Wang, Xue, and Fu]{liu2026activevla}
+Zhenyang Liu, Yongchong Gu, Yikai Wang, Xiangyang Xue, and Yanwei Fu.
+\newblock {ActiveVLA}: Injecting active perception into vision-language-action
+  models for precise {3D} robotic manipulation.
+\newblock In \emph{IEEE/CVF Conference on Computer Vision and Pattern
+  Recognition (CVPR)}, 2026.
 
 \bibitem[{NVIDIA}(2025)]{nvidia2025gr00t}
 {NVIDIA}.
@@ -83,6 +120,14 @@ Seongbin Park, Fan Zhang, Baharan Mirzasoleiman, Shahriar Talebi, and Nader
   generalization.
 \newblock arXiv preprint arXiv:2504.16054, 2025.
 
+\bibitem[Qu et~al.(2025)Qu, Song, Chen, Yao, Ye, Ding, Wang, Gu, Zhao, Wang,
+  and Li]{qu2025spatialvla}
+Delin Qu, Haoming Song, Qizhi Chen, Yuanqi Yao, Xinyi Ye, Yan Ding, Zhigang
+  Wang, JiaYuan Gu, Bin Zhao, Dong Wang, and Xuelong Li.
+\newblock {SpatialVLA}: Exploring spatial representations for
+  visual-language-action model.
+\newblock In \emph{Robotics: Science and Systems (RSS)}, 2025.
+
 \bibitem[Ravi et~al.(2024)Ravi, Gabeur, Hu, Hu, Ryali, Ma, Khedr, R{\"a}dle,
   Rolland, Gustafson, Mintun, Pan, Alwala, Carion, Wu, Girshick, Doll{\'a}r,
   and Feichtenhofer]{ravi2024sam2}
@@ -92,6 +137,14 @@ Nikhila Ravi, Valentin Gabeur, Yuan-Ting Hu, Ronghang Hu, Chaitanya Ryali,
   Wu, Ross Girshick, Piotr Doll{\'a}r, and Christoph Feichtenhofer.
 \newblock {SAM 2}: Segment anything in images and videos.
 \newblock arXiv preprint arXiv:2408.00714, 2024.
+
+\bibitem[Song et~al.(2026)Song, Le, Park, Wang, Shi, Liu, Gu, Eaton, Jayaraman,
+  and Daniilidis]{song2026omniguide}
+Yunzhou Song, Long Le, Yong-Hyun Park, Jie Wang, Junyao Shi, Lingjie Liu,
+  Jiatao Gu, Eric Eaton, Dinesh Jayaraman, and Kostas Daniilidis.
+\newblock {OmniGuide}: Universal guidance fields for enhancing generalist robot
+  policies.
+\newblock arXiv preprint arXiv:2603.10052, 2026.
 
 \bibitem[Stellato et~al.(2020)Stellato, Banjac, Goulart, Bemporad, and
   Boyd]{stellato2020osqp}
@@ -122,12 +175,6 @@ Kai Tang, Peidong Jia, Zhong Chu, Jiajun Cao, Jixian Wu, Bohua Zhang, Rui Ma,
 \newblock arXiv preprint arXiv:2606.20698, 2026.
 \newblock v2.
 
-\bibitem[Wang et~al.(2025)Wang, Liu, Chen, Lin, Han, and Ding]{wang2025yoloe}
-Ao Wang, Lihao Liu, Hui Chen, Zijia Lin, Jungong Han, and Guiguang Ding.
-\newblock {YOLOE}: Real-time seeing anything.
-\newblock In \emph{IEEE/CVF International Conference on Computer Vision
-  (ICCV)}, 2025.
-
 \bibitem[Zhang et~al.(2025)Zhang, Zhang, Ji, Lei, Dai, Chen, and
   Yang]{zhang2025safevla}
 Borong Zhang, Yuhao Zhang, Jiaming Ji, Yingshan Lei, Juntao Dai, Yuanpei Chen,
@@ -136,6 +183,14 @@ Borong Zhang, Yuhao Zhang, Jiaming Ji, Yingshan Lei, Juntao Dai, Yuanpei Chen,
   via constrained learning.
 \newblock In \emph{Advances in Neural Information Processing Systems
   (NeurIPS)}, 2025.
+
+\bibitem[Zhang et~al.(2026)Zhang, Nie, Lao, Cheng, Liu, Jiang, and
+  Huang]{zhang2026frozenvlas}
+Jiachen Zhang, Junnan Nie, Junyi Lao, Wei Cheng, Chenghao Liu, Jiaxin Jiang,
+  and Songfang Huang.
+\newblock What frozen {VLAs} already know about success: A probing study of
+  value-like structure in foundation robot policies.
+\newblock arXiv preprint arXiv:2605.28527, 2026.
 
 \bibitem[Zhu et~al.(2026)Zhu, Yan, Hong, Shou, Ma, and Guo]{zhu2026wmpo}
 F. Zhu, Z. Yan, Z. Hong, Q. Shou, X. Ma, and S. Guo.

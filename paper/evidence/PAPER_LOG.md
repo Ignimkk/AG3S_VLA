@@ -418,3 +418,47 @@ Step 4 종료 시점의 다음 구성 작업은 Step 5: 공식 template과 manus
 - 사용자 피드백: v1 분량 과다. CVPR 2026 참고 논문의 순서(4 → 4.1 Setup → 4.2 Main Results → 4.3 Ablation → 4.4 Analysis → Conclusion)로 재구성하고, 아직 측정하지 않은 결과는 사용자가 제시한 방향(LIBERO 단독 성공률은 π0.5보다 미세하게 낮음, 충돌률은 크게 감소, 다른 baseline 대비 약 10 point 충돌 감소, 일반화)에 맞춘 **목표값과 그 이유를 빨간 글씨로** 작성.
 - 표기: `\proj{…}` = 투영된(미검증) 수치·설명(빨강), `\tbd{…}` = 미확정 설정(빨강), 검정 = 벤치마크 정의·protocol·문헌 보고값(†). 투영값은 VLSA Tab. I(같은 π0.5-LIBERO: CAR 17.1 % / TSR 57.8 %, AEGIS 68.9 % / 67.5 %)와 SafeDojo Tab. 1–2에 맞춰 잡았다. 어느 것도 측정값이 아니다.
 - 산출: `paper/latex/exp_section/04_experiments.tex`(v2, 표 4개 · 그림 자리 2개), `build_experiments.pdf` 5쪽(본문 약 3.3쪽, 참고문헌 4–5쪽), overfull 0 · undefined 0. v1은 덮어썼다(기록은 이 로그와 이전 항목).
+
+## 2026-11-08 19:10 KST — 4. Experiments v3 + 5. Conclusion 초안, 4–5장 3.7쪽
+
+- 사용자 지시: 4장의 4개 세부 절(4.1–4.4)은 유지하고 내용만 수정; 각 TBD에 이상적인 예시 내용을 채움; trade-off는 숨기지 않고 보고; 4–5장을 3.5–4쪽 안에.
+- 내용 변경: Q1을 "충돌 감소량과 task success 비용, 그 trade-off의 비교"로; 4.2에 TSR−SSR(충돌하며 성공) / CAR−SSR(무충돌 실패) 분해 추가; 4.4에 "Where it still fails" 문단(충돌·무충돌 실패의 원인 분류 → 5장 future work의 근거) 추가; 모든 `\tbd` 자리를 구체적 예시로 채우되 `\proj`(빨강)로 표시(로봇·카메라, 접촉 판정 센서, attention layer/head, dev/eval initial state 분할, GPU, 그림 구성).
+- 5장 Conclusion 초안(`exp_section/05_conclusion.tex`): 요약 + "baseline toward collision-free execution" 포지셔닝 + 한계/future work 3가지(관측 한계·3D 표현 VLA 연구 인용, identity 신뢰도, 제약을 action 생성 단계로). 인용 추가: ActiveVLA(로컬 PDF), SpatialVLA·PointVLA(현 원고 PDF 서지에서 복사, 제출 전 1차 출처 재확인 필요).
+- 빌드: overfull 0 · undefined 0. 4장 시작부터 5장 끝까지 약 3.7쪽(References가 4쪽 오른쪽 열 중간에서 시작).
+- 디스크 변경 확인: `exp_section/` 파일은 이 세션의 sed/python 편집 외에 내용 변경 없음; 18:50 commit 3a14bf16(다른 세션)이 v2 파일들을 그대로 commit함.
+
+## 2026-11-08 19:40 KST — Q1 표현 수정, 최종 실험 계획 문서 작성
+
+- 4장: Q1을 "충돌을 줄이면서 task success를 얼마나 유지하는가"로, 4.2 · 5장의 "cost" 표현을 "preserved within … points"로 바꿈(사용자 지적). 빌드 재확인(overfull 0, 4–5장 약 3.7쪽 유지).
+- `AG3S-VLA_CVPR2027_FINAL_EXPERIMENT_PLAN_20261108_KO.md` 작성(`PLANNED`): 원고의 `\proj` 165곳을 실험 ID(S0, E1a, E1b, E2/E3, E4-F, E5, E6, E7, SUP)와 산출물로 매핑; 공통 규약; 실험별 protocol; 우선순위 · ESTIMATED 시간; supplementary 자료 13개 표 + 영상; 리뷰어 예상 요청 15개와 사전 준비물; 표본 수 근거; 체크리스트. 실험은 실행하지 않았다.
+- 19:55 KST 추가: 최종 실험 계획 §10 — 원고 Tab. 1–4 · Fig. 4 · 본문 수치를 표 그대로 옮겨 칸별 목표값 · 결과 파일 · 예상 메커니즘 · 결과가 다를 때의 원고 수정 규칙(판정)을 적음.
+- 20:10 KST 추가: 최종 실험 계획 §11 투영 대 실측 대조표(35 항목, 실측·차이·판정·원고 수정 열 비움) · §12 외부 segmenter 비사용 · 실시간성 논거 7개(A–G)와 근거 실험 · 확신도 · 배치 권장.
+
+## 2026-11-08 20:45 KST — 4–5장 최종 반영(B안), 1–3장 수정 요청 정리, Fig. 1 teaser v2 구성안
+
+- 4.4 "Where it still fails"를 세 문장(perception-side / action-side 두 축, 세부는 supplement Tab. S9)으로 축소. 4.2의 "every link / forearm"을 3.4(palm · finger sphere만 제약)에 맞게 "both hands' collision spheres and the attached object"로 수정.
+- 5장을 두 축의 future work로 재작성: perception(내부 표현과 장면 기하의 동기화; frozen VLA probing 연구 · 3D 표현 VLA 인용), action(생성 뒤 정제의 한계 → 제약을 반영한 chunk 생성, 6D grasp/place pose; "pursuing in ongoing work"). 빌드 overfull 0 · undefined 0, 4–5장 약 3.75쪽(References 4쪽 오른쪽 열 y 0.49).
+- `paper/figures/fig01_teaser/TEASER_V2_SAFELIBERO_PLAN_KO.md`: SafeLIBERO Level I triplet(π0.5 / AEGIS* / AG3S) + AG3S 내부 3단 레이아웃, 장면 선택 기준, 자료 inventory(11-04 같은 장면 영상 · 11-08 6-panel 진단 렌더는 시안용), 제작 절차, caption 초안. 최종 실험 계획 §1.7 · §10.6 · §11 · §6 · §13 갱신.
+- 1–3장 수정 요청은 사용자에게 위치와 함께 전달(직접 반영 예정).
+
+## 2026-11-08 21:30 KST — Tab. 1 보고값 블록을 같은 checkpoint(VLSA · KNOWS)로 교체, 공식 코드 우선 규칙, 투영값 정합
+
+- 사용자 판정: (a) Tab. 1 상단을 같은 π0.5-LIBERO checkpoint의 저자 보고값(VLSA Tab. I; KNOWS Tab. 1의 4 suite 평균 DERIVED)으로 교체, SafeDojo(OFT) 블록은 supplement로; 공식 코드가 있으면 재구현 대신 공식 코드(AEGIS = `main_aegis.py` submodule), 없는 것(KNOWS, multi-link)만 ∗.
+- 보고값이 드러낸 논리 문제: VLSA · KNOWS 모두 safety layer가 π0.5보다 **TSR을 올린다**(57.8 → 67.5, 55.0 → 67.5). AG3S가 SafeLIBERO에서 TSR을 잃으면 SSR 최고 주장이 불가능하므로 투영을 TSR 66.0 / SSR 61.5 / CAR 87.5(Level I), 68.0 / 63.0 / 89.0(Level II)으로 고치고, "π0.5보다 미세하게 낮다"는 LIBERO 무장애물 열(95.4 vs 96.8)에만 남김. 4.2 문단 · Tab. 3 · 5장 · 계획 문서 §1.2 · §7 · §10.1 · §10.4 · §11 동기화.
+- 빌드 PASS(overfull 0 · undefined 0). 4–5장 약 3.9쪽(References 4쪽 오른쪽 열 y 0.76) — 상한 4쪽에 근접, 그림 실물 삽입 시 Tab. 4 YOLOE 행·4.4 generalization 문장 축소 예정.
+- 22:00 KST 추가: 4.2의 Naive(GT segmentation) 비교 문장 수정(투영 SSR 61.5 < 보고 63.1이므로 "넘는다" → "2 pt 차이, 특권 정보"). `paper/notes/RESULTS_NARRATIVE_20261108_KO.md` 작성: Tab. 1 여섯 단계 읽기 · Tab. 2–4 · Fig. 4 · 4.4 수치의 서술 논리와 리뷰어 반문 답, 결과가 투영과 다를 때 바뀌는 논리(§8), 분량 축소 권고(§9: Fig. 5 삭제 등 ≈ 0.7쪽), 1–3장 축소 의견(§10: 3.5 압축 · Alg. 1 supplement · Fig. 2 제거 권고).
+
+## 2026-11-08 22:40 KST — 4장 축소 반영(≈ 0.6쪽), 1–3장 수정 요청 문서
+
+- 4장 축소(사용자 판정, 논리 유지): Fig. 5 삭제(4.4가 Fig. 1 teaser v2 패널 (d) 참조), 4.1 Metrics + Implementation을 한 문단으로, 4.1 Benchmarks 나열 축약, 4.2 SafeLIBERO 문단 축약, Tab. 4에서 YOLOE · oracle 행 삭제(supplement), 4.4 generalization + run time 3문장. 빌드 PASS(overfull 0 · undefined 0). 4–5장 ≈ 3.6쪽(References 4쪽 오른쪽 열 y 0.25; 이전 3.9).
+- `paper/notes/SEC1-3_REVISION_REQUESTS_20261108_KO.md`: Abstract · Intro · Fig. 1–3 · Related Work · Method 항목별(위치 · 현재 문장 · 요청 · 분류: 일관성/분량/그림), 용어 일치 점검표, 반영 순서. 이전에 구두로 전달한 요청(초록 수치, 기여 3 범위, multi-view, Fig. 2 caption, 3.4 유지)을 모두 포함. ◆ 판정 항목: Intro 1–2문단 절반, Fig. 2 삭제, 3.5 1/3 압축, Alg. 1 supplement(합계 ≈ 1.4쪽).
+- 23:10 KST 추가: 4.4에 지시문 변경 scene pair 문장(RQ1 직접 증거)과 head · margin 민감도 한 문장(supplement Tab. S14) 복원 · 추가; "carried object" → "attached object"로 용어 통일(3.4와 일치). 계획 문서 §6(Tab. S14 · S15) · §7 · §10.5 · §11(36–38) 갱신. 빌드 PASS(overfull 0 · undefined 0), 4–5장 ≈ 3.7쪽(References 4쪽 오른쪽 열 y 0.36).
+- 23:40 KST 추가: 실시간성 처리 확정(사용자 판정) — 4.4 run time을 "정책 추론 포함 같은 경계"의 비용 보고로 재작성(AG3S 490/620 ms vs π0.5+AEGIS 205 vs external 560, 단계 분해; 모두 투영), "one to two orders of magnitude more than an ellipsoid filter … a cost, not real-time capability"; 5장 Limitations에 비용 한계 문장 추가. 계획 문서 Tab. S11 형식 · §10.6 · §11(32–34) · §12 F · §12.1("왜 외부 segmenter를 안 쓰나" 답변 틀: extent · prompt · 일관성 · open-set/시간; 비용은 동등점) 갱신. 빌드 PASS.
+
+## 2026-11-09 KST — Fig. 1 · Fig. 2 병합 결정과 구성안 v3
+
+- CVPR 2026 4편(ACoT-VLA, AVA-VLA, ActiveVLA, ForceVLA2)의 그림 caption과 배치를 `papers/cvpr2026/*.pdf`에서 직접 확인. 네 편 모두 Fig. 1 = "기존 방식 vs 우리 방식" 개념 비교(수치 없음), Fig. 2 = 방법 구조 하나. 직전 답변(KNOWS · SafeDojo를 근거로 "CVPR 2026에는 개념 비교 그림이 없다")은 잘못된 근거였으므로 정정.
+- 결정(사용자 동의): 기존 Fig. 1(teaser)과 Fig. 2(세 축 개념 비교)를 새 Fig. 1 한 장으로 병합. Fig. 2의 세 칸이 뼈대, Fig. 1 장면은 위쪽 한 줄(선택), 수치 막대 · 내부 4단계 · Fig. 2 흐름 줄 삭제. 현재 Fig. 3 → 새 Fig. 2. 추정 절약 ≈ 0.4–0.5쪽(시안 빌드 후 실측).
+- 문서: `paper/figures/fig01_teaser/TEASER_V2_SAFELIBERO_PLAN_KO.md`를 v3로 개정(근거표, 세 축 ↔ 기여 · 절 · 표 대응, 레이아웃, 칸별 Prior baseline과 장면 기준, 자료 목록, 제작 절차, caption 초안, 원고 참조 변경 목록). `fig01_teaser/PLAN.md` · `fig02_overview/PLAN.md`에 포인터, SEC1-3 수정 요청 C1 · C2, 실험 계획 §6 · §13 갱신.
+- 원고 tex는 아직 바꾸지 않음: Intro 10행 · Method 58행 그림 참조, 04_experiments 159행 "(Fig.~1, panel~d)", build_experiments `\setcounter{figure}{3}` → `{2}`는 병합 그림 반영 시 함께 수정(구성안 §8).
+- 2026-11-09 추가: 분량 문서 갱신. 기존 원고 PDF의 절 제목 위치로 1–3장을 실측(≈ 6.13쪽: 제목 · 초록 · Fig. 1 0.93, Intro 1.87, Related 0.62, Method 2.72)하고 4–5장 standalone 3.75쪽과 합쳐 본문 ≈ 9.9쪽(사용자 보고 10쪽과 일치), 8쪽까지 ≈ 1.9쪽 축소 필요. `notes/SEC1-3_REVISION_REQUESTS_20261108_KO.md` §H에 3단계 예산표(1단계 ≈ 1.0: Fig. 1+2 병합 · Algorithm 1 · 3.5 · Intro 1–2문단; 2단계 ≈ 0.8; 3단계 ≈ 0.35, Tab. 2 이동은 마지막 수단) 추가. 실측으로 E1 0.25→0.17, E2 0.3→0.22 정정. `RESULTS_NARRATIVE` §9에 반영 완료 표시, §10의 "Fig. 2 삭제" 권고를 병합으로 정정.
