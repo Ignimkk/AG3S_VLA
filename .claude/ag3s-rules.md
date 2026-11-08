@@ -78,9 +78,6 @@
 **추측을 기록에 남기지 않는다** — 그 자리에서 실행해 수치로 확정한다.
 체크포인트/MuJoCo 실행이 필요하면 먼저 사용자에게 요청한다.
 
-**공용 pod 자원 — 끝난 작업의 메모리는 다른 세션이 쓸 수 있게 회수한다** (2026-10-15 사용자 지시)
-- 한도: working set (`memory.current − inactive_file`, `/sys/fs/cgroup`) + 추정 ≤ 64 GiB (pod hard limit 80 GiB),
-  worker ≤ 4, 서버 ≤ 2, GPU ≤ 130 GB. 시작 전에 확인한다.
 - **page cache** 는 읽거나 쓴 파일 내용을 커널이 RAM 에 남겨 둔 것이다. process 가 끝나도 남고, 최근에 다시 읽힌
   `active_file` 은 working set 에 그대로 잡힌다 — 한 세션의 기록 · checkpoint 가 다른 세션의 실행을 막는다
   (2026-10-15 측정: process 메모리 6.5 GiB 인데 working set 56.6 GiB, 대부분 끝난 CL4 · T56 · T53 기록과 checkpoint 의 cache).

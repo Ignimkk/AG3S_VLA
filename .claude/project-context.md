@@ -28,6 +28,5 @@ OpenPI `--record`의 상대경로는 run 안에서 해석하고 시작마다 새
 최신 `/mnt/dev/work` 정리·삭제 조건은 `doc/active/migration/LEGACY_RETIREMENT_REPORT.md`를 따른다.
 Panda benchmark 환경과 end-to-end 평가는 별도 작업이다.
 
-개선 branch를 평가 branch에 통째로 merge하면 V11AB 기준이 바뀐다.
 구조/경로 공통 수정만 선택해서 전달하고 실험마다 source·adapter·dependency SHA를 기록한다.
 Push는 사용자가 수행한다. 기존 Git history를 rewrite하거나 force push하지 않는다.

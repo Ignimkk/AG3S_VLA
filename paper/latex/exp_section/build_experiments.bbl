@@ -1,0 +1,147 @@
+\begin{thebibliography}{18}
+\providecommand{\natexlab}[1]{#1}
+\providecommand{\url}[1]{\texttt{#1}}
+\expandafter\ifx\csname urlstyle\endcsname\relax
+  \providecommand{\doi}[1]{doi: #1}\else
+  \providecommand{\doi}{doi: \begingroup \urlstyle{rm}\Url}\fi
+
+\bibitem[Agarwal and Raghunathan(2026)]{agarwal2026multilink}
+Yatharth Agarwal and Vijay Raghunathan.
+\newblock Multi-link safety filtering for {VLA} policies around moving hazards.
+\newblock arXiv preprint arXiv:2609.40007, 2026.
+
+\bibitem[Black et~al.(2024)Black, Brown, Driess, et~al.]{black2024pi0}
+Kevin Black, Noah Brown, Danny Driess, et~al.
+\newblock {$\pi_0$}: A vision-language-action flow model for general robot
+  control.
+\newblock arXiv preprint arXiv:2410.24164, 2024.
+
+\bibitem[Cui et~al.(2026)Cui, Zhang, Pang, et~al.]{cui2026liberosafety}
+Rongxu Cui, Zongzheng Zhang, Jingrui Pang, et~al.
+\newblock {LIBERO-Safety}: A comprehensive benchmark for physical and semantic
+  safety in vision-language-action models.
+\newblock arXiv preprint arXiv:2606.23686, 2026.
+
+\bibitem[Hu et~al.(2025)Hu, Liu, Liu, Cen, Meng, Wang, Li, and He]{hu2026vlsa}
+Songqiao Hu, Zeyi Liu, Shuang Liu, Jun Cen, Zihan Meng, Shihefeng Wang, Xiang
+  Li, and Xiao He.
+\newblock {VLSA}: Vision-language-action models with plug-and-play safety
+  constraint layer.
+\newblock arXiv preprint arXiv:2512.11891, 2025.
+
+\bibitem[Kim et~al.(2024)Kim, Pertsch, Karamcheti, Xiao, Balakrishna, Nair,
+  Rafailov, Foster, Sanketi, Vuong, Kollar, Burchfiel, Tedrake, Sadigh, Levine,
+  Liang, and Finn]{kim2024openvla}
+Moo~Jin Kim, Karl Pertsch, Siddharth Karamcheti, Ted Xiao, Ashwin Balakrishna,
+  Suraj Nair, Rafael Rafailov, Ethan~P. Foster, Pannag~R. Sanketi, Quan Vuong,
+  Thomas Kollar, Benjamin Burchfiel, Russ Tedrake, Dorsa Sadigh, Sergey Levine,
+  Percy Liang, and Chelsea Finn.
+\newblock {OpenVLA}: An open-source vision-language-action model.
+\newblock In \emph{Conference on Robot Learning (CoRL)}, pages 2679--2713,
+  2024.
+
+\bibitem[Kim et~al.(2025)Kim, Finn, and Liang]{kim2025openvlaoft}
+Moo~Jin Kim, Chelsea Finn, and Percy Liang.
+\newblock Fine-tuning vision-language-action models: Optimizing speed and
+  success.
+\newblock In \emph{Robotics: Science and Systems (RSS)}, 2025.
+
+\bibitem[Liu et~al.(2023)Liu, Zhu, Gao, Feng, Liu, Zhu, and
+  Stone]{liu2023libero}
+Bo Liu, Yifeng Zhu, Chongkai Gao, Yihao Feng, Qiang Liu, Yuke Zhu, and Peter
+  Stone.
+\newblock {LIBERO}: Benchmarking knowledge transfer for lifelong robot
+  learning.
+\newblock In \emph{Advances in Neural Information Processing Systems (NeurIPS),
+  Datasets and Benchmarks Track}, 2023.
+
+\bibitem[Liu et~al.(2024)Liu, Zeng, Ren, Li, Zhang, Yang,
+  et~al.]{liu2024groundingdino}
+Shilong Liu, Zhaoyang Zeng, Tianhe Ren, Feng Li, Hao Zhang, Jie Yang, et~al.
+\newblock Grounding {DINO}: Marrying {DINO} with grounded pre-training for
+  open-set object detection.
+\newblock In \emph{European Conference on Computer Vision (ECCV)}, pages
+  38--55, 2024.
+
+\bibitem[{NVIDIA}(2025)]{nvidia2025gr00t}
+{NVIDIA}.
+\newblock {GR00T N1}: An open foundation model for generalist humanoid robots.
+\newblock arXiv preprint arXiv:2503.14734, 2025.
+
+\bibitem[Park et~al.(2026)Park, Zhang, Mirzasoleiman, Talebi, and
+  Sehatbakhsh]{park2026knows}
+Seongbin Park, Fan Zhang, Baharan Mirzasoleiman, Shahriar Talebi, and Nader
+  Sehatbakhsh.
+\newblock Your model already knows: Attention-guided safety filter for
+  vision-language-action models.
+\newblock arXiv preprint arXiv:2606.09749, 2026.
+
+\bibitem[{Physical Intelligence} et~al.(2025){Physical Intelligence}, Black,
+  Brown, et~al.]{intelligence2025pi05}
+{Physical Intelligence}, Kevin Black, Noah Brown, et~al.
+\newblock {$\pi_{0.5}$}: a vision-language-action model with open-world
+  generalization.
+\newblock arXiv preprint arXiv:2504.16054, 2025.
+
+\bibitem[Ravi et~al.(2024)Ravi, Gabeur, Hu, Hu, Ryali, Ma, Khedr, R{\"a}dle,
+  Rolland, Gustafson, Mintun, Pan, Alwala, Carion, Wu, Girshick, Doll{\'a}r,
+  and Feichtenhofer]{ravi2024sam2}
+Nikhila Ravi, Valentin Gabeur, Yuan-Ting Hu, Ronghang Hu, Chaitanya Ryali,
+  Tengyu Ma, Haitham Khedr, Roman R{\"a}dle, Chloe Rolland, Laura Gustafson,
+  Eric Mintun, Junting Pan, Kalyan~Vasudev Alwala, Nicolas Carion, Chao-Yuan
+  Wu, Ross Girshick, Piotr Doll{\'a}r, and Christoph Feichtenhofer.
+\newblock {SAM 2}: Segment anything in images and videos.
+\newblock arXiv preprint arXiv:2408.00714, 2024.
+
+\bibitem[Stellato et~al.(2020)Stellato, Banjac, Goulart, Bemporad, and
+  Boyd]{stellato2020osqp}
+Bartolomeo Stellato, Goran Banjac, Paul Goulart, Alberto Bemporad, and Stephen
+  Boyd.
+\newblock {OSQP}: An operator splitting solver for quadratic programs.
+\newblock \emph{Mathematical Programming Computation}, 12\penalty0
+  (4):\penalty0 637--672, 2020.
+
+\bibitem[Sundaralingam et~al.(2023)Sundaralingam, Hari, Fishman, Garrett, {Van
+  Wyk}, Blukis, Millane, Oleynikova, Handa, Ramos, Ratliff, and
+  Fox]{sundaralingam2023curobo}
+Balakumar Sundaralingam, Siva Kumar~Sastry Hari, Adam Fishman, Caelan Garrett,
+  Karl {Van Wyk}, Valts Blukis, Alexander Millane, Helen Oleynikova, Ankur
+  Handa, Fabio Ramos, Nathan Ratliff, and Dieter Fox.
+\newblock {cuRobo}: Parallelized collision-free minimum-jerk robot motion
+  generation.
+\newblock arXiv preprint arXiv:2310.17274, 2023.
+
+\bibitem[Tang et~al.(2026)Tang, Jia, Chu, Cao, Wu, Zhang, Ma, Zhao, Chen, Guo,
+  Chi, Fan, Zhang, Xu, Yang, Mi, Ju, Tang, and Zhang]{tang2026safedojo}
+Kai Tang, Peidong Jia, Zhong Chu, Jiajun Cao, Jixian Wu, Bohua Zhang, Rui Ma,
+  Fangyuan Zhao, Sixiang Chen, Yichen Guo, Xiaowei Chi, Chun-Kai Fan, Kevin
+  Zhang, Jinchang Xu, Fubing Yang, Weishi Mi, Xiaozhu Ju, Jian Tang, and
+  Shanghang Zhang.
+\newblock {SafeDojo}: Safe reinforcement learning for {VLA} via interactive
+  world model.
+\newblock arXiv preprint arXiv:2606.20698, 2026.
+\newblock v2.
+
+\bibitem[Wang et~al.(2025)Wang, Liu, Chen, Lin, Han, and Ding]{wang2025yoloe}
+Ao Wang, Lihao Liu, Hui Chen, Zijia Lin, Jungong Han, and Guiguang Ding.
+\newblock {YOLOE}: Real-time seeing anything.
+\newblock In \emph{IEEE/CVF International Conference on Computer Vision
+  (ICCV)}, 2025.
+
+\bibitem[Zhang et~al.(2025)Zhang, Zhang, Ji, Lei, Dai, Chen, and
+  Yang]{zhang2025safevla}
+Borong Zhang, Yuhao Zhang, Jiaming Ji, Yingshan Lei, Juntao Dai, Yuanpei Chen,
+  and Yaodong Yang.
+\newblock {SafeVLA}: Towards safety alignment of vision-language-action model
+  via constrained learning.
+\newblock In \emph{Advances in Neural Information Processing Systems
+  (NeurIPS)}, 2025.
+
+\bibitem[Zhu et~al.(2026)Zhu, Yan, Hong, Shou, Ma, and Guo]{zhu2026wmpo}
+F. Zhu, Z. Yan, Z. Hong, Q. Shou, X. Ma, and S. Guo.
+\newblock {WMPO}: World model-based policy optimization for
+  vision-language-action models.
+\newblock In \emph{International Conference on Learning Representations
+  (ICLR)}, 2026.
+
+\end{thebibliography}

@@ -26,8 +26,8 @@
   },
   "permissions": {
     "deny": [
-      "Edit(//mnt/dev/work/**)",
-      "Write(//mnt/dev/work/**)"
+      "Edit(//mnt/dev/**)",
+      "Write(//mnt/dev/**)"
     ]
   }
 }

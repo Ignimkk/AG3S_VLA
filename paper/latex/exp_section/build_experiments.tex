@@ -1,0 +1,33 @@
+% Standalone build of Section 4 (Experiments) only, on the official CVPR 2027 style of ../cvpr.sty.
+% Compile from this directory:
+%   pdflatex build_experiments && bibtex build_experiments && pdflatex build_experiments && pdflatex build_experiments
+% To merge into the full paper: \input{exp_section/04_experiments} in place of sections/04_experiments and
+% add the four entries of references_experiments.bib to references.bib.
+\documentclass[10pt,twocolumn,letterpaper]{article}
+\usepackage[T1]{fontenc}
+\usepackage[review]{cvpr}
+% Project macros, copied from ../preamble.tex (the algorithm packages are not needed here).
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{xcolor}
+\newcommand{\notmeasured}{\textit{n/m}}
+\newcommand{\tbd}[1]{{\color{red}[TBD: #1]}}
+\newcommand{\tbdc}{{\color{red}[tbd]}}% compact placeholder for table cells
+\newcommand{\proj}[1]{{\color{red}#1}}% projected (unverified) result or explanation; add both to ../preamble.tex when merging
+\newcommand{\pend}[1]{{\color{orange!75!black}#1}}
+\newcommand{\sys}{AG3S-VLA}% method name as printed in the current manuscript
+\definecolor{cvprblue}{rgb}{0.21,0.49,0.74}
+\usepackage[pagebackref,breaklinks,colorlinks,allcolors=cvprblue]{hyperref}
+\def\confName{CVPR}
+\def\confYear{2027}
+% Counters continue from the full manuscript: Sections 1-3, Figures 1-3 precede this section.
+\setcounter{section}{3}
+\setcounter{figure}{3}
+\setcounter{table}{0}
+\begin{document}
+\input{04_experiments}
+{\small
+\bibliographystyle{../ieeenat_fullname}
+\bibliography{../references,references_experiments}}
+\end{document}

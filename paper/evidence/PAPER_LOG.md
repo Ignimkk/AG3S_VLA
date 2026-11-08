@@ -404,3 +404,17 @@ Step 4 종료 시점의 다음 구성 작업은 Step 5: 공식 template과 manus
 - 확인한 것: 공식 `main_aegis.py`의 horizon은 policy 300 / 550 step + wait 20 (harness `--safelibero-step-budget main_aegis`와 같음; 기존 dev run의 기본값 `total_incl_wait`는 280 / 530). 기존 baseline 기록(BL-7 · BL-11 · BL-13 · SL7 D13)은 dev split 또는 비공식 조건이라 E1 R 칸에 넣지 않는다. SafeDojo · SafeVLA · WMPO는 π0.5 harness에서 실행 불가 → P only. LIBERO-Safety 원문 비교는 `pi05_libero_safety`(이 기계에 없음) · controller · cost 문제 해결 전 불가.
 - 문헌 표 점검: SafeDojo Table 1–2와 LIBERO-Safety Table 3 L2 값은 PDF와 일치. `SOTA_COMPARISON_KO.md` §1에 Level II WMPO 행 누락(수정하지 않고 보고만 함). VLSA Table I의 OFT full-action 평균 CAR 5.7 %는 표 내부 불일치.
 - 등록 형식 문제: manifest schema는 16-D 전용이라 Panda 7-D run을 등록할 수 없다(별도 형식 TBD).
+
+## 2026-11-08 18:05 KST — 4. Experiments 전면 재작성 (standalone 빌드)
+
+- 사용자 요청: `paper/evidence`의 실험 계획(E1–E7, RQ1–RQ4, P/R/TBD 규칙)과 CVPR 2026 논문 4편(`papers/cvpr2026/`: ACoT-VLA · AVA-VLA · ActiveVLA · ForceVLA2)의 실험 절 흐름을 반영해 4장을 전부 교체. 기존 `sections/04_experiments.tex`(IFG 개발 결과 중심)는 수정하지 않고 보존했다.
+- 산출: `paper/latex/exp_section/04_experiments.tex` (4.1 Setup · 4.2 Main Results on Safety Benchmarks · 4.3 Task-Conditioned 3D Grounding · 4.4 Constraint Validity and Ablations · 4.5 Generalization, Efficiency, and Real-Robot Deployment; 표 6개, 그림 자리 2개), `build_experiments.tex`(공식 `cvpr.sty` review mode, section 4 · figure 4부터 번호), `references_experiments.bib`(SafeDojo · WMPO · OpenVLA-OFT · SAM 2, 각각 SafeDojo PDF 서지 목록과 SAM 2 PDF 머리에서 옮김), `build_experiments.pdf`.
+- 수치 규칙: 문헌 보고값(P)만 표에 넣었다 — SafeLIBERO Level I/II (SafeDojo v2 Tab. 1–2, OpenVLA-OFT 계열), LIBERO-Safety L2 SR (원문 Tab. 3). 자체 재현(R)과 AG3S 칸은 모두 `\tbdc`/`\tbd{}` placeholder. **등록된 개발 결과(R008–R026)는 설계 문서 §1 규칙에 따라 표에 넣지 않았고**, 어느 칸의 후보인지 tex 상단 주석에 적었다. 벤치마크 정의(Level I/II, TSR·SSR·CAR·ETS, 1 mm 변위 규칙, AAG·TSA·FSHOA·HRI, L0–L2)는 VLSA · SafeDojo · LIBERO-Safety 원문 PDF와 E1 protocol 문서로 확인했다.
+- 빌드: pdflatex + bibtex (TeX Live apt 설치, `TEXINPUTS=..:`), 6쪽(본문 5쪽 중간까지, 참고문헌 5–6쪽), undefined citation/reference 0, overfull 1건(2 pt 미만, Tab. 2). 전 페이지 PNG 시각 검토.
+- 미수행: main.tex 병합, 기존 preamble에 `\tbdc` 추가, 실험 실행·수치 등록. 본문 길이(약 4.5쪽)는 수치 확정 후 압축 대상.
+
+## 2026-11-08 18:40 KST — 4. Experiments v2: 분량 축소 + 목표 결과(빨간 글씨) 삽입
+
+- 사용자 피드백: v1 분량 과다. CVPR 2026 참고 논문의 순서(4 → 4.1 Setup → 4.2 Main Results → 4.3 Ablation → 4.4 Analysis → Conclusion)로 재구성하고, 아직 측정하지 않은 결과는 사용자가 제시한 방향(LIBERO 단독 성공률은 π0.5보다 미세하게 낮음, 충돌률은 크게 감소, 다른 baseline 대비 약 10 point 충돌 감소, 일반화)에 맞춘 **목표값과 그 이유를 빨간 글씨로** 작성.
+- 표기: `\proj{…}` = 투영된(미검증) 수치·설명(빨강), `\tbd{…}` = 미확정 설정(빨강), 검정 = 벤치마크 정의·protocol·문헌 보고값(†). 투영값은 VLSA Tab. I(같은 π0.5-LIBERO: CAR 17.1 % / TSR 57.8 %, AEGIS 68.9 % / 67.5 %)와 SafeDojo Tab. 1–2에 맞춰 잡았다. 어느 것도 측정값이 아니다.
+- 산출: `paper/latex/exp_section/04_experiments.tex`(v2, 표 4개 · 그림 자리 2개), `build_experiments.pdf` 5쪽(본문 약 3.3쪽, 참고문헌 4–5쪽), overfull 0 · undefined 0. v1은 덮어썼다(기록은 이 로그와 이전 항목).
