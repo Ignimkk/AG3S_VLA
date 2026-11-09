@@ -164,12 +164,31 @@ are in the supplement."
 | F3 '팔이 개입하는 동안 track 을 마지막 위치에 고정' | **넣음, GT · detector 두 판 같은 규칙** | R1, 논문 §3.2 ObjectTracker 자체 규칙 ("freezing a track at its last position when the arm intervenes"). port 가 덧붙이는 것이 아니라 KNOWS 의 가림 대처 능력을 논문대로 평가하는 것 (18:5x 판정의 취지와 같음: port 가 논문 밖의 보강을 하지 않는다) |
 | F4a attention 으로 target 제외 (Eq. 2–4, π0.5 layer 12 head 3, agent view) | **넣음 (detector 판)** | R1, 논문 식 · layer · head 명시. AG3S 의 핵심 주장 (VLA attention 으로 target / 장애물 구분) 과 가장 가까운 경쟁 기법. 우리 재현 P0b 적중 0.682 (`methods/knows/docs/08-p0b-results.md`). K · δ 는 논문 미기재 → 가정값을 밝힘 |
 | F4b fine-tune 한 YOLOE | 넣지 않음 | R4, recipe 미공개 → 공용 Grounding DINO "object", GT seg arm 이 상한 |
-| F2 env step 마다 filter (policy 는 5 step 마다 그대로) | **넣음, 모든 filter arm (AEGIS · multi-link CBF · KNOWS)** | R1 + R3: AEGIS 공식 `main_aegis.py:299–362` 와 KNOWS 논문 모두 env step 마다 측정 EE pose 로 filter. chunk 단위 실행의 예측 오차 (5 step 뒤 p90 1.3–5 cm) 제거. baseline 에 유리한 방향이라 우리에게 보수적 |
+| F2 env step 마다 filter (policy 는 5 step 마다 그대로) | ~~넣음~~ → **철회 (§4.7, 01:1x)** | R1 + R3: AEGIS 공식 `main_aegis.py:299–362` 와 KNOWS 논문 모두 env step 마다 측정 EE pose 로 filter. chunk 단위 실행의 예측 오차 (5 step 뒤 p90 1.3–5 cm) 제거. baseline 에 유리한 방향이라 우리에게 보수적 |
 | F5 · F6 | 넣지 않음 | R2 |
 | multi-link CBF | 같은 checklist 로 점검 (2026-11-10 00:0x 시작) | 대칭성: 세 방법을 같은 기준으로 |
 
 **순서:** tranche 1 queue 중지 (2026-11-09 23:58, 진행 중 run 1 개는 끝까지) → 변경 commit → F2 · F3 · F4a 구현 + CPU test → 개발 분할 짝 측정 (init 5–14, spatial · object · goal Level I, filter 6 arm) → 설정 고정 → tranche 1 재시작.
 **tranche 1 의 기존 run 처리:** π0.5 단독 (none) run 은 영향이 없어 그대로 쓴다. filter arm run (AEGIS · CBF · KNOWS, 23:58 까지) 은 F2 전 판이라 보고하지 않고 '수정 전' 기록으로만 남긴다.
+
+### 4.7 F2 철회 · tranche 1 재개 (사용자 결정 2026-11-10 01:1x)
+
+**경위:** §4.6 에서 F2 (env step 마다 filter) 를 모든 filter arm 에 넣기로 하고 tranche 1 을 멈췄다 (23:58). 그 결과 이미 끝난 filter arm run
+14 개 (약 5.5 h) 를 버리고 표 채우기가 2–3 일 늦어지는 비용을 dev-4a 가 충분히 따지지 않고 권했다. 사용자 지적 (01:0x) 뒤 다시 판단:
+F2 의 기여는 점검에서도 2차 요인이고 (현재 충돌의 92 % 는 `h*>0`, 예측 오차와 무관), chunk 단위 실행은 **모든 arm (AG3S 포함) 이 같은 VLA chunk
+인터페이스에서 동작하는 공용 조건** (R3) 이라 선언된 편차로 충분하다.
+
+| 결정 | 내용 |
+|---|---|
+| F2 | **철회.** 보고 run 은 모두 `--filter-rate chunk` (launcher 기본값). F2 code (`--filter-rate step`, bfa9bdb0) 는 supplement 의 민감도 실험용으로 남긴다 |
+| F1 · F3 · F4a · AEGIS 이름 문구 | 유지 (R1, 논문 · 공식 코드에 적힌 것) |
+| 개발 분할 짝 측정 | 표 채운 뒤로 미룬다 (supplement 근거, GPU 가 빌 때) |
+| 기존 run 재사용 | π0.5 단독 spatial LI · LII · object LI, AEGIS detector spatial LI · LII · object LI, AEGIS names spatial LII · object LI, multi-link CBF ± GT spatial LI · LII (12 run, 약 4.3 h) |
+| 재실행 (`-r2`) | AEGIS names spatial LI (이름 수정 전), KNOWS ± GT spatial LI · LII (F3 · F4a 전) — 처음 run 은 '수정 전' 기록으로 남김 |
+| 재사용 근거 | bfa9bdb0 의 변경은 chunk 경로에서 AEGIS · multi-link CBF 동작을 바꾸지 않음: client flag off byte-identical, `ObstacleCloudSource(target_box=True)` 기본 = 이전 동작, test 104 + 50 통과 (구현 보고 `outputs/2026-11-10_baseline_F2F3F4a/README.md`) |
+| 남은 위험 | multi-link CBF 점검 (진행 중) 에서 R1 수정이 나오면 그 arm 은 다시 돌린다 |
+
+queue: `experiments/segmentation/bl_tranche_resume_queue.sh` (재실행 5 → 남은 블록 scenario-major → LIBERO, 60 run).
 
 ## 5. 결과
 
@@ -199,3 +218,4 @@ are in the supplement."
 | 2026-11-09 18:57 | KNOWS port F1 (손 · 손가락 MVEE EE ellipsoid) 적용, tranche 1 KNOWS arm 은 F1 판; F3 등 나머지 미적용 | §4.4, 사용자 결정 |
 | 2026-11-09 20:01 | AEGIS port: privileged names 판 이름을 공식 prefer_list 문구로 (backview 등 미적용), tranche 1 spatial LI names 판 재실행 queue | §4.5, 사용자 결정 |
 | 2026-11-09 23:58 | tranche 1 queue 중지 (진행 중 aegis-gt object LI 는 끝까지), 재구성 원칙 R1–R5 와 F2 · F3 · F4a 채택, multi-link CBF 점검 시작 | §4.6, 사용자 결정 |
+| 2026-11-10 01:2x | F2 철회 (사용자 결정), 기존 run 12 개 재사용, KNOWS 4 · AEGIS names spatial LI 재실행, tranche 1 재개 (`bl_tranche_resume_queue.sh`) | §4.7 |
