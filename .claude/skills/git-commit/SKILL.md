@@ -33,6 +33,9 @@ description: AG3S_VLA monorepo 커밋 규칙, 브랜치 확인, 소유 파일 st
 - raw recording·checkpoint·dataset·venv·cache는 Git 밖에 둔다.
   재현에 필요한 source SHA·config·artifact SHA-256은 manifest로 남긴다.
 - 기존에 추적된 작은 fixture를 일괄 삭제하지 않는다.
+- 외부 논문 PDF(`papers/`, `references/` 아래 `*.pdf`)는 commit하지 않는다. `.gitignore`가 제외하며,
+  참고 자료는 local 또는 storage에 둔다 (2026-11-10 사용자 지시: 이력이 커져 pull이 느려짐).
+  `git add -f`로 우회하지 않는다.
 
 ## 브랜치 기준
 

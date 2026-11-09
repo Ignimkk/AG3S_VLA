@@ -45,3 +45,7 @@ core.*
 # External OpenPI input aliases; restored by prepare_legacy_artifacts.py.
 /third_party/openpi/assets
 /third_party/openpi/policy_records
+
+# External paper PDFs (reading material, not source) stay local; never commit (user 2026-11-10).
+/papers/**/*.pdf
+/references/**/*.pdf
