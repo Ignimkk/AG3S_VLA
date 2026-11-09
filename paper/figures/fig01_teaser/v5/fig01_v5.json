@@ -1,0 +1,436 @@
+{
+ "artifact": "fig01_v5",
+ "pdf": "paper/figures/fig01_teaser/v5/fig01_v5.pdf",
+ "png": "paper/figures/fig01_teaser/v5/fig01_v5.png",
+ "size_in": [
+  6.875,
+  2.86
+ ],
+ "textwidth_in": 6.875,
+ "raster_dpi_in_pdf": 400,
+ "png_dpi": 300,
+ "fonts": {
+  "family": "DejaVu Sans",
+  "pdf_fonttype": 42,
+  "min_pt": 7.0,
+  "max_pt": 7.5,
+  "n_text_items": 29,
+  "floor_pt": 7.0
+ },
+ "printed_text": [
+  "✗ bottle unboxed",
+  "✗ bowl not modelled",
+  "✗ bottle toppled",
+  "✓ seeds on bowl",
+  "✓ only bowl freed",
+  "bowl",
+  "bottle",
+  "✓ bottle upright",
+  "“pick up the black bowl on the stove and place it on the plate”",
+  "target surface",
+  "obstacle",
+  "seeds",
+  "Prior",
+  "AG3S (ours)",
+  "frozen VLA ❄",
+  "+ external\ndetector",
+  "frozen VLA ❄",
+  "its own\nattention",
+  "target surface",
+  "not modelled",
+  "detector boxes",
+  "noun attention → seeds",
+  "target",
+  "3D target surface",
+  "robot: one hand ellipsoid",
+  "contact-link field",
+  "outcome",
+  "outcome",
+  "✓ surface, not box"
+ ],
+ "printed_numbers": [],
+ "layout_audit": {
+  "tolerance_pt": 1.0,
+  "min_text_to_panel_border_in": 0.05,
+  "violations": {
+   "text_text": 0,
+   "text_segment": 0,
+   "panel_border": 0,
+   "badge_heights": 0
+  },
+  "n_panels": 7,
+  "n_texts": 29
+ },
+ "image_panels": [
+  {
+   "slot": "prior: detector boxes",
+   "file": "paper/figures/fig01_teaser/v4/assets/l_boxes.png",
+   "sha256": "33bdca6782dc82f0b52752fe795022c739a5adeb6df0224ff2d1f51161ba1e63",
+   "crop_px": [
+    64,
+    239,
+    640,
+    402
+   ],
+   "provenance": {
+    "run": "/mnt/dev/AG3S_VLA-storage/results/benchmark/20261104T201942_89b424595b57_e1a-aegis-spatial-LI-LI-aegis",
+    "obs_index": 20,
+    "boxes_used": [
+     {
+      "box": [
+       0.0,
+       85.3,
+       82.9,
+       219.0
+      ],
+      "score": 0.4142554700374603,
+      "trim": {
+       "n_box": 10984,
+       "n_robot": 0,
+       "n_support_or_high": 2243,
+       "n_components": 4,
+       "chosen": 3,
+       "n_center": 1782,
+       "center_votes": 1782,
+       "n_kept": 8518,
+       "n_out": 8176
+      },
+      "name": "object#0"
+     },
+     {
+      "box": [
+       167.7,
+       166.0,
+       215.5,
+       202.4
+      ],
+      "score": 0.3749934434890747,
+      "trim": {
+       "n_box": 1692,
+       "n_robot": 0,
+       "n_support_or_high": 1473,
+       "n_components": 1,
+       "chosen": 0,
+       "n_center": 0,
+       "n_kept": 219,
+       "n_out": 209
+      },
+      "name": "object#1"
+     }
+    ],
+    "boxes_all": [
+     {
+      "box": [
+       87.7,
+       0.0,
+       173.6,
+       87.1
+      ],
+      "score": 0.4521392285823822,
+      "trim": {
+       "n_box": 5530,
+       "n_robot": 5127,
+       "n_support_or_high": 331,
+       "n_components": 3,
+       "chosen": 0,
+       "n_center": 0,
+       "n_kept": 19,
+       "n_out": 17
+      },
+      "name": null
+     },
+     {
+      "box": [
+       0.0,
+       85.3,
+       82.9,
+       219.0
+      ],
+      "score": 0.4142554700374603,
+      "trim": {
+       "n_box": 10984,
+       "n_robot": 0,
+       "n_support_or_high": 2243,
+       "n_components": 4,
+       "chosen": 3,
+       "n_center": 1782,
+       "center_votes": 1782,
+       "n_kept": 8518,
+       "n_out": 8176
+      },
+      "name": "object#0"
+     },
+     {
+      "box": [
+       167.7,
+       166.0,
+       215.5,
+       202.4
+      ],
+      "score": 0.3749934434890747,
+      "trim": {
+       "n_box": 1692,
+       "n_robot": 0,
+       "n_support_or_high": 1473,
+       "n_components": 1,
+       "chosen": 0,
+       "n_center": 0,
+       "n_kept": 219,
+       "n_out": 209
+      },
+      "name": "object#1"
+     }
+    ],
+    "variant": "aegis:obst-detector:target-detector",
+    "n_intervened_calls": 2,
+    "n_calls": 46,
+    "note": "detector boxes are computed once and reused for every call of the episode (asserted)",
+    "sha256": "33bdca6782dc82f0b52752fe795022c739a5adeb6df0224ff2d1f51161ba1e63"
+   }
+  },
+  {
+   "slot": "prior: end-effector ellipsoid",
+   "file": "paper/figures/fig01_teaser/v4/assets/l_ee.png",
+   "sha256": "5b2b66dd16dbc7703f248d0dfe6d533de9a8009cdd2cdd667edd3fefc707eae3",
+   "crop_px": [
+    248,
+    227,
+    520,
+    326
+   ],
+   "provenance": {
+    "run": "/mnt/dev/AG3S_VLA-storage/results/benchmark/20261104T220956_89b424595b57_e1a-knows-spatial-LI-LI-knows",
+    "obs_index": 110,
+    "eef_pos_world": [
+     0.039,
+     0.1807,
+     1.1294
+    ],
+    "eef_quat_xyzw": [
+     0.998,
+     -0.0099,
+     -0.0506,
+     0.0365
+    ],
+    "semi_axes_m": [
+     0.04,
+     0.04,
+     0.07
+    ],
+    "content": "KNOWS robot model: one ellipsoid on the end effector (gripper frame, robosuite eef pose of the KNOWS run at obs 110), projected with the shared head camera; semi-axes from knows/adapter.py GRIPPER_SEMI_AXES",
+    "sha256": "5b2b66dd16dbc7703f248d0dfe6d533de9a8009cdd2cdd667edd3fefc707eae3"
+   }
+  },
+  {
+   "slot": "prior: episode end",
+   "file": "paper/figures/fig01_teaser/v4/assets/o_aegis_final.png",
+   "sha256": "d2ca31c8fdf08b203d7affd3a53673f66a305ce139006abab9fa3aaaeb33aee5",
+   "crop_px": [
+    110,
+    219,
+    640,
+    402
+   ],
+   "provenance": {
+    "run": "/mnt/dev/AG3S_VLA-storage/results/benchmark/20261104T201942_89b424595b57_e1a-aegis-spatial-LI-LI-aegis",
+    "obs_index": 249,
+    "sha256": "d2ca31c8fdf08b203d7affd3a53673f66a305ce139006abab9fa3aaaeb33aee5"
+   }
+  },
+  {
+   "slot": "ours: noun attention + seeds",
+   "file": "paper/figures/fig01_teaser/v4/assets/r_identity.png",
+   "sha256": "b2c4a6613224aadb39ec04e98efa4bedf0b3f34ab5cb24343a202715d531f97f",
+   "crop_px": [
+    85,
+    160,
+    430,
+    340
+   ],
+   "provenance": {
+    "source_chunk": "/mnt/dev/AG3S_VLA-storage/results/benchmark/20261109T080310_a811331c11d8_qe-pe123458-e1a-spatial-LI-t2-LI-vla_v11ab-AG3S-commonto-att-termsoff-pass-zr-ee-hdp-loose2-obst4-pts-nocarve-fh-t100-pe123458-C/server_constraints/run_0000/chunk_00161.npz",
+    "call_seq": 2,
+    "obs_index": 30,
+    "grasp": "latched",
+    "n_seeds": 101,
+    "content": "per-point noun attention (attention_values on attention_cloud) copied to the depth pixels within 6 mm of a point, normalised by the 99.5 % quantile; gold dots = seed points. The 16x16 attention_head map is not used.",
+    "sha256": "b2c4a6613224aadb39ec04e98efa4bedf0b3f34ab5cb24343a202715d531f97f"
+   }
+  },
+  {
+   "slot": "ours: episode end",
+   "file": "paper/figures/fig01_teaser/v4/assets/o_ag3s_final.png",
+   "sha256": "5472cfe654b09d091c74778ee280e2374afc8c2d1623335deb74dcaee220d26e",
+   "crop_px": [
+    130,
+    182,
+    600,
+    475
+   ],
+   "provenance": {
+    "run": "/mnt/dev/AG3S_VLA-storage/results/benchmark/20261109T080310_a811331c11d8_qe-pe123458-e1a-spatial-LI-t2-LI-vla_v11ab-AG3S-commonto-att-termsoff-pass-zr-ee-hdp-loose2-obst4-pts-nocarve-fh-t100-pe123458-C",
+    "obs_index": 139,
+    "sha256": "5472cfe654b09d091c74778ee280e2374afc8c2d1623335deb74dcaee220d26e"
+   }
+  }
+ ],
+ "episode": {
+  "stem": "safelibero_spatial_t2_e9",
+  "chunk_mapping": "episodes.jsonl order + seq0 solve_ms match",
+  "camera": "head (agentview), static; K / T_base_cam from AG3S geom",
+  "arms": {
+   "ag3s": {
+    "run": "/mnt/dev/AG3S_VLA-storage/results/benchmark/20261109T080310_a811331c11d8_qe-pe123458-e1a-spatial-LI-t2-LI-vla_v11ab-AG3S-commonto-att-termsoff-pass-zr-ee-hdp-loose2-obst4-pts-nocarve-fh-t100-pe123458-C",
+    "seed": 7,
+    "init": 9,
+    "success": true,
+    "safelibero": {
+     "obstacle": "wine_bottle_obstacle_1",
+     "obstacle_candidates": [
+      "moka_pot_obstacle_1",
+      "white_storage_box_obstacle_1",
+      "milk_obstacle_1",
+      "wine_bottle_obstacle_1",
+      "red_coffee_mug_obstacle_1",
+      "yellow_book_obstacle_1"
+     ],
+     "obstacle_initial_pos": [
+      -0.09999995528078236,
+      -0.021008684397799297,
+      0.8980043256603991
+     ],
+     "collided": false,
+     "collide_t": null,
+     "max_displacement_m": 1.6515661877339327e-07,
+     "safe_success": true
+    }
+   },
+   "vla": {
+    "run": "/mnt/dev/AG3S_VLA-storage/results/benchmark/20261108T233915_4ef922024674_qe-vla-e1a-spatial-LI-t2-LI-vla_only",
+    "seed": 7,
+    "init": 9,
+    "success": true,
+    "safelibero": {
+     "obstacle": "wine_bottle_obstacle_1",
+     "obstacle_candidates": [
+      "moka_pot_obstacle_1",
+      "white_storage_box_obstacle_1",
+      "milk_obstacle_1",
+      "wine_bottle_obstacle_1",
+      "red_coffee_mug_obstacle_1",
+      "yellow_book_obstacle_1"
+     ],
+     "obstacle_initial_pos": [
+      -0.09999995528078236,
+      -0.021008684397799297,
+      0.8980043256603991
+     ],
+     "collided": true,
+     "collide_t": 86,
+     "max_displacement_m": 0.14240669185012098,
+     "safe_success": false
+    }
+   },
+   "aegis": {
+    "run": "/mnt/dev/AG3S_VLA-storage/results/benchmark/20261104T201942_89b424595b57_e1a-aegis-spatial-LI-LI-aegis",
+    "seed": 7,
+    "init": 9,
+    "success": true,
+    "safelibero": {
+     "obstacle": "wine_bottle_obstacle_1",
+     "obstacle_candidates": [
+      "moka_pot_obstacle_1",
+      "white_storage_box_obstacle_1",
+      "milk_obstacle_1",
+      "wine_bottle_obstacle_1",
+      "red_coffee_mug_obstacle_1",
+      "yellow_book_obstacle_1"
+     ],
+     "obstacle_initial_pos": [
+      -0.09999995528078236,
+      -0.021008684397799297,
+      0.8980043256603991
+     ],
+     "collided": true,
+     "collide_t": 86,
+     "max_displacement_m": 0.14240669185012098,
+     "safe_success": false
+    }
+   },
+   "knows": {
+    "run": "/mnt/dev/AG3S_VLA-storage/results/benchmark/20261104T220956_89b424595b57_e1a-knows-spatial-LI-LI-knows",
+    "seed": 7,
+    "init": 9,
+    "success": false,
+    "safelibero": {
+     "obstacle": "wine_bottle_obstacle_1",
+     "obstacle_candidates": [
+      "moka_pot_obstacle_1",
+      "white_storage_box_obstacle_1",
+      "milk_obstacle_1",
+      "wine_bottle_obstacle_1",
+      "red_coffee_mug_obstacle_1",
+      "yellow_book_obstacle_1"
+     ],
+     "obstacle_initial_pos": [
+      -0.09999995528078236,
+      -0.021008684397799297,
+      0.8980043256603991
+     ],
+     "collided": true,
+     "collide_t": 86,
+     "max_displacement_m": 0.14347045054659158,
+     "safe_success": false
+    }
+   }
+  }
+ },
+ "honesty": [
+  "all panels come from SafeLIBERO spatial Level I task 2 episode 9 (init 9, seed 7); prior lane = AEGIS run (boxes, episode end) and KNOWS run (end-effector ellipsoid); AG3S lane = final run pe123458",
+  "the 3D and field panels plot recorded arrays of one AG3S server chunk (call 6, obs 50); no re-computation",
+  "the 'not modelled' tile is a statement about the method design (AEGIS models obstacles, not a target surface)",
+  "person icon, chips and arrows are schematic",
+  "no number printed in the figure"
+ ],
+ "script": "paper/tools/plotting/cvpr_v5_fig1_compose.py",
+ "generated": "2026-11-09T13:50:12+09:00",
+ "git_head": "827bc5e3d1815d4ad3b6c32f5b1e2a0919b59ee4",
+ "is_measured_result": false,
+ "scope": "qualitative same-episode comparison; no numbers",
+ "panel_3d": {
+  "chunk": "/mnt/dev/AG3S_VLA-storage/results/benchmark/20261109T080310_a811331c11d8_qe-pe123458-e1a-spatial-LI-t2-LI-vla_v11ab-AG3S-commonto-att-termsoff-pass-zr-ee-hdp-loose2-obst4-pts-nocarve-fh-t100-pe123458-C/server_constraints/run_0000/chunk_00165.npz",
+  "sha256": "ff8dbde3cdba9180613e0c143ef01cc51d73f0cf88925095b19afdb27fc5566d",
+  "box_lo_m": [
+   0.31,
+   -0.27,
+   -0.01
+  ],
+  "box_hi_m": [
+   0.63,
+   0.04,
+   0.26
+  ],
+  "n_table": 6,
+  "n_object": 575,
+  "n_removed": 2114,
+  "n_kept": 567,
+  "content": "grey = support points (every 3rd), blue = other observed points and non-target voxels kept, orange = voxels removed from the contact-link field (target surface)"
+ },
+ "panel_field": {
+  "chunk": "/mnt/dev/AG3S_VLA-storage/results/benchmark/20261109T080310_a811331c11d8_qe-pe123458-e1a-spatial-LI-t2-LI-vla_v11ab-AG3S-commonto-att-termsoff-pass-zr-ee-hdp-loose2-obst4-pts-nocarve-fh-t100-pe123458-C/server_constraints/run_0000/chunk_00165.npz",
+  "sha256": "ff8dbde3cdba9180613e0c143ef01cc51d73f0cf88925095b19afdb27fc5566d",
+  "slice_z_m": 0.062,
+  "slice_k": 59,
+  "x_range_m": [
+   0.3,
+   0.64
+  ],
+  "y_range_m": [
+   -0.31,
+   0.07
+  ],
+  "n_freed_px": 187,
+  "n_obstacle_px": 302,
+  "content": "horizontal slice of the recorded fields at the bowl's mid-height, camera-aligned (right = +y, down = +x); colour = esdf_free_distance (field read by the contact links), dark line = its zero level (obstacles, incl. the bottle), orange = occupied in esdf_distance (all links) but free in esdf_free_distance (the bowl surface the fingers may approach), white lines = iso-distance"
+ }
+}

@@ -96,6 +96,64 @@ AG3S 행은 같은 장면 · 같은 initial state · 같은 seed의 최종 구�
 
 결론: **지금 자료로는 layout 시안만 만들 수 있다.** 최종 그림은 E1a(SafeLIBERO main) eval run과 E2(grounding held-out) run 뒤에 제작한다.
 
+### 5.1 2026-11-09 자산 inventory (최종 구성 run 기준, `v3/assets/`)
+
+스크립트 `paper/tools/plotting/fig1_v3_assets.py`가 만든다. 출처 · frame · chunk · sha256은 `v3/assets/assets.json`.
+
+**최종 run에서 새로 렌더한 것** (SafeLIBERO Level I, task 2, episode 9, seed 7, initial state 9, 장애물 wine bottle)
+
+| 파일 | 칸 | 내용 |
+|---|---|---|
+| `top_vla_step{076,086,111,146}.png` | 위쪽 줄 | VLA 단독(`*qe-vla-e1a-spatial-LI-t2-*`). step 86에 첫 공식 충돌, step 111에 병이 쓰러져 접시 위로 |
+| `top_ag3s_step{076,086,111,139}.png` | 위쪽 줄 | 최종 AG3S(`*qe-pe123458-e1a-spatial-LI-t2-*`). 같은 step에 병은 서 있고 그릇을 옮겨 접시에 놓음(안전 성공) |
+| `c1_ours_attention.png` | 1 Ours | 점에 붙은 noun attention(`attention_values`)을 head 카메라에 투영 + seed 점(금색). target이 고정된(latched) 첫 call(call 2) |
+| `c2_ours_extent.png` | 2 Ours | target-free field에서 지운 voxel(주황, 그릇 표면 2114개)과 바로 옆에서 보존한 비-target voxel(파랑, 567개). call 6, 파지 직전 |
+| `c3_ours_links.png` | 3 Ours | 손 · 손가락 sphere(금색 = contact link), 쥔 그릇의 attached sphere(보라, 80개). call 14, 운반 중 |
+
+같은 조건(VLA 단독 밀고 성공 · AEGIS 충돌 · AG3S 안전 성공)을 만족하는 다른 episode: task 2 episode 11, task 3 episode 5 (`--task --ep`로 같은 스크립트 실행).
+
+칸 2 설명에 쓸 수 있는 관측: 탐색 첫 call(call 0)에서 seed 90개 중 29개가 target 옆 와인병에 걸렸지만 target 표면 222점 중 병 4.5 cm 안의 점은 0개였다. depth 경계가 seed의 번짐을 막은 사례다. call 1부터 seed는 그릇에만 있다.
+
+주의: chunk 기록의 16×16 `attention_head` 지도는 서버가 점에 붙인 attention 값과 어느 방향으로도 상관이 없어(|r| < 0.03) 쓰지 않았다. 원인은 미확인이며, 칸 1은 방법이 실제로 seed를 고르는 데 쓰는 점별 값으로 그렸다.
+
+**이전 컨테이너의 baseline 결과 그림에서 잘라낸 것** (`crop_*.png`, 원본은 `AG3S/ag3s/docs/figures/baselines/`)
+
+| 원본 | 칸 | 내용 |
+|---|---|---|
+| `2026-11-03_safelibero-seg-ats/fig4_erase_keep_maps.png` (3×3) | 2 Prior / Ours | SafeLIBERO 실제 frame. 열 = SAM-2 track(지시문) · Grounded-SAM(phrase) · ATS. 초록 = target 지움, 빨강 = target 남음, 검정 = 장애물을 잘못 지움, 주황 = 장애물 보존 |
+| `aegis/v1-aegis-scene-detection-ellipsoid.png` (3) | 2 · 3 Prior | AEGIS 세 변형의 검출 ellipsoid와 EE 경로 (LIBERO) |
+| `knows/v1-knows-scene-ellipsoids.png`, `multilink_cbf/v1-multilink-scene-link-ellipsoids.png` | 3 Prior | 물체 ellipsoid, link별 ellipsoid |
+| `grounded_sam2_track/v2-sl3-track-strip.png` (4×7) | 1 Prior | Grounded-SAM-2 per-frame이 같은 종류의 다른 그릇(주황 윤곽)을 target으로 고름 |
+| `sl4b/v2-sl4b-scene-overlay.png` | 1 Prior | segmenter 마스크(파랑)가 로봇 팔로 번짐 |
+| `2026-11-01_segmentation-baseline/fixed_segmentation_examples.png` | 1 Prior | Grounded-SAM-2(지시문)가 다른 그릇을 고름(IoU 0) |
+| `2026-11-01_multibench-segmentation/{occlusion_tracking,sam2_prompt_comparison}_example.png` | 1 Prior | 가림에서 SAM-2 per-frame · Grounded-SAM-2가 target을 놓침 |
+
+이 crop들은 11-01–11-03 이전 컨테이너 run의 그림이다. 원본 마스크 배열은 이 컴퓨터에 없다. 그림에는 쓸 수 있지만 장면이 위쪽 줄 episode와 다르며, 같은 episode의 baseline 마스크가 필요하면 기록된 frame에 segmenter를 다시 돌려야 한다.
+
+### 5.2 2026-11-09 12:08 KST 제작 결과 (`FIG1_V3_FINAL_PROMPT_KO.md` 실행)
+
+스크립트 `paper/tools/plotting/cvpr_v3_fig1_compose.py`(`Fig` · `fit` · `layout_audit`는 `cvpr_v1_compose.py`에서 그대로 복사; 원본은 import 시 이전 컨테이너 결과 파일을 읽어 import 불가). 산출물은 `v3/`의 PDF · PNG · JSON이다.
+
+| 변형 | 파일 | 크기 (in) | 패널 | layout audit | 최소 글자 |
+|---|---|---|---|---|---|
+| 위쪽 줄 포함 | `fig01_v3.{pdf,png,json}` | 6.875 × 2.889 (목표 ≤ 2.9) | 9 | 위반 0 | 7.0 pt |
+| 위쪽 줄 제외 | `fig01_v3_notop.{pdf,png,json}` | 6.875 × 1.699 (목표 ≤ 2.5) | 6 | 위반 0 | 7.0 pt |
+
+| 원고 (pdflatex, 같은 source에서 그림만 교체) | 전체 쪽수 | References 시작 쪽 | 그림 번호 |
+|---|---|---|---|
+| 변경 전 (구 Fig. 1 + Fig. 2 = 5.97 in) | 12 | 10 | 1 teaser · 2 overview · 3 pipeline · 4 held-out · 5 failure |
+| Fig. 1 v3 (위쪽 줄 포함, `main.tex` 현재 설정) | 11 | 9 | 1 v3 · 2 pipeline · 3 held-out · 4 failure |
+| Fig. 1 v3 (위쪽 줄 제외) | 11 | 9 | 같음 |
+
+프롬프트와 달라진 점:
+- **레이아웃:** 칸 안에서 Prior · Ours를 위아래가 아니라 좌우로 놓았다. 위아래 배치는 높이 2.5 in 안에서 패널이 0.9 in로 줄고 칸 폭의 절반이 비어서다. 패널은 모두 정사각형이고 크기가 같다(칸 1.03 in, 위쪽 줄 1.13 in).
+- **badge · 행 제목 축약:** 1 in 패널 안에 들어가도록 줄였다. 행 제목: `Prior: segmenter / ellipsoid / EE filter`. badge: `✗ other bowl`, `✓ target bowl`, `✗ one blob`, `✓ surface only`, `✗ EE path only`, `✓ held bowl`, 위쪽 줄 `✗ bottle toppled`, `✓ bottle upright`, `✓ bowl placed`.
+- **칸 3 Prior 해석 정정:** KNOWS 그림의 초록 ellipse는 손 끝 ellipsoid가 아니라 `flat_stove_1` 물체 ellipsoid다(원본 라벨). 그림이 보여 주는 것은 물체 ellipsoid와 nominal · filtered end-effector 경로뿐이고 쥔 물체 모델이 없다는 점이어서, caption을 그렇게 썼다.
+- **칸 2 Prior 사실 확인:** AEGIS `detector_names` 변형에서 `flat_stove_1` · `wooden_cabinet_1` 검출 상자가 둘 다 cabinet 전체를 덮어(semi-axes ≈ 0.15 m) 서랍 안의 target 그릇을 품는다(LIBERO spatial t4 = "black bowl in the top drawer of the wooden cabinet").
+- **raster 편집:** AEGIS · KNOWS crop의 이름 태그와 KNOWS 범례(1 in 패널에서 ≈ 1.5 pt)를 diffusion inpaint로 지웠다. Grounded-SAM-2 마스크는 파랑에서 주황으로 hue만 바꿨다(이 그림의 색 규약에서 파랑은 보호 이웃이라서). 패널별 상자 · 픽셀 수는 sidecar `panels[].edits`에 있다. 태그 자리에 옅은 번짐이 남는다(인쇄 크기에서 작음).
+- **참조 정리:** Method 58행의 cosine ≈ 0.97 문장과 실험 159행의 "mask follows the robot" 문장은 새 Fig. 1에 해당 장면이 없어서 그림 참조를 지웠다(`fig:teaser`로 바꾸면 틀린 참조가 된다). Intro 10행의 예시 문장(사과 · 기둥)은 새 그림의 그릇 · 병으로 바꿨다. caption이 `ravi2024sam2`를 인용하므로 `main.tex`의 `\bibliography`에 `exp_section/references_experiments`를 추가했다(두 bib의 key 중복 0).
+- **빌드 환경:** 이 컨테이너에는 tectonic이 없고 시스템 TeX에 `algorithm` · `algpseudocode`가 없다. 두 패키지는 preamble에서 불러오기만 하고 본문에서 쓰지 않으므로, scratch의 빈 stub로 pdflatex 빌드했다(원고 source에는 영향 없음).
+
 ## 6. 제작 절차
 
 1. **시안 (지금 가능).** `cvpr_v1_compose.py`의 `fig02()`를 복사해 `paper/tools/plotting/cvpr_v3_fig1_compose.py`의 `fig01_v3()`로 만든다. 위쪽 흐름 줄을 지우고, 위쪽 장면 줄을 선택 인자(`top_strip=True/False`)로 둔다. 기존 자산으로 두 변형을 렌더해 높이와 쪽수 절약을 실측한다.

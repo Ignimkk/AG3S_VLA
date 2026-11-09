@@ -462,3 +462,50 @@ Step 4 종료 시점의 다음 구성 작업은 Step 5: 공식 template과 manus
 - 문서: `paper/figures/fig01_teaser/TEASER_V2_SAFELIBERO_PLAN_KO.md`를 v3로 개정(근거표, 세 축 ↔ 기여 · 절 · 표 대응, 레이아웃, 칸별 Prior baseline과 장면 기준, 자료 목록, 제작 절차, caption 초안, 원고 참조 변경 목록). `fig01_teaser/PLAN.md` · `fig02_overview/PLAN.md`에 포인터, SEC1-3 수정 요청 C1 · C2, 실험 계획 §6 · §13 갱신.
 - 원고 tex는 아직 바꾸지 않음: Intro 10행 · Method 58행 그림 참조, 04_experiments 159행 "(Fig.~1, panel~d)", build_experiments `\setcounter{figure}{3}` → `{2}`는 병합 그림 반영 시 함께 수정(구성안 §8).
 - 2026-11-09 추가: 분량 문서 갱신. 기존 원고 PDF의 절 제목 위치로 1–3장을 실측(≈ 6.13쪽: 제목 · 초록 · Fig. 1 0.93, Intro 1.87, Related 0.62, Method 2.72)하고 4–5장 standalone 3.75쪽과 합쳐 본문 ≈ 9.9쪽(사용자 보고 10쪽과 일치), 8쪽까지 ≈ 1.9쪽 축소 필요. `notes/SEC1-3_REVISION_REQUESTS_20261108_KO.md` §H에 3단계 예산표(1단계 ≈ 1.0: Fig. 1+2 병합 · Algorithm 1 · 3.5 · Intro 1–2문단; 2단계 ≈ 0.8; 3단계 ≈ 0.35, Tab. 2 이동은 마지막 수단) 추가. 실측으로 E1 0.25→0.17, E2 0.3→0.22 정정. `RESULTS_NARRATIVE` §9에 반영 완료 표시, §10의 "Fig. 2 삭제" 권고를 병합으로 정정.
+
+## 2026-11-09 KST — Fig. 1 v3 자산: segmenter 결과 그림 발견, 최종 run에서 Ours · 위쪽 줄 렌더
+
+- 외부 segmenter · ellipsoid 결과는 이전 컨테이너(11-01–11-03) run의 그림으로 `AG3S/ag3s/docs/figures/baselines/`에 남아 있음(원본 마스크 배열은 이 컴퓨터에 없음). `paper/tools/plotting/fig1_v3_assets.py --only crop`으로 10개 그림의 패널을 `paper/figures/fig01_teaser/v3/assets/crop_*.png`로 분리.
+- 같은 스크립트 `--only render`로 최종 AG3S(pe123458) E1a run과 VLA 단독 run의 SafeLIBERO Level I task 2 episode 9(seed 7, initial state 9, 와인병)에서 위쪽 줄 frame과 칸 1–3 Ours 이미지 생성. 3D 점은 기록된 K · T_base_cam으로 투영, chunk 매핑은 `gtto_feature_scene.map_chunks`(solve_ms 일치 확인).
+- 확인한 사실: chunk의 16×16 `attention_head` 지도는 점별 attention 값과 어느 방향으로도 상관 없음(|r| < 0.03) → 칸 1은 점별 값으로 그림. call 0의 seed 90개 중 29개가 와인병에 걸렸으나 target 표면에는 병 근처 점 0개; call 1부터 seed는 그릇에만.
+- 배치 시안 `paper/figures/fig01_teaser/v3/mock_fig1_v3.png`. 구성안 §5.1에 자산 inventory 추가.
+- 2026-11-09 추가: Fig. 1 v3 최종 제작 프롬프트 `paper/figures/fig01_teaser/FIG1_V3_FINAL_PROMPT_KO.md` 작성(목적, 병합 정의, 레이아웃, 칸별 1순위 · 대안 이미지 경로, 제작 · LaTeX 반영 절차, 정직성 제약, 완료 기준).
+
+## 2026-11-09 12:08 KST — Fig. 1 v3 제작 · 원고 반영 (구 Fig. 1 + Fig. 2 병합)
+
+- `FIG1_V3_FINAL_PROMPT_KO.md`대로 `paper/tools/plotting/cvpr_v3_fig1_compose.py`를 새로 만들어 `paper/figures/fig01_teaser/v3/fig01_v3.{pdf,png,json}`(위쪽 줄 포함, 6.875 × 2.889 in, 패널 9)과 `fig01_v3_notop.*`(6.875 × 1.699 in, 패널 6)을 생성. 두 변형 모두 `layout_audit` 위반 0, 최소 글자 7.0 pt, 그림 안 수치 0. sidecar에 패널별 원본 경로 · sha256 · crop · 출처 run/episode/chunk · raster 편집 · 인쇄 글자 목록 기록.
+- 자료 유형: 위쪽 줄 · Ours 패널 = 기록된 run의 렌더(VLA 단독 `20261108T233915_4ef922024674_…vla_only`, AG3S `20261109T080310_a811331c11d8_…pe123458-C`, SafeLIBERO spatial Level I t2 e9, seed 7, init 9, 두 run commit 다름). Prior 패널 = 이전 컨테이너 baseline 문서 그림의 crop(LIBERO, 장애물 없음, 다른 장면).
+- 원고: wrapper `figures/fig01_teaser/figure_v3.tex` · `figure_v3_notop.tex` 신설, `latex/main.tex`가 `figure_v3`를 입력하고 구 Fig. 2 줄 삭제, Intro 10행 참조 `fig:teaser`로 통합 · 예시 문장을 그릇 · 병으로 수정, Method 58행 · 실험 159행의 그림 참조 삭제(해당 장면이 새 그림에 없음), `build_experiments.tex` figure counter 3 → 2, `\bibliography`에 `exp_section/references_experiments` 추가.
+- 빌드(pdflatex, 사용하지 않는 `algorithm`/`algpseudocode`는 scratch의 빈 stub): 12 → 11쪽, References 시작 10 → 9쪽, undefined reference · citation 0, 그림 번호 1 v3 · 2 pipeline · 3 held-out · 4 failure. 위쪽 줄 제외 변형도 11쪽 · References 9쪽.
+- 상세 · 프롬프트와 달라진 점: `figures/fig01_teaser/TEASER_V2_SAFELIBERO_PLAN_KO.md` §5.2.
+
+## 2026-11-09 13:26 KST — Fig. 1 v4: 같은 장면 비교 (figurelabs 시안 배치 + 실제 기록 frame)
+
+- 사용자 판단: v3는 teaser로 부족(Prior가 다른 장면, Ours segmentation 거침). 사용자가 figurelabs로 만든 배치 시안(AI 생성 장면, 논문 사용 불가)의 구성을 실제 기록으로 다시 만듦.
+- 같은 episode 확인(SafeLIBERO spatial Level I t2 e9, init 9, seed 7, 와인병): VLA 단독 · AEGIS · multi-link CBF · KNOWS 모두 step 86에 병 충돌(KNOWS는 과제 실패), AG3S pe123458 안전 성공. AEGIS detector 상자는 episode 내내 같고(cabinet · 접시) 병에는 상자가 없음(`…aegis…/method_calls/calls.jsonl`).
+- `paper/tools/plotting/fig1_v4_assets.py`: 기록된 head depth · K · T_base_cam으로 픽셀을 3D로 올려 기록된 점 · voxel · sphere에 대응시키는 방식으로 Ours 4장을 다시 렌더(점찍기 → 픽셀 mask, "segmentation 보정"은 표시 방식만 바꾼 것), Prior 3장(AEGIS 상자, KNOWS end-effector ellipsoid)과 episode 끝 frame 생성. KNOWS 물체 ellipsoid는 회전이 기록되지 않아(`serve_method.py:316`) 그리지 않음.
+- `paper/tools/plotting/cvpr_v4_fig1_compose.py` → `paper/figures/fig01_teaser/v4/fig01_v4.{pdf,png,json}`: 6.875 × 2.880 in, 패널 12, layout audit 위반 0, 최소 글자 7.0 pt, 수치 0. wrapper `figures/fig01_teaser/figure_v4.tex`(caption 초안). `main.tex`는 아직 v3 입력(전환은 사용자 결정).
+- 주의: init 9는 구성 선택에 쓴 분할(init 5–14) 안. AEGIS run(commit 89b424595b57)과 AG3S run(a811331c11d8)은 commit 다름, 초기 상태 · seed 같음.
+
+## 2026-11-09 13:50 KST — Fig. 1 v5: 지시 → 두 lane(Prior vs AG3S) storyboard
+
+- 사용자 요청: v4가 뭉툭하고 덜 예쁨 → 사람-로봇 소통, 로봇 비전이 타겟 기하를 잡아 충돌 제약으로 바꿔 성공하는 흐름, 외부 segmentation 미사용의 간접 표현.
+- `paper/tools/plotting/cvpr_v5_fig1_compose.py` → `paper/figures/fig01_teaser/v5/fig01_v5.{pdf,png,json}` (6.875 × 2.860 in, layout audit 위반 0, 최소 7.0 pt, 수치 0). 사람 아이콘 + 지시문 → Prior lane(frozen VLA + 점선 "external detector" 모듈 → AEGIS 상자 → "target surface not modelled" → KNOWS 손 ellipsoid → AEGIS 끝 frame) / AG3S lane(같은 frozen VLA → "its own attention" → attention·seed → 3D 점구름(target 표면 주황, 나머지 파랑) → contact-link 거리장 단면 → AG3S 끝 frame).
+- 새 패널 두 개는 AG3S chunk_00165(call 6, obs 50)의 기록 배열을 직접 그림: `filtered_cloud`, `support_mask`, `target_free_removed/nontarget_kept_ijk`, `esdf_distance` vs `esdf_free_distance`(그릇 voxel: main 0, free 중앙 8.7 mm → 비워짐; 이웃 voxel: 둘 다 0 → 장애물 유지; 확인함). 단면 z = 0.062 m, 카메라 정렬(오른쪽 = +y, 아래 = +x).
+- 둥근 모서리는 `mutation_aspect`로 인치 단위 원형 모서리, badge는 패널 폭 안으로 축약. wrapper `figures/fig01_teaser/figure_v5.tex`(caption 초안). `main.tex`는 여전히 v3 입력.
+
+## 2026-11-09 14:26 KST — Fig. 2 (method pipeline): 사용자 템플릿에 실제 기록 삽입
+
+- 입력: 사용자 템플릿 `paper/figures/figure02_method_pipeline.png`(AI 생성 배치, 1920 × 816, 가짜 큐브 · 공 장면). 원본은 수정하지 않음.
+- `paper/tools/plotting/fig2_template_fill.py` → `paper/figures/fig02_method/fig02_method_pipeline.{png,pdf,json}`(2배 3840 × 1632, 6.875 in 기준 558 dpi). 사진 칸 10개를 SafeLIBERO t2 e9 AG3S run(pe123458)의 기록으로 채움: 입력 head + wrist RGB(obs 20), ① call 2 점구름 · target 점 · seed(3D), ② target 점(obs 30, 50)과 held 중 attached sphere 중심(obs 70–130)의 시간 추적, ③ call 6 거리장 단면 C1(esdf_distance) / C2(esdf_free_distance), ⑤ obs 110 손 sphere + 실행된 end-effector 경로(obs 85–139), S1–S5 obs 35/60/95/125/139.
+- 기록과 맞지 않는 템플릿 글자 수정: "p40.5" → π0.5, "RGB + 2 wrists" → "RGB-D + wrist", S4 "release" → "lower onto plate", S5 "Retreat / move away" → "Success / bowl on plate, episode ends"(gripper가 끝까지 닫혀 있고 성공 시 episode 종료). 범례의 target / 이웃 구를 논문 색(주황 / 파랑)으로 변경.
+- 남은 문제(사용자 판단): 템플릿 글자가 인쇄 크기 ≈ 4–6 pt(7 pt 하한 미달), 범례 "Frozen policy, depth, robot model: none" 의미 불명, "s.t. clearance ≥ −x₁" 표기, robot state 아이콘이 Panda가 아님, ④ stage chip(approach … retreat)과 기록된 HSR 라벨(pick/place, grasp searching/latched/closing/held) 불일치.
+
+## 2026-11-09 14:51 KST — Fig. 2 모듈 ①②③: 장면 overlay 변형(B) 추가, A/B 비교
+
+- `fig2_template_fill.py scene` → `paper/figures/fig02_method/fig02_method_pipeline_scene.{png,pdf,json}`. ①②③ 칸만 같은 기록 배열을 head 카메라 위에 그림(기록 depth로 픽셀을 3D로 올려 대응): ① obs 30 target 점 → 주황 mask, seed 금색, 나머지 관측 표면 옅은 파랑, ② obs 130 frame 위에 처음 grounding된 target 점과 단계별 중심(obs 30–130) 마커 + 점선, ③ obs 50 frame 좌 C1(그릇 포함 관측 표면 빨강) / 우 C2(그릇 주황, 나머지 빨강, 손 sphere 금색).
+- 비교 그림 `paper/figures/fig02_method/fig02_modules123_compare.png`(위 A = 3D / 단면, 아래 B = 장면 overlay). 기본 변형(A)은 그대로 유지.
+
+## 2026-11-09 14:58 KST — Fig. 2 B①: target 밖 seed 표시 제외 (사용자 요청)
+
+- B① 장면판에서 target 점에서 2 cm보다 먼 seed를 그리지 않음(표시 선택). call 2 기록 seed 101개 중 95개 표시, 6개(병 4 · 서랍장 2, target까지 5.7–8.7 cm) 생략. 생략 수와 거리는 `fig02_method_pipeline_scene.json` `slots.p1`에 기록. caption에 "모든 seed가 그릇 위"라고 쓰지 않는다.

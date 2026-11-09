@@ -55,7 +55,7 @@ Geometry decides where evidence can flow; the unaries decide which surface recei
 
 \subsection{ATS: temporal identity and consistency}
 \label{sec:memory}
-Region identity and fine membership need different spatial information, so we use internal features for the former and the depth graph for the latter. Raw VLA patch features are dominated by a component shared by the whole frame, so every region in a scene scores cosine $\approx0.97$ against every other (Fig.~\ref{fig:overview}). Centering removes it. For unit patch feature $u_{p,t}$, frame mean $\bar u_t$, and the pixel count $b_p(R)$ of region $R$ in patch $p$,
+Region identity and fine membership need different spatial information, so we use internal features for the former and the depth graph for the latter. Raw VLA patch features are dominated by a component shared by the whole frame, so every region in a scene scores cosine $\approx0.97$ against every other. Centering removes it. For unit patch feature $u_{p,t}$, frame mean $\bar u_t$, and the pixel count $b_p(R)$ of region $R$ in patch $p$,
 \begin{equation}
  \widetilde u_{p,t}=\operatorname{norm}(u_{p,t}-\bar u_t),\qquad
  g_t(R)=\operatorname{norm}\!\Big(\sum_p b_p(R)\,\widetilde u_{p,t}\Big).

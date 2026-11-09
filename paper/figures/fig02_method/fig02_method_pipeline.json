@@ -1,0 +1,262 @@
+{
+ "artifact": "fig02_method_pipeline",
+ "png": "paper/figures/fig02_method/fig02_method_pipeline.png",
+ "pdf": "paper/figures/fig02_method/fig02_method_pipeline.pdf",
+ "size_px": [
+  3840,
+  1632
+ ],
+ "size_in": [
+  6.875,
+  2.922
+ ],
+ "template": {
+  "file": "paper/figures/figure02_method_pipeline.png",
+  "sha256": "c1d55195fb8378397895740f9c4b974412c0c03aca5dc84114b639b4f95b3bc0",
+  "size_px": [
+   1920,
+   816
+  ],
+  "note": "AI-drawn layout supplied by the user (2026-11-09); its mock scenes are fully covered by the slots"
+ },
+ "episode": {
+  "run": "/mnt/dev/AG3S_VLA-storage/results/benchmark/20261109T080310_a811331c11d8_qe-pe123458-e1a-spatial-LI-t2-LI-vla_v11ab-AG3S-commonto-att-termsoff-pass-zr-ee-hdp-loose2-obst4-pts-nocarve-fh-t100-pe123458-C",
+  "stem": "safelibero_spatial_t2_e9",
+  "chunk_mapping": "episodes.jsonl order + seq0 solve_ms match",
+  "seed": 7,
+  "init": 9
+ },
+ "slots": {
+  "rgb": {
+   "slot_px_template": [
+    29,
+    244,
+    137,
+    327
+   ],
+   "obs": 20,
+   "head_crop": [
+    0,
+    104,
+    768,
+    591
+   ],
+   "content": "head RGB (obs 20) with the left-wrist RGB of the same instant as inset"
+  },
+  "p1": {
+   "slot_px_template": [
+    392,
+    144,
+    704,
+    294
+   ],
+   "chunk": "/mnt/dev/AG3S_VLA-storage/results/benchmark/20261109T080310_a811331c11d8_qe-pe123458-e1a-spatial-LI-t2-LI-vla_v11ab-AG3S-commonto-att-termsoff-pass-zr-ee-hdp-loose2-obst4-pts-nocarve-fh-t100-pe123458-C/server_constraints/run_0000/chunk_00161.npz",
+   "call": 2,
+   "obs": 30,
+   "n_target": 233,
+   "n_seeds": 101,
+   "content": "grey = support points, blue = other observed points, orange = target points, gold = seeds"
+  },
+  "p2": {
+   "slot_px_template": [
+    750,
+    144,
+    1025,
+    294
+   ],
+   "obs": [
+    30,
+    50,
+    70,
+    90,
+    110,
+    130
+   ],
+   "chunks": [
+    "/mnt/dev/AG3S_VLA-storage/results/benchmark/20261109T080310_a811331c11d8_qe-pe123458-e1a-spatial-LI-t2-LI-vla_v11ab-AG3S-commonto-att-termsoff-pass-zr-ee-hdp-loose2-obst4-pts-nocarve-fh-t100-pe123458-C/server_constraints/run_0000/chunk_00161.npz",
+    "/mnt/dev/AG3S_VLA-storage/results/benchmark/20261109T080310_a811331c11d8_qe-pe123458-e1a-spatial-LI-t2-LI-vla_v11ab-AG3S-commonto-att-termsoff-pass-zr-ee-hdp-loose2-obst4-pts-nocarve-fh-t100-pe123458-C/server_constraints/run_0000/chunk_00165.npz",
+    "/mnt/dev/AG3S_VLA-storage/results/benchmark/20261109T080310_a811331c11d8_qe-pe123458-e1a-spatial-LI-t2-LI-vla_v11ab-AG3S-commonto-att-termsoff-pass-zr-ee-hdp-loose2-obst4-pts-nocarve-fh-t100-pe123458-C/server_constraints/run_0000/chunk_00169.npz",
+    "/mnt/dev/AG3S_VLA-storage/results/benchmark/20261109T080310_a811331c11d8_qe-pe123458-e1a-spatial-LI-t2-LI-vla_v11ab-AG3S-commonto-att-termsoff-pass-zr-ee-hdp-loose2-obst4-pts-nocarve-fh-t100-pe123458-C/server_constraints/run_0000/chunk_00173.npz",
+    "/mnt/dev/AG3S_VLA-storage/results/benchmark/20261109T080310_a811331c11d8_qe-pe123458-e1a-spatial-LI-t2-LI-vla_v11ab-AG3S-commonto-att-termsoff-pass-zr-ee-hdp-loose2-obst4-pts-nocarve-fh-t100-pe123458-C/server_constraints/run_0000/chunk_00177.npz",
+    "/mnt/dev/AG3S_VLA-storage/results/benchmark/20261109T080310_a811331c11d8_qe-pe123458-e1a-spatial-LI-t2-LI-vla_v11ab-AG3S-commonto-att-termsoff-pass-zr-ee-hdp-loose2-obst4-pts-nocarve-fh-t100-pe123458-C/server_constraints/run_0000/chunk_00181.npz"
+   ],
+   "content": "orange = target points (obs 30, 50) and attached-sphere centres while held (obs 70-130), opacity increasing with time; dashed line through their centroids"
+  },
+  "p3": {
+   "slot_px_template": [
+    1070,
+    144,
+    1350,
+    294
+   ],
+   "chunk": "/mnt/dev/AG3S_VLA-storage/results/benchmark/20261109T080310_a811331c11d8_qe-pe123458-e1a-spatial-LI-t2-LI-vla_v11ab-AG3S-commonto-att-termsoff-pass-zr-ee-hdp-loose2-obst4-pts-nocarve-fh-t100-pe123458-C/server_constraints/run_0000/chunk_00165.npz",
+   "call": 6,
+   "obs": 50,
+   "slice_z_m": 0.062,
+   "x_range_m": [
+    0.29,
+    0.65
+   ],
+   "y_range_m": [
+    -0.33,
+    0.06
+   ],
+   "content": "left: esdf_distance (all links, C1); right: esdf_free_distance (contact links, C2); red = occupied (keep clear), orange = occupied in C1 but free in C2; light blue = distance, iso-lines at 2/4/6 cm; camera-aligned (right = +y, down = +x)"
+  },
+  "p5": {
+   "slot_px_template": [
+    1648,
+    144,
+    1892,
+    283
+   ],
+   "obs": 110,
+   "chunk": "/mnt/dev/AG3S_VLA-storage/results/benchmark/20261109T080310_a811331c11d8_qe-pe123458-e1a-spatial-LI-t2-LI-vla_v11ab-AG3S-commonto-att-termsoff-pass-zr-ee-hdp-loose2-obst4-pts-nocarve-fh-t100-pe123458-C/server_constraints/run_0000/chunk_00177.npz",
+   "path_obs": [
+    85,
+    139
+   ],
+   "crop": [
+    0,
+    120,
+    768,
+    438
+   ],
+   "content": "gold = hand collision spheres (contact links) of call 18; green = executed end-effector path (robosuite eef position, obs 85-139) projected with the recorded camera"
+  },
+  "s1": {
+   "slot_px_template": [
+    43,
+    588,
+    385,
+    703
+   ],
+   "obs": 35,
+   "crop": [
+    0,
+    162,
+    731,
+    247
+   ],
+   "content": "head RGB centred on the end effector"
+  },
+  "s2": {
+   "slot_px_template": [
+    413,
+    588,
+    748,
+    703
+   ],
+   "obs": 60,
+   "crop": [
+    0,
+    219,
+    731,
+    252
+   ],
+   "content": "head RGB centred on the end effector"
+  },
+  "s3": {
+   "slot_px_template": [
+    770,
+    588,
+    1129,
+    703
+   ],
+   "obs": 95,
+   "crop": [
+    37,
+    115,
+    731,
+    235
+   ],
+   "content": "head RGB centred on the end effector"
+  },
+  "s4": {
+   "slot_px_template": [
+    1152,
+    588,
+    1499,
+    703
+   ],
+   "obs": 125,
+   "crop": [
+    37,
+    362,
+    731,
+    243
+   ],
+   "content": "head RGB centred on the end effector"
+  },
+  "s5": {
+   "slot_px_template": [
+    1522,
+    588,
+    1875,
+    703
+   ],
+   "obs": 139,
+   "crop": [
+    37,
+    427,
+    731,
+    239
+   ],
+   "content": "head RGB centred on the end effector"
+  }
+ },
+ "text_edits": {
+  "boxes": {
+   "pi": [
+    83,
+    120,
+    233,
+    141
+   ],
+   "rgb": [
+    154,
+    261,
+    218,
+    301
+   ],
+   "s4cap": [
+    1304,
+    709,
+    1355,
+    724
+   ],
+   "s5head": [
+    1686,
+    558,
+    1749,
+    580
+   ],
+   "s5cap": [
+    1662,
+    711,
+    1742,
+    728
+   ]
+  },
+  "legend_spheres": {
+   "target": [
+    "431",
+    "761",
+    "464",
+    "798"
+   ],
+   "neighbour": [
+    "664",
+    "761",
+    "697",
+    "798"
+   ]
+  },
+  "note": "inpainted and re-typeset (Nimbus Sans Narrow) because the template text did not match the recorded setup; see module docstring"
+ },
+ "font_warning": "template text is raster at ~16-22 px of 1920 px; at 6.875 in this prints at ~4.1-5.7 pt (below the 7 pt floor used for the other figures)",
+ "printed_numbers": [],
+ "script": "paper/tools/plotting/fig2_template_fill.py",
+ "generated": "2026-11-09T14:26:57+09:00",
+ "git_head": "827bc5e3d1815d4ad3b6c32f5b1e2a0919b59ee4"
+}

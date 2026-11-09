@@ -1,0 +1,336 @@
+{
+ "artifact": "fig01_v3",
+ "pdf": "paper/figures/fig01_teaser/v3/fig01_v3.pdf",
+ "png": "paper/figures/fig01_teaser/v3/fig01_v3.png",
+ "size_in": [
+  6.875,
+  2.889
+ ],
+ "textwidth_in": 6.875,
+ "raster_dpi_in_pdf": 400,
+ "png_dpi": 300,
+ "fonts": {
+  "family": "DejaVu Sans",
+  "pdf_fonttype": 42,
+  "min_pt": 7.0,
+  "max_pt": 7.0,
+  "n_text_items": 35,
+  "floor_pt": 7.0
+ },
+ "printed_text": [
+  "✗ other bowl",
+  "✓ target bowl",
+  "✗ one blob",
+  "✓ surface only",
+  "✗ EE path only",
+  "✓ held bowl",
+  "✗ bottle toppled",
+  "✓ bottle upright",
+  "✓ bowl placed",
+  "1 What: identity",
+  "the noun's attention names the object",
+  "Prior: segmenter",
+  "AG3S (ours)",
+  "2 Where it ends: extent",
+  "depth continuity sets the boundary",
+  "Prior: ellipsoid",
+  "AG3S (ours)",
+  "3 Who and when: permission",
+  "contact links only, in the allowed stage",
+  "Prior: EE filter",
+  "AG3S (ours)",
+  "VLA only",
+  "VLA + AG3S",
+  "VLA + AG3S, later",
+  "SafeLIBERO, Level I: one scene, two runs",
+  "“pick up the black bowl on the stove and place it on the plate”",
+  "obstacle: wine bottle next to the bowl's path",
+  "frozen VLA alone vs. with AG3S, same initial state and seed",
+  "Below, per axis: closest prior practice vs. AG3S",
+  "prior: earlier baseline runs on other LIBERO scenes",
+  "ours: the AG3S episode shown above",
+  "selected target surface",
+  "protected neighbor",
+  "seeds / contact links",
+  "attached object"
+ ],
+ "printed_numbers": [],
+ "layout_audit": {
+  "tolerance_pt": 1.0,
+  "min_text_to_panel_border_in": 0.05,
+  "violations": {
+   "text_text": 0,
+   "text_segment": 0,
+   "panel_border": 0,
+   "badge_heights": 0
+  },
+  "n_panels": 9,
+  "n_texts": 35
+ },
+ "panels": [
+  {
+   "slot": "1 What: identity / prior",
+   "file": "paper/figures/fig01_teaser/v3/assets/crop_grounded_sam2_track__v2-sl3-track-strip_r0c0.png",
+   "sha256": "1e1b17774f9ea18fd1d22953ec7ce809b31812f5a5bdc27ce33cac9642051f96",
+   "size_px": [
+    178,
+    178
+   ],
+   "square_crop_px": [
+    0,
+    0,
+    178,
+    178
+   ],
+   "edits": [
+    "trimmed 2 px source-panel frame on each side",
+    "re-tinted the blue Grounded-SAM-2 per-frame mask fill to orange #E8711A (337 px; hue only) to follow this figure's colour code; green contour (ground-truth target) and orange contour (same-category distractor) of the source figure kept"
+   ],
+   "panel_kind": "previous-container figure crop",
+   "provenance": {
+    "source": "AG3S/ag3s/docs/figures/baselines/grounded_sam2_track/v2-sl3-track-strip.png",
+    "sha256": "d139ee3a2efaaca6549e682eec1132032341c27d33ae91375e9cfa32689dd4e8",
+    "box_rows_cols": [
+     97,
+     279,
+     69,
+     251
+    ]
+   }
+  },
+  {
+   "slot": "1 What: identity / ours",
+   "file": "paper/figures/fig01_teaser/v3/assets/c1_ours_attention.png",
+   "sha256": "c187f201908595e751c66750eb9c3c9417268d2c03bfa416f92bed923988dfa4",
+   "size_px": [
+    768,
+    768
+   ],
+   "square_crop_px": [
+    0,
+    0,
+    768,
+    768
+   ],
+   "edits": [],
+   "panel_kind": "recorded run",
+   "provenance": {
+    "source_chunk": "/mnt/dev/AG3S_VLA-storage/results/benchmark/20261109T080310_a811331c11d8_qe-pe123458-e1a-spatial-LI-t2-LI-vla_v11ab-AG3S-commonto-att-termsoff-pass-zr-ee-hdp-loose2-obst4-pts-nocarve-fh-t100-pe123458-C/server_constraints/run_0000/chunk_00161.npz",
+    "call_seq": 2,
+    "obs_index": 30,
+    "grasp": "latched",
+    "n_points_visible": 7812,
+    "n_seeds": 101,
+    "content": "noun attention lifted to the observed points (attention_values on attention_cloud), projected to the head camera and blurred; gold = seed points. The stored 16x16 attention_head map is not used (no correlation with the per-point values)."
+   },
+   "run": "20261109T080310_a811331c11d8_qe-pe123458-e1a-spatial-LI-t2-LI-vla_v11ab-AG3S-commonto-att-termsoff-pass-zr-ee-hdp-loose2-obst4-pts-nocarve-fh-t100-pe123458-C"
+  },
+  {
+   "slot": "2 Where it ends: extent / prior",
+   "file": "paper/figures/fig01_teaser/v3/assets/crop_aegis__v1-aegis-scene-detection-ellipsoid_r0c1.png",
+   "sha256": "9cdc8a9ce23185da9188513b9105ce20665254cac1e50c0320edde976e669a00",
+   "size_px": [
+    505,
+    506
+   ],
+   "square_crop_px": [
+    0,
+    0,
+    505,
+    505
+   ],
+   "edits": [
+    "inpainted 2 raster name tag / legend boxes (5244 px) that would print below 7 pt: [[55, 157, 148, 171], [97, 220, 186, 238]]"
+   ],
+   "panel_kind": "previous-container figure crop",
+   "provenance": {
+    "source": "AG3S/ag3s/docs/figures/baselines/aegis/v1-aegis-scene-detection-ellipsoid.png",
+    "sha256": "54008de9a757500b4e34c5d36803bb0486758d91579d08739506813957182f4c",
+    "box_rows_cols": [
+     113,
+     619,
+     871,
+     1376
+    ]
+   }
+  },
+  {
+   "slot": "2 Where it ends: extent / ours",
+   "file": "paper/figures/fig01_teaser/v3/assets/c2_ours_extent.png",
+   "sha256": "eb15b5d6ef5ecd3e99642392b11297f7ef97c2cbb7788384cfba94a88576e289",
+   "size_px": [
+    768,
+    768
+   ],
+   "square_crop_px": [
+    0,
+    0,
+    768,
+    768
+   ],
+   "edits": [],
+   "panel_kind": "recorded run",
+   "provenance": {
+    "source_chunk": "/mnt/dev/AG3S_VLA-storage/results/benchmark/20261109T080310_a811331c11d8_qe-pe123458-e1a-spatial-LI-t2-LI-vla_v11ab-AG3S-commonto-att-termsoff-pass-zr-ee-hdp-loose2-obst4-pts-nocarve-fh-t100-pe123458-C/server_constraints/run_0000/chunk_00165.npz",
+    "call_seq": 6,
+    "obs_index": 50,
+    "grasp": "closing",
+    "n_removed": 2114,
+    "n_neighbour_kept": 567,
+    "content": "orange = voxels removed from the target-free field (target surface); blue = non-target voxels kept protected next to it"
+   },
+   "run": "20261109T080310_a811331c11d8_qe-pe123458-e1a-spatial-LI-t2-LI-vla_v11ab-AG3S-commonto-att-termsoff-pass-zr-ee-hdp-loose2-obst4-pts-nocarve-fh-t100-pe123458-C"
+  },
+  {
+   "slot": "3 Who and when: permission / prior",
+   "file": "paper/figures/fig01_teaser/v3/assets/crop_knows__v1-knows-scene-ellipsoids_r0c0.png",
+   "sha256": "e11cbf5146d57bc4b6057cf9d07983bfc082997fa0997cecf0e8dbc2510a5df8",
+   "size_px": [
+    505,
+    506
+   ],
+   "square_crop_px": [
+    0,
+    0,
+    505,
+    505
+   ],
+   "edits": [
+    "inpainted 6 raster name tag / legend boxes (12579 px) that would print below 7 pt: [[132, 127, 224, 139], [147, 140, 206, 150], [0, 163, 79, 175], [312, 212, 399, 225], [256, 329, 305, 342], [6, 464, 88, 499]]"
+   ],
+   "panel_kind": "previous-container figure crop",
+   "provenance": {
+    "source": "AG3S/ag3s/docs/figures/baselines/knows/v1-knows-scene-ellipsoids.png",
+    "sha256": "1fdf3de6dffb95cc04de9fa37b8a6d49c71efb1691fd96df7eac386bcdce9160",
+    "box_rows_cols": [
+     88,
+     594,
+     266,
+     771
+    ]
+   }
+  },
+  {
+   "slot": "3 Who and when: permission / ours",
+   "file": "paper/figures/fig01_teaser/v3/assets/c3_ours_links.png",
+   "sha256": "4fb0841356c9af6dce1a0113c1806b082d91a53d1b94f9a9f8b97d9c29cd7e94",
+   "size_px": [
+    768,
+    768
+   ],
+   "square_crop_px": [
+    0,
+    0,
+    768,
+    768
+   ],
+   "edits": [],
+   "panel_kind": "recorded run",
+   "provenance": {
+    "source_chunk": "/mnt/dev/AG3S_VLA-storage/results/benchmark/20261109T080310_a811331c11d8_qe-pe123458-e1a-spatial-LI-t2-LI-vla_v11ab-AG3S-commonto-att-termsoff-pass-zr-ee-hdp-loose2-obst4-pts-nocarve-fh-t100-pe123458-C/server_constraints/run_0000/chunk_00173.npz",
+    "call_seq": 14,
+    "obs_index": 90,
+    "grasp": "held",
+    "n_spheres": 170,
+    "n_attached": 80,
+    "target_field_exclude_any": false,
+    "content": "gold = hand/finger spheres (contact links), grey = other link spheres, purple = attached"
+   },
+   "run": "20261109T080310_a811331c11d8_qe-pe123458-e1a-spatial-LI-t2-LI-vla_v11ab-AG3S-commonto-att-termsoff-pass-zr-ee-hdp-loose2-obst4-pts-nocarve-fh-t100-pe123458-C"
+  },
+  {
+   "slot": "top / VLA only",
+   "file": "paper/figures/fig01_teaser/v3/assets/top_vla_step111.png",
+   "sha256": "5b342b8ed9a767cc1534eab81f7f4b9ee6b388c5ed4e5c61683c6fcaf405b66f",
+   "size_px": [
+    768,
+    768
+   ],
+   "square_crop_px": [
+    0,
+    0,
+    768,
+    768
+   ],
+   "edits": [],
+   "panel_kind": "recorded run",
+   "provenance": {
+    "source": "/mnt/dev/AG3S_VLA-storage/results/benchmark/20261108T233915_4ef922024674_qe-vla-e1a-spatial-LI-t2-LI-vla_only/episodes/safelibero_spatial_t2_e9.npz",
+    "frame": 111,
+    "episode": "safelibero_spatial_t2_e9",
+    "note": "VLA first official collision at step 86"
+   },
+   "run": "20261108T233915_4ef922024674_qe-vla-e1a-spatial-LI-t2-LI-vla_only"
+  },
+  {
+   "slot": "top / VLA + AG3S",
+   "file": "paper/figures/fig01_teaser/v3/assets/top_ag3s_step111.png",
+   "sha256": "eef988724d1503c7bc6e215e5c77c0dcb66aee53169024a092c42c63ab7d9850",
+   "size_px": [
+    768,
+    768
+   ],
+   "square_crop_px": [
+    0,
+    0,
+    768,
+    768
+   ],
+   "edits": [],
+   "panel_kind": "recorded run",
+   "provenance": {
+    "source": "/mnt/dev/AG3S_VLA-storage/results/benchmark/20261109T080310_a811331c11d8_qe-pe123458-e1a-spatial-LI-t2-LI-vla_v11ab-AG3S-commonto-att-termsoff-pass-zr-ee-hdp-loose2-obst4-pts-nocarve-fh-t100-pe123458-C/episodes/safelibero_spatial_t2_e9.npz",
+    "frame": 111,
+    "episode": "safelibero_spatial_t2_e9",
+    "note": "VLA first official collision at step 86"
+   },
+   "run": "20261109T080310_a811331c11d8_qe-pe123458-e1a-spatial-LI-t2-LI-vla_v11ab-AG3S-commonto-att-termsoff-pass-zr-ee-hdp-loose2-obst4-pts-nocarve-fh-t100-pe123458-C"
+  },
+  {
+   "slot": "top / VLA + AG3S, later",
+   "file": "paper/figures/fig01_teaser/v3/assets/top_ag3s_step139.png",
+   "sha256": "5472cfe654b09d091c74778ee280e2374afc8c2d1623335deb74dcaee220d26e",
+   "size_px": [
+    768,
+    768
+   ],
+   "square_crop_px": [
+    0,
+    0,
+    768,
+    768
+   ],
+   "edits": [],
+   "panel_kind": "recorded run",
+   "provenance": {
+    "source": "/mnt/dev/AG3S_VLA-storage/results/benchmark/20261109T080310_a811331c11d8_qe-pe123458-e1a-spatial-LI-t2-LI-vla_v11ab-AG3S-commonto-att-termsoff-pass-zr-ee-hdp-loose2-obst4-pts-nocarve-fh-t100-pe123458-C/episodes/safelibero_spatial_t2_e9.npz",
+    "frame": 139,
+    "episode": "safelibero_spatial_t2_e9",
+    "note": "VLA first official collision at step 86"
+   },
+   "run": "20261109T080310_a811331c11d8_qe-pe123458-e1a-spatial-LI-t2-LI-vla_v11ab-AG3S-commonto-att-termsoff-pass-zr-ee-hdp-loose2-obst4-pts-nocarve-fh-t100-pe123458-C"
+  }
+ ],
+ "runs": {
+  "vla_only": "20261108T233915_4ef922024674_qe-vla-e1a-spatial-LI-t2-LI-vla_only",
+  "ag3s": "20261109T080310_a811331c11d8_qe-pe123458-e1a-spatial-LI-t2-LI-vla_v11ab-AG3S-commonto-att-termsoff-pass-zr-ee-hdp-loose2-obst4-pts-nocarve-fh-t100-pe123458-C",
+  "note": "VLA-only run (2026-11-08, commit 4ef922024674) and AG3S run (2026-11-09, commit a811331c11d8) differ in commit; seed 7 and initial state 9 are the same. SafeLIBERO spatial Level I task 2 episode 9."
+ },
+ "prior_scenes": {
+  "identity": "Grounded-SAM-2 per-frame, instruction prompt; LIBERO spatial t2 e0 (task 'from table center', no obstacle), head camera obs 10; source AG3S/ag3s/docs/figures/baselines/grounded_sam2_track/v2-sl3-track-strip.png (BL-4, 2026-10-24, previous container)",
+  "extent": "AEGIS detector_names variant; LIBERO spatial t4_e0 (bowl in the top drawer of the wooden cabinet, no obstacle), call 8 obs 50, open-loop replay; detector boxes of flat_stove_1 and wooden_cabinet_1 both span the cabinet, so their ellipsoids (semi-axes ~0.15 m) contain the target bowl; source aegis/v1-aegis-scene-detection-ellipsoid.png",
+  "permission": "KNOWS; LIBERO spatial t4_e0 call 12 obs 70, object ellipsoids fitted from simulator segmentation (privileged) and the nominal (white) vs filtered (orange) end-effector path; no attached-object model. The green ellipse is the flat_stove_1 object ellipsoid (not an end-effector ellipsoid); source knows/v1-knows-scene-ellipsoids.png"
+ },
+ "honesty": [
+  "prior panels are different scenes (LIBERO, no obstacle) from previous-container runs, not the top-row episode",
+  "c1 ours uses per-point attention values; the stored 16x16 attention_head map is not used",
+  "camera renders are 256 px upsampled 3x (768 px), no further sharpening",
+  "no number printed in the figure"
+ ],
+ "script": "paper/tools/plotting/cvpr_v3_fig1_compose.py",
+ "generated": "2026-11-09T12:03:56+09:00",
+ "git_head": "a811331c11d84465d6de14a899c5f5105cb5972c",
+ "is_measured_result": false,
+ "scope": "conceptual comparison on real renders / recorded baseline figures; no numbers",
+ "top_strip": true
+}

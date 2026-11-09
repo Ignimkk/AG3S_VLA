@@ -12,13 +12,12 @@
 % Extend the local title command without modifying the pinned CVPR style.
 \makeatletter
 \g@addto@macro\@maketitle{%
-  \input{../figures/fig01_teaser/figure_ifg_textwidth}%
+  % Fig. 1 v3 = old teaser + old three-axis overview (2026-11-09). Without the top scene strip: figure_v3_notop.
+  \input{../figures/fig01_teaser/figure_v3}%
 }
 \makeatother
 \begin{document}
 \maketitle
-% Overview for the top of page 2.
-\input{../figures/fig02_overview/figure_cvpr_v1}
 \input{sections/00_abstract}
 \input{sections/01_introduction}
 \input{sections/02_related_work}
@@ -33,7 +32,7 @@
 \ifhasverifiedreferences
 {\small
 \bibliographystyle{ieeenat_fullname}
-\bibliography{references}}
+\bibliography{references,exp_section/references_experiments}}
 \else
 \section*{References}
 \textit{Verified bibliography pending. No citation entries have been fabricated.}
