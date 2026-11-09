@@ -258,6 +258,20 @@ held-out frames. All reported detector-variant numbers use this version; the fir
 
 **참고:** AEGIS 는 공식 code 의 EE ellipsoid 가 같은 right_hand frame 기준이라 (0.12 m 축이 y) 해당 없음. multi-link CBF 는 관절 FK 로 손 위치를 놓아 해당 없음.
 
+### 4.12 multi-link CBF GT 판 → 논문의 privileged 조건 "exact geometry" (2026-11-10 05:1x, dev-4a 자율 판정)
+
+| 단계 | 내용 | 근거 |
+|---|---|---|
+| 1. 실제 결과 | GT seg 판 spatial + object 64 ep (level 합산): TSR / SSR / CAR 70.3 / 39.1 / **46.9** | `bl_tranche_check.py` 04:48 |
+| 2. 원문과의 차이 | 논문 Table Ib static SafeLIBERO 'Ours' 60.3 / 51.7 / 73.0 → CAR −26 pt, **FLAG** (§4.8, ≥ 64 ep) | §4.8 |
+| 3. 원인 | GT seg 점군이 손목 카메라 위주 (중앙 75 %) 인데 AEGIS 공식 trim ('중심에서 먼 20 % 제거') 이 긴 물체의 끝을 잘라 hazard ellipsoid 가 실제보다 작음 (wine bottle 높이 0.254 m → 최대 semi-axis 0.077 m). 충돌 89 건 중 53 건이 wine bottle (object suite 에 집중) | `outputs/2026-11-10_multilinkCBF_port_점검/README.md` §1, M1 |
+| 4. 논문의 의도 | 논문의 privileged 조건은 perception 을 거치지 않는 "exact geometry" (Table III ‡, §VI) — GT arm 은 perception 의 trim 을 통과시키는 것이 아니라 정답 형상을 줘야 함 | 논문 |
+| 5. 수정 | `--gt exact` (multi-link CBF 의 `--gt` 기본): 활성 장애물의 collision geom 상자 꼭짓점의 MVEE (margin 0, base frame) 를 첫 call 에 한 번 fit, `obstacle_source="ellipsoids"`. CBF · robot 모델 · 실행 주기는 그대로. `--gt seg` 는 이전 조건으로 남김 | `closed_loop/privileged.py` `exact_ellipsoids`, `arms.py`, `serve_method.py`; test `closed_loop/tests/test_gt_exact_geometry.py`; CPU smoke 오류 0 / 60 call |
+| 6. 적용 범위 | multi-link CBF GT 의 모든 tranche run 을 `-r2` (exact) 로. 이전 GT seg run 은 '수정 전' 기록 (supplement: GT seg 조건 결과) | queue D |
+| 7. 하지 않은 것 | 비특권 (detector) 판의 trim 제거 (논문 trim 그대로, R2), robot ellipsoid 의 mesh 재 fit (점검 M3, 현재 충돌 2 / 49 만 관련 — FLAG 가 남으면 다음 후보), 'true motion' (optical flow 생략은 선언된 편차) | — |
+
+**같은 시점 KNOWS (§4.11) closed-loop 확인:** spatial LI GT seg `-r3` TSR / CAR 75.0 / **43.8** (수정 전 r2 6.2), detector `-r3` 62.5 / 6.2 (detector recall 한계, R4). GT seg 는 64 ep 이 모이면 다시 판정.
+
 ## 5. 결과
 
 ### 5.1 Tranche 1 (init 15–18) — PLANNED (시작 후 채움)
@@ -291,3 +305,4 @@ held-out frames. All reported detector-variant numbers use this version; the fir
 | 2026-11-10 01:4x | multi-link CBF 점검 완료, §4.8 규칙상 GT 판 원문 근접 → 미수정, 논문 Table Ib 값 반영 (§4.1 정정) | §4.9 |
 | 2026-11-10 03:4x | AEGIS · multi-link CBF detector 판 → VLM 이름 (`vlm_name`, Qwen2.5-VL-7B, 공식 prompt), 기존 detector run 5 개 `-r2` 재실행 예정; KNOWS 원인 분석 중 | §4.10, 사용자 위임 |
 | 2026-11-10 04:0x | KNOWS F1 EE frame bug 수정 (Rz 90°), KNOWS ± GT 전부 `-r3` 재실행; queue C (KNOWS spatial LI 먼저 → 확정 arm 나머지 → AEGIS · CBF detector VLM 판 → KNOWS 나머지) | §4.10, §4.11, 사용자 위임 |
+| 2026-11-10 05:1x | multi-link CBF GT FLAG → `--gt exact` (논문 privileged 조건), GT run 전부 `-r2`; queue D (변경 arm spatial LI 먼저) | §4.12, 사용자 위임 |

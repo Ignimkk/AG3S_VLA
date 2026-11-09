@@ -122,6 +122,28 @@ def obstacle_geoms(obstacles: list[dict], shape: str = "collision") -> list[dict
     return prims
 
 
+def exact_ellipsoids(obstacles: list[dict]) -> list[dict]:
+    """``--gt exact`` (2026-11-10): the multi-link CBF paper's privileged hazard condition "exact geometry" (Table III):
+    per **active** obstacle object, the MVEE (Khachiyan, margin 0) of the corners of its collision geoms' boxes (base
+    frame) -- encloses every collision geom, no perception, no trim. ``[{"name", "center", "R", "semi_axes",
+    "n_points"}]`` (``aegis.perception.ObstacleEllipsoid.from_dict`` format, plain lists)."""
+    from Baseline.paper_baselines.methods.knows.perception.ellipsoid_fit import mvee
+
+    out = []
+    for o in obstacles:
+        if not o["active"]:
+            continue
+        pts = [_box_corners(g) for g in o["geoms"] if g["collision"]]
+        if not pts:
+            continue
+        P = np.concatenate(pts)
+        c, Q = mvee(P, tol=1e-4)
+        w, V = np.linalg.eigh(np.asarray(Q, np.float64))
+        out.append({"name": o["display_name"], "center": np.asarray(c, float).reshape(3).tolist(), "R": V.tolist(),
+                    "semi_axes": np.sqrt(np.clip(w, 0.0, None)).tolist(), "n_points": int(len(P))})
+    return out
+
+
 def extras(request: dict, T_world_base: np.ndarray, *, shape: str = "collision") -> dict:
     """All privileged ``SceneObservation.extras`` of one request (see the module table). Raises ``KeyError`` when
     the client did not send them (``--emit-privileged-obstacles`` missing)."""

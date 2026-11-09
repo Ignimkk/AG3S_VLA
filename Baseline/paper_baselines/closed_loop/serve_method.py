@@ -322,6 +322,8 @@ class MethodServer:
             from Baseline.paper_baselines.closed_loop import privileged as P
 
             sobs.extras.update(P.extras(obs, sobs.extras["T_world_base"], shape=self.arm.get("gt_geom_shape") or "collision"))
+            if self.arm.get("gt_source") == "exact":  # multi-link CBF privileged "exact geometry" (doc §4.12)
+                sobs.extras["obstacle_ellipsoids"] = P.exact_ellipsoids(sobs.extras["privileged/obstacles"])
             if row is not None:
                 row["privileged"] = P.summary(sobs.extras)
         return sobs
@@ -580,6 +582,8 @@ def build_server(args, *, policy=None, record_root=None) -> tuple[MethodServer, 
                 kw.setdefault("detector_prompt", "obstacle_names")
                 kw.setdefault("detector_device", args.sidecar_device)
                 kw.setdefault("detector_weight", args.detector_weight)
+            elif arm.get("gt_source") == "exact":
+                kw.setdefault("obstacle_source", "ellipsoids")
             elif arm.get("gt_source") == "seg":
                 kw.setdefault("obstacle_source", "gt_seg")
                 kw.setdefault("exclude", "task_objects")  # target / destination are None: nothing excluded

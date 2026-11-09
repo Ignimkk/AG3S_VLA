@@ -36,9 +36,10 @@ TARGET_SOURCES = ("detector", "none", "attention")
 #: arms whose detector variant can exclude the target by the policy's attention (KNOWS Eq. 2-4, F4a); their default
 ATTENTION_TARGET_ARMS = ("knows",)
 FILTER_RATES = ("chunk", "step")
-GT_SOURCES = {"filter": ("names", "seg"), "guidance": ("geoms", "repo", "spheres")}
+GT_SOURCES = {"filter": ("names", "seg", "exact"), "guidance": ("geoms", "repo", "spheres")}
 #: ``--gt`` without a value: the source closest to each original paper
-GT_DEFAULT = {"aegis": "names", "knows": "seg", "multilink_cbf": "seg", "constrained_flow_matching": "spheres",
+#: multi-link CBF: "exact" since 2026-11-10 (its paper's privileged condition, Table III; doc §4.12); before: "seg"
+GT_DEFAULT = {"aegis": "names", "knows": "seg", "multilink_cbf": "exact", "constrained_flow_matching": "spheres",
               "nudge": "geoms", "omniguide": "geoms", "lan_o3dp_guidance_adapted": "geoms"}
 #: ``privileged.obstacle_geoms`` shape of a guidance ``--gt`` source
 GT_GEOM_SHAPE = {"geoms": "collision", "repo": "repo", "spheres": "sphere"}
@@ -67,7 +68,10 @@ GT_DESCRIPTION = {
              "(privileged/obstacle_geoms, base frame)",
     "repo": "obstacles = CFM repo rule (every geom named *obstacle*, mesh -> box of geom_size; "
             "live_viewer.GroundTruthObstacleTracker)",
-    "spheres": "obstacles = one enclosing sphere per active SafeLIBERO obstacle object (CFM paper Sec. 5 GT sphere)"}
+    "spheres": "obstacles = one enclosing sphere per active SafeLIBERO obstacle object (CFM paper Sec. 5 GT sphere)",
+    "exact": "obstacles = exact geometry: MVEE of the active SafeLIBERO obstacle's collision geoms (privileged/obstacles, "
+             "base frame), fitted at the first call, no perception / trim (multi-link CBF paper Table III privileged "
+             "condition; obstacle_source='ellipsoids')"}
 
 
 @dataclasses.dataclass(frozen=True)
@@ -148,7 +152,8 @@ def resolve_gt(name: str, gt: str | None, obstacles: str | None = None, target: 
     if tgt not in TARGET_SOURCES:
         raise ValueError(f"--target must be one of {TARGET_SOURCES}")
     inputs = {"names": ["obstacle_names"], "seg": ["segmentation_geom", "instances_geom_ids"],
-              "geoms": ["obstacle_geoms"], "repo": ["obstacle_geoms"], "spheres": ["obstacle_geoms"]}[src]
+              "geoms": ["obstacle_geoms"], "repo": ["obstacle_geoms"], "spheres": ["obstacle_geoms"],
+              "exact": ["obstacles (collision geoms)"]}[src]
     if a.family == "filter":
         dev = [COMMON_FILTER_DEVIATIONS[0]]
         if src == "names":
