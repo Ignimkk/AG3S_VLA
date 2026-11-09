@@ -39,6 +39,9 @@ from typing import Any, Mapping, Optional, Sequence
 
 import numpy as np
 
+#: SL-PE9 -- first request (0-based, per episode) at which the attention-peak cut may be used.
+ATTENTION_PEAK_MIN_FRAME = 5
+
 from AG3S.ag3s.stages.attention_lifting import lift, make_adapter
 from AG3S.ag3s.constraints.clearance import ClearancePolicy
 from AG3S.ag3s.stages.collision_candidates import CandidateTracker, generate_candidates
@@ -513,6 +516,7 @@ class AG3S:
         self._close_seed_frame = None
         self._close_seed_plane = None
         self._obstacle_frame = None   # SL-GTTO19
+        self._held_motion = None   # SL-PE8: per-episode tracker (made on first use)
         self._esdf_cameras_seen = set()   # SL-QE1: cameras that wrote voxels this episode (read only with esdf.dead_camera_seen_ok)
         self._obstacle_history = []
         self._target_support_code = None
@@ -602,6 +606,25 @@ class AG3S:
         prev = getattr(self._target_confirm, "_support", None)
         self._target_confirm.note_support(plane if prev is None else np.vstack([np.asarray(prev).reshape(-1, 4), plane]))
 
+    #: SL-PE9: the attention peak is not used on the first requests of an episode -- there it fell on the SafeLIBERO
+    #: obstacle in 7 of 33 gated cuts (21 %; from request 5 on: 2 of 37, both calls whose identity already was the
+    #: obstacle) while the LIBERO cuts were the target 100 % from request 5 (gt24att records, offline).
+    @staticmethod
+    def _attention_peak_point(attention_cloud, support_mask):
+        """SL-PE9 -- the non-support point of maximal raw attention (base frame), or None."""
+        pts = np.asarray(attention_cloud.cloud.points, np.float64).reshape(-1, 3)
+        raw = attention_cloud.raw_attention if attention_cloud.raw_attention is not None else attention_cloud.attention
+        raw = np.asarray(raw, np.float64).reshape(-1)
+        if len(raw) != len(pts) or not len(pts):
+            return None
+        ok = np.isfinite(raw)
+        if support_mask is not None and len(np.asarray(support_mask).reshape(-1)) == len(raw):
+            ok &= ~np.asarray(support_mask, bool).reshape(-1)
+        if not ok.any():
+            return None
+        i = np.flatnonzero(ok)[int(np.argmax(raw[ok]))]
+        return pts[i].copy()
+
     def _close_seed_grounding_input(self, attention_cloud, support_mask):
         """SL-PE1 — `(cloud, exclude_mask)` for `ground_target`: with a seed and a cut, attention = raw = 1.0 on the object
         cut out under the seed (`stages/close_seed.split_at_seed`, support-plane points excluded) and 0 elsewhere, the
@@ -618,6 +641,14 @@ class AG3S:
             # s8 t4: the bowl in the drawer was `inadmissible_match` on every call between two seeds)
             self._add_support_plane(self._close_seed_plane)
             rec["kept_support_plane_z_m"] = round(float(self._close_seed_plane[0, 3]), 4)
+        peak_ratio = getattr(self.config.clustering, "attention_peak_seed", None)   # SL-PE9 (off: None, not read)
+        if (seed is None and peak_ratio is not None and attention_cloud is not None and len(attention_cloud)
+                and self._attached is None and not self._target_confirm.frozen
+                and int(getattr(self, "frame_index", 0)) >= ATTENTION_PEAK_MIN_FRAME):
+            seed = self._attention_peak_point(attention_cloud, support_mask)
+            rec.update(source="attention_peak", seed=seed is not None)
+        else:
+            peak_ratio = None
         if seed is None or attention_cloud is None or len(attention_cloud) == 0:
             return attention_cloud, support_mask
         pts = np.asarray(attention_cloud.cloud.points, np.float64).reshape(-1, 3)
@@ -626,11 +657,13 @@ class AG3S:
         if idx is None:
             return attention_cloud, support_mask
         ratio = getattr(self.config.clustering, "close_seed_attention_ratio", None)
+        if peak_ratio is not None:   # SL-PE9: an attention-peak cut always carries the attention bar, also on the identity
+            ratio = float(peak_ratio)
         cur = getattr(self, "_manipulated", None)
         same = (cur is not None and getattr(cur, "centroid", None) is not None
                 and float(np.linalg.norm(pts[idx].mean(axis=0) - np.asarray(cur.centroid, np.float64).reshape(3))) <= 0.06)
         rec["same_as_identity"] = bool(same)
-        if ratio is not None and not same:
+        if ratio is not None and (not same or peak_ratio is not None):
             # SL-PE7: the attention must be on a cut that would *change* the identity (off: not read). A cut on the current
             # object only refreshes its geometry -- vetting it left a stale shape while the fingers hid the bowl (pe1234567
             # SafeLIBERO t3e4 call 14, 3.0 x median) and the moved bowl became an obstacle row for 19 calls.
@@ -1116,7 +1149,33 @@ class AG3S:
             return None
         return pts if len(pts) else None
 
-    def _scene_obstacle_points(self, cloud, support_mask, target_points, destination_points, held_points=None):
+    def _held_motion_mask(self, pts, comp, robot_state=None, held=False, preheld_geometry=None):
+        """SL-PE8 (`clustering.scene_obstacle_held_motion`) -- bool mask over the non-support cloud `pts`: the points that
+        moved with the hand while held (`stages.held_motion`), widened to a whole 15 mm component when at least half of the
+        component is such points and every point of it lies within the tracker's reach of the fingertips (a component that
+        reaches farther, e.g. the bowl merged with a neighbour, keeps its other points). None = no pose this request."""
+        from AG3S.ag3s.stages.held_motion import HeldMotionTracker, hand_pose_and_tip
+
+        if self._held_motion is None:
+            self._held_motion = HeldMotionTracker()
+        T, tip, _hold = hand_pose_and_tip(self.constraint_robot_model, robot_state)
+        if T is None:
+            self._held_motion.last = {"why": "no_hand_pose"}
+            return None
+        m = self._held_motion.update(pts, T, tip, bool(held), preheld_geometry)
+        if m.any() and tip is not None:
+            reach = self._held_motion._reach
+            inside = np.linalg.norm(pts - np.asarray(tip, np.float64).reshape(1, 3), axis=1) <= reach
+            for c in np.unique(comp[m]):
+                if c <= 0:
+                    continue
+                cm = comp == c
+                if (m & cm).sum() * 2 >= cm.sum() and inside[cm].all():
+                    m = m | cm
+        return m
+
+    def _scene_obstacle_points(self, cloud, support_mask, target_points, destination_points, held_points=None,
+                               held_motion=None, target_cut=False):
         """SL-GTTO20 (`clustering.scene_obstacle_objects`) — `(points (K, 3) or None, record)`: the obstacle-object surface
         from AG3S's own perception (no GT). Connected components of the self-filtered, non-support cloud on a 15 mm grid;
         excluded: components within 15 mm of the manipulated object's points (the last observed geometry while occluded /
@@ -1143,15 +1202,31 @@ class AG3S:
                 drop = set()
                 tgt = None if target_points is None else np.asarray(target_points, np.float64).reshape(-1, 3)
                 tree = cKDTree(pts)
+                cut_drop = np.zeros(len(pts), bool)
+                if tgt is not None and len(tgt) and target_cut:
+                    # SL-PE11: drop the manipulated object by POINTS -- within 15 mm of its points, plus the object re-cut
+                    # at its centre (`split_at_seed`: local support band and flat walls removed). A component-wide drop
+                    # also removed an obstacle touching the bowl (pe12345789 SafeLIBERO t3 e2 / e4: book / mug voxels
+                    # 123-174 -> 0 the moment the identity became the bowl, then the hand hit them).
+                    from AG3S.ag3s.stages.close_seed import split_at_seed
+                    cut_drop = cKDTree(tgt).query(pts)[0] <= v
+                    idx, _cut = split_at_seed(pts, tgt.mean(axis=0))
+                    if idx is not None:
+                        cut_drop[np.asarray(idx, np.int64)] = True
+                    rec["target_cut"] = {"n_dropped": int(cut_drop.sum()), "recut": idx is not None}
                 if tgt is not None and len(tgt):
-                    for ids in tree.query_ball_point(tgt, v):
-                        drop.update(int(comp[i]) for i in ids)
+                    if not target_cut:
+                        for ids in tree.query_ball_point(tgt, v):
+                            drop.update(int(comp[i]) for i in ids)
                     zmin = float(tgt[:, 2].min())
                     under = (pts[:, 2] <= zmin + 0.005) & (pts[:, 2] >= zmin - 0.03)
                     base = tgt[tgt[:, 2] <= zmin + 0.01]   # SL-GTTO21: only what is under the target's base
                     if under.any():
                         near = cKDTree(base[:, :2]).query(pts[under, :2])[0] <= 0.01
-                        drop.update(int(c) for c in np.unique(comp[under][near]))
+                        if target_cut:   # SL-PE11: the band points themselves, not their components
+                            cut_drop[np.flatnonzero(under)[near]] = True
+                        else:
+                            drop.update(int(c) for c in np.unique(comp[under][near]))
                 n_target_support = len(drop)
                 if held_points is not None and len(held_points):   # SL-PE3: the object in the hand now
                     before = len(drop)
@@ -1161,7 +1236,13 @@ class AG3S:
                 if destination_points is not None and len(destination_points):
                     for ids in tree.query_ball_point(np.asarray(destination_points, np.float64).reshape(-1, 3), v):
                         drop.update(int(comp[i]) for i in ids)
-                keep = ~np.isin(comp, sorted(drop)) & (comp > 0)
+                keep = ~np.isin(comp, sorted(drop)) & (comp > 0) & ~cut_drop
+                if held_motion is not None:   # SL-PE8: what moved with the hand is the held object, not an obstacle
+                    hm = self._held_motion_mask(pts, comp, **held_motion)
+                    rec["held_motion"] = dict(self._held_motion.last) if self._held_motion is not None else None
+                    if hm is not None:
+                        rec["held_motion"]["n_removed_total"] = int((keep & hm).sum())
+                        keep &= ~hm
                 sel = pts[keep]
                 if len(sel):
                     key = np.floor(sel / v).astype(np.int64)
@@ -3208,7 +3289,12 @@ class AG3S:
                 cloud, support_mask, None if manipulated_geometry is None else getattr(manipulated_geometry, "points", None),
                 destination_points,
                 **({"held_points": self._held_points_now(robot_state)}   # SL-PE3 (off: the call is unchanged)
-                   if getattr(cfg.clustering, "scene_obstacle_held_exclude", False) else {}))
+                   if getattr(cfg.clustering, "scene_obstacle_held_exclude", False) else {}),
+                **({"held_motion": {"robot_state": robot_state, "held": self._attached is not None,   # SL-PE8 (off: unchanged)
+                                    "preheld_geometry": None if manipulated_geometry is None
+                                    else getattr(manipulated_geometry, "points", None)}}
+                   if getattr(cfg.clustering, "scene_obstacle_held_motion", False) else {}),
+                **({"target_cut": True} if getattr(cfg.clustering, "scene_obstacle_target_cut", False) else {}))   # SL-PE11
         if self._target_confirm.destinations.last_event == "registered":
             notes.append(
                 f"destination registered from perception: id={destination.id}, "

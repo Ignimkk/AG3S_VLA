@@ -1108,11 +1108,14 @@ def t43t_identity_section(args) -> dict:
         if getattr(args, name, False):
             out[name] = True
     for name in ("close_seed_grounding", "destination_after_held", "scene_obstacle_held_exclude",
-                 "destination_held_leader"):   # SL-PE1-3, 5 (off: no key)
+                 "destination_held_leader", "scene_obstacle_held_motion",
+                 "scene_obstacle_target_cut"):   # SL-PE1-3, 5, 8, 11 (off: no key)
         if getattr(args, name, False):
             out[name] = True
     if getattr(args, "close_seed_attention_ratio", None) is not None:   # SL-PE7 (off: no key)
         out["close_seed_attention_ratio"] = float(args.close_seed_attention_ratio)
+    if getattr(args, "attention_peak_seed", None) is not None:   # SL-PE9 (off: no key)
+        out["attention_peak_seed"] = float(args.attention_peak_seed)
     if getattr(args, "oracle_obstacle_support", None) is not None:   # SL-GTTO21 (off: no key)
         out["oracle_obstacle_support"] = str(args.oracle_obstacle_support)
     if getattr(args, "refused_identity_release", None) is not None:
@@ -2650,6 +2653,17 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--destination-held-leader", action="store_true",
                     help="SL-PE5 — --destination-after-held 와 함께. 쥔 동안 손 (60 mm) 밖 attention 1 위 cluster 는 잡을 수 있는 크기여도 "
                          "목적지 후보 (접시 10.7 × 135 × 135 mm 는 가장 좁은 폭 때문에 등록되지 않았음) (clustering.destination_held_leader)")
+    ap.add_argument("--attention-peak-seed", type=float, default=None, metavar="K",
+                    help="SL-PE9 — 손 닫는 지점이 없는 쥐기 전 (closing · attach 전) call 에 attention 최고점 아래 물체를 손 닫는 지점과 "
+                         "같은 방식으로 잘라 쓴다; 자른 물체 평균 raw attention ≥ K × 비받침 중앙값일 때만 "
+                         "(clustering.attention_peak_seed, --close-seed-grounding 필요)")
+    ap.add_argument("--scene-obstacle-target-cut", action="store_true",
+                    help="SL-PE11 — --scene-obstacle-objects 에서 조작 대상을 성분째가 아니라 점 단위로 뺌 (점 15 mm + 중심에서 "
+                         "다시 자른 물체 + 바닥 아래 띠): 그릇에 붙은 장애물이 같이 빠지지 않게 (clustering.scene_obstacle_target_cut)")
+    ap.add_argument("--scene-obstacle-held-motion", action="store_true",
+                    help="SL-PE8 — --scene-obstacle-objects 에서 attach 중이면 손과 같이 움직인 점 (손 frame 에서 제자리, 정지로 "
+                         "설명 안 됨, 손끝 + 물체 폭 + 20 mm 안) 을 쥔 물체로 보고 장애물 물체에서 뺌 "
+                         "(clustering.scene_obstacle_held_motion)")
     ap.add_argument("--scene-obstacle-held-exclude", action="store_true",
                     help="SL-PE3 — --scene-obstacle-objects 에서 attach 중이면 지금 손 안의 쥔 물체 점 15 mm 안 성분도 뺌 "
                          "(clustering.scene_obstacle_held_exclude)")

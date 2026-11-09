@@ -510,6 +510,22 @@ class ClusteringConfig:
     #: the arm hid it (real collision). On the gt24att + pe12345 records 5 keeps 97.7 % of the target cuts (487) and drops
     #: those three. None (default) = no vetting.
     close_seed_attention_ratio: float | None = None
+    #: SL-PE8 -- `scene_obstacle_objects` also drops, while an object is attached, the points that moved with the hand
+    #: (`stages.held_motion.HeldMotionTracker`): after the lift the camera sees the bowl's outer wall, 26-73 mm from the
+    #: attach snapshot, so SL-PE3's 15 mm test dropped nothing and the hand rows next to the held bowl refused the
+    #: pass-through 8-15 calls (LIBERO t9, pe12345). Needs `scene_obstacle_objects`.
+    scene_obstacle_held_motion: bool = False
+    #: SL-PE9 -- before the policy's chunk carries a close command (no grasp seed) and before closing / attach, cut the
+    #: object under the ATTENTION PEAK (non-support point of maximal raw attention) the same way as the grasp seed and use
+    #: it when its mean raw attention is >= this many times the non-support median. On gt24att LIBERO s8 the cut is the
+    #: target on 84 % of such calls (93 % with ratio >= 5) vs 46 % for the identity the server had: the bowl merged with the
+    #: cabinet / drawer was an obstacle object while the fingers approached it (pe12345 s7 t9, s8 t4). Needs
+    #: `close_seed_grounding`. None (default) = off.
+    attention_peak_seed: float | None = None
+    #: SL-PE11 -- `scene_obstacle_objects` drops the manipulated object by points (within 15 mm of its points + the object
+    #: re-cut at its centre by `split_at_seed` + the band under its base) instead of whole 15 mm components: a component
+    #: drop also removed an obstacle touching the bowl (pe12345789 SafeLIBERO t3 e2 / e4). Needs `scene_obstacle_objects`.
+    scene_obstacle_target_cut: bool = False
     # --- SL-PE — end
     #: **T43 T 3(b) — release an identity the exclusion gate keeps refusing.** An integer N = when
     #: `AG3S._exclusion_gate` refuses the manipulated object because it overlaps the destination on
@@ -739,7 +755,7 @@ class ClusteringConfig:
         if self.scene_obstacle_objects and self.oracle_obstacle_objects:
             raise AG3SConfigError("clustering.scene_obstacle_objects and oracle_obstacle_objects are two sources of one set")
         for _name in ("close_seed_grounding", "destination_after_held", "scene_obstacle_held_exclude",
-                      "destination_held_leader"):   # SL-PE
+                      "destination_held_leader", "scene_obstacle_held_motion", "scene_obstacle_target_cut"):   # SL-PE
             if not isinstance(getattr(self, _name), bool):
                 raise AG3SConfigError(f"clustering.{_name} must be true or false, got {getattr(self, _name)!r}")
         if self.close_seed_grounding and self.grounding_source != "attention":
@@ -753,6 +769,16 @@ class ClusteringConfig:
             raise AG3SConfigError("clustering.close_seed_attention_ratio needs clustering.close_seed_grounding")
         if self.destination_held_leader and not self.destination_after_held:
             raise AG3SConfigError("clustering.destination_held_leader needs clustering.destination_after_held")
+        a = self.attention_peak_seed   # SL-PE9
+        if a is not None and (isinstance(a, bool) or not isinstance(a, (int, float)) or not math.isfinite(float(a))
+                              or float(a) <= 0.0):
+            raise AG3SConfigError(f"clustering.attention_peak_seed must be a positive number or None, got {a!r}")
+        if a is not None and not self.close_seed_grounding:
+            raise AG3SConfigError("clustering.attention_peak_seed needs clustering.close_seed_grounding")
+        if self.scene_obstacle_target_cut and not self.scene_obstacle_objects:   # SL-PE11
+            raise AG3SConfigError("clustering.scene_obstacle_target_cut needs clustering.scene_obstacle_objects")
+        if self.scene_obstacle_held_motion and not self.scene_obstacle_objects:   # SL-PE8
+            raise AG3SConfigError("clustering.scene_obstacle_held_motion needs clustering.scene_obstacle_objects")
         if self.scene_obstacle_held_exclude and not self.scene_obstacle_objects:
             raise AG3SConfigError("clustering.scene_obstacle_held_exclude needs clustering.scene_obstacle_objects")
         if not isinstance(self.latch_reach_hand_relative, bool):  # T46g

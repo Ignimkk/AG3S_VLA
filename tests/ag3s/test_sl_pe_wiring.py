@@ -210,7 +210,7 @@ def test_server_flags_and_versions():
     from AG3S.trajopt import serve_safe as ss
 
     gt24 = pf.GT24_VERSIONS[0]
-    pe1, pe123, pe12345, pe123456, pe125cls, pe1234567 = pf.PE_VERSIONS
+    pe1, pe123, pe12345, pe123456, pe125cls, pe1234567 = pf.PE_VERSIONS[:6]
     assert list(pf.AG3S_VERSIONS[pe1]) == list(pf.AG3S_VERSIONS[gt24]) + ["--close-seed-grounding"]
     assert list(pf.AG3S_VERSIONS[pe123]) == list(pf.AG3S_VERSIONS[pe1]) + [
         "--destination-after-held", "--scene-obstacle-held-exclude"]

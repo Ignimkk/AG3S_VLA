@@ -1062,6 +1062,30 @@ GT15_VERSIONS = GT15_VERSIONS + PE_VERSIONS[3:]
 PE_VERSIONS = PE_VERSIONS + ("AG3S-commonto-att-termsoff-pass-zr-ee-hdp-loose2-obst4-pts-nocarve-fh-t100-pe1234567",)
 AG3S_VERSIONS[PE_VERSIONS[5]] = tuple(AG3S_VERSIONS[PE_VERSIONS[3]]) + ("--close-seed-attention-ratio", "5")
 GT15_VERSIONS = GT15_VERSIONS + PE_VERSIONS[5:]
+#: SL-PE8 (dev-4a, 2026-11-09 03:xx, G162): pe123458 = pe12345 + --scene-obstacle-held-motion (the held object = the points
+#: that moved with the hand; the lifted bowl stayed an obstacle object while carrying / placing, LIBERO t9).
+PE_VERSIONS = PE_VERSIONS + ("AG3S-commonto-att-termsoff-pass-zr-ee-hdp-loose2-obst4-pts-nocarve-fh-t100-pe123458",)
+AG3S_VERSIONS[PE_VERSIONS[6]] = tuple(AG3S_VERSIONS[PE_VERSIONS[2]]) + ("--scene-obstacle-held-motion",)
+GT15_VERSIONS = GT15_VERSIONS + PE_VERSIONS[6:]
+#: SL-PE (G162, 2026-11-09 03:4x): pe12345678 = pe1234567 (PE6 + PE7) + PE8, to decide PE6 · PE7 on top of PE8.
+PE_VERSIONS = PE_VERSIONS + ("AG3S-commonto-att-termsoff-pass-zr-ee-hdp-loose2-obst4-pts-nocarve-fh-t100-pe12345678",)
+AG3S_VERSIONS[PE_VERSIONS[7]] = tuple(AG3S_VERSIONS[PE_VERSIONS[5]]) + ("--scene-obstacle-held-motion",)
+GT15_VERSIONS = GT15_VERSIONS + PE_VERSIONS[7:]
+#: SL-PE9 (dev-4a, 2026-11-09 04:xx, G163): pe1234589 = pe123458 + --attention-peak-seed 5 (before the chunk carries a close
+#: command, the object under the attention peak is cut out of the cabinet / drawer it merged with).
+PE_VERSIONS = PE_VERSIONS + ("AG3S-commonto-att-termsoff-pass-zr-ee-hdp-loose2-obst4-pts-nocarve-fh-t100-pe1234589",)
+AG3S_VERSIONS[PE_VERSIONS[8]] = tuple(AG3S_VERSIONS[PE_VERSIONS[6]]) + ("--attention-peak-seed", "5")
+GT15_VERSIONS = GT15_VERSIONS + PE_VERSIONS[8:]
+#: SL-PE (G163, 2026-11-09 04:1x): pe12345789 = pe1234589 + --close-seed-attention-ratio 5 (PE7, vets identity-changing grasp
+#: seed cuts; removed the wine-bottle collision of pe12345 SafeLIBERO t3e3). PE6 (--no-target-certify) left out.
+PE_VERSIONS = PE_VERSIONS + ("AG3S-commonto-att-termsoff-pass-zr-ee-hdp-loose2-obst4-pts-nocarve-fh-t100-pe12345789",)
+AG3S_VERSIONS[PE_VERSIONS[9]] = tuple(AG3S_VERSIONS[PE_VERSIONS[8]]) + ("--close-seed-attention-ratio", "5")
+GT15_VERSIONS = GT15_VERSIONS + PE_VERSIONS[9:]
+#: SL-PE11 (dev-4a, 2026-11-09 08:xx, G167, patch only): pe1234578911 = pe12345789 + --scene-obstacle-target-cut (the
+#: manipulated object leaves the obstacle set by points, not with the obstacle touching it).
+PE_VERSIONS = PE_VERSIONS + ("AG3S-commonto-att-termsoff-pass-zr-ee-hdp-loose2-obst4-pts-nocarve-fh-t100-pe1234578911",)
+AG3S_VERSIONS[PE_VERSIONS[10]] = tuple(AG3S_VERSIONS[PE_VERSIONS[9]]) + ("--scene-obstacle-target-cut",)
+GT15_VERSIONS = GT15_VERSIONS + PE_VERSIONS[10:]
 #: SL-QE2 (dev-e5, 2026-11-09 01:xx, G111): B5 (GT) / B5 without GT with the action QP bending the position only
 #: (--ee-action-qp-translation-only; E1a task 3: the F7 QP turned rx / ry / rz by ~1.0 and the grasp pose was lost, G110).
 QE2_VERSIONS: tuple[str, ...] = ("AG3S-commonto-gt2-termsoff-pass-zr-ee-hdp-loose2-obst3-pts-nocarve-fh-t100-tro",
@@ -1070,6 +1094,11 @@ for _v in QE2_VERSIONS:
     AG3S_VERSIONS[_v] = tuple(AG3S_VERSIONS[_v[:-len("-tro")]]) + ("--ee-action-qp-translation-only",)
 del _v
 GT15_VERSIONS = GT15_VERSIONS + QE2_VERSIONS
+#: SL-PE x SL-QE2 (dev-4a, 2026-11-09 12:xx, user-approved): the GT-free final pe123458 with the translation-only action QP
+#: (B5-tro: E1a SSR 13 -> 20, G169). Same base + flag pattern, so test_sl_qe2 covers it.
+QE2_VERSIONS = QE2_VERSIONS + ("AG3S-commonto-att-termsoff-pass-zr-ee-hdp-loose2-obst4-pts-nocarve-fh-t100-pe123458-tro",)
+AG3S_VERSIONS[QE2_VERSIONS[-1]] = tuple(AG3S_VERSIONS[QE2_VERSIONS[-1][:-len("-tro")]]) + ("--ee-action-qp-translation-only",)
+GT15_VERSIONS = GT15_VERSIONS + QE2_VERSIONS[-1:]
 #: (G88c, 03:5x) the A-alone ablation queued as ``…-obst3`` (gtto23, not started yet) gets the same two fixes, so A alone and
 #: A + B differ only by the held point model: ``…-obst3`` := A'' + no carve + support "under" (``…-obst3-pts`` = B'' keeps
 #: the flags it was evaluated with -- it was built above from the earlier definition).
