@@ -81,7 +81,7 @@ queue 가 도는 동안 이 서버의 HEAD 를 바꾸지 않는다 (git pull · 
 | **chunk 단위 filtering** — 원 논문은 env step 마다 CBF, port 는 policy call 마다 10 행 (client 는 0–4 행 실행) | run manifest `deviation_from_paper` | supplement Tab. S13 에 deviation 목록 |
 | **AEGIS port 가 보고값보다 충돌을 덜 피함** — pilot Level I CAR 34.2 (detector) · 47.5 (privileged names) vs VLSA 보고 AEGIS CAR 68.9 (TSR 67.5) | §3 (보고값은 suite 평균 · level 합산이라 정확히 같은 조건은 아님) | 이름을 정답으로 줘도 차이가 남음 → 차이는 인식이 아니라 chunk 단위 filtering 쪽으로 추정. **Tab. 1 위쪽에 원 논문 보고값 (†) 을 같이 둔다** (계획에 이미 있음) |
 | **KNOWS port 가 보고값보다 크게 낮음** — detector 판 SSR 2.5, GT seg 판 25.0 vs 보고 KNOWS SSR 59.9 | §3 | 원 논문은 VLA attention + segmenter, port detector 판은 Grounding DINO → 인식 경로가 다름. GT seg 판에서도 차이 → 9/10 전에 port 구현 점검 권장 |
-| multi-link CBF 는 보고값 자체가 없음 | 공식 결과 없음 | 재현 비교 불가, `*` 표시 |
+| ~~multi-link CBF 는 보고값 자체가 없음~~ **정정 (2026-11-10 점검): 논문 Table Ib 에 static SafeLIBERO 값이 있음** — Ours TSR / CAR / SSR 60.3 / 73.0 / 51.7, frozen (optical flow 없음) 61.6 / 74.8 / 52.9, π0.5 60.0 / 16.6 / 15.1 (level 합산) | 공식 code 없음 | 우리 π0.5 합산 60.0 / 15.0 / 13.5 와 일치 → harness 정상. 표에 `*` 표시 |
 
 **정리:** port 는 '같은 조건에서 safety layer 를 바꿔 끼운 비교' 로는 공정하고, 특히 AEGIS 의 privileged names 판은 공식 VLM 단계의 상한이다.
 그러나 port 가 원 논문 수치보다 낮게 나오는 것은 사실이므로, (1) 표에 원 논문 보고값 (†) 을 같이 두고, (2) 본문 주장은 "같은 harness 의 재구현 대비" 로
@@ -186,9 +186,43 @@ F2 의 기여는 점검에서도 2차 요인이고 (현재 충돌의 92 % 는 `h
 | 기존 run 재사용 | π0.5 단독 spatial LI · LII · object LI, AEGIS detector spatial LI · LII · object LI, AEGIS names spatial LII · object LI, multi-link CBF ± GT spatial LI · LII (12 run, 약 4.3 h) |
 | 재실행 (`-r2`) | AEGIS names spatial LI (이름 수정 전), KNOWS ± GT spatial LI · LII (F3 · F4a 전) — 처음 run 은 '수정 전' 기록으로 남김 |
 | 재사용 근거 | bfa9bdb0 의 변경은 chunk 경로에서 AEGIS · multi-link CBF 동작을 바꾸지 않음: client flag off byte-identical, `ObstacleCloudSource(target_box=True)` 기본 = 이전 동작, test 104 + 50 통과 (구현 보고 `outputs/2026-11-10_baseline_F2F3F4a/README.md`) |
-| 남은 위험 | multi-link CBF 점검 (진행 중) 에서 R1 수정이 나오면 그 arm 은 다시 돌린다 |
+| 남은 위험 | ~~multi-link CBF 점검 (진행 중) 에서 R1 수정이 나오면 그 arm 은 다시 돌린다~~ → 점검 완료 (§4.9): 수정 후보는 있으나 §4.8 규칙상 GT 판은 원문과 가까워 지금 적용하지 않음, 기존 run 유지 |
 
 queue: `experiments/segmentation/bl_tranche_resume_queue.sh` (재실행 5 → 남은 블록 scenario-major → LIBERO, 60 run).
+
+### 4.8 중간 점검 규칙 — 원문 지표보다 너무 낮으면 그때 개선안 적용 (사용자 결정 2026-11-10 01:3x)
+
+**사용자 결정:** "우선 이렇게 판정하고, 원문 지표보다 너무 낮게 나오면 그때 적용. 실험 중간에 확인하면서 차이가 너무 크면 개선안을 적용한 뒤 진행."
+'너무 낮음' 의 기준은 tranche 결과를 보기 **전에** 아래처럼 고정한다 (`experiments/segmentation/bl_tranche_check.py`).
+
+| 항목 | 기준 |
+|---|---|
+| 점검 시점 | 재실행 5 run 끝 (spatial 블록 완성), 그 뒤 suite 블록 (Level I + II) 이 끝날 때마다 |
+| harness 확인 | π0.5 단독 TSR 이 KNOWS 논문 π0.5 행과 10 pt 이내 (≥ 64 ep 일 때) — 벗어나면 port 가 아니라 harness 를 먼저 의심 |
+| 표시 (FLAG) | arm 의 누적 CAR 또는 SSR 이 논문 기준값보다 **20 pt 넘게 낮고**, 그 level 에서 **≥ 64 ep** (2 suite 이상; 64 ep 에서 이항 SE ≤ 6.3 pt → 20 pt > 3 SE) |
+| 기준값 | π0.5 · KNOWS: KNOWS 논문 Tab. 1 (4 suite 평균, level 별), KNOWS GT seg: 같은 표의 Naive (GT segmentation), AEGIS ± names: VLSA Tab. I (level 합산 → 우리도 합산 행으로 비교), multi-link CBF ± GT: 논문 Table Ib static SafeLIBERO 'Ours' 60.3 / 51.7 / 73.0 (TSR / SSR / CAR, level 합산 → 합산 행으로 비교) |
+| FLAG 시 개선안 후보 | 점검 보고에 **이미 적힌** fidelity 수정만 (예: F2 env step 마다 filter, AEGIS backview · 1024 px, AEGIS 의 VLM 이름 단계). tuning (R2) 은 여전히 불가 |
+| FLAG 시 절차 | 사용자에게 보고 → 결정 → 그 arm 의 tranche run 을 모두 같은 판으로 다시 돌림 (섞지 않음). 기록: "실제 결과 → 원문과의 차이 → 원인 → 적용한 개선 → 범위" (§4.4 형식), 결과를 보고 적용했다는 사실도 그대로 밝힘 |
+
+**01:3x 첫 점검 (재실행 전, 참고):** AEGIS detector 판 level 합산 48 ep CAR 18.8 % (논문 68.9, −50 pt) — ep 수가 64 미만이라 아직 FLAG 아님.
+같은 판의 pilot 도 낮았고 (§4.5), 원인은 공식 GLM 이름 단계를 일반 prompt "object" 로 바꾼 것 (AEGIS 점검 README). 64 ep 를 넘으면 FLAG 될 가능성이 높다.
+
+### 4.9 multi-link CBF port 점검 결과와 판정 (2026-11-10 01:4x, §4.8 규칙 적용)
+
+점검: `outputs/2026-11-10_multilinkCBF_port_점검/README.md` (GT seg 200 ep 를 기록 frame 으로 재실행해 served chunk 를 정확히 재현, 최대 차이 0.0).
+
+| # | 발견 | 분류 |
+|---|---|---|
+| 1 | GT seg 판의 장애물 ellipsoid 가 실제 장애물보다 작음: 공식 AEGIS 의 '중심에서 먼 20 % 점 제거' 를 손목 카메라 위주 (중앙 75 %) 의 깨끗한 GT 점에 적용 → 긴 물체 끝이 잘림 (wine bottle 높이 0.254 m, semi-axis 0.077 m). wine bottle 이 충돌 89 건 중 53 건 | trim 은 논문대로 (R1), 손목 depth 사용은 논문 Fig. 2 와 다름 (R1 / R3 편차) |
+| 2 | filter 자체는 작동: 장애물이 집합에 89 / 89, 충돌 전 개입 76 / 89, QP 실패 0 | — |
+| 3 | 충돌 순간 닿은 robot mesh 가 장애물 ellipsoid 밖 47 / 49 (중앙 63 mm) | DERIVED |
+| 4 | robot ellipsoid 가 robosuite mesh 가 아닌 cuRobo 구에 fit (hand mesh 의 70.6 % 만 포함) — 지금 충돌에는 2 / 49 만 관련 | R1, 작음 |
+| 5 | chunk 예측 오차 p90 5.8–17.3 mm | F2 (철회, 공용 편차) |
+| 6 | detector 판: 일반 prompt 로 hazard 최대 8 개 (논문: VLM 이 이름 붙인 1 개), call 0 에 감시 장애물 포함 97 / 200 | R4, 선언 |
+
+**§4.8 규칙에 따른 판정:**
+- **GT seg 판:** spatial 32 ep 합산 TSR / SSR / CAR 68.8 / 59.4 / 68.8 vs 논문 60.3 / 51.7 / 73.0 → CAR −4 pt, SSR +8 pt. 원문과 가까움 → **수정하지 않음**, 기존 run 유지. 점검의 수정 후보 (exact geometry ellipsoid, 머리 카메라만, mesh fit) 는 기록만 하고, 이후 suite 에서 FLAG 되면 그때 적용.
+- **detector 판:** 32 ep 합산 CAR 34.4 (−38.6 pt), SSR 18.8 (−33.0 pt) — 64 ep 미만이라 아직 FLAG 아님. AEGIS detector 판 (48 ep CAR 18.8, −50 pt) 과 같은 원인 (논문의 VLM 이름 단계를 일반 prompt 로 바꿈, R4) 으로 보이며, 두 detector 판 모두 FLAG 될 가능성이 높다. 그때의 개선안 후보는 두 방법에 공통인 'VLM 이름 단계' (AEGIS: 공식 GLM-4.5V, 비용 · 계정 필요) — 사용자 결정 사항.
 
 ## 5. 결과
 
@@ -219,3 +253,5 @@ queue: `experiments/segmentation/bl_tranche_resume_queue.sh` (재실행 5 → �
 | 2026-11-09 20:01 | AEGIS port: privileged names 판 이름을 공식 prefer_list 문구로 (backview 등 미적용), tranche 1 spatial LI names 판 재실행 queue | §4.5, 사용자 결정 |
 | 2026-11-09 23:58 | tranche 1 queue 중지 (진행 중 aegis-gt object LI 는 끝까지), 재구성 원칙 R1–R5 와 F2 · F3 · F4a 채택, multi-link CBF 점검 시작 | §4.6, 사용자 결정 |
 | 2026-11-10 01:2x | F2 철회 (사용자 결정), 기존 run 12 개 재사용, KNOWS 4 · AEGIS names spatial LI 재실행, tranche 1 재개 (`bl_tranche_resume_queue.sh`) | §4.7 |
+| 2026-11-10 01:3x | 중간 점검 규칙 (20 pt · ≥ 64 ep) 고정, `bl_tranche_check.py` | §4.8, 사용자 결정 |
+| 2026-11-10 01:4x | multi-link CBF 점검 완료, §4.8 규칙상 GT 판 원문 근접 → 미수정, 논문 Table Ib 값 반영 (§4.1 정정) | §4.9 |

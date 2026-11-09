@@ -225,6 +225,15 @@ AEGIS_PREFER_LIST_WORDING = {"yellow book": "yellow rectangular book", "moka pot
                              "wine bottle": "black wine bottle", "milk": "red milk carton",
                              "binder": "gray rectangular binder"}
 NAME_WORDINGS = ("display", "aegis_prefer_list")
+#: the official GLM-4.5V candidate list in its order (utils.py:466-468; the binder only when "long" is in the suite name)
+AEGIS_PREFER_LIST = ("yellow rectangular book", "blue moka pot", "red mug", "white storage box", "black wine bottle",
+                     "red milk carton")
+AEGIS_PREFER_LIST_LONG = "gray rectangular binder"
+
+
+def aegis_prefer_list(suite: str | None) -> list[str]:
+    """``prefer_list`` of the official ``obstacle_detection`` for a task suite name (non-privileged: fixed per suite)."""
+    return list(AEGIS_PREFER_LIST) + ([AEGIS_PREFER_LIST_LONG] if "long" in str(suite or "") else [])
 
 
 def obstacle_query_phrase(name: str, wording: str = "display") -> str:
@@ -277,7 +286,14 @@ class ObstacleCloudSource:
 
     ``detector`` prompts (``detector_prompt``): ``"obstacle_names"`` = ``privileged/obstacle_names`` (SafeLIBERO
     metadata; the VLM replacement (a)), ``"all_objects"`` = ``generic_prompt`` with every box overlapping the
-    target box (IoU > ``target_iou``) removed (replacement (b); not privileged).
+    target box (IoU > ``target_iou``) removed (replacement (b); not privileged), ``"candidate_list"`` = replacement (c),
+    2026-11-10: the official GLM-4.5V step ("identify exactly one non-robot obstacle ... preferably from prefer_list") done
+    by the detector -- every :func:`aegis_prefer_list` phrase is prompted, the top-1 valid box of each (table-sized and
+    target-box overlaps removed as in (b)), and the single phrase with the highest score is the episode's one obstacle,
+    then cropped exactly like (a) (not privileged: the list is the official prompt's, fixed per suite);
+    ``"vlm_name"`` = replacement (d), 2026-11-10: the official GLM-4.5V prompt answered by a local open VLM
+    (``providers.vlm_namer.QwenVLNamer``) on the first external camera's image; its answer is the one Grounding DINO
+    phrase, cropped like (a) -- the official pipeline with the API model swapped (not privileged).
     """
 
     SOURCES = ("given", "gt_seg", "detector")
@@ -299,19 +315,22 @@ class ObstacleCloudSource:
                  max_height_m: float = 0.58, trim_percentiles: tuple[float, float] = (2.0, 98.0),
                  assoc_gate_m: float = 0.05, assoc_overlap: float = 0.5,
                  base_envelope_m: tuple[float, float] | None = (0.18, 0.16),
-                 gt_obstacle_set: str = "all_non_target", name_wording: str = "display", target_box: bool = True):
+                 gt_obstacle_set: str = "all_non_target", name_wording: str = "display", target_box: bool = True,
+                 vlm: Any = None, vlm_weight: str | None = None, vlm_device: str = "cuda"):
         if name_wording not in NAME_WORDINGS:
             raise ValueError(f"name_wording must be one of {NAME_WORDINGS}, got {name_wording!r}")
         self.name_wording = name_wording
         #: ``all_objects`` prompt: drop boxes overlapping the target phrase's top-1 box (default, replacement (b)).
         #: ``False`` (KNOWS F4a, 2026-11-10): keep every box -- the target is excluded upstream by attention (Eq. 2-4).
         self.target_box = bool(target_box)
+        self._vlm, self.vlm_weight, self.vlm_device = vlm, vlm_weight, vlm_device  # detector_prompt="vlm_name" only
         if source not in self.SOURCES:
             raise ValueError(f"source must be one of {self.SOURCES}, got {source!r}")
         if exclude not in self.EXCLUDE:
             raise ValueError(f"exclude must be one of {self.EXCLUDE}, got {exclude!r}")
-        if detector_prompt not in ("obstacle_names", "all_objects"):
-            raise ValueError(f"detector_prompt must be obstacle_names|all_objects, got {detector_prompt!r}")
+        if detector_prompt not in ("obstacle_names", "all_objects", "candidate_list", "vlm_name"):
+            raise ValueError("detector_prompt must be obstacle_names|all_objects|candidate_list|vlm_name, "
+                             f"got {detector_prompt!r}")
         if gt_obstacle_set not in self.GT_OBSTACLE_SETS:
             raise ValueError(f"gt_obstacle_set must be one of {self.GT_OBSTACLE_SETS}, got {gt_obstacle_set!r}")
         self.gt_obstacle_set = gt_obstacle_set
@@ -351,6 +370,9 @@ class ObstacleCloudSource:
                                else {"weight": self.detector_weight, "device": self.detector_device, "loaded": False}),
                      detector_prompt=self.detector_prompt, generic_prompt=self.generic_prompt,
                      name_wording=self.name_wording,
+                     **({"vlm": (self._vlm.provenance() if self._vlm is not None and hasattr(self._vlm, "provenance")
+                                 else {"weight": self.vlm_weight, "device": self.vlm_device, "loaded": False})}
+                        if self.detector_prompt == "vlm_name" else {}),
                      box_threshold=self.box_threshold, text_threshold=self.text_threshold, target_iou=self.target_iou,
                      crop_mode=self.crop_mode,
                      crop=("axis-aligned box on depth (AEGIS utils.py:188-255), not a mask; = CLOSED-LOOP-FIX V5"
@@ -374,6 +396,14 @@ class ObstacleCloudSource:
             if not self.target_box:  # key only off the default (default provenance unchanged)
                 p["target_box"] = False
         return p
+
+    @property
+    def vlm(self):
+        if self._vlm is None:
+            from Baseline.paper_baselines.providers.vlm_namer import DEFAULT_VLM, QwenVLNamer
+
+            self._vlm = QwenVLNamer(self.vlm_weight or DEFAULT_VLM, device=self.vlm_device)
+        return self._vlm
 
     @property
     def detector(self):
@@ -531,7 +561,7 @@ class ObstacleCloudSource:
         links = []
         for i in range(n):
             for j in range(i + 1, n):
-                if self.detector_prompt == "obstacle_names" and entries[i]["key"] != entries[j]["key"]:
+                if self.detector_prompt in ("obstacle_names", "candidate_list", "vlm_name") and entries[i]["key"] != entries[j]["key"]:
                     continue
                 if find(i) == find(j):
                     continue
@@ -549,7 +579,7 @@ class ObstacleCloudSource:
         k_all = 0
         for g in sorted(groups.values(), key=lambda m: m[0]):  # order of the first member (camera, score)
             e0 = entries[g[0]]
-            if self.detector_prompt == "obstacle_names":
+            if self.detector_prompt in ("obstacle_names", "candidate_list", "vlm_name"):
                 name = e0["key"] if e0["key"] not in used_keys else f"{e0['key']}@{e0['cam']}"
                 used_keys.add(e0["key"])
             else:
@@ -559,6 +589,32 @@ class ObstacleCloudSource:
             for i in g:
                 entries[i]["name"] = name
         return out, links
+
+    def _choose_candidate(self, obs: SceneObservation, cams) -> tuple[str | None, dict]:
+        """``candidate_list``: the one prefer_list phrase GLM would answer -> highest top-1 valid box score over cameras."""
+        det = self.detector
+        cands = aegis_prefer_list(obs.extras.get("suite"))
+        best: dict[str, float] = {c: 0.0 for c in cands}
+        for cam in cams:
+            rgb = obs.rgb[cam]
+            H, W = rgb.shape[:2]
+            tbox = None
+            if obs.target_phrase and self.target_box:
+                b, s, _ = det.detect(rgb, obs.target_phrase, self.box_threshold, self.text_threshold)
+                if len(s):
+                    tbox = b[int(np.argmax(s))]
+            for c in cands:
+                boxes, scores, _ = det.detect(rgb, c, self.box_threshold, self.text_threshold)
+                for i in (np.argsort(-np.asarray(scores)) if len(scores) else []):
+                    bx = boxes[i]
+                    if (bx[2] - bx[0]) * (bx[3] - bx[1]) > self.max_box_frac * H * W:
+                        continue
+                    if tbox is not None and box_iou(bx, tbox) > self.target_iou:
+                        continue
+                    best[c] = max(best[c], float(scores[i]))
+                    break
+        chosen = max(cands, key=lambda c: best[c]) if any(v > 0 for v in best.values()) else None
+        return chosen, {"candidates": cands, "scores": {c: round(v, 4) for c, v in best.items()}, "chosen": chosen}
 
     def _detect(self, obs: SceneObservation) -> ObjectClouds:
         det = self.detector
@@ -574,6 +630,13 @@ class ObstacleCloudSource:
         else:
             queries = [("object", self.generic_prompt)]
         cams = self._cams(obs, CAMERAS_EXTERNAL)
+        if self.detector_prompt == "candidate_list":
+            phrase, info["candidate_list"] = self._choose_candidate(obs, cams)
+            queries = [(phrase, phrase)] if phrase is not None else []
+        elif self.detector_prompt == "vlm_name":
+            name, vinfo = self.vlm.name(obs.rgb[cams[0]], obs.instruction, aegis_prefer_list(obs.extras.get("suite")))
+            info["vlm_name"] = {**vinfo, "camera": cams[0]}
+            queries = [(name, name)] if name else []
         table_z = None
         if trim:
             table_z, zcam = self.support_z(obs, cams)
@@ -583,7 +646,7 @@ class ObstacleCloudSource:
             rgb = obs.rgb[cam]
             H, W = rgb.shape[:2]
             tbox = None
-            if self.detector_prompt == "all_objects" and obs.target_phrase and self.target_box:
+            if self.detector_prompt in ("all_objects", "candidate_list") and obs.target_phrase and self.target_box:
                 b, s, _ = det.detect(rgb, obs.target_phrase, self.box_threshold, self.text_threshold)
                 if len(s):
                     tbox = b[int(np.argmax(s))]
@@ -598,7 +661,7 @@ class ObstacleCloudSource:
                     if tbox is not None and box_iou(bx, tbox) > self.target_iou:
                         continue  # the target is not an obstacle
                     kept.append(int(i))
-                    if self.detector_prompt == "obstacle_names":
+                    if self.detector_prompt in ("obstacle_names", "candidate_list", "vlm_name"):
                         break  # AEGIS keeps one box per obstacle phrase (utils.py:197 ``pixel_boxes[0]``; here top-1 score)
                 for j, i in enumerate(kept[: self.max_obstacles]):
                     rec = {"box": np.asarray(boxes[i], float).round(1).tolist(), "score": float(scores[i])}
@@ -608,7 +671,7 @@ class ObstacleCloudSource:
                         rec["name"] = None
                         if len(p) >= self.min_points:  # empty / tiny crops (e.g. the table, the robot) are no object
                             entries.append({"key": key, "phrase": phrases[i], "cam": cam, "points": p, "rec": rec,
-                                            "label": f"{cam}:{key if self.detector_prompt == 'obstacle_names' else j}"})
+                                            "label": f"{cam}:{key if self.detector_prompt in ('obstacle_names', 'candidate_list', 'vlm_name') else j}"})
                         info["boxes"].setdefault(cam, []).append(rec)
                         continue
                     x0, y0, x1, y1 = np.round(boxes[i]).astype(int)
@@ -617,7 +680,7 @@ class ObstacleCloudSource:
                     p = backproject(obs.depth[cam], obs.intrinsics[cam], obs.T_base_cam[cam], m)
                     if self.robot_filter:
                         p = self.remove_robot(obs, p)
-                    name = key if self.detector_prompt == "obstacle_names" else f"{phrases[i] or 'object'}#{j}"
+                    name = key if self.detector_prompt in ("obstacle_names", "candidate_list", "vlm_name") else f"{phrases[i] or 'object'}#{j}"
                     out[name] = np.concatenate([out[name], p]) if name in out else p
                     info["boxes"].setdefault(cam, []).append({"name": name, **rec})
         if trim:
@@ -759,7 +822,7 @@ def rollout_positions(ee_pose: np.ndarray, actions: np.ndarray, pos_gain: float 
     return np.asarray(p)
 
 
-__all__ = ["AEGIS_PREFER_LIST_WORDING", "NAME_WORDINGS", "obstacle_query_phrase", "CAMERAS_EXTERNAL", "OSC_POS_SCALE", "OSC_ROT_SCALE", "POS_GAIN_M", "ROT_GAIN_RAD", "SUPPORT_NAMES", "ObjectClouds",
+__all__ = ["AEGIS_PREFER_LIST", "AEGIS_PREFER_LIST_LONG", "aegis_prefer_list", "AEGIS_PREFER_LIST_WORDING", "NAME_WORDINGS", "obstacle_query_phrase", "CAMERAS_EXTERNAL", "OSC_POS_SCALE", "OSC_ROT_SCALE", "POS_GAIN_M", "ROT_GAIN_RAD", "SUPPORT_NAMES", "ObjectClouds",
            "ObstacleCloudSource", "axisangle_to_mat", "backproject", "backproject_uv", "box_iou", "center_component",
            "check_actions", "cloud_overlap", "depth_trim", "ellipsoid_silhouette", "robot_pixels_in", "robot_spheres",
            "load_recorded_call", "mat_to_axisangle", "phrase_from_object", "propagate_ee", "quat_xyzw_to_mat",
