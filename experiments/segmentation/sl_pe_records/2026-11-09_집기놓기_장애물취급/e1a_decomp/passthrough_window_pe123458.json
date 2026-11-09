@@ -1,0 +1,204 @@
+[
+ {
+  "task": 0,
+  "ep": 6,
+  "obst": "moka_pot_obstacle_1",
+  "seq": 7,
+  "calls": [
+   "4:solve[initial]:obstacle:obsviol16.3mm:nobs1587:panda_hand:d_obst110mm",
+   "5:pass:clear:obsviol6.9mm:nobs1274:panda_link7:d_obst130mm",
+   "6:solve[initial]:obstacle:obsviol19.4mm:nobs851:panda_link7:d_obst117mm",
+   "7:pass:clear:obsviol9.2mm:nobs454:panda_hand:d_obst92mm"
+  ]
+ },
+ {
+  "task": 0,
+  "ep": 8,
+  "obst": "milk_obstacle_1",
+  "seq": 1,
+  "calls": [
+   "0:pass:clear:obsviol3.2mm:nobs1622:panda_rightfinger:d_obst146mm",
+   "1:pass:clear:obsviol6.2mm:nobs1616:panda_rightfinger:d_obst140mm"
+  ]
+ },
+ {
+  "task": 0,
+  "ep": 10,
+  "obst": "red_coffee_mug_obstacle_1",
+  "seq": 5,
+  "calls": [
+   "2:pass:clear:obsviol0.0mm:nobs766:panda_rightfinger:d_obst238mm",
+   "3:solve[initial]:obstacle:obsviol11.4mm:nobs1534:panda_leftfinger:d_obst138mm",
+   "4:solve[initial]:obstacle:obsviol29.5mm:nobs1487:panda_hand:d_obst145mm",
+   "5:solve[initial]:obstacle:obsviol15.7mm:nobs1167:panda_leftfinger:d_obst149mm"
+  ]
+ },
+ {
+  "task": 0,
+  "ep": 11,
+  "obst": "yellow_book_obstacle_1",
+  "seq": 7,
+  "calls": [
+   "4:pass:clear:obsviol0.0mm:nobs1534:panda_leftfinger:d_obst136mm",
+   "5:solve[initial]:obstacle:obsviol35.0mm:nobs1287:panda_hand:d_obst117mm",
+   "6:solve[initial]:obstacle:obsviol30.5mm:nobs910:panda_hand:d_obst121mm",
+   "7:solve[initial]:obstacle:obsviol11.5mm:nobs418:panda_hand:d_obst155mm"
+  ]
+ },
+ {
+  "task": 0,
+  "ep": 12,
+  "obst": "moka_pot_obstacle_1",
+  "seq": 7,
+  "calls": [
+   "4:solve[initial]:obstacle:obsviol10.6mm:nobs1562:panda_hand:d_obst118mm",
+   "5:solve[initial]:obstacle:obsviol25.2mm:nobs1193:panda_link7:d_obst130mm",
+   "6:pass:clear:obsviol8.1mm:nobs739:panda_link7:d_obst137mm",
+   "7:pass:clear:obsviol9.0mm:nobs450:panda_link7:d_obst132mm"
+  ]
+ },
+ {
+  "task": 0,
+  "ep": 13,
+  "obst": "white_storage_box_obstacle_1",
+  "seq": 6,
+  "calls": [
+   "3:pass:clear:obsviol0.0mm:nobs765:panda_leftfinger:d_obst206mm",
+   "4:pass:clear:obsviol0.6mm:nobs1524:panda_leftfinger:d_obst108mm",
+   "5:solve[initial]:obstacle:obsviol33.6mm:nobs1343:panda_hand:d_obst86mm",
+   "6:pass:clear:obsviol9.7mm:nobs1049:panda_hand:d_obst122mm"
+  ]
+ },
+ {
+  "task": 0,
+  "ep": 14,
+  "obst": "milk_obstacle_1",
+  "seq": 24,
+  "calls": [
+   "21:pass:clear:obsviol0.0mm:nobs157:panda_link7:d_obst123mm",
+   "22:pass:clear:obsviol0.0mm:nobs295:panda_link7:d_obst123mm",
+   "23:pass:clear:obsviol0.0mm:nobs321:panda_link7:d_obst137mm",
+   "24:solve[initial]:obstacle:obsviol10.4mm:nobs1335:panda_hand:d_obst106mm"
+  ]
+ },
+ {
+  "task": 1,
+  "ep": 6,
+  "obst": "moka_pot_obstacle_1",
+  "seq": 11,
+  "calls": [
+   "8:pass:clear:obsviol0.0mm:nobs30:panda_link1:d_obst680mm",
+   "9:pass:clear:obsviol0.0mm:nobs14:panda_link1:d_obst681mm",
+   "10:pass:clear:obsviol0.0mm:nobs14:panda_link1:d_obst681mm",
+   "11:pass:clear:obsviol0.0mm:nobs39:panda_link1:d_obst681mm"
+  ]
+ },
+ {
+  "task": 1,
+  "ep": 8,
+  "obst": "milk_obstacle_1",
+  "seq": 46,
+  "calls": [
+   "43:pass:clear:obsviol0.0mm:nobs57:panda_link5:d_obst326mm",
+   "44:pass:clear:obsviol0.0mm:nobs506:panda_link5:d_obst203mm",
+   "45:pass:clear:obsviol0.0mm:nobs223:panda_leftfinger:d_obst153mm",
+   "46:pass:clear:obsviol0.0mm:nobs69:panda_hand:d_obst160mm"
+  ]
+ },
+ {
+  "task": 1,
+  "ep": 9,
+  "obst": "wine_bottle_obstacle_1",
+  "seq": 44,
+  "calls": [
+   "41:solve[initial]:obstacle:obsviol23.7mm:nobs955:panda_hand:d_obst185mm",
+   "42:solve[initial]:obstacle:obsviol12.6mm:nobs1303:panda_hand:d_obst218mm",
+   "43:solve[initial]:obstacle:obsviol27.5mm:nobs946:panda_hand:d_obst200mm",
+   "44:solve[initial]:obstacle:obsviol36.3mm:nobs979:panda_hand:d_obst197mm"
+  ]
+ },
+ {
+  "task": 1,
+  "ep": 10,
+  "obst": "red_coffee_mug_obstacle_1",
+  "seq": 10,
+  "calls": [
+   "7:pass:clear:obsviol0.0mm:nobs96:panda_link7:d_obst244mm",
+   "8:pass:clear:obsviol0.0mm:nobs173:panda_link7:d_obst246mm",
+   "9:pass:clear:obsviol0.0mm:nobs284:panda_link7:d_obst257mm",
+   "10:pass:clear:obsviol0.0mm:nobs516:panda_link7:d_obst279mm"
+  ]
+ },
+ {
+  "task": 1,
+  "ep": 12,
+  "obst": "moka_pot_obstacle_1",
+  "seq": 11,
+  "calls": [
+   "8:pass:clear:obsviol0.0mm:nobs10:panda_link1:d_obst682mm",
+   "9:pass:clear:obsviol0.0mm:nobs29:panda_link1:d_obst683mm",
+   "10:pass:clear:obsviol0.0mm:nobs44:panda_link1:d_obst683mm",
+   "11:pass:clear:obsviol0.0mm:nobs66:panda_link1:d_obst684mm"
+  ]
+ },
+ {
+  "task": 1,
+  "ep": 14,
+  "obst": "milk_obstacle_1",
+  "seq": 11,
+  "calls": [
+   "8:pass:clear:obsviol0.0mm:nobs10:panda_link1:d_obst686mm",
+   "9:pass:clear:obsviol0.0mm:nobs11:panda_link1:d_obst686mm",
+   "10:pass:clear:obsviol0.0mm:nobs36:panda_link1:d_obst686mm",
+   "11:pass:clear:obsviol0.0mm:nobs25:panda_link1:d_obst686mm"
+  ]
+ },
+ {
+  "task": 2,
+  "ep": 10,
+  "obst": "red_coffee_mug_obstacle_1",
+  "seq": 3,
+  "calls": [
+   "0:pass:clear:obsviol0.0mm:nobs5:panda_link1:d_obst459mm",
+   "1:pass:clear:obsviol0.0mm:nobs10:panda_link1:d_obst459mm",
+   "2:pass:clear:obsviol0.0mm:nobs10:panda_link1:d_obst459mm",
+   "3:pass:clear:obsviol0.0mm:nobs10:panda_link1:d_obst459mm"
+  ]
+ },
+ {
+  "task": 3,
+  "ep": 8,
+  "obst": "yellow_book_obstacle_1",
+  "seq": 22,
+  "calls": [
+   "19:pass:clear:obsviol0.0mm:nobs40:panda_link1:d_obst643mm",
+   "20:pass:clear:obsviol0.0mm:nobs40:panda_link1:d_obst640mm",
+   "21:pass:clear:obsviol0.0mm:nobs21:panda_link1:d_obst641mm",
+   "22:pass:clear:obsviol0.0mm:nobs20:panda_link1:d_obst639mm"
+  ]
+ },
+ {
+  "task": 3,
+  "ep": 10,
+  "obst": "red_coffee_mug_obstacle_1",
+  "seq": 4,
+  "calls": [
+   "1:pass:clear:obsviol4.8mm:nobs166:panda_hand:d_obst157mm",
+   "2:solve[initial]:obstacle:obsviol21.4mm:nobs991:panda_leftfinger:d_obst115mm",
+   "3:pass:clear:obsviol0.0mm:nobs721:panda_leftfinger:d_obst168mm",
+   "4:pass:clear:obsviol8.5mm:nobs1411:panda_leftfinger:d_obst147mm"
+  ]
+ },
+ {
+  "task": 3,
+  "ep": 13,
+  "obst": "red_coffee_mug_obstacle_1",
+  "seq": 9,
+  "calls": [
+   "6:pass:clear:obsviol0.0mm:nobs780:panda_hand:d_obst181mm",
+   "7:solve[initial]:obstacle:obsviol15.7mm:nobs1477:panda_link7:d_obst179mm",
+   "8:solve[initial]:obstacle:obsviol30.1mm:nobs1170:panda_link7:d_obst141mm",
+   "9:solve[initial]:obstacle:obsviol13.4mm:nobs478:panda_hand:d_obst102mm"
+  ]
+ }
+]

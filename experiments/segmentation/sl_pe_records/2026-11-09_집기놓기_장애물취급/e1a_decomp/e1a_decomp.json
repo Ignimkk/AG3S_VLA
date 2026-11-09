@@ -1,0 +1,3017 @@
+{
+ "pe123458": {
+  "t0e5": {
+   "task": 0,
+   "ep": 5,
+   "cls": "F",
+   "obst": "yellow_book",
+   "disp_mm": 0.0,
+   "collide_t": null,
+   "phase": "-",
+   "steps": 300,
+   "n_calls": 60,
+   "held": true,
+   "first_held": 100,
+   "hold": 0,
+   "qp": 16,
+   "kinds": {
+    "budget_only": 11,
+    "occluded_target": 2
+   }
+  },
+  "t0e6": {
+   "task": 0,
+   "ep": 6,
+   "cls": "F+C",
+   "obst": "moka_pot",
+   "disp_mm": 15.7,
+   "collide_t": 59,
+   "phase": "pre",
+   "steps": 300,
+   "n_calls": 60,
+   "held": true,
+   "first_held": 85,
+   "hold": 43,
+   "qp": 49,
+   "kinds": {
+    "budget_only": 48,
+    "occluded_target": 1,
+    "uncertified": 43
+   }
+  },
+  "t0e7": {
+   "task": 0,
+   "ep": 7,
+   "cls": "F",
+   "obst": "white_storage_box",
+   "disp_mm": 0.0,
+   "collide_t": null,
+   "phase": "-",
+   "steps": 300,
+   "n_calls": 60,
+   "held": false,
+   "first_held": null,
+   "hold": 60,
+   "qp": 60,
+   "kinds": {
+    "uncertified": 60,
+    "budget_only": 60
+   }
+  },
+  "t0e8": {
+   "task": 0,
+   "ep": 8,
+   "cls": "S+C",
+   "obst": "milk",
+   "disp_mm": 35.8,
+   "collide_t": 27,
+   "phase": "pre",
+   "steps": 194,
+   "n_calls": 39,
+   "held": true,
+   "first_held": 195,
+   "hold": 0,
+   "qp": 12,
+   "kinds": {
+    "budget_only": 5,
+    "occluded_target": 6
+   }
+  },
+  "t0e9": {
+   "task": 0,
+   "ep": 9,
+   "cls": "SS",
+   "obst": "wine_bottle",
+   "disp_mm": 1.0,
+   "collide_t": null,
+   "phase": "-",
+   "steps": 79,
+   "n_calls": 16,
+   "held": true,
+   "first_held": 85,
+   "hold": 0,
+   "qp": 5,
+   "kinds": {
+    "budget_only": 1,
+    "occluded_target": 3
+   }
+  },
+  "t0e10": {
+   "task": 0,
+   "ep": 10,
+   "cls": "S+C",
+   "obst": "red_coffee_mug",
+   "disp_mm": 6.5,
+   "collide_t": 45,
+   "phase": "pre",
+   "steps": 133,
+   "n_calls": 27,
+   "held": true,
+   "first_held": 95,
+   "hold": 0,
+   "qp": 10,
+   "kinds": {
+    "budget_only": 8,
+    "occluded_target": 8
+   }
+  },
+  "t0e11": {
+   "task": 0,
+   "ep": 11,
+   "cls": "S+C",
+   "obst": "yellow_book",
+   "disp_mm": 43.9,
+   "collide_t": 56,
+   "phase": "pre",
+   "steps": 139,
+   "n_calls": 28,
+   "held": true,
+   "first_held": 145,
+   "hold": 0,
+   "qp": 3,
+   "kinds": {
+    "budget_only": 1,
+    "occluded_target": 4
+   }
+  },
+  "t0e12": {
+   "task": 0,
+   "ep": 12,
+   "cls": "F+C",
+   "obst": "moka_pot",
+   "disp_mm": 62.5,
+   "collide_t": 55,
+   "phase": "pre",
+   "steps": 300,
+   "n_calls": 60,
+   "held": true,
+   "first_held": 80,
+   "hold": 0,
+   "qp": 24,
+   "kinds": {
+    "budget_only": 14,
+    "occluded_target": 2
+   }
+  },
+  "t0e13": {
+   "task": 0,
+   "ep": 13,
+   "cls": "F+C",
+   "obst": "white_storage_box",
+   "disp_mm": 247.9,
+   "collide_t": 52,
+   "phase": "pre",
+   "steps": 300,
+   "n_calls": 60,
+   "held": false,
+   "first_held": null,
+   "hold": 0,
+   "qp": 16,
+   "kinds": {
+    "budget_only": 10,
+    "occluded_target": 1
+   }
+  },
+  "t0e14": {
+   "task": 0,
+   "ep": 14,
+   "cls": "S+C",
+   "obst": "milk",
+   "disp_mm": 4.2,
+   "collide_t": 142,
+   "phase": "pre",
+   "steps": 184,
+   "n_calls": 37,
+   "held": true,
+   "first_held": 180,
+   "hold": 0,
+   "qp": 7,
+   "kinds": {
+    "budget_only": 3,
+    "occluded_target": 6
+   }
+  },
+  "t1e5": {
+   "task": 1,
+   "ep": 5,
+   "cls": "SS",
+   "obst": "yellow_book",
+   "disp_mm": 0.0,
+   "collide_t": null,
+   "phase": "-",
+   "steps": 101,
+   "n_calls": 21,
+   "held": true,
+   "first_held": 65,
+   "hold": 0,
+   "qp": 2,
+   "kinds": {
+    "occluded_target": 4,
+    "budget_only": 2
+   }
+  },
+  "t1e6": {
+   "task": 1,
+   "ep": 6,
+   "cls": "S+C",
+   "obst": "moka_pot",
+   "disp_mm": 312.6,
+   "collide_t": 77,
+   "phase": "pre",
+   "steps": 160,
+   "n_calls": 32,
+   "held": true,
+   "first_held": 80,
+   "hold": 0,
+   "qp": 9,
+   "kinds": {
+    "budget_only": 7,
+    "occluded_target": 11
+   }
+  },
+  "t1e7": {
+   "task": 1,
+   "ep": 7,
+   "cls": "SS",
+   "obst": "white_storage_box",
+   "disp_mm": 0.0,
+   "collide_t": null,
+   "phase": "-",
+   "steps": 120,
+   "n_calls": 24,
+   "held": true,
+   "first_held": 70,
+   "hold": 0,
+   "qp": 2,
+   "kinds": {
+    "occluded_target": 6
+   }
+  },
+  "t1e8": {
+   "task": 1,
+   "ep": 8,
+   "cls": "F+C",
+   "obst": "milk",
+   "disp_mm": 22.9,
+   "collide_t": 253,
+   "phase": "held",
+   "steps": 300,
+   "n_calls": 60,
+   "held": true,
+   "first_held": 120,
+   "hold": 0,
+   "qp": 21,
+   "kinds": {
+    "occluded_target": 5,
+    "budget_only": 18
+   }
+  },
+  "t1e9": {
+   "task": 1,
+   "ep": 9,
+   "cls": "F+C",
+   "obst": "wine_bottle",
+   "disp_mm": 81.1,
+   "collide_t": 240,
+   "phase": "held",
+   "steps": 300,
+   "n_calls": 60,
+   "held": true,
+   "first_held": 75,
+   "hold": 0,
+   "qp": 22,
+   "kinds": {
+    "budget_only": 10,
+    "occluded_target": 46
+   }
+  },
+  "t1e10": {
+   "task": 1,
+   "ep": 10,
+   "cls": "S+C",
+   "obst": "red_coffee_mug",
+   "disp_mm": 41.3,
+   "collide_t": 72,
+   "phase": "pre",
+   "steps": 203,
+   "n_calls": 41,
+   "held": true,
+   "first_held": 75,
+   "hold": 0,
+   "qp": 10,
+   "kinds": {
+    "budget_only": 8,
+    "occluded_target": 13
+   }
+  },
+  "t1e11": {
+   "task": 1,
+   "ep": 11,
+   "cls": "SS",
+   "obst": "yellow_book",
+   "disp_mm": 0.0,
+   "collide_t": null,
+   "phase": "-",
+   "steps": 101,
+   "n_calls": 21,
+   "held": true,
+   "first_held": 65,
+   "hold": 0,
+   "qp": 2,
+   "kinds": {
+    "budget_only": 2,
+    "occluded_target": 4
+   }
+  },
+  "t1e12": {
+   "task": 1,
+   "ep": 12,
+   "cls": "F+C",
+   "obst": "moka_pot",
+   "disp_mm": 188.8,
+   "collide_t": 78,
+   "phase": "pre",
+   "steps": 300,
+   "n_calls": 60,
+   "held": true,
+   "first_held": 120,
+   "hold": 0,
+   "qp": 10,
+   "kinds": {
+    "budget_only": 7,
+    "occluded_target": 13
+   }
+  },
+  "t1e13": {
+   "task": 1,
+   "ep": 13,
+   "cls": "SS",
+   "obst": "white_storage_box",
+   "disp_mm": 0.0,
+   "collide_t": null,
+   "phase": "-",
+   "steps": 90,
+   "n_calls": 18,
+   "held": true,
+   "first_held": 70,
+   "hold": 0,
+   "qp": 0,
+   "kinds": {
+    "occluded_target": 1
+   }
+  },
+  "t1e14": {
+   "task": 1,
+   "ep": 14,
+   "cls": "F+C",
+   "obst": "milk",
+   "disp_mm": 328.9,
+   "collide_t": 76,
+   "phase": "pre",
+   "steps": 300,
+   "n_calls": 60,
+   "held": true,
+   "first_held": 215,
+   "hold": 17,
+   "qp": 33,
+   "kinds": {
+    "budget_only": 29,
+    "uncertified": 17
+   }
+  },
+  "t2e5": {
+   "task": 2,
+   "ep": 5,
+   "cls": "SS",
+   "obst": "yellow_book",
+   "disp_mm": 0.0,
+   "collide_t": null,
+   "phase": "-",
+   "steps": 117,
+   "n_calls": 24,
+   "held": true,
+   "first_held": 80,
+   "hold": 0,
+   "qp": 3,
+   "kinds": {
+    "budget_only": 1,
+    "occluded_target": 11
+   }
+  },
+  "t2e6": {
+   "task": 2,
+   "ep": 6,
+   "cls": "SS",
+   "obst": "moka_pot",
+   "disp_mm": 0.0,
+   "collide_t": null,
+   "phase": "-",
+   "steps": 198,
+   "n_calls": 40,
+   "held": true,
+   "first_held": 85,
+   "hold": 0,
+   "qp": 5,
+   "kinds": {
+    "occluded_target": 7,
+    "budget_only": 3
+   }
+  },
+  "t2e7": {
+   "task": 2,
+   "ep": 7,
+   "cls": "F",
+   "obst": "white_storage_box",
+   "disp_mm": 0.0,
+   "collide_t": null,
+   "phase": "-",
+   "steps": 300,
+   "n_calls": 60,
+   "held": true,
+   "first_held": 80,
+   "hold": 0,
+   "qp": 1,
+   "kinds": {
+    "occluded_target": 13
+   }
+  },
+  "t2e8": {
+   "task": 2,
+   "ep": 8,
+   "cls": "SS",
+   "obst": "milk",
+   "disp_mm": 0.0,
+   "collide_t": null,
+   "phase": "-",
+   "steps": 172,
+   "n_calls": 35,
+   "held": true,
+   "first_held": 75,
+   "hold": 0,
+   "qp": 9,
+   "kinds": {
+    "budget_only": 5,
+    "occluded_target": 7
+   }
+  },
+  "t2e9": {
+   "task": 2,
+   "ep": 9,
+   "cls": "SS",
+   "obst": "wine_bottle",
+   "disp_mm": 0.0,
+   "collide_t": null,
+   "phase": "-",
+   "steps": 119,
+   "n_calls": 24,
+   "held": true,
+   "first_held": 70,
+   "hold": 0,
+   "qp": 3,
+   "kinds": {
+    "occluded_target": 14,
+    "budget_only": 3
+   }
+  },
+  "t2e10": {
+   "task": 2,
+   "ep": 10,
+   "cls": "F+C",
+   "obst": "red_coffee_mug",
+   "disp_mm": 1449.6,
+   "collide_t": 38,
+   "phase": "pre",
+   "steps": 300,
+   "n_calls": 60,
+   "held": true,
+   "first_held": 170,
+   "hold": 30,
+   "qp": 39,
+   "kinds": {
+    "budget_only": 39,
+    "uncertified": 30
+   }
+  },
+  "t2e11": {
+   "task": 2,
+   "ep": 11,
+   "cls": "SS",
+   "obst": "yellow_book",
+   "disp_mm": 0.0,
+   "collide_t": null,
+   "phase": "-",
+   "steps": 193,
+   "n_calls": 39,
+   "held": true,
+   "first_held": 80,
+   "hold": 0,
+   "qp": 4,
+   "kinds": {
+    "occluded_target": 25,
+    "budget_only": 3
+   }
+  },
+  "t2e12": {
+   "task": 2,
+   "ep": 12,
+   "cls": "SS",
+   "obst": "moka_pot",
+   "disp_mm": 0.0,
+   "collide_t": null,
+   "phase": "-",
+   "steps": 145,
+   "n_calls": 29,
+   "held": true,
+   "first_held": 80,
+   "hold": 0,
+   "qp": 3,
+   "kinds": {
+    "budget_only": 3,
+    "occluded_target": 4
+   }
+  },
+  "t2e13": {
+   "task": 2,
+   "ep": 13,
+   "cls": "F",
+   "obst": "white_storage_box",
+   "disp_mm": 0.0,
+   "collide_t": null,
+   "phase": "-",
+   "steps": 300,
+   "n_calls": 60,
+   "held": true,
+   "first_held": 80,
+   "hold": 0,
+   "qp": 5,
+   "kinds": {
+    "budget_only": 5,
+    "occluded_target": 34
+   }
+  },
+  "t2e14": {
+   "task": 2,
+   "ep": 14,
+   "cls": "SS",
+   "obst": "milk",
+   "disp_mm": 0.0,
+   "collide_t": null,
+   "phase": "-",
+   "steps": 138,
+   "n_calls": 28,
+   "held": true,
+   "first_held": 65,
+   "hold": 0,
+   "qp": 4,
+   "kinds": {
+    "budget_only": 2,
+    "occluded_target": 9
+   }
+  },
+  "t3e5": {
+   "task": 3,
+   "ep": 5,
+   "cls": "SS",
+   "obst": "yellow_book",
+   "disp_mm": 0.0,
+   "collide_t": null,
+   "phase": "-",
+   "steps": 143,
+   "n_calls": 29,
+   "held": true,
+   "first_held": 95,
+   "hold": 0,
+   "qp": 3,
+   "kinds": {
+    "budget_only": 2
+   }
+  },
+  "t3e6": {
+   "task": 3,
+   "ep": 6,
+   "cls": "F",
+   "obst": "wine_bottle",
+   "disp_mm": 0.0,
+   "collide_t": null,
+   "phase": "-",
+   "steps": 300,
+   "n_calls": 60,
+   "held": false,
+   "first_held": null,
+   "hold": 0,
+   "qp": 9,
+   "kinds": {
+    "occluded_target": 4,
+    "budget_only": 6
+   }
+  },
+  "t3e7": {
+   "task": 3,
+   "ep": 7,
+   "cls": "SS",
+   "obst": "red_coffee_mug",
+   "disp_mm": 0.0,
+   "collide_t": null,
+   "phase": "-",
+   "steps": 109,
+   "n_calls": 22,
+   "held": true,
+   "first_held": 75,
+   "hold": 0,
+   "qp": 1,
+   "kinds": {
+    "occluded_target": 8
+   }
+  },
+  "t3e8": {
+   "task": 3,
+   "ep": 8,
+   "cls": "S+C",
+   "obst": "yellow_book",
+   "disp_mm": 2.3,
+   "collide_t": 133,
+   "phase": "pre",
+   "steps": 198,
+   "n_calls": 40,
+   "held": true,
+   "first_held": 145,
+   "hold": 0,
+   "qp": 4,
+   "kinds": {
+    "budget_only": 2,
+    "occluded_target": 1
+   }
+  },
+  "t3e9": {
+   "task": 3,
+   "ep": 9,
+   "cls": "F",
+   "obst": "wine_bottle",
+   "disp_mm": 0.0,
+   "collide_t": null,
+   "phase": "-",
+   "steps": 300,
+   "n_calls": 60,
+   "held": false,
+   "first_held": null,
+   "hold": 0,
+   "qp": 6,
+   "kinds": {
+    "budget_only": 2
+   }
+  },
+  "t3e10": {
+   "task": 3,
+   "ep": 10,
+   "cls": "F+C",
+   "obst": "red_coffee_mug",
+   "disp_mm": 92.9,
+   "collide_t": 42,
+   "phase": "pre",
+   "steps": 300,
+   "n_calls": 60,
+   "held": false,
+   "first_held": null,
+   "hold": 0,
+   "qp": 5,
+   "kinds": {
+    "budget_only": 3
+   }
+  },
+  "t3e11": {
+   "task": 3,
+   "ep": 11,
+   "cls": "F",
+   "obst": "yellow_book",
+   "disp_mm": 0.0,
+   "collide_t": null,
+   "phase": "-",
+   "steps": 300,
+   "n_calls": 60,
+   "held": true,
+   "first_held": 105,
+   "hold": 0,
+   "qp": 10,
+   "kinds": {
+    "budget_only": 7,
+    "occluded_target": 10
+   }
+  },
+  "t3e12": {
+   "task": 3,
+   "ep": 12,
+   "cls": "F",
+   "obst": "wine_bottle",
+   "disp_mm": 0.0,
+   "collide_t": null,
+   "phase": "-",
+   "steps": 300,
+   "n_calls": 60,
+   "held": false,
+   "first_held": null,
+   "hold": 19,
+   "qp": 32,
+   "kinds": {
+    "budget_only": 27,
+    "occluded_target": 4,
+    "uncertified": 19
+   }
+  },
+  "t3e13": {
+   "task": 3,
+   "ep": 13,
+   "cls": "F+C",
+   "obst": "red_coffee_mug",
+   "disp_mm": 487.3,
+   "collide_t": 68,
+   "phase": "pre",
+   "steps": 300,
+   "n_calls": 60,
+   "held": true,
+   "first_held": 115,
+   "hold": 0,
+   "qp": 6,
+   "kinds": {
+    "budget_only": 2,
+    "occluded_target": 2
+   }
+  },
+  "t3e14": {
+   "task": 3,
+   "ep": 14,
+   "cls": "SS",
+   "obst": "yellow_book",
+   "disp_mm": 0.0,
+   "collide_t": null,
+   "phase": "-",
+   "steps": 290,
+   "n_calls": 58,
+   "held": true,
+   "first_held": 245,
+   "hold": 0,
+   "qp": 6,
+   "kinds": {
+    "budget_only": 5,
+    "occluded_target": 8
+   }
+  }
+ },
+ "gt23tro": {
+  "t0e5": {
+   "task": 0,
+   "ep": 5,
+   "cls": "F+C",
+   "obst": "yellow_book",
+   "disp_mm": 23.5,
+   "collide_t": 244,
+   "phase": "post",
+   "steps": 300,
+   "n_calls": 60,
+   "held": true,
+   "first_held": 120,
+   "hold": 0,
+   "qp": 14,
+   "kinds": {
+    "budget_only": 7,
+    "occluded_target": 1
+   }
+  },
+  "t0e6": {
+   "task": 0,
+   "ep": 6,
+   "cls": "S+C",
+   "obst": "moka_pot",
+   "disp_mm": 2.4,
+   "collide_t": 59,
+   "phase": "pre",
+   "steps": 101,
+   "n_calls": 21,
+   "held": true,
+   "first_held": 110,
+   "hold": 0,
+   "qp": 6,
+   "kinds": {
+    "budget_only": 3,
+    "occluded_target": 3
+   }
+  },
+  "t0e7": {
+   "task": 0,
+   "ep": 7,
+   "cls": "F+C",
+   "obst": "white_storage_box",
+   "disp_mm": 957.8,
+   "collide_t": 134,
+   "phase": "pre",
+   "steps": 300,
+   "n_calls": 60,
+   "held": false,
+   "first_held": null,
+   "hold": 0,
+   "qp": 35,
+   "kinds": {
+    "budget_only": 23,
+    "occluded_target": 10
+   }
+  },
+  "t0e8": {
+   "task": 0,
+   "ep": 8,
+   "cls": "S+C",
+   "obst": "milk",
+   "disp_mm": 25.9,
+   "collide_t": 27,
+   "phase": "pre",
+   "steps": 111,
+   "n_calls": 23,
+   "held": true,
+   "first_held": 80,
+   "hold": 0,
+   "qp": 5,
+   "kinds": {
+    "budget_only": 4,
+    "occluded_target": 1
+   }
+  },
+  "t0e9": {
+   "task": 0,
+   "ep": 9,
+   "cls": "SS",
+   "obst": "wine_bottle",
+   "disp_mm": 0.5,
+   "collide_t": null,
+   "phase": "-",
+   "steps": 154,
+   "n_calls": 31,
+   "held": true,
+   "first_held": 120,
+   "hold": 0,
+   "qp": 10,
+   "kinds": {
+    "budget_only": 4,
+    "occluded_target": 5
+   }
+  },
+  "t0e10": {
+   "task": 0,
+   "ep": 10,
+   "cls": "F+C",
+   "obst": "red_coffee_mug",
+   "disp_mm": 7.3,
+   "collide_t": 70,
+   "phase": "pre",
+   "steps": 300,
+   "n_calls": 60,
+   "held": true,
+   "first_held": 145,
+   "hold": 0,
+   "qp": 37,
+   "kinds": {
+    "budget_only": 22,
+    "occluded_target": 25
+   }
+  },
+  "t0e11": {
+   "task": 0,
+   "ep": 11,
+   "cls": "S+C",
+   "obst": "yellow_book",
+   "disp_mm": 2.1,
+   "collide_t": 59,
+   "phase": "pre",
+   "steps": 166,
+   "n_calls": 34,
+   "held": true,
+   "first_held": 170,
+   "hold": 0,
+   "qp": 4,
+   "kinds": {
+    "budget_only": 3,
+    "occluded_target": 4
+   }
+  },
+  "t0e12": {
+   "task": 0,
+   "ep": 12,
+   "cls": "SS",
+   "obst": "moka_pot",
+   "disp_mm": 0.0,
+   "collide_t": null,
+   "phase": "-",
+   "steps": 112,
+   "n_calls": 23,
+   "held": true,
+   "first_held": 110,
+   "hold": 0,
+   "qp": 8,
+   "kinds": {
+    "budget_only": 6,
+    "occluded_target": 5
+   }
+  },
+  "t0e13": {
+   "task": 0,
+   "ep": 13,
+   "cls": "S+C",
+   "obst": "white_storage_box",
+   "disp_mm": 44.4,
+   "collide_t": 95,
+   "phase": "pre",
+   "steps": 148,
+   "n_calls": 30,
+   "held": true,
+   "first_held": 110,
+   "hold": 0,
+   "qp": 6,
+   "kinds": {
+    "budget_only": 5,
+    "occluded_target": 2
+   }
+  },
+  "t0e14": {
+   "task": 0,
+   "ep": 14,
+   "cls": "S+C",
+   "obst": "milk",
+   "disp_mm": 3.7,
+   "collide_t": 72,
+   "phase": "pre",
+   "steps": 136,
+   "n_calls": 28,
+   "held": true,
+   "first_held": 130,
+   "hold": 0,
+   "qp": 6,
+   "kinds": {
+    "occluded_target": 9,
+    "budget_only": 1
+   }
+  },
+  "t1e5": {
+   "task": 1,
+   "ep": 5,
+   "cls": "SS",
+   "obst": "yellow_book",
+   "disp_mm": 0.0,
+   "collide_t": null,
+   "phase": "-",
+   "steps": 95,
+   "n_calls": 19,
+   "held": true,
+   "first_held": 65,
+   "hold": 0,
+   "qp": 1,
+   "kinds": {
+    "occluded_target": 10,
+    "budget_only": 1
+   }
+  },
+  "t1e6": {
+   "task": 1,
+   "ep": 6,
+   "cls": "F+C",
+   "obst": "moka_pot",
+   "disp_mm": 105.6,
+   "collide_t": 39,
+   "phase": "pre",
+   "steps": 300,
+   "n_calls": 60,
+   "held": false,
+   "first_held": null,
+   "hold": 0,
+   "qp": 23,
+   "kinds": {
+    "budget_only": 15,
+    "occluded_target": 48
+   }
+  },
+  "t1e7": {
+   "task": 1,
+   "ep": 7,
+   "cls": "SS",
+   "obst": "white_storage_box",
+   "disp_mm": 0.0,
+   "collide_t": null,
+   "phase": "-",
+   "steps": 120,
+   "n_calls": 24,
+   "held": true,
+   "first_held": 70,
+   "hold": 0,
+   "qp": 2,
+   "kinds": {
+    "occluded_target": 14
+   }
+  },
+  "t1e8": {
+   "task": 1,
+   "ep": 8,
+   "cls": "F+C",
+   "obst": "milk",
+   "disp_mm": 5.1,
+   "collide_t": 281,
+   "phase": "pre",
+   "steps": 300,
+   "n_calls": 60,
+   "held": false,
+   "first_held": null,
+   "hold": 0,
+   "qp": 45,
+   "kinds": {
+    "occluded_target": 41,
+    "budget_only": 31
+   }
+  },
+  "t1e9": {
+   "task": 1,
+   "ep": 9,
+   "cls": "F+C",
+   "obst": "wine_bottle",
+   "disp_mm": 2.1,
+   "collide_t": 164,
+   "phase": "held",
+   "steps": 300,
+   "n_calls": 60,
+   "held": true,
+   "first_held": 70,
+   "hold": 0,
+   "qp": 20,
+   "kinds": {
+    "budget_only": 13,
+    "occluded_target": 27
+   }
+  },
+  "t1e10": {
+   "task": 1,
+   "ep": 10,
+   "cls": "F+C",
+   "obst": "red_coffee_mug",
+   "disp_mm": 707.1,
+   "collide_t": 45,
+   "phase": "pre",
+   "steps": 300,
+   "n_calls": 60,
+   "held": false,
+   "first_held": null,
+   "hold": 0,
+   "qp": 45,
+   "kinds": {
+    "budget_only": 29,
+    "occluded_target": 19
+   }
+  },
+  "t1e11": {
+   "task": 1,
+   "ep": 11,
+   "cls": "SS",
+   "obst": "yellow_book",
+   "disp_mm": 0.0,
+   "collide_t": null,
+   "phase": "-",
+   "steps": 86,
+   "n_calls": 18,
+   "held": false,
+   "first_held": null,
+   "hold": 0,
+   "qp": 1,
+   "kinds": {
+    "budget_only": 1
+   }
+  },
+  "t1e12": {
+   "task": 1,
+   "ep": 12,
+   "cls": "F+C",
+   "obst": "moka_pot",
+   "disp_mm": 7.8,
+   "collide_t": 51,
+   "phase": "pre",
+   "steps": 300,
+   "n_calls": 60,
+   "held": false,
+   "first_held": null,
+   "hold": 0,
+   "qp": 34,
+   "kinds": {
+    "budget_only": 15,
+    "occluded_target": 15
+   }
+  },
+  "t1e13": {
+   "task": 1,
+   "ep": 13,
+   "cls": "SS",
+   "obst": "white_storage_box",
+   "disp_mm": 0.0,
+   "collide_t": null,
+   "phase": "-",
+   "steps": 90,
+   "n_calls": 18,
+   "held": true,
+   "first_held": 70,
+   "hold": 0,
+   "qp": 0,
+   "kinds": {
+    "occluded_target": 8
+   }
+  },
+  "t1e14": {
+   "task": 1,
+   "ep": 14,
+   "cls": "F+C",
+   "obst": "milk",
+   "disp_mm": 38.7,
+   "collide_t": 67,
+   "phase": "pre",
+   "steps": 300,
+   "n_calls": 60,
+   "held": true,
+   "first_held": 110,
+   "hold": 0,
+   "qp": 25,
+   "kinds": {
+    "occluded_target": 33,
+    "budget_only": 11
+   }
+  },
+  "t2e5": {
+   "task": 2,
+   "ep": 5,
+   "cls": "SS",
+   "obst": "yellow_book",
+   "disp_mm": 0.0,
+   "collide_t": null,
+   "phase": "-",
+   "steps": 175,
+   "n_calls": 35,
+   "held": true,
+   "first_held": 120,
+   "hold": 0,
+   "qp": 2,
+   "kinds": {
+    "budget_only": 2,
+    "occluded_target": 15
+   }
+  },
+  "t2e6": {
+   "task": 2,
+   "ep": 6,
+   "cls": "S+C",
+   "obst": "moka_pot",
+   "disp_mm": 2.2,
+   "collide_t": 86,
+   "phase": "held",
+   "steps": 150,
+   "n_calls": 30,
+   "held": true,
+   "first_held": 85,
+   "hold": 0,
+   "qp": 7,
+   "kinds": {
+    "occluded_target": 17,
+    "budget_only": 4
+   }
+  },
+  "t2e7": {
+   "task": 2,
+   "ep": 7,
+   "cls": "SS",
+   "obst": "white_storage_box",
+   "disp_mm": 0.0,
+   "collide_t": null,
+   "phase": "-",
+   "steps": 121,
+   "n_calls": 25,
+   "held": true,
+   "first_held": 70,
+   "hold": 0,
+   "qp": 1,
+   "kinds": {
+    "budget_only": 1
+   }
+  },
+  "t2e8": {
+   "task": 2,
+   "ep": 8,
+   "cls": "SS",
+   "obst": "milk",
+   "disp_mm": 0.0,
+   "collide_t": null,
+   "phase": "-",
+   "steps": 139,
+   "n_calls": 28,
+   "held": true,
+   "first_held": 75,
+   "hold": 0,
+   "qp": 7,
+   "kinds": {
+    "budget_only": 6,
+    "occluded_target": 17
+   }
+  },
+  "t2e9": {
+   "task": 2,
+   "ep": 9,
+   "cls": "SS",
+   "obst": "wine_bottle",
+   "disp_mm": 0.0,
+   "collide_t": null,
+   "phase": "-",
+   "steps": 133,
+   "n_calls": 27,
+   "held": true,
+   "first_held": 70,
+   "hold": 0,
+   "qp": 3,
+   "kinds": {
+    "occluded_target": 17
+   }
+  },
+  "t2e10": {
+   "task": 2,
+   "ep": 10,
+   "cls": "F+C",
+   "obst": "red_coffee_mug",
+   "disp_mm": 175.7,
+   "collide_t": 220,
+   "phase": "pre",
+   "steps": 300,
+   "n_calls": 60,
+   "held": false,
+   "first_held": null,
+   "hold": 0,
+   "qp": 45,
+   "kinds": {
+    "budget_only": 22
+   }
+  },
+  "t2e11": {
+   "task": 2,
+   "ep": 11,
+   "cls": "SS",
+   "obst": "yellow_book",
+   "disp_mm": 0.0,
+   "collide_t": null,
+   "phase": "-",
+   "steps": 141,
+   "n_calls": 29,
+   "held": true,
+   "first_held": 85,
+   "hold": 0,
+   "qp": 4,
+   "kinds": {
+    "budget_only": 2,
+    "occluded_target": 16
+   }
+  },
+  "t2e12": {
+   "task": 2,
+   "ep": 12,
+   "cls": "SS",
+   "obst": "moka_pot",
+   "disp_mm": 0.0,
+   "collide_t": null,
+   "phase": "-",
+   "steps": 142,
+   "n_calls": 29,
+   "held": true,
+   "first_held": 80,
+   "hold": 0,
+   "qp": 3,
+   "kinds": {
+    "occluded_target": 17,
+    "budget_only": 3
+   }
+  },
+  "t2e13": {
+   "task": 2,
+   "ep": 13,
+   "cls": "S+C",
+   "obst": "white_storage_box",
+   "disp_mm": 2.0,
+   "collide_t": 89,
+   "phase": "pre",
+   "steps": 127,
+   "n_calls": 26,
+   "held": true,
+   "first_held": 90,
+   "hold": 0,
+   "qp": 3,
+   "kinds": {
+    "budget_only": 3,
+    "occluded_target": 12
+   }
+  },
+  "t2e14": {
+   "task": 2,
+   "ep": 14,
+   "cls": "SS",
+   "obst": "milk",
+   "disp_mm": 0.0,
+   "collide_t": null,
+   "phase": "-",
+   "steps": 121,
+   "n_calls": 25,
+   "held": true,
+   "first_held": 65,
+   "hold": 0,
+   "qp": 2,
+   "kinds": {
+    "occluded_target": 16
+   }
+  },
+  "t3e5": {
+   "task": 3,
+   "ep": 5,
+   "cls": "SS",
+   "obst": "yellow_book",
+   "disp_mm": 0.0,
+   "collide_t": null,
+   "phase": "-",
+   "steps": 133,
+   "n_calls": 27,
+   "held": true,
+   "first_held": 95,
+   "hold": 0,
+   "qp": 1,
+   "kinds": {
+    "budget_only": 1,
+    "occluded_target": 12
+   }
+  },
+  "t3e6": {
+   "task": 3,
+   "ep": 6,
+   "cls": "F+C",
+   "obst": "wine_bottle",
+   "disp_mm": 4.7,
+   "collide_t": 130,
+   "phase": "pre",
+   "steps": 300,
+   "n_calls": 60,
+   "held": false,
+   "first_held": null,
+   "hold": 0,
+   "qp": 36,
+   "kinds": {
+    "budget_only": 18
+   }
+  },
+  "t3e7": {
+   "task": 3,
+   "ep": 7,
+   "cls": "SS",
+   "obst": "red_coffee_mug",
+   "disp_mm": 0.0,
+   "collide_t": null,
+   "phase": "-",
+   "steps": 108,
+   "n_calls": 22,
+   "held": true,
+   "first_held": 75,
+   "hold": 0,
+   "qp": 0,
+   "kinds": {
+    "occluded_target": 11
+   }
+  },
+  "t3e8": {
+   "task": 3,
+   "ep": 8,
+   "cls": "SS",
+   "obst": "yellow_book",
+   "disp_mm": 0.0,
+   "collide_t": null,
+   "phase": "-",
+   "steps": 133,
+   "n_calls": 27,
+   "held": true,
+   "first_held": 95,
+   "hold": 0,
+   "qp": 3,
+   "kinds": {
+    "budget_only": 2,
+    "occluded_target": 12
+   }
+  },
+  "t3e9": {
+   "task": 3,
+   "ep": 9,
+   "cls": "F+C",
+   "obst": "wine_bottle",
+   "disp_mm": 76.7,
+   "collide_t": 91,
+   "phase": "pre",
+   "steps": 300,
+   "n_calls": 60,
+   "held": false,
+   "first_held": null,
+   "hold": 0,
+   "qp": 8,
+   "kinds": {
+    "budget_only": 5
+   }
+  },
+  "t3e10": {
+   "task": 3,
+   "ep": 10,
+   "cls": "SS",
+   "obst": "red_coffee_mug",
+   "disp_mm": 0.0,
+   "collide_t": null,
+   "phase": "-",
+   "steps": 128,
+   "n_calls": 26,
+   "held": true,
+   "first_held": 100,
+   "hold": 0,
+   "qp": 5,
+   "kinds": {
+    "budget_only": 1,
+    "occluded_target": 10
+   }
+  },
+  "t3e11": {
+   "task": 3,
+   "ep": 11,
+   "cls": "SS",
+   "obst": "yellow_book",
+   "disp_mm": 0.0,
+   "collide_t": null,
+   "phase": "-",
+   "steps": 129,
+   "n_calls": 26,
+   "held": false,
+   "first_held": null,
+   "hold": 0,
+   "qp": 1,
+   "kinds": {}
+  },
+  "t3e12": {
+   "task": 3,
+   "ep": 12,
+   "cls": "F+C",
+   "obst": "wine_bottle",
+   "disp_mm": 471.8,
+   "collide_t": 90,
+   "phase": "pre",
+   "steps": 300,
+   "n_calls": 60,
+   "held": false,
+   "first_held": null,
+   "hold": 0,
+   "qp": 14,
+   "kinds": {
+    "budget_only": 9
+   }
+  },
+  "t3e13": {
+   "task": 3,
+   "ep": 13,
+   "cls": "SS",
+   "obst": "red_coffee_mug",
+   "disp_mm": 0.0,
+   "collide_t": null,
+   "phase": "-",
+   "steps": 123,
+   "n_calls": 25,
+   "held": true,
+   "first_held": 85,
+   "hold": 0,
+   "qp": 5,
+   "kinds": {
+    "budget_only": 1,
+    "occluded_target": 12
+   }
+  },
+  "t3e14": {
+   "task": 3,
+   "ep": 14,
+   "cls": "SS",
+   "obst": "yellow_book",
+   "disp_mm": 0.0,
+   "collide_t": null,
+   "phase": "-",
+   "steps": 110,
+   "n_calls": 22,
+   "held": true,
+   "first_held": 75,
+   "hold": 0,
+   "qp": 0,
+   "kinds": {
+    "occluded_target": 11
+   }
+  }
+ },
+ "gt23t100": {
+  "t0e5": {
+   "task": 0,
+   "ep": 5,
+   "cls": "S+C",
+   "obst": "yellow_book",
+   "disp_mm": 1.3,
+   "collide_t": 60,
+   "phase": "pre",
+   "steps": 296,
+   "n_calls": 60,
+   "held": true,
+   "first_held": 75,
+   "hold": 0,
+   "qp": 9,
+   "kinds": {
+    "budget_only": 5,
+    "occluded_target": 25
+   }
+  },
+  "t0e6": {
+   "task": 0,
+   "ep": 6,
+   "cls": "S+C",
+   "obst": "moka_pot",
+   "disp_mm": 11.4,
+   "collide_t": 59,
+   "phase": "pre",
+   "steps": 107,
+   "n_calls": 22,
+   "held": true,
+   "first_held": 70,
+   "hold": 0,
+   "qp": 10,
+   "kinds": {
+    "budget_only": 3,
+    "occluded_target": 12
+   }
+  },
+  "t0e7": {
+   "task": 0,
+   "ep": 7,
+   "cls": "S+C",
+   "obst": "white_storage_box",
+   "disp_mm": 20.8,
+   "collide_t": 57,
+   "phase": "pre",
+   "steps": 183,
+   "n_calls": 37,
+   "held": true,
+   "first_held": 180,
+   "hold": 0,
+   "qp": 3,
+   "kinds": {
+    "budget_only": 2,
+    "occluded_target": 5
+   }
+  },
+  "t0e8": {
+   "task": 0,
+   "ep": 8,
+   "cls": "S+C",
+   "obst": "milk",
+   "disp_mm": 39.9,
+   "collide_t": 27,
+   "phase": "pre",
+   "steps": 192,
+   "n_calls": 39,
+   "held": false,
+   "first_held": null,
+   "hold": 0,
+   "qp": 9,
+   "kinds": {
+    "budget_only": 4
+   }
+  },
+  "t0e9": {
+   "task": 0,
+   "ep": 9,
+   "cls": "SS",
+   "obst": "wine_bottle",
+   "disp_mm": 0.0,
+   "collide_t": null,
+   "phase": "-",
+   "steps": 149,
+   "n_calls": 30,
+   "held": true,
+   "first_held": 95,
+   "hold": 0,
+   "qp": 5,
+   "kinds": {
+    "budget_only": 2,
+    "occluded_target": 2
+   }
+  },
+  "t0e10": {
+   "task": 0,
+   "ep": 10,
+   "cls": "S+C",
+   "obst": "red_coffee_mug",
+   "disp_mm": 140.3,
+   "collide_t": 57,
+   "phase": "pre",
+   "steps": 167,
+   "n_calls": 34,
+   "held": true,
+   "first_held": 165,
+   "hold": 0,
+   "qp": 11,
+   "kinds": {
+    "budget_only": 2,
+    "occluded_target": 5
+   }
+  },
+  "t0e11": {
+   "task": 0,
+   "ep": 11,
+   "cls": "S+C",
+   "obst": "yellow_book",
+   "disp_mm": 30.9,
+   "collide_t": 59,
+   "phase": "pre",
+   "steps": 99,
+   "n_calls": 20,
+   "held": true,
+   "first_held": 100,
+   "hold": 0,
+   "qp": 3,
+   "kinds": {
+    "budget_only": 2,
+    "occluded_target": 4
+   }
+  },
+  "t0e12": {
+   "task": 0,
+   "ep": 12,
+   "cls": "S+C",
+   "obst": "moka_pot",
+   "disp_mm": 22.7,
+   "collide_t": 55,
+   "phase": "pre",
+   "steps": 93,
+   "n_calls": 19,
+   "held": true,
+   "first_held": 75,
+   "hold": 0,
+   "qp": 6,
+   "kinds": {
+    "budget_only": 3,
+    "occluded_target": 8
+   }
+  },
+  "t0e13": {
+   "task": 0,
+   "ep": 13,
+   "cls": "SS",
+   "obst": "white_storage_box",
+   "disp_mm": 0.0,
+   "collide_t": null,
+   "phase": "-",
+   "steps": 138,
+   "n_calls": 28,
+   "held": true,
+   "first_held": 120,
+   "hold": 0,
+   "qp": 3,
+   "kinds": {
+    "budget_only": 2,
+    "occluded_target": 9
+   }
+  },
+  "t0e14": {
+   "task": 0,
+   "ep": 14,
+   "cls": "S+C",
+   "obst": "milk",
+   "disp_mm": 92.9,
+   "collide_t": 151,
+   "phase": "pre",
+   "steps": 186,
+   "n_calls": 38,
+   "held": true,
+   "first_held": 175,
+   "hold": 0,
+   "qp": 9,
+   "kinds": {
+    "budget_only": 3,
+    "occluded_target": 1
+   }
+  },
+  "t1e5": {
+   "task": 1,
+   "ep": 5,
+   "cls": "SS",
+   "obst": "yellow_book",
+   "disp_mm": 0.0,
+   "collide_t": null,
+   "phase": "-",
+   "steps": 93,
+   "n_calls": 19,
+   "held": true,
+   "first_held": 65,
+   "hold": 0,
+   "qp": 1,
+   "kinds": {
+    "occluded_target": 10
+   }
+  },
+  "t1e6": {
+   "task": 1,
+   "ep": 6,
+   "cls": "F+C",
+   "obst": "moka_pot",
+   "disp_mm": 93.9,
+   "collide_t": 39,
+   "phase": "pre",
+   "steps": 300,
+   "n_calls": 60,
+   "held": false,
+   "first_held": null,
+   "hold": 0,
+   "qp": 27,
+   "kinds": {
+    "budget_only": 14,
+    "occluded_target": 16
+   }
+  },
+  "t1e7": {
+   "task": 1,
+   "ep": 7,
+   "cls": "SS",
+   "obst": "white_storage_box",
+   "disp_mm": 0.0,
+   "collide_t": null,
+   "phase": "-",
+   "steps": 147,
+   "n_calls": 30,
+   "held": true,
+   "first_held": 70,
+   "hold": 0,
+   "qp": 4,
+   "kinds": {
+    "occluded_target": 20,
+    "budget_only": 2
+   }
+  },
+  "t1e8": {
+   "task": 1,
+   "ep": 8,
+   "cls": "F+C",
+   "obst": "milk",
+   "disp_mm": 30.8,
+   "collide_t": 104,
+   "phase": "pre",
+   "steps": 300,
+   "n_calls": 60,
+   "held": false,
+   "first_held": null,
+   "hold": 0,
+   "qp": 23,
+   "kinds": {
+    "occluded_target": 7,
+    "budget_only": 17
+   }
+  },
+  "t1e9": {
+   "task": 1,
+   "ep": 9,
+   "cls": "F+C",
+   "obst": "wine_bottle",
+   "disp_mm": 10.1,
+   "collide_t": 114,
+   "phase": "held",
+   "steps": 300,
+   "n_calls": 60,
+   "held": true,
+   "first_held": 75,
+   "hold": 0,
+   "qp": 12,
+   "kinds": {
+    "budget_only": 8,
+    "occluded_target": 49
+   }
+  },
+  "t1e10": {
+   "task": 1,
+   "ep": 10,
+   "cls": "F+C",
+   "obst": "red_coffee_mug",
+   "disp_mm": 156.0,
+   "collide_t": 45,
+   "phase": "pre",
+   "steps": 300,
+   "n_calls": 60,
+   "held": false,
+   "first_held": null,
+   "hold": 0,
+   "qp": 20,
+   "kinds": {
+    "occluded_target": 9,
+    "budget_only": 9
+   }
+  },
+  "t1e11": {
+   "task": 1,
+   "ep": 11,
+   "cls": "SS",
+   "obst": "yellow_book",
+   "disp_mm": 0.0,
+   "collide_t": null,
+   "phase": "-",
+   "steps": 86,
+   "n_calls": 18,
+   "held": false,
+   "first_held": null,
+   "hold": 0,
+   "qp": 1,
+   "kinds": {}
+  },
+  "t1e12": {
+   "task": 1,
+   "ep": 12,
+   "cls": "F+C",
+   "obst": "moka_pot",
+   "disp_mm": 149.0,
+   "collide_t": 42,
+   "phase": "pre",
+   "steps": 300,
+   "n_calls": 60,
+   "held": false,
+   "first_held": null,
+   "hold": 0,
+   "qp": 14,
+   "kinds": {
+    "occluded_target": 29,
+    "budget_only": 5
+   }
+  },
+  "t1e13": {
+   "task": 1,
+   "ep": 13,
+   "cls": "SS",
+   "obst": "white_storage_box",
+   "disp_mm": 0.0,
+   "collide_t": null,
+   "phase": "-",
+   "steps": 90,
+   "n_calls": 18,
+   "held": true,
+   "first_held": 70,
+   "hold": 0,
+   "qp": 0,
+   "kinds": {
+    "occluded_target": 8
+   }
+  },
+  "t1e14": {
+   "task": 1,
+   "ep": 14,
+   "cls": "F+C",
+   "obst": "milk",
+   "disp_mm": 419.6,
+   "collide_t": 70,
+   "phase": "pre",
+   "steps": 300,
+   "n_calls": 60,
+   "held": true,
+   "first_held": 110,
+   "hold": 0,
+   "qp": 10,
+   "kinds": {
+    "budget_only": 8,
+    "occluded_target": 16
+   }
+  },
+  "t2e5": {
+   "task": 2,
+   "ep": 5,
+   "cls": "SS",
+   "obst": "yellow_book",
+   "disp_mm": 0.0,
+   "collide_t": null,
+   "phase": "-",
+   "steps": 150,
+   "n_calls": 30,
+   "held": true,
+   "first_held": 90,
+   "hold": 0,
+   "qp": 5,
+   "kinds": {
+    "budget_only": 2,
+    "occluded_target": 16
+   }
+  },
+  "t2e6": {
+   "task": 2,
+   "ep": 6,
+   "cls": "F+C",
+   "obst": "moka_pot",
+   "disp_mm": 17.2,
+   "collide_t": 85,
+   "phase": "held",
+   "steps": 300,
+   "n_calls": 60,
+   "held": true,
+   "first_held": 85,
+   "hold": 0,
+   "qp": 10,
+   "kinds": {
+    "occluded_target": 30,
+    "budget_only": 7
+   }
+  },
+  "t2e7": {
+   "task": 2,
+   "ep": 7,
+   "cls": "F",
+   "obst": "white_storage_box",
+   "disp_mm": 0.0,
+   "collide_t": null,
+   "phase": "-",
+   "steps": 300,
+   "n_calls": 60,
+   "held": true,
+   "first_held": 75,
+   "hold": 0,
+   "qp": 1,
+   "kinds": {
+    "budget_only": 1
+   }
+  },
+  "t2e8": {
+   "task": 2,
+   "ep": 8,
+   "cls": "SS",
+   "obst": "milk",
+   "disp_mm": 0.0,
+   "collide_t": null,
+   "phase": "-",
+   "steps": 132,
+   "n_calls": 27,
+   "held": true,
+   "first_held": 75,
+   "hold": 0,
+   "qp": 5,
+   "kinds": {
+    "budget_only": 5,
+    "occluded_target": 16
+   }
+  },
+  "t2e9": {
+   "task": 2,
+   "ep": 9,
+   "cls": "SS",
+   "obst": "wine_bottle",
+   "disp_mm": 0.0,
+   "collide_t": null,
+   "phase": "-",
+   "steps": 130,
+   "n_calls": 26,
+   "held": true,
+   "first_held": 70,
+   "hold": 0,
+   "qp": 3,
+   "kinds": {
+    "occluded_target": 16,
+    "budget_only": 2
+   }
+  },
+  "t2e10": {
+   "task": 2,
+   "ep": 10,
+   "cls": "F+C",
+   "obst": "red_coffee_mug",
+   "disp_mm": 832.3,
+   "collide_t": 74,
+   "phase": "pre",
+   "steps": 300,
+   "n_calls": 60,
+   "held": false,
+   "first_held": null,
+   "hold": 0,
+   "qp": 12,
+   "kinds": {
+    "budget_only": 7
+   }
+  },
+  "t2e11": {
+   "task": 2,
+   "ep": 11,
+   "cls": "F",
+   "obst": "yellow_book",
+   "disp_mm": 0.0,
+   "collide_t": null,
+   "phase": "-",
+   "steps": 300,
+   "n_calls": 60,
+   "held": true,
+   "first_held": 75,
+   "hold": 0,
+   "qp": 2,
+   "kinds": {
+    "occluded_target": 15
+   }
+  },
+  "t2e12": {
+   "task": 2,
+   "ep": 12,
+   "cls": "S+C",
+   "obst": "moka_pot",
+   "disp_mm": 34.0,
+   "collide_t": 80,
+   "phase": "held",
+   "steps": 133,
+   "n_calls": 27,
+   "held": true,
+   "first_held": 80,
+   "hold": 0,
+   "qp": 3,
+   "kinds": {
+    "occluded_target": 15,
+    "budget_only": 1
+   }
+  },
+  "t2e13": {
+   "task": 2,
+   "ep": 13,
+   "cls": "SS",
+   "obst": "white_storage_box",
+   "disp_mm": 0.0,
+   "collide_t": null,
+   "phase": "-",
+   "steps": 131,
+   "n_calls": 27,
+   "held": true,
+   "first_held": 80,
+   "hold": 0,
+   "qp": 2,
+   "kinds": {
+    "occluded_target": 15,
+    "budget_only": 1
+   }
+  },
+  "t2e14": {
+   "task": 2,
+   "ep": 14,
+   "cls": "SS",
+   "obst": "milk",
+   "disp_mm": 0.0,
+   "collide_t": null,
+   "phase": "-",
+   "steps": 131,
+   "n_calls": 27,
+   "held": true,
+   "first_held": 65,
+   "hold": 0,
+   "qp": 3,
+   "kinds": {
+    "occluded_target": 18,
+    "budget_only": 2
+   }
+  },
+  "t3e5": {
+   "task": 3,
+   "ep": 5,
+   "cls": "F",
+   "obst": "yellow_book",
+   "disp_mm": 0.0,
+   "collide_t": null,
+   "phase": "-",
+   "steps": 300,
+   "n_calls": 60,
+   "held": true,
+   "first_held": 95,
+   "hold": 0,
+   "qp": 1,
+   "kinds": {
+    "budget_only": 1
+   }
+  },
+  "t3e6": {
+   "task": 3,
+   "ep": 6,
+   "cls": "F",
+   "obst": "wine_bottle",
+   "disp_mm": 0.0,
+   "collide_t": null,
+   "phase": "-",
+   "steps": 300,
+   "n_calls": 60,
+   "held": true,
+   "first_held": 85,
+   "hold": 0,
+   "qp": 6,
+   "kinds": {
+    "budget_only": 4,
+    "occluded_target": 4
+   }
+  },
+  "t3e7": {
+   "task": 3,
+   "ep": 7,
+   "cls": "SS",
+   "obst": "red_coffee_mug",
+   "disp_mm": 0.0,
+   "collide_t": null,
+   "phase": "-",
+   "steps": 108,
+   "n_calls": 22,
+   "held": true,
+   "first_held": 75,
+   "hold": 0,
+   "qp": 0,
+   "kinds": {
+    "occluded_target": 11
+   }
+  },
+  "t3e8": {
+   "task": 3,
+   "ep": 8,
+   "cls": "F",
+   "obst": "yellow_book",
+   "disp_mm": 0.0,
+   "collide_t": null,
+   "phase": "-",
+   "steps": 300,
+   "n_calls": 60,
+   "held": false,
+   "first_held": null,
+   "hold": 0,
+   "qp": 9,
+   "kinds": {
+    "budget_only": 6
+   }
+  },
+  "t3e9": {
+   "task": 3,
+   "ep": 9,
+   "cls": "F+C",
+   "obst": "wine_bottle",
+   "disp_mm": 4.4,
+   "collide_t": 67,
+   "phase": "pre",
+   "steps": 300,
+   "n_calls": 60,
+   "held": true,
+   "first_held": 140,
+   "hold": 0,
+   "qp": 4,
+   "kinds": {
+    "budget_only": 4,
+    "occluded_target": 12
+   }
+  },
+  "t3e10": {
+   "task": 3,
+   "ep": 10,
+   "cls": "F",
+   "obst": "red_coffee_mug",
+   "disp_mm": 0.0,
+   "collide_t": null,
+   "phase": "-",
+   "steps": 300,
+   "n_calls": 60,
+   "held": false,
+   "first_held": null,
+   "hold": 0,
+   "qp": 12,
+   "kinds": {
+    "budget_only": 4
+   }
+  },
+  "t3e11": {
+   "task": 3,
+   "ep": 11,
+   "cls": "F",
+   "obst": "yellow_book",
+   "disp_mm": 0.0,
+   "collide_t": null,
+   "phase": "-",
+   "steps": 300,
+   "n_calls": 60,
+   "held": false,
+   "first_held": null,
+   "hold": 0,
+   "qp": 3,
+   "kinds": {
+    "budget_only": 2
+   }
+  },
+  "t3e12": {
+   "task": 3,
+   "ep": 12,
+   "cls": "F+C",
+   "obst": "wine_bottle",
+   "disp_mm": 423.2,
+   "collide_t": 98,
+   "phase": "pre",
+   "steps": 300,
+   "n_calls": 60,
+   "held": false,
+   "first_held": null,
+   "hold": 37,
+   "qp": 50,
+   "kinds": {
+    "budget_only": 28,
+    "uncertified": 37
+   }
+  },
+  "t3e13": {
+   "task": 3,
+   "ep": 13,
+   "cls": "F",
+   "obst": "red_coffee_mug",
+   "disp_mm": 0.0,
+   "collide_t": null,
+   "phase": "-",
+   "steps": 300,
+   "n_calls": 60,
+   "held": false,
+   "first_held": null,
+   "hold": 42,
+   "qp": 51,
+   "kinds": {
+    "budget_only": 14,
+    "uncertified": 42
+   }
+  },
+  "t3e14": {
+   "task": 3,
+   "ep": 14,
+   "cls": "SS",
+   "obst": "yellow_book",
+   "disp_mm": 0.0,
+   "collide_t": null,
+   "phase": "-",
+   "steps": 110,
+   "n_calls": 22,
+   "held": true,
+   "first_held": 75,
+   "hold": 0,
+   "qp": 0,
+   "kinds": {
+    "occluded_target": 11
+   }
+  }
+ },
+ "gt24att": {
+  "t0e5": {
+   "task": 0,
+   "ep": 5,
+   "cls": "SS",
+   "obst": "yellow_book",
+   "disp_mm": 0.0,
+   "collide_t": null,
+   "phase": "-",
+   "steps": 77,
+   "n_calls": 16,
+   "held": true,
+   "first_held": 75,
+   "hold": 0,
+   "qp": 4,
+   "kinds": {
+    "occluded_target": 4,
+    "budget_only": 1
+   }
+  },
+  "t0e6": {
+   "task": 0,
+   "ep": 6,
+   "cls": "F+C",
+   "obst": "moka_pot",
+   "disp_mm": 15.7,
+   "collide_t": 59,
+   "phase": "pre",
+   "steps": 300,
+   "n_calls": 60,
+   "held": true,
+   "first_held": 85,
+   "hold": 43,
+   "qp": 49,
+   "kinds": {
+    "budget_only": 48,
+    "occluded_target": 1,
+    "uncertified": 43
+   }
+  },
+  "t0e7": {
+   "task": 0,
+   "ep": 7,
+   "cls": "F",
+   "obst": "white_storage_box",
+   "disp_mm": 0.0,
+   "collide_t": null,
+   "phase": "-",
+   "steps": 300,
+   "n_calls": 60,
+   "held": false,
+   "first_held": null,
+   "hold": 60,
+   "qp": 60,
+   "kinds": {
+    "uncertified": 60,
+    "budget_only": 60
+   }
+  },
+  "t0e8": {
+   "task": 0,
+   "ep": 8,
+   "cls": "F+C",
+   "obst": "milk",
+   "disp_mm": 35.8,
+   "collide_t": 27,
+   "phase": "pre",
+   "steps": 300,
+   "n_calls": 60,
+   "held": false,
+   "first_held": null,
+   "hold": 0,
+   "qp": 18,
+   "kinds": {
+    "budget_only": 9
+   }
+  },
+  "t0e9": {
+   "task": 0,
+   "ep": 9,
+   "cls": "SS",
+   "obst": "wine_bottle",
+   "disp_mm": 0.8,
+   "collide_t": null,
+   "phase": "-",
+   "steps": 116,
+   "n_calls": 24,
+   "held": true,
+   "first_held": 80,
+   "hold": 0,
+   "qp": 9,
+   "kinds": {
+    "budget_only": 2,
+    "occluded_target": 10
+   }
+  },
+  "t0e10": {
+   "task": 0,
+   "ep": 10,
+   "cls": "F+C",
+   "obst": "red_coffee_mug",
+   "disp_mm": 253.8,
+   "collide_t": 44,
+   "phase": "pre",
+   "steps": 300,
+   "n_calls": 60,
+   "held": true,
+   "first_held": 130,
+   "hold": 0,
+   "qp": 11,
+   "kinds": {
+    "budget_only": 9,
+    "occluded_target": 7
+   }
+  },
+  "t0e11": {
+   "task": 0,
+   "ep": 11,
+   "cls": "S+C",
+   "obst": "yellow_book",
+   "disp_mm": 43.9,
+   "collide_t": 56,
+   "phase": "pre",
+   "steps": 139,
+   "n_calls": 28,
+   "held": true,
+   "first_held": 145,
+   "hold": 0,
+   "qp": 4,
+   "kinds": {
+    "budget_only": 2,
+    "occluded_target": 2
+   }
+  },
+  "t0e12": {
+   "task": 0,
+   "ep": 12,
+   "cls": "S+C",
+   "obst": "moka_pot",
+   "disp_mm": 23.6,
+   "collide_t": 55,
+   "phase": "pre",
+   "steps": 110,
+   "n_calls": 22,
+   "held": true,
+   "first_held": 80,
+   "hold": 0,
+   "qp": 7,
+   "kinds": {
+    "budget_only": 3,
+    "occluded_target": 3
+   }
+  },
+  "t0e13": {
+   "task": 0,
+   "ep": 13,
+   "cls": "F+C",
+   "obst": "white_storage_box",
+   "disp_mm": 616.0,
+   "collide_t": 62,
+   "phase": "pre",
+   "steps": 300,
+   "n_calls": 60,
+   "held": false,
+   "first_held": null,
+   "hold": 0,
+   "qp": 17,
+   "kinds": {
+    "budget_only": 14,
+    "occluded_target": 1
+   }
+  },
+  "t0e14": {
+   "task": 0,
+   "ep": 14,
+   "cls": "F+C",
+   "obst": "milk",
+   "disp_mm": 24.3,
+   "collide_t": 140,
+   "phase": "pre",
+   "steps": 300,
+   "n_calls": 60,
+   "held": true,
+   "first_held": 275,
+   "hold": 0,
+   "qp": 9,
+   "kinds": {
+    "budget_only": 4,
+    "occluded_target": 10
+   }
+  },
+  "t1e5": {
+   "task": 1,
+   "ep": 5,
+   "cls": "F",
+   "obst": "yellow_book",
+   "disp_mm": 0.0,
+   "collide_t": null,
+   "phase": "-",
+   "steps": 300,
+   "n_calls": 60,
+   "held": true,
+   "first_held": 65,
+   "hold": 0,
+   "qp": 43,
+   "kinds": {
+    "occluded_target": 6,
+    "budget_only": 43
+   }
+  },
+  "t1e6": {
+   "task": 1,
+   "ep": 6,
+   "cls": "F+C",
+   "obst": "moka_pot",
+   "disp_mm": 271.8,
+   "collide_t": 77,
+   "phase": "pre",
+   "steps": 300,
+   "n_calls": 60,
+   "held": false,
+   "first_held": null,
+   "hold": 0,
+   "qp": 35,
+   "kinds": {
+    "budget_only": 25
+   }
+  },
+  "t1e7": {
+   "task": 1,
+   "ep": 7,
+   "cls": "F",
+   "obst": "white_storage_box",
+   "disp_mm": 0.0,
+   "collide_t": null,
+   "phase": "-",
+   "steps": 300,
+   "n_calls": 60,
+   "held": false,
+   "first_held": null,
+   "hold": 0,
+   "qp": 41,
+   "kinds": {
+    "budget_only": 40,
+    "occluded_target": 8
+   }
+  },
+  "t1e8": {
+   "task": 1,
+   "ep": 8,
+   "cls": "F+C",
+   "obst": "milk",
+   "disp_mm": 3.4,
+   "collide_t": 274,
+   "phase": "post",
+   "steps": 300,
+   "n_calls": 60,
+   "held": true,
+   "first_held": 120,
+   "hold": 0,
+   "qp": 11,
+   "kinds": {
+    "occluded_target": 8,
+    "budget_only": 6
+   }
+  },
+  "t1e9": {
+   "task": 1,
+   "ep": 9,
+   "cls": "F+C",
+   "obst": "wine_bottle",
+   "disp_mm": 165.3,
+   "collide_t": 84,
+   "phase": "pre",
+   "steps": 300,
+   "n_calls": 60,
+   "held": false,
+   "first_held": null,
+   "hold": 0,
+   "qp": 36,
+   "kinds": {
+    "budget_only": 30
+   }
+  },
+  "t1e10": {
+   "task": 1,
+   "ep": 10,
+   "cls": "F+C",
+   "obst": "red_coffee_mug",
+   "disp_mm": 11.5,
+   "collide_t": 63,
+   "phase": "pre",
+   "steps": 300,
+   "n_calls": 60,
+   "held": true,
+   "first_held": 170,
+   "hold": 8,
+   "qp": 14,
+   "kinds": {
+    "budget_only": 7,
+    "occluded_target": 3,
+    "uncertified": 8
+   }
+  },
+  "t1e11": {
+   "task": 1,
+   "ep": 11,
+   "cls": "F+C",
+   "obst": "yellow_book",
+   "disp_mm": 1.4,
+   "collide_t": 277,
+   "phase": "pre",
+   "steps": 300,
+   "n_calls": 60,
+   "held": false,
+   "first_held": null,
+   "hold": 7,
+   "qp": 39,
+   "kinds": {
+    "budget_only": 32,
+    "uncertified": 7
+   }
+  },
+  "t1e12": {
+   "task": 1,
+   "ep": 12,
+   "cls": "F+C",
+   "obst": "moka_pot",
+   "disp_mm": 225.6,
+   "collide_t": 195,
+   "phase": "pre",
+   "steps": 300,
+   "n_calls": 60,
+   "held": false,
+   "first_held": null,
+   "hold": 0,
+   "qp": 30,
+   "kinds": {
+    "budget_only": 24,
+    "occluded_target": 2
+   }
+  },
+  "t1e13": {
+   "task": 1,
+   "ep": 13,
+   "cls": "F+C",
+   "obst": "white_storage_box",
+   "disp_mm": 16.8,
+   "collide_t": 158,
+   "phase": "pre",
+   "steps": 300,
+   "n_calls": 60,
+   "held": true,
+   "first_held": 195,
+   "hold": 0,
+   "qp": 26,
+   "kinds": {
+    "budget_only": 23,
+    "occluded_target": 4
+   }
+  },
+  "t1e14": {
+   "task": 1,
+   "ep": 14,
+   "cls": "F+C",
+   "obst": "milk",
+   "disp_mm": 317.4,
+   "collide_t": 74,
+   "phase": "pre",
+   "steps": 300,
+   "n_calls": 60,
+   "held": true,
+   "first_held": 225,
+   "hold": 0,
+   "qp": 23,
+   "kinds": {
+    "budget_only": 15,
+    "occluded_target": 7
+   }
+  },
+  "t2e5": {
+   "task": 2,
+   "ep": 5,
+   "cls": "SS",
+   "obst": "yellow_book",
+   "disp_mm": 0.0,
+   "collide_t": null,
+   "phase": "-",
+   "steps": 117,
+   "n_calls": 24,
+   "held": true,
+   "first_held": 80,
+   "hold": 0,
+   "qp": 2,
+   "kinds": {
+    "budget_only": 1,
+    "occluded_target": 9
+   }
+  },
+  "t2e6": {
+   "task": 2,
+   "ep": 6,
+   "cls": "F+C",
+   "obst": "moka_pot",
+   "disp_mm": 28.3,
+   "collide_t": 85,
+   "phase": "held",
+   "steps": 300,
+   "n_calls": 60,
+   "held": true,
+   "first_held": 85,
+   "hold": 0,
+   "qp": 43,
+   "kinds": {
+    "budget_only": 34,
+    "occluded_target": 23
+   }
+  },
+  "t2e7": {
+   "task": 2,
+   "ep": 7,
+   "cls": "F",
+   "obst": "white_storage_box",
+   "disp_mm": 0.0,
+   "collide_t": null,
+   "phase": "-",
+   "steps": 300,
+   "n_calls": 60,
+   "held": true,
+   "first_held": 80,
+   "hold": 0,
+   "qp": 36,
+   "kinds": {
+    "budget_only": 24,
+    "occluded_target": 38
+   }
+  },
+  "t2e8": {
+   "task": 2,
+   "ep": 8,
+   "cls": "F+C",
+   "obst": "milk",
+   "disp_mm": 323.3,
+   "collide_t": 106,
+   "phase": "held",
+   "steps": 300,
+   "n_calls": 60,
+   "held": true,
+   "first_held": 75,
+   "hold": 0,
+   "qp": 29,
+   "kinds": {
+    "budget_only": 26,
+    "occluded_target": 16
+   }
+  },
+  "t2e9": {
+   "task": 2,
+   "ep": 9,
+   "cls": "SS",
+   "obst": "wine_bottle",
+   "disp_mm": 0.0,
+   "collide_t": null,
+   "phase": "-",
+   "steps": 133,
+   "n_calls": 27,
+   "held": true,
+   "first_held": 70,
+   "hold": 0,
+   "qp": 5,
+   "kinds": {
+    "occluded_target": 15,
+    "budget_only": 3
+   }
+  },
+  "t2e10": {
+   "task": 2,
+   "ep": 10,
+   "cls": "F",
+   "obst": "red_coffee_mug",
+   "disp_mm": 0.0,
+   "collide_t": null,
+   "phase": "-",
+   "steps": 300,
+   "n_calls": 60,
+   "held": false,
+   "first_held": null,
+   "hold": 58,
+   "qp": 58,
+   "kinds": {
+    "uncertified": 58,
+    "budget_only": 10
+   }
+  },
+  "t2e11": {
+   "task": 2,
+   "ep": 11,
+   "cls": "F",
+   "obst": "yellow_book",
+   "disp_mm": 0.0,
+   "collide_t": null,
+   "phase": "-",
+   "steps": 300,
+   "n_calls": 60,
+   "held": true,
+   "first_held": 80,
+   "hold": 0,
+   "qp": 31,
+   "kinds": {
+    "occluded_target": 26,
+    "budget_only": 25
+   }
+  },
+  "t2e12": {
+   "task": 2,
+   "ep": 12,
+   "cls": "S+C",
+   "obst": "moka_pot",
+   "disp_mm": 19.2,
+   "collide_t": 80,
+   "phase": "held",
+   "steps": 156,
+   "n_calls": 32,
+   "held": true,
+   "first_held": 80,
+   "hold": 0,
+   "qp": 5,
+   "kinds": {
+    "occluded_target": 11,
+    "budget_only": 3
+   }
+  },
+  "t2e13": {
+   "task": 2,
+   "ep": 13,
+   "cls": "SS",
+   "obst": "white_storage_box",
+   "disp_mm": 0.0,
+   "collide_t": null,
+   "phase": "-",
+   "steps": 128,
+   "n_calls": 26,
+   "held": true,
+   "first_held": 80,
+   "hold": 0,
+   "qp": 2,
+   "kinds": {
+    "occluded_target": 13,
+    "budget_only": 1
+   }
+  },
+  "t2e14": {
+   "task": 2,
+   "ep": 14,
+   "cls": "S+C",
+   "obst": "milk",
+   "disp_mm": 9.8,
+   "collide_t": 88,
+   "phase": "held",
+   "steps": 140,
+   "n_calls": 28,
+   "held": true,
+   "first_held": 65,
+   "hold": 0,
+   "qp": 6,
+   "kinds": {
+    "budget_only": 4,
+    "occluded_target": 4
+   }
+  },
+  "t3e5": {
+   "task": 3,
+   "ep": 5,
+   "cls": "F+C",
+   "obst": "yellow_book",
+   "disp_mm": 5.5,
+   "collide_t": 85,
+   "phase": "pre",
+   "steps": 300,
+   "n_calls": 60,
+   "held": false,
+   "first_held": null,
+   "hold": 0,
+   "qp": 11,
+   "kinds": {
+    "budget_only": 11,
+    "occluded_target": 6
+   }
+  },
+  "t3e6": {
+   "task": 3,
+   "ep": 6,
+   "cls": "F+C",
+   "obst": "wine_bottle",
+   "disp_mm": 215.9,
+   "collide_t": 76,
+   "phase": "pre",
+   "steps": 300,
+   "n_calls": 60,
+   "held": false,
+   "first_held": null,
+   "hold": 0,
+   "qp": 27,
+   "kinds": {
+    "occluded_target": 7,
+    "budget_only": 19
+   }
+  },
+  "t3e7": {
+   "task": 3,
+   "ep": 7,
+   "cls": "F",
+   "obst": "red_coffee_mug",
+   "disp_mm": 0.0,
+   "collide_t": null,
+   "phase": "-",
+   "steps": 300,
+   "n_calls": 60,
+   "held": false,
+   "first_held": null,
+   "hold": 11,
+   "qp": 23,
+   "kinds": {
+    "budget_only": 18,
+    "occluded_target": 2,
+    "uncertified": 11
+   }
+  },
+  "t3e8": {
+   "task": 3,
+   "ep": 8,
+   "cls": "F",
+   "obst": "yellow_book",
+   "disp_mm": 0.0,
+   "collide_t": null,
+   "phase": "-",
+   "steps": 300,
+   "n_calls": 60,
+   "held": false,
+   "first_held": null,
+   "hold": 0,
+   "qp": 37,
+   "kinds": {
+    "budget_only": 32,
+    "occluded_target": 14
+   }
+  },
+  "t3e9": {
+   "task": 3,
+   "ep": 9,
+   "cls": "F",
+   "obst": "wine_bottle",
+   "disp_mm": 0.0,
+   "collide_t": null,
+   "phase": "-",
+   "steps": 300,
+   "n_calls": 60,
+   "held": true,
+   "first_held": 270,
+   "hold": 0,
+   "qp": 26,
+   "kinds": {
+    "budget_only": 18,
+    "occluded_target": 3
+   }
+  },
+  "t3e10": {
+   "task": 3,
+   "ep": 10,
+   "cls": "F+C",
+   "obst": "red_coffee_mug",
+   "disp_mm": 131.6,
+   "collide_t": 42,
+   "phase": "pre",
+   "steps": 300,
+   "n_calls": 60,
+   "held": false,
+   "first_held": null,
+   "hold": 40,
+   "qp": 46,
+   "kinds": {
+    "budget_only": 42,
+    "uncertified": 40
+   }
+  },
+  "t3e11": {
+   "task": 3,
+   "ep": 11,
+   "cls": "F",
+   "obst": "yellow_book",
+   "disp_mm": 0.0,
+   "collide_t": null,
+   "phase": "-",
+   "steps": 300,
+   "n_calls": 60,
+   "held": false,
+   "first_held": null,
+   "hold": 0,
+   "qp": 38,
+   "kinds": {
+    "occluded_target": 16,
+    "budget_only": 26
+   }
+  },
+  "t3e12": {
+   "task": 3,
+   "ep": 12,
+   "cls": "F",
+   "obst": "wine_bottle",
+   "disp_mm": 0.0,
+   "collide_t": null,
+   "phase": "-",
+   "steps": 300,
+   "n_calls": 60,
+   "held": false,
+   "first_held": null,
+   "hold": 19,
+   "qp": 32,
+   "kinds": {
+    "budget_only": 27,
+    "occluded_target": 4,
+    "uncertified": 19
+   }
+  },
+  "t3e13": {
+   "task": 3,
+   "ep": 13,
+   "cls": "F+C",
+   "obst": "red_coffee_mug",
+   "disp_mm": 400.7,
+   "collide_t": 128,
+   "phase": "pre",
+   "steps": 300,
+   "n_calls": 60,
+   "held": false,
+   "first_held": null,
+   "hold": 6,
+   "qp": 20,
+   "kinds": {
+    "budget_only": 15,
+    "occluded_target": 3,
+    "uncertified": 6
+   }
+  },
+  "t3e14": {
+   "task": 3,
+   "ep": 14,
+   "cls": "F+C",
+   "obst": "yellow_book",
+   "disp_mm": 581.8,
+   "collide_t": 85,
+   "phase": "pre",
+   "steps": 300,
+   "n_calls": 60,
+   "held": false,
+   "first_held": null,
+   "hold": 0,
+   "qp": 32,
+   "kinds": {
+    "budget_only": 24,
+    "occluded_target": 24
+   }
+  }
+ }
+}

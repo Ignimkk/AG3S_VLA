@@ -1,5 +1,7 @@
 # 새 세션 시작 안내 (IFG 작업 인계)
 
+> **2026-11-09 최신 (다른 서버로 이전):** 먼저 [NEXT_SERVER_HANDOFF_20261109_KO.md](NEXT_SERVER_HANDOFF_20261109_KO.md) 를 읽는다 — 목표 · 현재 상태 · 새 서버 준비 · 다음 작업 (feature/panda-benchmark, GT 없는 AG3S SL-PE). 아래는 이전 이력.
+
 > **2026-10-23 최신 연구 결정:** 먼저 [연구 범위 한 페이지](plans/AG3S_RESEARCH_SCOPE_20261023_KO.md), [읽은 문서와 판단 근거](reviews/AG3S_SCOPE_DECISION_20261023_KO.md), [평가 구성·비교·종료 기준](../../AG3S/ag3s/docs/handoff/AG3S-CORE-EVALUATION.task.md)을 읽는다. 다음 작업은 그 task §8의 CPU 평가 준비다. 아래 10-18 인계는 당시 이력으로 보존하며, 실패 장면별 규칙 추가를 자동 재개하지 않는다.
 
 작성: 2026-10-18 18:20 KST. 이전 세션(IFG 분석, ag3s-vla-development-52)이 만료되기 전에 남긴 인계 문서다. **이 문서를 가장 먼저 읽는다.**

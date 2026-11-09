@@ -1,0 +1,457 @@
+{
+ "4ef922024674_gtto-pe1234567b-libero4s8-vla_v/libero_spatial_t4_e0": {
+  "success": false,
+  "rows": [
+   {
+    "seq": 6,
+    "state": "searching",
+    "link": "panda_rightfinger",
+    "rec_clear_mm": -19.5,
+    "base": {
+     "clear_mm": 5.7,
+     "age": 0,
+     "owner": "fixture",
+     "owner_mm": 1.6
+    },
+    "hf": {
+     "clear_mm": 5.7,
+     "age": 0,
+     "owner": "fixture",
+     "owner_mm": 1.6
+    },
+    "pe3": {
+     "clear_mm": 5.7,
+     "age": 0,
+     "owner": "fixture",
+     "owner_mm": 1.6
+    },
+    "pe3w": {
+     "clear_mm": 5.7,
+     "age": 0,
+     "owner": "fixture",
+     "owner_mm": 1.6
+    }
+   },
+   {
+    "seq": 7,
+    "state": "searching",
+    "link": "panda_leftfinger",
+    "rec_clear_mm": -22.8,
+    "base": {
+     "clear_mm": 4.2,
+     "age": 2,
+     "owner": "target",
+     "owner_mm": 0.7
+    },
+    "hf": {
+     "clear_mm": 4.2,
+     "age": 2,
+     "owner": "target",
+     "owner_mm": 0.7
+    },
+    "pe3": {
+     "clear_mm": 4.2,
+     "age": 2,
+     "owner": "target",
+     "owner_mm": 0.7
+    },
+    "pe3w": {
+     "clear_mm": 4.2,
+     "age": 2,
+     "owner": "target",
+     "owner_mm": 0.7
+    }
+   },
+   {
+    "seq": 8,
+    "state": "searching",
+    "link": "panda_leftfinger",
+    "rec_clear_mm": -16.6,
+    "base": {
+     "clear_mm": 3.1,
+     "age": 2,
+     "owner": "target",
+     "owner_mm": 0.8
+    },
+    "hf": {
+     "clear_mm": 3.1,
+     "age": 2,
+     "owner": "target",
+     "owner_mm": 0.8
+    },
+    "pe3": {
+     "clear_mm": 3.1,
+     "age": 2,
+     "owner": "target",
+     "owner_mm": 0.8
+    },
+    "pe3w": {
+     "clear_mm": 3.1,
+     "age": 2,
+     "owner": "target",
+     "owner_mm": 0.8
+    }
+   },
+   {
+    "seq": 9,
+    "state": "searching",
+    "link": "panda_leftfinger",
+    "rec_clear_mm": -21.0,
+    "base": {
+     "clear_mm": 3.1,
+     "age": 0,
+     "owner": "target",
+     "owner_mm": 0.4
+    },
+    "hf": {
+     "clear_mm": 3.1,
+     "age": 0,
+     "owner": "target",
+     "owner_mm": 0.4
+    },
+    "pe3": {
+     "clear_mm": 3.1,
+     "age": 0,
+     "owner": "target",
+     "owner_mm": 0.4
+    },
+    "pe3w": {
+     "clear_mm": 3.1,
+     "age": 0,
+     "owner": "target",
+     "owner_mm": 0.4
+    }
+   },
+   {
+    "seq": 10,
+    "state": "searching",
+    "link": "panda_leftfinger",
+    "rec_clear_mm": -20.8,
+    "base": {
+     "clear_mm": 2.9,
+     "age": 0,
+     "owner": "target",
+     "owner_mm": 0.5
+    },
+    "hf": {
+     "clear_mm": 2.9,
+     "age": 0,
+     "owner": "target",
+     "owner_mm": 0.5
+    },
+    "pe3": {
+     "clear_mm": 2.9,
+     "age": 0,
+     "owner": "target",
+     "owner_mm": 0.5
+    },
+    "pe3w": {
+     "clear_mm": 2.9,
+     "age": 0,
+     "owner": "target",
+     "owner_mm": 0.5
+    }
+   },
+   {
+    "seq": 11,
+    "state": "searching",
+    "link": "panda_hand",
+    "rec_clear_mm": -18.0,
+    "base": {
+     "clear_mm": 13.4,
+     "age": 0,
+     "owner": "fixture",
+     "owner_mm": 0.5
+    },
+    "hf": {
+     "clear_mm": 13.4,
+     "age": 0,
+     "owner": "fixture",
+     "owner_mm": 0.5
+    },
+    "pe3": {
+     "clear_mm": 13.4,
+     "age": 0,
+     "owner": "fixture",
+     "owner_mm": 0.5
+    },
+    "pe3w": {
+     "clear_mm": 13.4,
+     "age": 0,
+     "owner": "fixture",
+     "owner_mm": 0.5
+    }
+   },
+   {
+    "seq": 12,
+    "state": "searching",
+    "link": "panda_rightfinger",
+    "rec_clear_mm": -22.2,
+    "base": {
+     "clear_mm": 6.9,
+     "age": 0,
+     "owner": "fixture",
+     "owner_mm": 1.6
+    },
+    "hf": {
+     "clear_mm": 6.9,
+     "age": 0,
+     "owner": "fixture",
+     "owner_mm": 1.6
+    },
+    "pe3": {
+     "clear_mm": 6.9,
+     "age": 0,
+     "owner": "fixture",
+     "owner_mm": 1.6
+    },
+    "pe3w": {
+     "clear_mm": 6.9,
+     "age": 0,
+     "owner": "fixture",
+     "owner_mm": 1.6
+    }
+   },
+   {
+    "seq": 13,
+    "state": "searching",
+    "link": "panda_rightfinger",
+    "rec_clear_mm": -23.0,
+    "base": {
+     "clear_mm": 0.9,
+     "age": 0,
+     "owner": "fixture",
+     "owner_mm": 1.0
+    },
+    "hf": {
+     "clear_mm": 0.9,
+     "age": 0,
+     "owner": "fixture",
+     "owner_mm": 1.0
+    },
+    "pe3": {
+     "clear_mm": 0.9,
+     "age": 0,
+     "owner": "fixture",
+     "owner_mm": 1.0
+    },
+    "pe3w": {
+     "clear_mm": 0.9,
+     "age": 0,
+     "owner": "fixture",
+     "owner_mm": 1.0
+    }
+   },
+   {
+    "seq": 14,
+    "state": "searching",
+    "link": "panda_rightfinger",
+    "rec_clear_mm": -14.8,
+    "base": {
+     "clear_mm": 8.8,
+     "age": 2,
+     "owner": "fixture",
+     "owner_mm": 1.2
+    },
+    "hf": {
+     "clear_mm": 8.8,
+     "age": 2,
+     "owner": "fixture",
+     "owner_mm": 1.2
+    },
+    "pe3": {
+     "clear_mm": 8.8,
+     "age": 2,
+     "owner": "fixture",
+     "owner_mm": 1.2
+    },
+    "pe3w": {
+     "clear_mm": 8.8,
+     "age": 2,
+     "owner": "fixture",
+     "owner_mm": 1.2
+    }
+   },
+   {
+    "seq": 16,
+    "state": "searching",
+    "link": "panda_hand",
+    "rec_clear_mm": -24.3,
+    "base": {
+     "clear_mm": 8.8,
+     "age": 0,
+     "owner": "fixture",
+     "owner_mm": 1.1
+    },
+    "hf": {
+     "clear_mm": 8.8,
+     "age": 0,
+     "owner": "fixture",
+     "owner_mm": 1.1
+    },
+    "pe3": {
+     "clear_mm": 8.8,
+     "age": 0,
+     "owner": "fixture",
+     "owner_mm": 1.1
+    },
+    "pe3w": {
+     "clear_mm": 8.8,
+     "age": 0,
+     "owner": "fixture",
+     "owner_mm": 1.1
+    }
+   },
+   {
+    "seq": 17,
+    "state": "searching",
+    "link": "panda_hand",
+    "rec_clear_mm": -31.2,
+    "base": {
+     "clear_mm": 2.5,
+     "age": 0,
+     "owner": "fixture",
+     "owner_mm": 1.7
+    },
+    "hf": {
+     "clear_mm": 2.5,
+     "age": 0,
+     "owner": "fixture",
+     "owner_mm": 1.7
+    },
+    "pe3": {
+     "clear_mm": 2.5,
+     "age": 0,
+     "owner": "fixture",
+     "owner_mm": 1.7
+    },
+    "pe3w": {
+     "clear_mm": 2.5,
+     "age": 0,
+     "owner": "fixture",
+     "owner_mm": 1.7
+    }
+   },
+   {
+    "seq": 18,
+    "state": "searching",
+    "link": "panda_hand",
+    "rec_clear_mm": -21.4,
+    "base": {
+     "clear_mm": 16.4,
+     "age": 0,
+     "owner": "fixture",
+     "owner_mm": 0.8
+    },
+    "hf": {
+     "clear_mm": 16.4,
+     "age": 0,
+     "owner": "fixture",
+     "owner_mm": 0.8
+    },
+    "pe3": {
+     "clear_mm": 16.4,
+     "age": 0,
+     "owner": "fixture",
+     "owner_mm": 0.8
+    },
+    "pe3w": {
+     "clear_mm": 16.4,
+     "age": 0,
+     "owner": "fixture",
+     "owner_mm": 0.8
+    }
+   },
+   {
+    "seq": 19,
+    "state": "searching",
+    "link": "panda_leftfinger",
+    "rec_clear_mm": -21.4,
+    "base": {
+     "clear_mm": 4.1,
+     "age": 1,
+     "owner": "target",
+     "owner_mm": 0.3
+    },
+    "hf": {
+     "clear_mm": 4.1,
+     "age": 1,
+     "owner": "target",
+     "owner_mm": 0.3
+    },
+    "pe3": {
+     "clear_mm": 4.1,
+     "age": 1,
+     "owner": "target",
+     "owner_mm": 0.3
+    },
+    "pe3w": {
+     "clear_mm": 4.1,
+     "age": 1,
+     "owner": "target",
+     "owner_mm": 0.3
+    }
+   },
+   {
+    "seq": 20,
+    "state": "searching",
+    "link": "panda_rightfinger",
+    "rec_clear_mm": -18.3,
+    "base": {
+     "clear_mm": 18.3,
+     "age": 1,
+     "owner": "fixture",
+     "owner_mm": 1.1
+    },
+    "hf": {
+     "clear_mm": 18.3,
+     "age": 1,
+     "owner": "fixture",
+     "owner_mm": 1.1
+    },
+    "pe3": {
+     "clear_mm": 18.3,
+     "age": 1,
+     "owner": "fixture",
+     "owner_mm": 1.1
+    },
+    "pe3w": {
+     "clear_mm": 18.3,
+     "age": 1,
+     "owner": "fixture",
+     "owner_mm": 1.1
+    }
+   },
+   {
+    "seq": 21,
+    "state": "searching",
+    "link": "panda_hand",
+    "rec_clear_mm": -18.3,
+    "base": {
+     "clear_mm": 15.5,
+     "age": 2,
+     "owner": "fixture",
+     "owner_mm": 1.1
+    },
+    "hf": {
+     "clear_mm": 15.5,
+     "age": 2,
+     "owner": "fixture",
+     "owner_mm": 1.1
+    },
+    "pe3": {
+     "clear_mm": 15.5,
+     "age": 2,
+     "owner": "fixture",
+     "owner_mm": 1.1
+    },
+    "pe3w": {
+     "clear_mm": 15.5,
+     "age": 2,
+     "owner": "fixture",
+     "owner_mm": 1.1
+    }
+   }
+  ]
+ }
+}
