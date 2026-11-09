@@ -188,7 +188,7 @@ pe12345 run (LIBERO s7 · s8 · s9 t3 · 4 · 7 · 9 + SafeLIBERO t3, 553 call) 
 |---|---|---|
 | `--ee-action-qp` | 통과 못한 chunk 는 정책 OSC action 행 위 `min ‖Δa‖²` (6 자유도), 서버는 `a_ref + Δa` 를 보냄 | 주 optimizer 에만 (window optimizer 에는 map 없음) |
 | `--blas-threads 1` | OpenBLAS 1 thread (parser 기본값과 같음) | 사용 |
-| *(후보, 미채택 — 꺼짐)* `--ee-action-qp-translation-only` (SL-QE2, dev-38) | action QP 의 회전 3 자유도를 고정하고 평행이동 3 자유도만 바꿈 | B5 (GT) 에서 B5-tro 와 B5 비교 (2026-11-09, dev-38): E1a SSR 20 vs 13 (짝 9 / 2) · TSR 27 vs 22, LIBERO 27 27 vs 27, SafeLIBERO 11 안전 성공 9 vs 8, LIBERO-Safety 10 8 vs 9 (human_safety e2 시간 초과). GT 없는 판 (pe123458) 에는 아직 안 붙임 — 채택은 사용자 판단 (`outputs/2026-11-09_QE2_평가_E1a/README.md`) |
+| *(후보, 미채택 — 꺼짐)* `--ee-action-qp-translation-only` (SL-QE2, dev-38) | action QP 의 회전 3 자유도를 고정하고 평행이동 3 자유도만 바꿈 | B5 (GT) 에서 B5-tro 와 B5 비교 (2026-11-09, dev-38): E1a SSR 20 vs 13 (짝 9 / 2) · TSR 27 vs 22, LIBERO 27 27 vs 27, SafeLIBERO 11 안전 성공 9 vs 8, LIBERO-Safety 10 8 vs 9 (human_safety e2 시간 초과). GT 없는 판 결과 (pe123458-tro vs pe123458, 2026-11-09 12:10–15:11, 같은 평가 규약 · §8.3): 보정 13 vs 14 · LIBERO 27 23 vs 22 · SafeLIBERO 11 안전 성공 5 vs 6 · LIBERO-Safety 10 5 vs 5 · E1a 40 (개발 분할) SSR 17 vs 15 (p = 0.69), CAR 20 vs 23 → 사전 기준 (SafeLIBERO 안전 성공 ≥ 지금 구성) 미달로 **미채택 유지** (G172) |
 
 launcher 가 붙이는 것: `--port <자동>`, 평가 queue 의 `--record-constraints <run>/server_constraints --record-constraints-esdf full`, 환경 `AG3S_PANDA_CONVERSION=C` (`launch_libero_paired.py --conversion C`).
 
@@ -245,6 +245,8 @@ GT 를 쓰는 B5 (`…-gt2-…-obst3-pts-nocarve-fh-t100`) 에서 GT flag 를 �
 
 평가 순서 (`experiments/segmentation/gtto16_queue.sh`, 모두 `--conversion C --modes vla_v11ab`): 보정 LIBERO seed 10 · 11 (+ SafeLIBERO seed 10) → 평가 LIBERO 27 (libero_spatial t0–4 · 6–9 × ep 0 × seed 7 · 8 · 9) → SafeLIBERO 11 (Spatial LI dev, seed 7: t1 ep 1 · 4, t2 ep 0–4, t3 ep 0 · 2 · 3 · 4) → LIBERO-Safety 10 (L0 seed 7: human_safety 4 · obstacle_avoidance 4 · affordance 2) → E1a 40 (dev-38 의 같은 launcher `vla_only` 짝 `qe-vla-e1a-*` 와 함께). 평가용 실행: `gtto16_queue.sh` 에 `V=<판>` · `EXTRA="--record-constraints full"`.
 
+**분할 사용 규칙 (사용자 판정 2026-11-09 13:0x, G171):** E1a init 5–14 는 구성 선택에 쓰였으므로 (B5 → B5-tro, gt24att → pe123458, E1a 분해 → SL-PE11) **'개발에 쓴 분할'** 로 표시한다. 최종 동결 구성의 headline E1a 수치는 아직 어떤 arm 도 보지 않은 **init 15–49** 로 낸다 (π0.5 단독 짝 포함). 5–14 수치는 개발 기록으로만 남긴다.
+
 ## 7. 구현 위치 · test (SL-PE)
 
 | 무엇 | code | test |
@@ -282,6 +284,19 @@ GT 를 쓰는 B5 (`…-gt2-…-obst3-pts-nocarve-fh-t100`) 에서 GT flag 를 �
 | SafeLIBERO t3 실제 충돌 (새로 생긴 것) | — | 1 (e3 와인병 296 mm) | 1 (같은 e3; 손 닫는 지점이 병에 찍혀 identity 가 됨) |
 
 남은 실패: 서랍 t4 (접근 단계 identity · 첫 call 기하 미인증 HOLD), 접근 단계 identity 오류로 늦어진 시간 초과 (s7 t9), 목적지 등록 지연으로 놓기 직전 접시 거절 (s8 t9). 평가 규약 수치는 §6 순서로 채운다.
+
+### 8.3 후보 비교 — pe123458-tro (SL-QE2 회전 고정 action QP, 미채택, 2026-11-09 12:10–15:11, G172)
+
+| | pe123458-tro | **지금 구성 (pe123458)** |
+|---|---|---|
+| 보정 LIBERO seed 10 · 11 (18) | 13 | 14 |
+| 평가 LIBERO 27 | 23 (실패 s7 · s8 t4, s9 t1 · t9) | 22 |
+| SafeLIBERO 11 성공 · 안전 성공 · 충돌 (> 10 mm) | 7 · **5** · 4 (2) | 8 · 6 · 4 (2) |
+| LIBERO-Safety 10 성공 (위반) | 5 (0) | 5 (0) |
+| E1a 40 (init 5–14, 개발 분할) TSR · CAR · SSR | 24 · 20 · 17 (짝 4 / 2, p = 0.69) | 22 · 23 · 15 |
+| E1a 충돌 ep: 전체 · > 10 mm · > 50 mm | 20 · 11 · 6 (≤ 8 mm 9 ep) | 17 · 14 · 9 |
+
+tro 는 큰 충돌을 줄이고 (E1a > 50 mm 9 → 6) 대신 1–8 mm 접촉을 늘림 (장애물 행 허용치 τ_obs 10 mm 안 통과로 추정). 비교 script · 원본: `outputs/2026-11-09_집기놓기_장애물취급/eval_pe123458tro/tro_compare.py` · `tro_compare.json`.
 
 ## 교체 기록 (무엇 → 무엇, 이유)
 

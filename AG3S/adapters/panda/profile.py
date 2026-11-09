@@ -1086,6 +1086,12 @@ GT15_VERSIONS = GT15_VERSIONS + PE_VERSIONS[9:]
 PE_VERSIONS = PE_VERSIONS + ("AG3S-commonto-att-termsoff-pass-zr-ee-hdp-loose2-obst4-pts-nocarve-fh-t100-pe1234578911",)
 AG3S_VERSIONS[PE_VERSIONS[10]] = tuple(AG3S_VERSIONS[PE_VERSIONS[9]]) + ("--scene-obstacle-target-cut",)
 GT15_VERSIONS = GT15_VERSIONS + PE_VERSIONS[10:]
+#: SL-PE11 alone (dev-4a, 2026-11-09 12:1x, G170): pe12345811 = final pe123458 + --scene-obstacle-target-cut (no PE7 / PE9).
+#: pe123458 E1a / SafeLIBERO dev: the obstacle left the obstacle-object set with the target's component in 6 / 17 and 2 / 4
+#: collided episodes; the target cut keeps it on every such call (offline, e1a_decomp/e1a_pe11_offline.py).
+PE_VERSIONS = PE_VERSIONS + ("AG3S-commonto-att-termsoff-pass-zr-ee-hdp-loose2-obst4-pts-nocarve-fh-t100-pe12345811",)
+AG3S_VERSIONS[PE_VERSIONS[11]] = tuple(AG3S_VERSIONS[PE_VERSIONS[6]]) + ("--scene-obstacle-target-cut",)
+GT15_VERSIONS = GT15_VERSIONS + PE_VERSIONS[11:]
 #: SL-QE2 (dev-e5, 2026-11-09 01:xx, G111): B5 (GT) / B5 without GT with the action QP bending the position only
 #: (--ee-action-qp-translation-only; E1a task 3: the F7 QP turned rx / ry / rz by ~1.0 and the grasp pose was lost, G110).
 QE2_VERSIONS: tuple[str, ...] = ("AG3S-commonto-gt2-termsoff-pass-zr-ee-hdp-loose2-obst3-pts-nocarve-fh-t100-tro",
@@ -1097,6 +1103,9 @@ GT15_VERSIONS = GT15_VERSIONS + QE2_VERSIONS
 #: SL-PE x SL-QE2 (dev-4a, 2026-11-09 12:xx, user-approved): the GT-free final pe123458 with the translation-only action QP
 #: (B5-tro: E1a SSR 13 -> 20, G169). Same base + flag pattern, so test_sl_qe2 covers it.
 QE2_VERSIONS = QE2_VERSIONS + ("AG3S-commonto-att-termsoff-pass-zr-ee-hdp-loose2-obst4-pts-nocarve-fh-t100-pe123458-tro",)
+AG3S_VERSIONS[QE2_VERSIONS[-1]] = tuple(AG3S_VERSIONS[QE2_VERSIONS[-1][:-len("-tro")]]) + ("--ee-action-qp-translation-only",)
+GT15_VERSIONS = GT15_VERSIONS + QE2_VERSIONS[-1:]
+QE2_VERSIONS = QE2_VERSIONS + ("AG3S-commonto-att-termsoff-pass-zr-ee-hdp-loose2-obst4-pts-nocarve-fh-t100-pe12345811-tro",)
 AG3S_VERSIONS[QE2_VERSIONS[-1]] = tuple(AG3S_VERSIONS[QE2_VERSIONS[-1][:-len("-tro")]]) + ("--ee-action-qp-translation-only",)
 GT15_VERSIONS = GT15_VERSIONS + QE2_VERSIONS[-1:]
 #: (G88c, 03:5x) the A-alone ablation queued as ``…-obst3`` (gtto23, not started yet) gets the same two fixes, so A alone and
