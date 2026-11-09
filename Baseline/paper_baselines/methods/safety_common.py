@@ -299,10 +299,13 @@ class ObstacleCloudSource:
                  max_height_m: float = 0.58, trim_percentiles: tuple[float, float] = (2.0, 98.0),
                  assoc_gate_m: float = 0.05, assoc_overlap: float = 0.5,
                  base_envelope_m: tuple[float, float] | None = (0.18, 0.16),
-                 gt_obstacle_set: str = "all_non_target", name_wording: str = "display"):
+                 gt_obstacle_set: str = "all_non_target", name_wording: str = "display", target_box: bool = True):
         if name_wording not in NAME_WORDINGS:
             raise ValueError(f"name_wording must be one of {NAME_WORDINGS}, got {name_wording!r}")
         self.name_wording = name_wording
+        #: ``all_objects`` prompt: drop boxes overlapping the target phrase's top-1 box (default, replacement (b)).
+        #: ``False`` (KNOWS F4a, 2026-11-10): keep every box -- the target is excluded upstream by attention (Eq. 2-4).
+        self.target_box = bool(target_box)
         if source not in self.SOURCES:
             raise ValueError(f"source must be one of {self.SOURCES}, got {source!r}")
         if exclude not in self.EXCLUDE:
@@ -368,6 +371,8 @@ class ObstacleCloudSource:
                                    "collision spheres at q (AG3S/adapters/panda model; not in AEGIS)"
                                    if self.robot_filter else None),
                      privileged_inputs=["obstacle_names"] if self.detector_prompt == "obstacle_names" else [])
+            if not self.target_box:  # key only off the default (default provenance unchanged)
+                p["target_box"] = False
         return p
 
     @property
@@ -578,7 +583,7 @@ class ObstacleCloudSource:
             rgb = obs.rgb[cam]
             H, W = rgb.shape[:2]
             tbox = None
-            if self.detector_prompt == "all_objects" and obs.target_phrase:
+            if self.detector_prompt == "all_objects" and obs.target_phrase and self.target_box:
                 b, s, _ = det.detect(rgb, obs.target_phrase, self.box_threshold, self.text_threshold)
                 if len(s):
                     tbox = b[int(np.argmax(s))]
@@ -621,6 +626,59 @@ class ObstacleCloudSource:
                 e["rec"]["name"] = e["name"]
         out = {k: self._subsample(v) for k, v in out.items() if len(v) >= self.min_points}
         return ObjectClouds(out, "detector", self.privileged, [], info)
+
+
+# --- image-plane silhouette of an ellipsoid / robot pixels (KNOWS F3 track freeze, F4a attention masks; 2026-11-10) ---
+def ellipsoid_silhouette(center, Q, K, T_base_cam, hw) -> np.ndarray:
+    """``(H, W)`` bool: pixels whose viewing ray meets the ellipsoid ``{x : (x - c)^T Q^-1 (x - c) <= 1}`` in front of
+    the camera (exact projection; the paper's "ellipsoid projected onto the image plane", KNOWS Sec. 3.3). Pixel
+    convention = :func:`backproject` (column ``u`` / row ``v`` indices with ``K`` as given). Camera inside -> all True."""
+    H, W = int(hw[0]), int(hw[1])
+    T = np.asarray(T_base_cam, np.float64)
+    K = np.asarray(K, np.float64)
+    P = np.linalg.inv(np.asarray(Q, np.float64))
+    oc = T[:3, 3] - np.asarray(center, np.float64).reshape(3)
+    cc = float(oc @ P @ oc) - 1.0
+    if cc <= 0.0:
+        return np.ones((H, W), bool)
+    v, u = np.mgrid[0:H, 0:W]
+    rays = np.stack([(u - K[0, 2]) / K[0, 0], (v - K[1, 2]) / K[1, 1], np.ones((H, W))], -1).reshape(-1, 3)
+    d = rays @ T[:3, :3].T  # base-frame ray directions (t > 0 = in front)
+    a = np.einsum("ni,ij,nj->n", d, P, d)
+    b = 2.0 * (d @ (P @ oc))
+    disc = b * b - 4.0 * a * cc
+    hit = (disc >= 0.0) & (b < 0.0)  # cc > 0: both roots share a sign; in front <=> -b / 2a > 0
+    return hit.reshape(H, W)
+
+
+def robot_spheres(obs: SceneObservation, model_cache: dict | None = None) -> tuple[np.ndarray, np.ndarray]:
+    """Panda collision spheres ``(centres (S, 3), radii (S,))`` at ``obs.q`` (fingers from ``extras['robot_state']``),
+    the model :meth:`ObstacleCloudSource.robot_keep_mask` uses (``AG3S/adapters/panda``; kinematics, not GT)."""
+    cache = {} if model_cache is None else model_cache
+    if "model" not in cache:
+        from AG3S.adapters.panda import model as panda
+
+        cache["panda"], cache["model"] = panda, panda.build_panda_bare_model()
+    rs = obs.extras.get("robot_state")
+    if rs is not None and len(np.asarray(rs).reshape(-1)) == 9:
+        q = cache["panda"].set_finger_parameters(cache["model"], rs)
+    else:
+        q = np.asarray(obs.q, np.float64).reshape(-1)[:7]
+    C, R = cache["model"].sphere_centers_numeric(q)
+    return np.asarray(C, np.float64).reshape(-1, 3), np.asarray(R, np.float64).reshape(-1)
+
+
+def robot_pixels_in(obs: SceneObservation, cam: str, region: np.ndarray, spheres, margin: float) -> int:
+    """Number of valid-depth pixels of ``region`` (camera ``cam``) whose back-projected point lies inside a robot
+    sphere + ``margin`` -- the robot seen inside that image region (the same test as the detector crop's robot cut)."""
+    p = backproject(obs.depth[cam], obs.intrinsics[cam], obs.T_base_cam[cam], region)
+    if not len(p):
+        return 0
+    C, R = spheres
+    inside = np.zeros(len(p), bool)
+    for c, r in zip(C, R):
+        inside |= np.einsum("ij,ij->i", p - c, p - c) <= (r + margin) ** 2
+    return int(np.count_nonzero(inside))
 
 
 # --- recorded LIBERO frames (smoke input) ----------------------------------------------------------------------
@@ -703,6 +761,6 @@ def rollout_positions(ee_pose: np.ndarray, actions: np.ndarray, pos_gain: float 
 
 __all__ = ["AEGIS_PREFER_LIST_WORDING", "NAME_WORDINGS", "obstacle_query_phrase", "CAMERAS_EXTERNAL", "OSC_POS_SCALE", "OSC_ROT_SCALE", "POS_GAIN_M", "ROT_GAIN_RAD", "SUPPORT_NAMES", "ObjectClouds",
            "ObstacleCloudSource", "axisangle_to_mat", "backproject", "backproject_uv", "box_iou", "center_component",
-           "check_actions", "cloud_overlap", "depth_trim",
+           "check_actions", "cloud_overlap", "depth_trim", "ellipsoid_silhouette", "robot_pixels_in", "robot_spheres",
            "load_recorded_call", "mat_to_axisangle", "phrase_from_object", "propagate_ee", "quat_xyzw_to_mat",
            "rollout_positions", "skew", "voxel_components"]

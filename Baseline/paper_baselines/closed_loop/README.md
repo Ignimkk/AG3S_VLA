@@ -26,13 +26,34 @@ metrics.py: TSR / CAR / ETS (official), SL5c safe success, KNOWS SR / CR / SSR, 
 | arm | family | obstacles | target exclusion | main deviations (all arms: no VLM / API; perception from the wire only) |
 |---|---|---|---|---|
 | `none` | — | — | — | identical server path to VLA-only |
-| `knows` | filter | GDINO "object" boxes − target box (`--obstacles detector`) or depth components (`depth`) | GDINO target box | attention target exclusion (Eq. 4) → detector box |
+| `knows` | filter | GDINO "object" boxes (`--obstacles detector`) or depth components (`depth`) | pi0.5 attention, Eq. 2-4 (`--target attention`, default since F4a 2026-11-10); `--target detector` = GDINO target box (before F4a) | YOLOE → GDINO "object"; K, delta from P0b |
 | `aegis` | filter | same | same | GLM-4.5V naming → generic GDINO prompt (= offline `aegis:detector_all`) |
 | `multilink_cbf` | filter | same | same | moving-hazard flow omitted |
 | `omniguide`, `constrained_flow_matching`, `lan_o3dp_guidance_adapted`, `nudge` | guidance | depth lift (− robot, − table, − target box), padded to 1024 points | GDINO target box (`--target detector`) or none | post-Euler hook, `x0_hat` from the sampling noise; CFM paper uses GT spheres |
 
 Filters edit the whole 10-row chunk at the policy call (later rows on the method's EE prediction); the client
 executes rows 0-4 (replan 5), as for VLA-only and V11AB. The original filters run every env step.
+
+## Filter rate (F2, 2026-11-10) and KNOWS attention target (F4a)
+
+`launch_method.py --filter-rate step` (filter arms; default `chunk` = the paragraph above, command lines unchanged):
+server `serve_method --filter-rate step`, client `libero_safe_client.py --filter-every-step`. The official loop asks
+the client every env step; every 5th step is the same policy request as in chunk mode (same env step, `ag3s/seq`,
+reset, `policy_seed`, + `ag3s/filter_step = 0`), the server calls the policy, caches the nominal chunk and filters row 0
+on the measured EE pose; the 4 steps in between send `ag3s/filter_step = k` with the current observation and the
+server filters row `k` of the cached chunk without touching the policy (RNG unchanged). One filter step per env step
+(AEGIS `z`, KNOWS normals / tracks advance once per step). Records: `calls.jsonl` one row per env step (`call_kind`,
+`k`), `ep*_seed*.npz` `seq` / `nominal` / `served` per policy call + `step_*` per step; client `_calls.npz` adds
+`step_actions` / `step_obs_index` / `step_k`; `metrics.method_calls` counts policy calls once and adds `steps`.
+Note: `episodes.jsonl` `policy_calls` / `policy_latency_ms` (the official loop's own counters) count client requests =
+env steps in this mode; the policy calls are `safe_client.calls`.
+
+KNOWS detector arm (`--target attention`, default): `attention_tap.AttentionTap` between `SeededPolicy` and the policy
+recomputes denoising step 0 of the sample that produced the chunk (same obs, the policy's own noise, same weights,
+`return_attn_probs`) and hands `extras["knows/attention"]` (layer 12, head 3, agent-view 16 x 16, OpenCV orientation)
+to the adapter; the served chunk is the policy's, untouched (`tests/test_filter_rate_attention.py`). KNOWS F3 (track
+freeze while the arm intervenes) is an adapter default for both KNOWS arms (`--method-kwargs '{"track_freeze": "off"}'`
+= before). Pre-fix runs: `--filter-rate chunk --target detector --method-kwargs '{"track_freeze": "off"}'`.
 
 ## Privileged variants (`--gt`) and benchmark jobs (BASELINE-BENCH-READY, 2026-10-25)
 

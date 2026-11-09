@@ -19,6 +19,16 @@ Per episode it writes ``episodes/<stem>_calls.jsonl`` (one row per policy call: 
 TrajOpt status, conversion record, max action change, timings; ``hsr6`` only when the server sends ``panda/hsr6``,
 SL6-H) and ``episodes/<stem>_calls.npz`` (per call:
 policy chunk, executed rows, refined/reference joint chunks when present).
+
+``--filter-every-step`` (F2 baseline fidelity, 2026-11-10; default off = requests and outputs byte-identical): for a
+method server run with ``serve_method --filter-rate step`` (its metadata ``ag3s_filter_rate = step``; a mismatch is
+refused at connect). The official loop then asks the client every env step (``replan_steps = 1`` for the loop only);
+the client still sends a full policy request every ``--replan-steps`` steps (same env steps, ``ag3s/seq``, reset and
+``policy_seed`` as without the flag, + ``ag3s/filter_step = 0``) and in between a filter-step request of the current
+observation (same keys, ``ag3s/seq`` of the chunk, ``ag3s/filter_step = k``) whose response row 0 is executed.
+Records: one ``_calls.jsonl`` row per policy call with its ``filter_steps``; ``_calls.npz`` adds ``step_actions``,
+``step_obs_index``, ``step_k`` (per env step); ``actions_executed`` per call holds the rows run at its steps (rows
+not reached before the episode ended = the policy-step response rows, as handed rows in the default mode).
 """
 from __future__ import annotations
 
@@ -44,6 +54,10 @@ ROOT = pathlib.Path(__file__).resolve().parents[2]
 PHASE = "approach"            # V11AB client: --safe-phase approach (profile.v11ab_client_phase)
 MANIPULATORS = ["left"]       # Panda = V11AB left manipulator (SL2)
 FINGER_OPEN_M = 0.04
+#: ``--filter-every-step`` (F2): request key (0 = policy step, k > 0 = filter step k of the chunk) and the method
+#: server's metadata key that must say ``step`` (``serve_method.FILTER_STEP_KEY`` / ``FILTER_RATE_META``)
+FILTER_STEP_KEY = "ag3s/filter_step"
+FILTER_RATE_META = "ag3s_filter_rate"
 
 
 # --- SafeLIBERO (benchmark/SafeLIBERO, the vlsa-aegis fork of LIBERO) ----------------------------------------------
@@ -273,8 +287,12 @@ class SafeClient(object):
     """Wraps the websocket policy client; one instance per episode (``policy_for``)."""
 
     def __init__(self, ws_client, seed, task_id, episode_idx, replan_steps, emit_privileged=False, request_extra=None,
-                 oracle=False, oracle_info=None, oracle_grasp=False, gt_oracle=None):
+                 oracle=False, oracle_info=None, oracle_grasp=False, gt_oracle=None, filter_every_step=False):
         self.ws = ws_client
+        #: ``--filter-every-step`` (F2, default off = nothing below is used): position in the current chunk
+        self.filter_every_step = bool(filter_every_step)
+        self.k_in_chunk = 0
+        self.step_rows = []
         #: SL12 ``--oracle-segmentation`` (diagnostic, default off = no key added): the request also carries the GT code image
         #: per camera (``oracle_codes``); the labeller is made on the first observation (it needs the env's BDDL problem).
         self.oracle = bool(oracle)
@@ -332,13 +350,18 @@ class SafeClient(object):
         return self.ws.get_server_metadata()
 
     # --- one policy call ----------------------------------------------------------------------------------------
-    def _request(self, element):
+    def _request(self, element, filter_step=None):
         frames = self.geometry.frames[-1]
         req = dict(element)
         req.update(self.wire_pack.pack_cameras(frames, stamp_mode=self.camera.STAMP_MODE))
-        first = self.seq == 0
-        req.update({"ag3s/phase": PHASE, "ag3s/active_manipulators": list(MANIPULATORS), "ag3s/seq": self.seq,
-                    "ag3s/reset": bool(first)})
+        if filter_step is not None and filter_step > 0:  # --filter-every-step: filter step k of the last policy call
+            req.update({"ag3s/phase": PHASE, "ag3s/active_manipulators": list(MANIPULATORS), "ag3s/seq": self.seq - 1,
+                        "ag3s/reset": False, FILTER_STEP_KEY: int(filter_step)})
+            first = False
+        else:
+            first = self.seq == 0
+            req.update({"ag3s/phase": PHASE, "ag3s/active_manipulators": list(MANIPULATORS), "ag3s/seq": self.seq,
+                        "ag3s/reset": bool(first)})
         if first:
             req["ag3s/policy_seed"] = self.seed
         cam0 = self.geometry.cameras[-1]  # left_wrist robot_state (both cameras share the image instant)
@@ -364,6 +387,8 @@ class SafeClient(object):
         if self.gt_oracle is not None:
             # SL-GTTO: ag3s/oracle_seg/<cam> (uint8 codes on the depth grid) + ag3s/oracle_seg_meta
             req.update(self.gt_oracle.request_keys(frames))
+        if filter_step == 0:  # --filter-every-step policy step (the request above + the step index)
+            req[FILTER_STEP_KEY] = 0
         return req, rs9
 
     def _add_privileged(self, req, frames):
@@ -403,7 +428,53 @@ class SafeClient(object):
                                   "measured_gripper": float(fb["measured_gripper"][0]), "obs_index": len(self.eef) - 1})
         return fb, applied.astype(np.float64)
 
+    def _infer_step(self, element):
+        """``--filter-every-step``: one env step (module docstring). Returns the one action to execute."""
+        k = self.k_in_chunk
+        req, _ = self._request(element, filter_step=k)
+        t0 = time.perf_counter()
+        resp = self.ws.infer(req)
+        dt = (time.perf_counter() - t0) * 1000.0
+        mode = resp.get("panda/mode", "unknown")
+        actions = np.asarray(resp["actions"])
+        act = np.array(actions[0], copy=True)
+        obs_index = int(len(self.eef) - 1)
+        step = {"k": int(k), "obs_index": obs_index, "t_client_ms": dt, "mode": mode,
+                "timing_ms": base._jsonable(resp.get("timing_ms"))}
+        if k == 0:
+            self._finish_call()
+            row = {"seq": int(self.seq), "obs_index": obs_index, "mode": mode, "safe": True, "hold": False,
+                   "t_client_ms": dt, "timing_ms": base._jsonable(resp.get("timing_ms")),
+                   "policy_seed": resp.get("policy_seed"), "filter_rate": "step", "filter_steps": []}
+            self.calls.append(row)
+            self._cur = {"response": np.asarray(actions, np.float64), "executed": []}
+            self.arrays["actions_response"].append(np.asarray(actions, np.float64))
+            self.arrays["call_obs_index"].append(obs_index)
+            self.seq += 1
+        self.calls[-1]["filter_steps"].append(step)
+        self._cur["executed"].append(np.asarray(act, np.float64))
+        self.arrays["step_actions"].append(np.asarray(act, np.float64))
+        self.arrays["step_obs_index"].append(obs_index)
+        self.arrays["step_k"].append(int(k))
+        self.last_gripper = float(act[6])
+        self.k_in_chunk = (k + 1) % self.replan
+        return {"actions": act[None], "server_timing": resp.get("server_timing"), "policy_timing": resp.get("policy_timing")}
+
+    def _finish_call(self):
+        """``--filter-every-step``: the executed rows of the previous policy call (rows not reached = its response)."""
+        cur = getattr(self, "_cur", None)
+        if cur is None:
+            return
+        n = min(self.replan, cur["response"].shape[0])
+        rows = np.array(cur["response"][:n], copy=True)
+        for i, a in enumerate(cur["executed"][:n]):
+            rows[i] = a
+        self.arrays["actions_executed"].append(rows)
+        self._cur = None
+
     def infer(self, element):
+        if self.filter_every_step:
+            return self._infer_step(element)
         req, rs9 = self._request(element)
         t0 = time.perf_counter()
         resp = self.ws.infer(req)
@@ -478,6 +549,8 @@ class SafeClient(object):
         return {"actions": out, "server_timing": resp.get("server_timing"), "policy_timing": resp.get("policy_timing")}
 
     def save(self, episodes_dir, stem):
+        if self.filter_every_step:
+            self._finish_call()
         path = episodes_dir / (stem + "_calls.jsonl")
         with open(str(path), "x") as f:
             for row in self.calls:
@@ -496,6 +569,9 @@ class SafeClient(object):
         out = {"calls_log": str(path.name), "calls_npz": stem + "_calls.npz", "policy_seed": self.seed,
                "server_mode": self.calls[0]["mode"] if self.calls else None, "hold_calls": holds,
                "calls": len(self.calls), "max_abs_action_change_executed": float(max(changed) if changed else 0.0)}
+        if self.filter_every_step:  # F2 (key only with --filter-every-step)
+            out["filter_every_step"] = {"policy_calls": len(self.calls), "env_steps": len(self.arrays["step_k"]),
+                                        "replan_steps": self.replan}
         if self.labeler is not None:   # SL12 (key only with --oracle-segmentation)
             out["oracle"] = self.labeler.record()
         if self.grasp_oracle is not None:   # SL14 (key only with --oracle-grasp)
@@ -518,7 +594,29 @@ def build_parser():
                              "segmentation with --capture-segmentation) for the privileged baseline arms")
     add_oracle_argument(parser)
     add_oracle_arguments(parser)   # SL-GTTO (default off)
+    parser.add_argument("--filter-every-step", action="store_true",
+                        help="F2 (baseline filter arms): ask the server every env step (policy every --replan-steps "
+                             "steps as without the flag, a filter-step request in between); the server must run "
+                             "serve_method --filter-rate step")
     return parser
+
+
+def check_filter_rate_pairing(args, ws):
+    """``--filter-every-step`` and the server's ``ag3s_filter_rate`` metadata must agree (as ``check_oracle_pairing``)."""
+    meta = {}
+    get = getattr(ws, "get_server_metadata", None)
+    if callable(get):
+        try:
+            meta = dict(get() or {})
+        except Exception:  # noqa: BLE001
+            meta = {}
+    step_server = meta.get(FILTER_RATE_META) == "step"
+    if step_server and not args.filter_every_step:
+        raise RuntimeError("the server filters every env step (serve_method --filter-rate step): start the client with "
+                           "--filter-every-step")
+    if args.filter_every_step and not step_server:
+        raise RuntimeError("--filter-every-step but the server does not run --filter-rate step (no {} = step in its "
+                           "metadata)".format(FILTER_RATE_META))
 
 
 def add_oracle_argument(parser):
@@ -605,6 +703,12 @@ def main(argv=None):
         max_steps = base.MAX_STEPS[args.task_suite_name]
     ws, connector = base.make_policy_client(args.host, args.port)
     check_oracle_pairing(args, ws)
+    if args.filter_every_step:   # F2 (off: no metadata read beyond the oracle checks)
+        check_filter_rate_pairing(args, ws)
+        extra["filter_every_step"] = {"policy_replan_steps": args.replan_steps, "loop_replan_steps": 1,
+                                      "request_key": FILTER_STEP_KEY,
+                                      "rule": "policy request every policy_replan_steps env steps (unchanged), "
+                                              "one filter-step request at every other env step"}
     if args.oracle_segmentation:
         extra["oracle_segmentation"] = oc.settings_record()["oracle_segmentation"]
     if args.oracle_grasp:   # SL14
@@ -622,7 +726,8 @@ def main(argv=None):
         client = SafeClient(ws, args.seed, task_id, episode_idx, args.replan_steps,
                             emit_privileged=args.emit_privileged_obstacles, oracle=args.oracle_segmentation,
                             oracle_info={"suite": args.task_suite_name, "task_id": task_id},
-                            oracle_grasp=args.oracle_grasp, gt_oracle=oracle)
+                            oracle_grasp=args.oracle_grasp, gt_oracle=oracle,
+                            **({"filter_every_step": True} if args.filter_every_step else {}))
         client.collision = CollisionMonitor(args.num_steps_wait) if safelibero else None
         return client, connector, dict(extra)
 
@@ -644,8 +749,12 @@ def main(argv=None):
             out["oracle_seg"] = oracle_record(client.gt_oracle, client.gt_oracle.record)
         return out
 
+    loop_args = args
+    if args.filter_every_step:   # F2: the official loop asks every env step; the client keeps the policy cadence
+        loop_args = argparse.Namespace(**vars(args))
+        loop_args.replan_steps = 1
     with jsonl:
-        errors = base.run_tasks(args, run_dir, jsonl, task_suite, max_steps, policy_for,
+        errors = base.run_tasks(loop_args, run_dir, jsonl, task_suite, max_steps, policy_for,
                                 observer_for=observer_for, after_episode=after_episode)
     return 1 if errors else 0
 

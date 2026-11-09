@@ -18,6 +18,19 @@ chunks): intervened rows, ``|delta a|`` (``evaluate_offline.delta_stats``, the o
 method's obstacle set, nominal vs guided), perception, timings, fallbacks. ``<run>`` = ``$AG3S_RUN_DIR`` (launcher) or
 ``--record-dir``. A method failure never breaks the episode: the nominal chunk is served and the error logged.
 
+``--filter-rate step`` (F2, 2026-11-10; filter arms; default ``chunk`` = everything above, unchanged): the client
+(``libero_safe_client.py --filter-every-step``) asks every env step. A request with ``ag3s/filter_step = 0`` is a policy
+step (same env steps, seq and seed as in chunk mode): the policy runs, the nominal chunk is cached and only row 0 is
+filtered (measured EE pose, current observation); ``ag3s/filter_step = k > 0`` filters row ``k`` of the cached chunk on
+that step's observation without calling the policy (its RNG does not move). One filter step per env step, so the
+adapter state (AEGIS ``z``, KNOWS normals / tracks) advances once per env step. ``calls.jsonl`` gets one row per env step
+(``call_kind`` policy | filter, ``k``); ``ep*_seed*.npz`` keeps ``seq`` / ``nominal`` / ``served`` per policy call and adds
+``step_*`` arrays per env step. The server metadata carries ``ag3s_filter_rate = step`` (the client refuses a mismatch).
+
+KNOWS F4a (``--target attention``, the knows detector arm's default since 2026-11-10): ``attention_tap.AttentionTap``
+between ``SeededPolicy`` and the policy hands the method the step-0 attention grid of the call that produced the chunk
+(``extras["knows/attention"]``); the chunk itself is untouched.
+
 Policy loading is ``serve_safe``'s Panda path (``AG3S/adapters/panda/server.py:main``): ``create_trained_policy(
 get_config(--config), --checkpoint, default_prompt=...)``. ``--fake-policy constant|recorded`` replaces it on CPU.
 """
@@ -57,6 +70,10 @@ STEP_KEYS = ("h_star", "h_star_next", "h_star_next_nominal", "cbf_ok", "relax_m"
 #: ``method`` = ``total - diagnostics`` (the latency the method itself adds); ``serve`` = ``total`` (kept for readers
 #: of the V2 / V3 records, where it meant ``total - diagnostics``).
 LATENCY_KEYS = ("total", "diagnostics", "method", "serve")
+#: F2 (2026-11-10): ``--filter-rate``; request key of the client's per-step mode; server metadata key of the mode
+FILTER_RATES = ("chunk", "step")
+FILTER_STEP_KEY = "ag3s/filter_step"
+FILTER_RATE_META = "ag3s_filter_rate"
 
 
 _SD_JIT = None
@@ -117,6 +134,24 @@ class CallRecorder:
         self._episode = (int(episode), policy_seed)
         self._arrays = {"seq": [], "nominal": [], "served": []}
 
+    def add_step(self, row: dict, chunk: tuple | None, step_nominal: np.ndarray, step_served: np.ndarray) -> None:
+        """``--filter-rate step``: one jsonl row per env step; ``seq`` / ``nominal`` / ``served`` per policy call (``chunk``
+        = (nominal chunk, served chunk) on a policy step), ``step_*`` per env step."""
+        from Baseline.paper_baselines.methods.interface import jsonable
+
+        if self._jsonl is not None:
+            self._jsonl.write(json.dumps(jsonable(row), allow_nan=True) + "\n")
+            self._jsonl.flush()
+        if self._episode is not None:
+            if chunk is not None:
+                self._arrays["seq"].append(int(row.get("seq") or 0))
+                self._arrays["nominal"].append(np.asarray(chunk[0], np.float64))
+                self._arrays["served"].append(np.asarray(chunk[1], np.float64))
+            for key, val in (("step_seq", int(row.get("seq") or 0)), ("step_k", int(row.get("k") or 0)),
+                             ("step_nominal", np.asarray(step_nominal, np.float64).reshape(-1)),
+                             ("step_served", np.asarray(step_served, np.float64).reshape(-1))):
+                self._arrays.setdefault(key, []).append(val)
+
     def add(self, row: dict, nominal: np.ndarray | None, served: np.ndarray) -> None:
         from Baseline.paper_baselines.methods.interface import jsonable
 
@@ -136,6 +171,9 @@ class CallRecorder:
             arrays = {key: np.stack(v) for key, v in self._arrays.items()}
         except ValueError:
             arrays = {"seq": np.asarray(self._arrays["seq"])}
+            for key in ("step_seq", "step_k", "step_nominal", "step_served"):  # --filter-rate step only
+                if self._arrays.get(key):
+                    arrays[key] = np.stack(self._arrays[key])
         path = self.root / f"ep{k:03d}_seed{ps}.npz"
         np.savez_compressed(path, **arrays)
         self._arrays = {"seq": [], "nominal": [], "served": []}
@@ -154,7 +192,7 @@ class MethodServer:
     def __init__(self, inner, arm: dict, *, method=None, sidecar=None, norm: dict | None = None, backend=None,
                  recorder: CallRecorder | None = None, scene_kwargs: dict | None = None,
                  perception_kwargs: dict | None = None, record_nominal: bool = True, target_cameras=None,
-                 suite: str | None = None):
+                 suite: str | None = None, filter_rate: str = "chunk", attention_tap=None):
         from AG3S.adapters.panda.server import PandaVLAOnly
         from AG3S.trajopt.policy_seed import SeededPolicy
 
@@ -166,11 +204,22 @@ class MethodServer:
         self.target_cameras = list(target_cameras) if target_cameras else None
         self.suite = suite  # extras["suite"] (AEGIS's official workspace box per suite; non-privileged)
         self.guided = None
+        if filter_rate not in FILTER_RATES:
+            raise ValueError(f"filter_rate must be one of {FILTER_RATES}")
+        if filter_rate != "chunk" and self.family != "filter":
+            raise ValueError("--filter-rate step applies to filter arms only")
+        self.filter_rate = filter_rate
+        self.chunk = None  # step mode: {"seq", "A0"} of the last policy step
+        self.tap = attention_tap
+        if attention_tap is not None and self.family != "filter":
+            raise ValueError("the attention tap (KNOWS F4a) applies to filter arms only")
         if self.family == "guidance":
             from Baseline.paper_baselines.closed_loop.guided import GuidedPolicy
 
             self.guided = GuidedPolicy(inner, backend, method, norm, record_nominal=record_nominal)
             self.vla = PandaVLAOnly(SeededPolicy(self.guided))
+        elif attention_tap is not None:  # the tap wraps the policy; the call itself is unchanged (attention_tap.py)
+            self.vla = PandaVLAOnly(SeededPolicy(attention_tap))
         else:
             self.vla = PandaVLAOnly(SeededPolicy(inner))
         self.episode = -1
@@ -181,6 +230,8 @@ class MethodServer:
 
     @property
     def metadata(self):
+        if self.filter_rate == "step":  # the client's --filter-every-step checks this (chunk mode: unchanged)
+            return {**dict(self.vla.metadata or {}), FILTER_RATE_META: "step"}
         return self.vla.metadata
 
     def reset(self):
@@ -226,6 +277,10 @@ class MethodServer:
         t0 = time.perf_counter()
         obs = dict(obs)
         seq = obs.get("ag3s/seq")
+        if self.filter_rate == "step":
+            return self._infer_step(obs, seq, t0, **kwargs)
+        if FILTER_STEP_KEY in obs:
+            raise ValueError(f"{FILTER_STEP_KEY} in a request but the server runs --filter-rate chunk")
         if obs.get("ag3s/reset") or self.episode < 0:
             self._new_episode(obs)
         if hasattr(self.inner, "set_context"):  # fake policies only (recorded chunk lookup)
@@ -271,17 +326,74 @@ class MethodServer:
                 row["privileged"] = P.summary(sobs.extras)
         return sobs
 
-    def _filter_call(self, obs, row, seq, t0, **kwargs):
-        from Baseline.paper_baselines.closed_loop.perception import clusters, scene_points
-        from Baseline.paper_baselines.closed_loop.wire_obs import obs_to_dict
-        from Baseline.paper_baselines.methods.evaluate_offline import delta_stats, filter_step_info
+    def _infer_step(self, obs, seq, t0, **kwargs) -> dict:
+        """``--filter-rate step``: one env step (policy step ``k = 0`` or filter step ``k > 0``, module docstring)."""
+        if FILTER_STEP_KEY not in obs:
+            raise ValueError(f"--filter-rate step needs {FILTER_STEP_KEY} in every request (client --filter-every-step)")
+        k = int(obs[FILTER_STEP_KEY])
+        policy_step = k == 0
+        if policy_step and (obs.get("ag3s/reset") or self.episode < 0):
+            self._new_episode(obs)
+        if policy_step and hasattr(self.inner, "set_context"):  # fake policies only (recorded chunk lookup)
+            self.inner.set_context(policy_seed=self.policy_seed, seq=seq)
+        row = {"episode": self.episode, **self.episode_info, "seq": seq, "arm": self.arm["arm"],
+               "variant": self.arm["variant"], "family": self.family, "filter_rate": "step",
+               "call_kind": "policy" if policy_step else "filter", "k": k}
+        if policy_step:
+            result, nominal = self._filter_call(obs, row, seq, t0, rows=slice(0, 1), **kwargs)
+            A0 = np.asarray(nominal)
+            self.chunk = {"seq": seq, "A0": A0}
+            served = np.asarray(result["actions"])  # the chunk, row 0 filtered (rows 1.. are filtered at their steps)
+            step_nominal, step_served = A0[0], served[0]
+            chunk = (A0, served)
+        else:
+            if self.chunk is None or self.chunk["seq"] != seq or k >= len(self.chunk["A0"]):
+                raise ValueError(f"filter step k={k} of seq {seq} without its policy step (cached: "
+                                 f"{None if self.chunk is None else self.chunk['seq']})")
+            A0 = self.chunk["A0"]
+            row["ms"] = {"policy": 0.0}
+            result = {"actions": A0[k:k + 1].copy()}
+            result, _ = self._filter_rows(obs, row, seq, A0[k:k + 1], result, 0.0, t0)
+            served = np.asarray(result["actions"])
+            step_nominal, step_served = A0[k], served[0]
+            chunk = None
+        self.last_gripper = float(step_served[6])  # the action executed at this step
+        row["ms"]["total"] = (time.perf_counter() - t0) * 1e3
+        row["ms"].setdefault("diagnostics", 0.0)
+        row["ms"]["method"] = row["ms"]["total"] - row["ms"]["diagnostics"]
+        row["ms"]["serve"] = row["ms"]["total"]
+        sx = np.asarray(step_served, np.float64)[:3]
+        row["served_max_abs_xyz"] = float(np.abs(sx).max())
+        row["served_rows_out_of_range"] = int(np.abs(sx).max() > 1.0)
+        self.recorder.add_step(row, chunk, step_nominal, step_served)
+        self.n_calls += 1
+        result["panda/mode"] = f"method:{self.arm['arm']}"
+        result["panda/filter_step"] = k
+        result["timing_ms"] = {kk: round(float(v), 3) for kk, v in row["ms"].items()}
+        return result
 
+    def _filter_call(self, obs, row, seq, t0, rows=None, **kwargs):
         result = self.vla.infer(obs, **kwargs)
         t_pol = time.perf_counter()
         A0 = np.asarray(result["actions"])
         row["ms"] = {"policy": (t_pol - t0) * 1e3}
+        if rows is None:  # chunk mode: the whole chunk
+            return self._filter_rows(obs, row, seq, A0, result, t_pol, t0)[0], A0
+        out = {**result, "actions": A0.copy()}  # step mode policy step: filter row 0, keep the nominal rows after it
+        res, _ = self._filter_rows(obs, row, seq, A0[rows], {"actions": A0[rows].copy()}, t_pol, t0)
+        out["actions"][rows] = np.asarray(res["actions"])
+        return out, A0
+
+    def _filter_rows(self, obs, row, seq, A0, result, t_pol, t0):
+        """Filter ``A0`` (the chunk, or one row in step mode) on this request's observation; ``result["actions"]`` <- B."""
+        from Baseline.paper_baselines.closed_loop.perception import clusters, scene_points
+        from Baseline.paper_baselines.closed_loop.wire_obs import obs_to_dict
+        from Baseline.paper_baselines.methods.evaluate_offline import delta_stats, filter_step_info
+
+        t_pol = t_pol or time.perf_counter()
         try:
             sobs = self._scene_obs(obs, seq, row)
+            self._attach_attention(sobs, row)
             if self.arm["obstacles"] == "depth":
                 masks, tinfo = self._target_masks(sobs)
                 sp = scene_points(sobs, target_masks=masks, **self.perception_kwargs)
@@ -315,6 +427,8 @@ class MethodServer:
             if isinstance(obst, dict):
                 row["filter_obstacles"] = {k: {"c": v.get("c"), "semi_axes": v.get("semi_axes")} for k, v in obst.items()}
             row["filter_perception"] = r["info"].get("perception")
+            if r["info"].get("target") is not None:  # KNOWS F4a: Eq. 4 target of this step (excluded from the set)
+                row["filter_target"] = r["info"]["target"]
             row["ms"].update({"perception": (t_perc - t_pol) * 1e3, "sidecar_roundtrip": (t_f - t_perc) * 1e3,
                               "filter": r.get("ms")})
             row["fallback"] = None
@@ -325,6 +439,17 @@ class MethodServer:
             row["error"] = traceback.format_exc()
             logging.error("method %s failed at seq %s:\n%s", self.arm["arm"], seq, row["error"])
         return result, A0
+
+    def _attach_attention(self, sobs, row) -> None:
+        """KNOWS F4a: the attention grid of the policy call that produced the current chunk (tap.last)."""
+        if self.tap is None:
+            return
+        last = self.tap.last or {}
+        row["attention"] = {k: last.get(k) for k in ("ms", "call", "reason") if last.get(k) is not None}
+        if last.get("error"):
+            row["attention"]["error"] = last["error"][-500:]
+        if last.get("grid") is not None:
+            sobs.extras["knows/attention"] = {"grid": np.asarray(last["grid"], np.float32), "seq": last.get("call")}
 
     def _guidance_call(self, obs, row, seq, t0, **kwargs):
         from Baseline.paper_baselines.closed_loop.perception import scene_points
@@ -417,7 +542,8 @@ def build_server(args, *, policy=None, record_root=None) -> tuple[MethodServer, 
     """Everything below the openpi policy (tests pass a fake ``policy``)."""
     from Baseline.paper_baselines.methods.interface import get_method, jsonable
 
-    arm = A.resolve(args.method, args.obstacles, args.target, getattr(args, "gt", None))
+    filter_rate = getattr(args, "filter_rate", "chunk")
+    arm = A.resolve(args.method, args.obstacles, args.target, getattr(args, "gt", None), filter_rate=filter_rate)
     ckpt = pathlib.Path(args.checkpoint or default_checkpoint())
     norm = load_norm(ckpt) if arm["family"] == "guidance" or args.fake_policy != "none" else None
     if policy is None:
@@ -462,6 +588,8 @@ def build_server(args, *, policy=None, record_root=None) -> tuple[MethodServer, 
                 kw.setdefault("detector_prompt", "all_objects")
                 kw.setdefault("detector_device", args.sidecar_device)
                 kw.setdefault("detector_weight", args.detector_weight)
+                if arm.get("target") == "attention":  # KNOWS F4a (arms.resolve: knows detector default)
+                    kw.setdefault("target_exclusion", "attention")
             else:
                 kw.setdefault("obstacle_source", "given")
             r = sidecar.call("init", method=arm["method"], kwargs=kw, detector=det)
@@ -480,17 +608,33 @@ def build_server(args, *, policy=None, record_root=None) -> tuple[MethodServer, 
             backend = OpenpiBackend(policy, slot, exec_mode=args.guidance_exec)
         info["method_kwargs"], info["provenance"] = method_kwargs, jsonable(method.provenance())
         info["guidance_exec"] = args.guidance_exec
+    tap = None
+    if arm.get("target") == "attention":  # KNOWS F4a: attention of the call that produced the chunk
+        from Baseline.paper_baselines.closed_loop.attention_tap import AttentionTap, OpenpiAttentionBackend
+
+        att_backend = None
+        if args.fake_policy == "none" and hasattr(policy, "_model"):
+            from openpi.training import config as _config
+
+            att_backend = OpenpiAttentionBackend(policy, _config.get_config(args.config).model)
+        tap = AttentionTap(policy, att_backend)
+        info["attention"] = (att_backend.describe() if att_backend is not None
+                             else {"backend": None, "reason": "fake policy: no attention, KNOWS target = none"})
     rec_dir = None if run is None else pathlib.Path(run) / "method_calls"
     server = MethodServer(policy, arm, method=method, sidecar=sidecar, norm=norm, backend=backend,
                           recorder=CallRecorder(rec_dir), record_nominal=not args.no_record_nominal,
                           scene_kwargs=json.loads(args.scene_kwargs) if args.scene_kwargs else None,
-                          suite=args.suite)
+                          suite=args.suite, filter_rate=filter_rate, attention_tap=tap)
     info.update({"config": args.config, "checkpoint": str(ckpt), "fake_policy": args.fake_policy,
                  "fake_source_run": args.fake_source_run, "fake_source_key": args.fake_source_key,
                  "fake_kind": args.fake_kind, "record_dir": None if rec_dir is None else str(rec_dir),
                  "scene_kwargs": server.scene_kwargs, "suite": args.suite, "record_nominal": not args.no_record_nominal,
                  "action_convention": "pi05_libero EE delta chunk (H=10); client executes rows 0-4 (replan 5), "
                                       "same as serve_safe --robot panda"})
+    if filter_rate != "chunk":  # key only off the default (chunk-mode config unchanged)
+        info["filter_rate"] = {"rate": filter_rate, "rule": "policy every 5 env steps (rows 0-4 as chunk mode); every "
+                               "env step one row filtered on the measured EE pose and the current observation "
+                               "(client --filter-every-step)"}
     return server, info
 
 
@@ -510,6 +654,9 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--method-kwargs", default=None, help="JSON kwargs for get_method")
     ap.add_argument("--scene-kwargs", default=None, help="JSON kwargs for guidance_common.scene.build_scene")
     ap.add_argument("--guidance-exec", choices=("callback", "inline"), default="callback")
+    ap.add_argument("--filter-rate", choices=FILTER_RATES, default="chunk",
+                    help="filter arms: chunk (default, whole chunk at the policy call) | step (F2: one row per env step; "
+                         "needs the client's --filter-every-step)")
     ap.add_argument("--no-record-nominal", action="store_true", help="guidance: skip the unguided sample per call")
     ap.add_argument("--sidecar-python", default=str(PROJECT_ROOT / ".venv-baselines/bin/python"))
     ap.add_argument("--sidecar-device", default="cpu", help="cpu | cuda (Grounding DINO in the sidecar)")

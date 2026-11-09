@@ -14,6 +14,10 @@ keyword, arguments taken from its own parser so later options keep their default
    (a ``--gt`` arm appends its ``client_flags``: ``--emit-privileged-obstacles`` [``--capture-segmentation``]);
 5. server stopped (SIGINT), ``closed_loop_metrics.json`` (``metrics.summarize``, optionally paired with ``--ref-run``).
 
+``--filter-rate step`` (F2, 2026-11-10; filter arms; default ``chunk`` = the command lines above keep their meaning):
+the server gets ``--filter-rate step`` and the client ``--filter-every-step`` (policy every 5 env steps as before, one
+filter row per env step on the measured EE pose); recorded in the manifest ``settings.filter_rate`` and the arm record.
+
     source scripts/setup/env.sh
     .venv-ag3s/bin/python Baseline/paper_baselines/closed_loop/launch_method.py --method aegis \
         --task-suite-name safelibero_spatial --safety-level I --task-ids 0,1,2,3 --episode-ids 0,1,2,3,4 \
@@ -94,11 +98,13 @@ def server_argv(args, port: int, checkpoint: str | None) -> list[str]:
         argv.append("--no-record-nominal")
     if args.gt is not None:
         argv += ["--gt", args.gt]
+    if args.filter_rate != "chunk":  # F2 (default chunk: argv unchanged)
+        argv += ["--filter-rate", args.filter_rate]
     return argv
 
 
 def resolve_arm(args) -> dict:
-    return A.resolve(args.method, args.obstacles, args.target, args.gt)
+    return A.resolve(args.method, args.obstacles, args.target, args.gt, filter_rate=getattr(args, "filter_rate", "chunk"))
 
 
 def method_client_argv(args, run_dir: str, port: int, pargs) -> list[str]:
@@ -107,7 +113,10 @@ def method_client_argv(args, run_dir: str, port: int, pargs) -> list[str]:
     if "--capture-segmentation" in flags:
         pargs = argparse.Namespace(**{**vars(pargs), "capture_segmentation": True})
     argv = lp.client_argv(run_dir=run_dir, port=port, args=pargs)
-    return argv + [f for f in flags if f not in argv]
+    argv = argv + [f for f in flags if f not in argv]
+    if getattr(args, "filter_rate", "chunk") == "step":  # F2: the client asks every env step
+        argv.append("--filter-every-step")
+    return argv
 
 
 def server_env(args, run_dir: Path) -> dict:
@@ -170,7 +179,8 @@ def run(args) -> Path:
                 "server_extras": {"suite": None if args.no_suite_extras else args.task_suite_name}, "cpu_smoke": bool(args.cpu_smoke),
                 "fake_policy": args.fake_policy, "fake_source_run": args.fake_source_run,
                 "action_convention": "pi05_libero EE-delta chunk H=10, client executes rows 0-4 (replan 5) as VLA-only "
-                                     "/ V11AB", "versions": lp.versions()}
+                                     "/ V11AB", "versions": lp.versions(),
+                "filter_rate": (args.filter_rate if arm["family"] == "filter" else None)}
     run_dir = create_run(run_id=f"{args.run_id}-{run_tag(args)}", settings=settings,
                          checkpoint=None if args.cpu_smoke else ckpt)
     print(f"[{arm['variant']}] {run_dir}", flush=True)
@@ -244,6 +254,9 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--method-kwargs", default=None)
     ap.add_argument("--scene-kwargs", default=None)
     ap.add_argument("--no-record-nominal", action="store_true")
+    ap.add_argument("--filter-rate", choices=A.FILTER_RATES, default="chunk",
+                    help="filter arms: chunk (default; whole chunk filtered at the policy call) | step (F2: policy every "
+                         "5 env steps, one row filtered every env step on the measured EE pose)")
     ap.add_argument("--ref-run", default=None, help="reference run (same tasks / episodes) for paired metrics")
     ap.add_argument("--cpu-smoke", action="store_true")
     ap.add_argument("--fake-policy", choices=("none", "constant", "recorded"), default="none")

@@ -12,6 +12,12 @@ with; ``docs/metrics.md`` for the sources).
 | ``libero`` | SR = env goal predicate | LIBERO Sec. 5.1 |
 | ``method_calls`` | per-call intervention rate, ``|delta a|``, own ``h``, fallbacks, server latency (``serve_method`` log) | this STEP |
 
+``--filter-rate step`` runs (F2, rows with ``filter_rate = "step"``, one row per env step): ``method_calls`` counts the
+policy calls (``call_kind = policy``) as calls and every row as one executed step; ``intervention_rate_calls`` = policy
+calls with an intervention at any of their steps (grouped by episode and seq, no double count), the per-step block
+``steps`` adds the step count, per-kind latency and the KNOWS target / freeze counts. Chunk-mode records give the same
+dict as before.
+
 ETS: main_aegis increments ``t`` after a step only when the episode did not end (``if done: break; t += 1``), so for a
 success ``t = steps - 1`` and for a timeout ``t = budget``; ``env_steps_excluding_wait`` of the client = steps. The
 budget itself depends on ``--safelibero-step-budget`` (``total_incl_wait`` = 280 policy steps for spatial/object/goal,
@@ -118,11 +124,34 @@ def _pct(v: list[float], q: float):
     return s[min(len(s) - 1, max(0, int(round(q * (len(s) - 1)))))]
 
 
+def method_steps(rows: list[dict]) -> dict:
+    """``--filter-rate step`` rows -> calls grouped by (episode, seq) + per-step statistics (no double count)."""
+    calls: dict[tuple, list] = {}
+    for r in rows:
+        calls.setdefault((r.get("episode"), r.get("seq")), []).append(r)
+    iv_call = [any(int(x.get("n_intervened") or 0) for x in g) for g in calls.values()]
+    by_kind = {}
+    for kind in ("policy", "filter"):
+        ms = [float(r["ms"]["total"]) for r in rows if r.get("call_kind") == kind and (r.get("ms") or {}).get("total")
+              is not None]
+        by_kind[kind] = {"n": sum(r.get("call_kind") == kind for r in rows), "server_ms_p50": _pct(ms, 0.5),
+                         "server_ms_p95": _pct(ms, 0.95), "server_ms_max": max(ms) if ms else None}
+    tg = [r.get("filter_target") for r in rows if isinstance(r.get("filter_target"), dict)]
+    fz = [r for r in rows if isinstance((r.get("filter_perception") or {}).get("frozen"), dict)]
+    return {"filter_rate": "step", "n_policy_calls": len(calls), "n_steps": len(rows),
+            "intervention_rate_calls": _rate(sum(iv_call), len(iv_call)), "by_kind": by_kind,
+            "knows_target_steps": (sum(t.get("target") is not None for t in tg) if tg else None),
+            "knows_target_none_steps": (sum(t.get("target") is None for t in tg) if tg else None),
+            "knows_frozen_track_steps": (sum(len(r["filter_perception"]["frozen"]) for r in fz) if fz else None),
+            "knows_steps_with_frozen_track": (sum(bool(r["filter_perception"]["frozen"]) for r in fz) if fz else None)}
+
+
 def method_calls(run: str | pathlib.Path) -> dict | None:
     path = pathlib.Path(run) / "method_calls" / "calls.jsonl"
     if not path.exists():
         return None
     rows = [json.loads(l) for l in path.read_text().splitlines() if l.strip()]
+    step_mode = any(r.get("filter_rate") == "step" for r in rows)
     rows_T = [r for r in rows if "n_intervened" in r]
     n_rows = sum(int(r["T"]) for r in rows_T)
     n_iv = sum(int(r["n_intervened"]) for r in rows_T)
@@ -138,7 +167,7 @@ def method_calls(run: str | pathlib.Path) -> dict | None:
     g = [r["guidance"] for r in rows if isinstance(r.get("guidance"), dict)]
     caches = [x.get("cache") or {} for x in g]
     smax = [r["served_max_abs_xyz"] for r in rows if r.get("served_max_abs_xyz") is not None]
-    return {"n_calls": len(rows), "n_episodes": len({r.get("episode") for r in rows}),
+    out = {"n_calls": len(rows), "n_episodes": len({r.get("episode") for r in rows}),
             "intervention_rate_rows": _rate(n_iv, n_rows),
             "intervention_rate_calls": _rate(sum(bool(r.get("call_intervened")) for r in rows_T), len(rows_T)),
             "executed_rows_intervened": exec_iv,
@@ -161,6 +190,12 @@ def method_calls(run: str | pathlib.Path) -> dict | None:
             "guidance_compiles": max((int(c.get("compiles") or 0) for c in caches), default=None) if g else None,
             "served_max_abs_xyz": max(smax) if smax else None,
             "served_rows_out_of_range": sum(int(r.get("served_rows_out_of_range") or 0) for r in rows) if smax else None}
+    if step_mode:  # F2: a row is one executed env step; calls = policy calls (chunk-mode dict unchanged)
+        st = method_steps(rows)
+        out["n_calls"] = st["n_policy_calls"]
+        out["intervention_rate_calls"] = st["intervention_rate_calls"]
+        out["steps"] = st
+    return out
 
 
 def paired(rows: list[dict], ref_rows: list[dict]) -> dict:

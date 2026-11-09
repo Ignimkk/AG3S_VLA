@@ -18,6 +18,12 @@ spheres); the manifest records ``privileged: true`` and the privileged inputs.
 |---|---|---|
 | ``none``     | nothing -- the VLA-only server path (``PandaVLAOnly(SeededPolicy(policy))``)            | server |
 | ``filter``   | after the policy: the 10-row EE-delta chunk is edited, the client executes rows 0..4      | ``.venv-baselines`` sidecar |
+
+``filter_rate`` (F2, 2026-11-10): ``chunk`` (default) = the row above; ``step`` = the policy still runs every 5 env steps,
+and every env step one row of the cached chunk is filtered on that step's measured EE pose and observation
+(``--filter-rate step``; :data:`STEP_FILTER_DEVIATION` replaces the chunk-level deviation).
+``knows`` detector arm target (F4a, 2026-11-10): ``attention`` (default) = paper Eq. 2-4 on the pi0.5 attention
+(layer 12 / head 3); ``--target detector`` = the port's Grounding DINO target box (before F4a).
 | ``guidance`` | inside flow-matching sampling (``pi0.sample_actions(guidance_fn=...)``, post-Euler hook) | server (JAX) |
 """
 from __future__ import annotations
@@ -26,7 +32,10 @@ import dataclasses
 
 FAMILIES = ("none", "filter", "guidance")
 OBSTACLE_SOURCES = ("detector", "depth")  # filters; guidance always uses the depth lift
-TARGET_SOURCES = ("detector", "none")
+TARGET_SOURCES = ("detector", "none", "attention")
+#: arms whose detector variant can exclude the target by the policy's attention (KNOWS Eq. 2-4, F4a); their default
+ATTENTION_TARGET_ARMS = ("knows",)
+FILTER_RATES = ("chunk", "step")
 GT_SOURCES = {"filter": ("names", "seg"), "guidance": ("geoms", "repo", "spheres")}
 #: ``--gt`` without a value: the source closest to each original paper
 GT_DEFAULT = {"aegis": "names", "knows": "seg", "multilink_cbf": "seg", "constrained_flow_matching": "spheres",
@@ -40,6 +49,15 @@ GT_EXTRA_DEVIATIONS = {"multilink_cbf": ("moving-hazard optical flow omitted",),
                        "lan_o3dp_guidance_adapted": ("not the original policy's result",),
                        "knows": ("no target exclusion step: only the SafeLIBERO obstacles are instances (paper: VLA "
                                  "attention, Eq. 4)",)}
+#: F2 ``--filter-rate step``: replaces ``COMMON_FILTER_DEVIATIONS[0]`` (what remains different from the papers)
+STEP_FILTER_DEVIATION = ("per-env-step filtering on the measured EE pose and the current observation (as the original "
+                         "methods); the policy chunk is still queried every 5 env steps (H=10, rows 0-4 executed, "
+                         "replan 5) and row k of it is filtered at the k-th step after the call")
+#: F4a: KNOWS detector arm with the paper's attention target exclusion (``--target attention``, default)
+KNOWS_ATTENTION_DEVIATION = ("target exclusion by pi0.5 attention (paper Eq. 2-4, layer 12 / head 3, agent view) over "
+                             "the Grounding DINO 'object' instances; masks = projected tracked ellipsoids; K = 5 policy "
+                             "calls and delta = 7.3e-6 from our offline P0b (not in the paper); attention recomputed "
+                             "at denoising step 0 of the served sample (same obs / noise / weights)")
 GT_DESCRIPTION = {
     "names": "obstacle names = the active SafeLIBERO obstacle objects (privileged/obstacle_names) -> Grounding DINO "
              "prompt (detector_prompt='obstacle_names'), depth crop; replaces the paper's VLM naming",
@@ -98,6 +116,14 @@ ARMS: dict[str, Arm] = {a.name: a for a in (
 )}
 
 
+def _rate_deviations(dev: list, filter_rate: str) -> list:
+    if filter_rate not in FILTER_RATES:
+        raise ValueError(f"filter_rate must be one of {FILTER_RATES}")
+    if filter_rate == "chunk":
+        return dev
+    return [STEP_FILTER_DEVIATION if d == COMMON_FILTER_DEVIATIONS[0] else d for d in dev]
+
+
 def resolve_gt(name: str, gt: str | None, obstacles: str | None = None, target: str | None = None) -> dict:
     """Privileged (``--gt``) arm record. ``gt="default"`` = :data:`GT_DEFAULT`."""
     a = ARMS[name]
@@ -109,6 +135,9 @@ def resolve_gt(name: str, gt: str | None, obstacles: str | None = None, target: 
     if obstacles is not None:
         raise ValueError("--obstacles and --gt are exclusive (--gt sets the obstacle source)")
     tgt = target if target is not None else ("detector" if name in TARGET_READERS else "none")
+    if tgt == "attention":
+        raise ValueError("--target attention applies to the non-privileged detector arm (a --gt filter arm has no "
+                         "target exclusion)")
     if a.family == "filter" and tgt != "none":
         raise ValueError("a --gt filter arm has no target exclusion (only the SafeLIBERO obstacles are obstacles)")
     if tgt not in TARGET_SOURCES:
@@ -133,12 +162,22 @@ def resolve_gt(name: str, gt: str | None, obstacles: str | None = None, target: 
             "deviation_from_paper": dev}
 
 
-def resolve(name: str, obstacles: str | None = None, target: str | None = None, gt: str | None = None) -> dict:
-    """Arm record for the manifest (method, family, effective perception, privileged, deviations)."""
+def resolve(name: str, obstacles: str | None = None, target: str | None = None, gt: str | None = None,
+            filter_rate: str = "chunk") -> dict:
+    """Arm record for the manifest (method, family, effective perception, privileged, deviations).
+
+    ``filter_rate`` (F2): ``chunk`` (default) = the record as before; ``step`` (filter arms only) swaps the chunk-level
+    deviation for :data:`STEP_FILTER_DEVIATION` and adds ``filter_rate: "step"``."""
     if name not in ARMS:
         raise KeyError(f"unknown arm {name!r}; available: {sorted(ARMS)}")
+    if filter_rate != "chunk" and ARMS[name].family != "filter":
+        raise ValueError("--filter-rate step applies to filter arms only")
     if gt is not None:
-        return resolve_gt(name, gt, obstacles, target)
+        rec = resolve_gt(name, gt, obstacles, target)
+        if filter_rate != "chunk":
+            rec["deviation_from_paper"] = _rate_deviations(rec["deviation_from_paper"], filter_rate)
+            rec["filter_rate"] = filter_rate
+        return rec
     a = ARMS[name]
     obst = obstacles if obstacles is not None else a.default_obstacles
     tgt = target if target is not None else a.default_target
@@ -148,10 +187,15 @@ def resolve(name: str, obstacles: str | None = None, target: str | None = None, 
         raise ValueError("--obstacles applies to filter arms only (guidance uses the depth lift)")
     if a.family == "none" and target is not None:
         raise ValueError("--target does not apply to --method none")
-    if a.family == "filter" and obst == "detector" and target not in (None, "detector"):
+    if target == "attention" and not (name in ATTENTION_TARGET_ARMS and obst == "detector"):
+        raise ValueError(f"--target attention applies to {ATTENTION_TARGET_ARMS} with --obstacles detector only")
+    if a.family == "filter" and obst == "detector" and target not in (None, "detector", "attention"):
         raise ValueError("the detector obstacle source removes the target box itself (target=detector)")
     if a.family == "filter":
-        tgt = "detector" if obst == "detector" else (tgt or "detector")
+        if obst == "detector":
+            tgt = target or ("attention" if name in ATTENTION_TARGET_ARMS else "detector")
+        else:
+            tgt = tgt or "detector"
     if tgt is not None and tgt not in TARGET_SOURCES:
         raise ValueError(f"--target must be one of {TARGET_SOURCES}")
     variant = name if a.family == "none" else f"{name}:obst-{obst or 'depth'}:target-{tgt}"
@@ -161,10 +205,19 @@ def resolve(name: str, obstacles: str | None = None, target: str | None = None, 
     if a.family == "filter" and obst == "depth":
         extra.append("obstacles = connected components of the depth lift (robot / table / target box removed), "
                      "passed as obstacle_source='given'")
-    return {"arm": name, "variant": variant, "family": a.family, "method": a.method, "cite": a.cite,
-            "obstacles": obst if a.family == "filter" else ("depth_lift" if a.family == "guidance" else None),
-            "target": tgt, "privileged": False, "privileged_inputs": [],
-            "deviation_from_paper": list(a.deviation) + extra}
+    dev = list(a.deviation)
+    if tgt == "attention":  # F4a: the GDINO target-box deviation of the knows record is replaced
+        dev = [KNOWS_ATTENTION_DEVIATION if d.startswith("target exclusion by the Grounding DINO target box") else
+               ("obstacles = Grounding DINO 'object' boxes (target not removed in the detector; attention excludes "
+                "it), box-cropped depth" if d.startswith("obstacles = Grounding DINO 'object' boxes minus") else d)
+               for d in dev]
+    rec = {"arm": name, "variant": variant, "family": a.family, "method": a.method, "cite": a.cite,
+           "obstacles": obst if a.family == "filter" else ("depth_lift" if a.family == "guidance" else None),
+           "target": tgt, "privileged": False, "privileged_inputs": [],
+           "deviation_from_paper": _rate_deviations(dev, filter_rate) + extra}
+    if filter_rate != "chunk":
+        rec["filter_rate"] = filter_rate
+    return rec
 
 
 def arm_spec(spec: str) -> dict:
@@ -181,5 +234,5 @@ def arm_spec(spec: str) -> dict:
     raise ValueError(f"arm spec {spec!r}: expected <arm>, <arm>:gt or <arm>:gt-<source>")
 
 
-__all__ = ["ARMS", "Arm", "FAMILIES", "GT_DEFAULT", "GT_SOURCES", "OBSTACLE_SOURCES", "TARGET_SOURCES", "arm_spec",
+__all__ = ["ATTENTION_TARGET_ARMS", "FILTER_RATES", "STEP_FILTER_DEVIATION", "ARMS", "Arm", "FAMILIES", "GT_DEFAULT", "GT_SOURCES", "OBSTACLE_SOURCES", "TARGET_SOURCES", "arm_spec",
            "resolve", "resolve_gt"]

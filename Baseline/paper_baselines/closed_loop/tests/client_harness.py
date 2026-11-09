@@ -8,6 +8,11 @@ Digest (JSON on stdout): per request the ordered key list and a SHA-256 per key 
 SHA-256 of the whole packed request, the ``save()`` record, the SHA-256 of ``<stem>_calls.jsonl`` and of every array of
 ``<stem>_calls.npz`` (npz zip timestamps differ between writes, the arrays do not), the parsed SL5c argv. With
 ``--emit`` the packed requests are also written to ``<out>/requests.msgpack`` (length-prefixed) for the round-trip test.
+
+``--loop chunk|step`` (F2, 2026-11-10; worktree client only): instead, run the **official episode loop**
+(``libero_pi05_client.run_episode``) on a fake env with a fake method server, without / with ``--filter-every-step``
+(``replan_steps = 1`` for the loop exactly as ``main`` does), and print per request its kind, ``ag3s/seq``, observation
+index, the key list and the SHA-256 of the policy-relevant request bytes, plus the executed actions.
 """
 from __future__ import annotations
 
@@ -187,6 +192,87 @@ def drive(mod, mode, emit, seg, out_dir):
             "calls_npz": arrays}
 
 
+# --- F2: the official loop with and without --filter-every-step ------------------------------------------------------
+class LoopWS(object):
+    """Fake method server: chunk = f(seq) on a policy request, row k of it + 1e-3 (a 'filtered' row) on a filter step."""
+
+    def __init__(self, packb, step):
+        self.packb, self.step, self.log = packb, step, []
+
+    @staticmethod
+    def chunk(seq):
+        return np.random.RandomState(100 + int(seq)).uniform(-1, 1, (10, 7)).astype(np.float32)
+
+    def infer(self, req):
+        k = req.get("ag3s/filter_step")
+        seq = int(req["ag3s/seq"])
+        policy_keys = [key for key in req if not key.startswith("ag3s/filter_step")]
+        self.log.append({"kind": "filter" if (k or 0) > 0 else "policy", "k": k, "seq": seq,
+                         "reset": bool(req.get("ag3s/reset")), "policy_seed": req.get("ag3s/policy_seed"),
+                         "keys": list(req), "sha_policy_keys": sha(self.packb({key: req[key] for key in policy_keys}))})
+        c = self.chunk(seq)
+        if k is None or k == 0:
+            resp = {"actions": c, "panda/mode": "method:test", "policy_seed": 700000}
+            if self.step:
+                resp["actions"] = c.copy()
+                resp["actions"][0] += 1e-3
+            return resp
+        return {"actions": c[k:k + 1] + 1e-3, "panda/mode": "method:test"}
+
+    def get_server_metadata(self):
+        return {"ag3s_filter_rate": "step"} if self.step else {}
+
+
+class LoopEnv(object):
+    def __init__(self):
+        self.n = 0
+        self.actions = []
+        self.sim = types.SimpleNamespace(model=None, data=None)
+
+    def obs(self):
+        rng = np.random.RandomState(self.n)
+        q = rng.randn(4)
+        return {"agentview_image": rng.randint(0, 255, (16, 16, 3)).astype(np.uint8),
+                "robot0_eye_in_hand_image": rng.randint(0, 255, (16, 16, 3)).astype(np.uint8),
+                "robot0_eef_pos": rng.randn(3), "robot0_eef_quat": q / np.linalg.norm(q),
+                "robot0_joint_pos": rng.randn(7), "robot0_gripper_qpos": rng.randn(2)}
+
+    def reset(self):
+        self.n = 0
+
+    def set_init_state(self, s):
+        return self.obs()
+
+    def step(self, action):
+        self.n += 1
+        self.actions.append([float(a) for a in action])
+        return self.obs(), 0.0, False, {}
+
+
+def drive_loop(mod, step):
+    import argparse as _ap
+
+    from openpi_client import msgpack_numpy
+
+    env = LoopEnv()
+    ws = LoopWS(msgpack_numpy.packb, step)
+    client = mod.SafeClient(ws, 7, 0, 0, 5, **({"filter_every_step": True} if step else {}))
+    client.collision = None
+    geom = FakeGeometry(False)
+    args = _ap.Namespace(num_steps_wait=3, replan_steps=5, resize_size=8)
+    loop_args = args
+    if step:  # = libero_safe_client.main
+        loop_args = _ap.Namespace(**vars(args))
+        loop_args.replan_steps = 1
+    summary, rec, _ = mod.base.run_episode(env, [None], 0, "pick up the black bowl", client, loop_args, 17,
+                                           observer=client.observer(geom))
+    saved = client.save(pathlib.Path(tempfile.mkdtemp()), "safelibero_spatial_t0_e0")
+    return {"requests": ws.log, "executed": env.actions, "summary_status": summary["status"],
+            "env_steps": summary["env_steps_including_wait"], "save": saved,
+            "client_arrays": {k: list(np.asarray(v).shape) for k, v in client.arrays.items()},
+            "actions_executed": [np.asarray(a).round(6).tolist() for a in client.arrays["actions_executed"]]}
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser()
     ap.add_argument("--source", required=True, help="git commit of the client, or 'worktree'")
@@ -194,8 +280,12 @@ def main(argv=None):
     ap.add_argument("--emit", action="store_true")
     ap.add_argument("--seg", action="store_true")
     ap.add_argument("--out", required=True)
+    ap.add_argument("--loop", choices=("chunk", "step"), default=None, help="F2: drive the official loop (worktree)")
     a = ap.parse_args(argv)
     mod = load_client(a.source)
+    if a.loop is not None:
+        print(json.dumps(drive_loop(mod, a.loop == "step"), sort_keys=True, default=str))
+        return
     out = pathlib.Path(a.out)
     out.mkdir(parents=True, exist_ok=True)
     res = drive(mod, a.mode, a.emit, a.seg, out)
