@@ -2,8 +2,13 @@
 
 Nothing in ``cbf/`` changes; this adapter only maps one policy call onto it, following ``offline_filter.py``:
 
-* robot = one ellipsoid on the EE (``offline_filter.DEFAULT_GRIPPER_SEMI_AXES`` = Franka hand, gripper frame),
-  centre = ``ee_pose`` translation, shape rotated with the EE (``R Q_local R^T``);
+* robot = one ellipsoid rigidly attached to the EE, shape rotated with the EE (``R Q_local R^T``). Default
+  ``ee_model="hand_mvee"`` (F1, 2026-11-09): the MVEE of the Panda hand + open-finger collision-mesh vertices, centred
+  ``HAND_MVEE_CENTER`` (grip-site frame) behind the grip site -- the paper's "calibrated offline" EE ellipsoid (Sec. 3.1;
+  Sec. 5 leaves only links upstream of the wrist unprotected). The offset centre moves with wrist rotation through the
+  ``cbf.filter.RobotBody`` lever-arm term (one part, the paper's single ellipsoid). ``ee_model="grip_site_v0"`` is the
+  port's original model (``offline_filter.DEFAULT_GRIPPER_SEMI_AXES`` (0.04, 0.04, 0.07) m centred on the grip site),
+  which encloses none of the hand / finger vertices (audit ``outputs/2026-11-09_KNOWS_port_점검``);
 * obstacles = one MVEE per object point cloud (KNOWS ``perception.ellipsoid_fit.mvee``, Khachiyan), shapes frozen at
   the first call after ``reset`` and centroids re-measured on later calls (``ObjectTracker`` rule, Sec. 3.2);
 * target exclusion (paper Eq. 4: attention top-1 object) -- by default the BDDL target and destination from
@@ -48,13 +53,21 @@ import numpy as np
 from Baseline.paper_baselines.methods.interface import FilterResult, SceneObservation, register_method
 from Baseline.paper_baselines.methods.knows.cbf.ellipsoid import (Ellipsoid, barrier, grad_normal, initial_normal,
                                                                   optimal_normals_batch, rotate_shape)
-from Baseline.paper_baselines.methods.knows.cbf.filter import CbfParams, SafetyFilter as KnowsCbfFilter
+from Baseline.paper_baselines.methods.knows.cbf.filter import CbfParams, RobotBody, SafetyFilter as KnowsCbfFilter
 from Baseline.paper_baselines.methods.knows.perception.ellipsoid_fit import mvee
 from Baseline.paper_baselines.methods.safety_common import (OSC_POS_SCALE, OSC_ROT_SCALE, POS_GAIN_M, ROT_GAIN_RAD,
                                                              ObstacleCloudSource, check_actions, propagate_ee)
 
-#: ``offline_filter.DEFAULT_GRIPPER_SEMI_AXES`` (not imported: offline_filter pulls the LIBERO camera model).
+#: ``offline_filter.DEFAULT_GRIPPER_SEMI_AXES`` (not imported: offline_filter pulls the LIBERO camera model) -- the
+#: port's original grip-site-centred EE ellipsoid (``ee_model="grip_site_v0"``).
 GRIPPER_SEMI_AXES = (0.04, 0.04, 0.07)
+#: F1 (2026-11-09, user-approved fidelity fix): MVEE (Khachiyan, margin 0) of the Panda hand + open-finger collision-mesh
+#: vertices in the grip-site frame, ``outputs/2026-11-09_KNOWS_port_점검/gripper_coverage.json`` ``calibration``.
+#: ``HAND_MVEE_AXES`` columns = principal axes (grip-site frame), semi-axes in the same order.
+HAND_MVEE_CENTER = (-0.0075, 0.0, -0.0699)
+HAND_MVEE_SEMI_AXES = (0.0332, 0.0884, 0.1287)
+HAND_MVEE_AXES = ((0.0, -0.085, -0.996), (-1.0, -0.001, -0.0), (-0.001, 0.996, -0.085))
+EE_MODELS = ("hand_mvee", "grip_site_v0")
 
 
 class KnowsSafetyFilter:
@@ -63,7 +76,8 @@ class KnowsSafetyFilter:
     ASSOCIATE = ("auto", "name", "centroid")
 
     def __init__(self, obstacle_source: str = "gt_seg", *, cbf_params: dict | CbfParams | None = None,
-                 gripper_semi_axes=GRIPPER_SEMI_AXES, exclude: str = "task_objects", track_centroids: bool = True,
+                 ee_model: str = "hand_mvee", gripper_semi_axes=None, exclude: str = "task_objects",
+                 track_centroids: bool = True,
                  pos_gain: float = POS_GAIN_M, rot_gain: float = ROT_GAIN_RAD, intervene_tol: float = 1e-6,
                  associate: str = "auto", assoc_gate_m: float = 0.10, diagnostics: bool = True,
                  **source_kwargs):
@@ -79,7 +93,20 @@ class KnowsSafetyFilter:
         self.obstacle_source = obstacle_source
         self.source = (None if obstacle_source == "ellipsoids"
                        else ObstacleCloudSource(obstacle_source, exclude=exclude, **source_kwargs))
-        self.Q_local = np.diag(np.asarray(gripper_semi_axes, np.float64) ** 2)
+        if gripper_semi_axes is not None:  # explicit grip-site-centred axis-aligned ellipsoid (old keyword)
+            ee_model = "custom_grip_site"
+            self.Q_local = np.diag(np.asarray(gripper_semi_axes, np.float64) ** 2)
+            self.ee_offset = np.zeros(3)
+        elif ee_model == "hand_mvee":
+            V = np.asarray(HAND_MVEE_AXES, np.float64)
+            self.Q_local = V @ np.diag(np.asarray(HAND_MVEE_SEMI_AXES, np.float64) ** 2) @ V.T
+            self.ee_offset = np.asarray(HAND_MVEE_CENTER, np.float64)
+        elif ee_model == "grip_site_v0":
+            self.Q_local = np.diag(np.asarray(GRIPPER_SEMI_AXES, np.float64) ** 2)
+            self.ee_offset = np.zeros(3)
+        else:
+            raise ValueError(f"ee_model must be one of {EE_MODELS}")
+        self.ee_model = ee_model
         self.track_centroids, self.pos_gain, self.rot_gain = bool(track_centroids), float(pos_gain), float(rot_gain)
         self.intervene_tol = float(intervene_tol)
         self.cbf = KnowsCbfFilter(self.params)
@@ -91,7 +118,11 @@ class KnowsSafetyFilter:
                 "official_code": "none (paper-only reimplementation, Baseline/paper_baselines/methods/knows, moved from "
                                  "Baseline/knows_vla)",
                 "cbf_params": dataclasses.asdict(self.params) | {"joint_weights": None},
-                "robot": {"semi_axes": np.sqrt(np.diag(self.Q_local)).tolist(), "frame": "EE (grip site)"},
+                "robot": {"ee_model": self.ee_model,
+                          "semi_axes": np.sqrt(np.clip(np.linalg.eigvalsh(self.Q_local), 0, None)).tolist(),
+                          "center_offset_grip_frame_m": self.ee_offset.tolist(), "frame": "EE (grip site)",
+                          "calibration": ("hand + open-finger collision-mesh MVEE, margin 0 (F1 2026-11-09)"
+                                          if self.ee_model == "hand_mvee" else "port original (grip-site centred)")},
                 "obstacle": (self.source.provenance() if self.source is not None
                              else {"obstacle_source": "ellipsoids", "privileged": False}),
                 "obstacle_fit": "KNOWS mvee (Khachiyan), shapes frozen at first call, centroids tracked",
@@ -168,7 +199,8 @@ class KnowsSafetyFilter:
                                 "ms": (time.perf_counter() - t0) * 1e3}
         return cur
 
-    def _diagnose(self, robot: Ellipsoid, obstacles: dict[str, Ellipsoid], res, dc_nom, dth_nom, stored: dict) -> dict:
+    def _diagnose(self, robot: Ellipsoid, obstacles: dict[str, Ellipsoid], res, dc_nom, dth_nom, stored: dict,
+                  lever=None) -> dict:
         """True-barrier view of one step (see module docstring); read-only w.r.t. the filter state."""
         p = self.params
         keys = sorted(obstacles, key=repr)
@@ -181,7 +213,9 @@ class KnowsSafetyFilter:
             return np.array([barrier(n, R, o) for n, o in zip(N, obs_l)])
 
         def moved(dc, dth):
-            return Ellipsoid(robot.c + np.asarray(dc, np.float64), rotate_shape(robot.Q, np.asarray(dth, np.float64)))
+            dth = np.asarray(dth, np.float64)
+            shift = np.asarray(dc, np.float64) + (np.cross(dth, lever) if lever is not None else 0.0)
+            return Ellipsoid(robot.c + shift, rotate_shape(robot.Q, dth))
 
         hb = h_star(robot)
         ha = h_star(moved(res.delta_c, res.delta_theta))
@@ -214,7 +248,10 @@ class KnowsSafetyFilter:
         T_ee = np.asarray(obs.ee_pose, np.float64)
         for k, a in enumerate(A):
             R = T_ee[:3, :3]
-            robot = Ellipsoid(T_ee[:3, 3], R @ self.Q_local @ R.T)
+            Qw = R @ self.Q_local @ R.T
+            lever = R @ self.ee_offset
+            robot_w = Ellipsoid(T_ee[:3, 3] + lever, Qw)  # the EE ellipsoid in the world (diagnostics)
+            robot = (RobotBody(T_ee[:3, 3], {"eef": Ellipsoid(lever, Qw)}) if np.any(self.ee_offset) else robot_w)
             dc_nom, dth_nom = a[:3] * OSC_POS_SCALE, a[3:6] * OSC_ROT_SCALE
             stored = self.cbf.normals() if self.diagnostics else None  # normals the QP rows use (before delta_n)
             res = self.cbf(robot, obstacles, dc_nom, dth_nom)
@@ -230,7 +267,8 @@ class KnowsSafetyFilter:
                     "min_h": float(res.h.min()) if res.h.size else None,
                     "binding": [str(r[1]) for r, h in zip(res.rows, res.h) if h < 0.05][:4]}
             if self.diagnostics and res.status != "no_obstacles":
-                step.update(self._diagnose(robot, obstacles, res, dc_nom, dth_nom, stored))
+                step.update(self._diagnose(robot_w, obstacles, res, dc_nom, dth_nom, stored,
+                                           lever=lever if np.any(self.ee_offset) else None))
             info["steps"].append(step)
             T_ee = propagate_ee(T_ee, new, self.pos_gain, self.rot_gain)
         return FilterResult(out, intervened, info)
@@ -243,4 +281,5 @@ def make_method(**kwargs) -> KnowsSafetyFilter:
     return KnowsSafetyFilter(**kwargs)
 
 
-__all__ = ["GRIPPER_SEMI_AXES", "KnowsSafetyFilter", "make_method"]
+__all__ = ["EE_MODELS", "GRIPPER_SEMI_AXES", "HAND_MVEE_AXES", "HAND_MVEE_CENTER", "HAND_MVEE_SEMI_AXES",
+           "KnowsSafetyFilter", "make_method"]

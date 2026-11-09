@@ -83,13 +83,15 @@ class AegisSafetyFilter:
                  cameras: tuple[str, ...] | None = None, exclude: str = "task_objects", max_obstacles: int = 8,
                  refit_every_call: bool = False, cbf_gain: float = CBF_GAIN, solver: str = "OSQP",
                  skip_inactive: bool = True, pos_gain: float = POS_GAIN_M, rot_gain: float = ROT_GAIN_RAD,
-                 intervene_tol: float = 1e-6, **source_kwargs):
+                 intervene_tol: float = 1e-6, name_wording: str = "aegis_prefer_list", **source_kwargs):
+        # name_wording (2026-11-09 fidelity fix): GT obstacle names reach Grounding DINO in the official prefer_list
+        # wording (= a correct GLM-4.5V answer); only used with detector_prompt="obstacle_names" (the privileged-names arm)
         self.obstacle_source = obstacle_source
         self.source = None
         if obstacle_source != "ellipsoids":
             self.source = ObstacleCloudSource(obstacle_source, detector=detector, detector_prompt=detector_prompt,
                                               cameras=cameras, exclude=exclude, max_obstacles=max_obstacles,
-                                              **source_kwargs)
+                                              name_wording=name_wording, **source_kwargs)
         self.max_obstacles = int(max_obstacles)
         self.refit_every_call, self.cbf_gain, self.solver = bool(refit_every_call), float(cbf_gain), solver
         self.skip_inactive, self.pos_gain, self.rot_gain = bool(skip_inactive), float(pos_gain), float(rot_gain)

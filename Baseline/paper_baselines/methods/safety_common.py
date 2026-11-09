@@ -215,6 +215,30 @@ def cloud_overlap(a: np.ndarray, b: np.ndarray, radius: float) -> float:
     return float(np.mean(np.isfinite(d)))
 
 
+#: AEGIS official obstacle wording (2026-11-09, user-approved fidelity fix): the official code asks GLM-4.5V to name the
+#: obstacle "preferably from this list" (``benchmark/SafeLIBERO/main/utils.py:466`` ``prefer_list``), so a perfect VLM
+#: answer for a SafeLIBERO obstacle is the list entry, not the display name. Keyed by ``phrase_from_object`` of the display
+#: name, ``small`` variants share the entry. Audit ``outputs/2026-11-09_AEGIS_port_점검`` (Grounding DINO top-1 hits on the
+#: recorded call-0 frames 45 -> 89 / 111 with this wording).
+AEGIS_PREFER_LIST_WORDING = {"yellow book": "yellow rectangular book", "moka pot": "blue moka pot",
+                             "red coffee mug": "red mug", "white storage box": "white storage box",
+                             "wine bottle": "black wine bottle", "milk": "red milk carton",
+                             "binder": "gray rectangular binder"}
+NAME_WORDINGS = ("display", "aegis_prefer_list")
+
+
+def obstacle_query_phrase(name: str, wording: str = "display") -> str:
+    """Detector prompt for a privileged obstacle name: ``display`` = :func:`phrase_from_object`; ``aegis_prefer_list``
+    = the official AEGIS ``prefer_list`` entry for that object (falls back to the display phrase if not listed)."""
+    p = phrase_from_object(name)
+    if wording == "aegis_prefer_list":
+        base = p[: -len(" small")] if p.endswith(" small") else p
+        return AEGIS_PREFER_LIST_WORDING.get(base, p)
+    if wording != "display":
+        raise ValueError(f"wording must be one of {NAME_WORDINGS}, got {wording!r}")
+    return p
+
+
 def phrase_from_object(name: str) -> str:
     """``akita_black_bowl_1`` -> ``akita black bowl`` (same rule as ``providers/gt_oracle.phrase_from_object``)."""
     parts = str(name).split("_")
@@ -275,7 +299,10 @@ class ObstacleCloudSource:
                  max_height_m: float = 0.58, trim_percentiles: tuple[float, float] = (2.0, 98.0),
                  assoc_gate_m: float = 0.05, assoc_overlap: float = 0.5,
                  base_envelope_m: tuple[float, float] | None = (0.18, 0.16),
-                 gt_obstacle_set: str = "all_non_target"):
+                 gt_obstacle_set: str = "all_non_target", name_wording: str = "display"):
+        if name_wording not in NAME_WORDINGS:
+            raise ValueError(f"name_wording must be one of {NAME_WORDINGS}, got {name_wording!r}")
+        self.name_wording = name_wording
         if source not in self.SOURCES:
             raise ValueError(f"source must be one of {self.SOURCES}, got {source!r}")
         if exclude not in self.EXCLUDE:
@@ -320,6 +347,7 @@ class ObstacleCloudSource:
             p.update(detector=(det.provenance() if det is not None and hasattr(det, "provenance")
                                else {"weight": self.detector_weight, "device": self.detector_device, "loaded": False}),
                      detector_prompt=self.detector_prompt, generic_prompt=self.generic_prompt,
+                     name_wording=self.name_wording,
                      box_threshold=self.box_threshold, text_threshold=self.text_threshold, target_iou=self.target_iou,
                      crop_mode=self.crop_mode,
                      crop=("axis-aligned box on depth (AEGIS utils.py:188-255), not a mask; = CLOSED-LOOP-FIX V5"
@@ -537,7 +565,7 @@ class ObstacleCloudSource:
             names = obs.privileged("obstacle_names")
             if names is None:
                 raise KeyError("detector_prompt='obstacle_names' needs extras['privileged/obstacle_names']")
-            queries = [(str(n), phrase_from_object(n)) for n in names]
+            queries = [(str(n), obstacle_query_phrase(n, self.name_wording)) for n in names]
         else:
             queries = [("object", self.generic_prompt)]
         cams = self._cams(obs, CAMERAS_EXTERNAL)
@@ -673,7 +701,7 @@ def rollout_positions(ee_pose: np.ndarray, actions: np.ndarray, pos_gain: float 
     return np.asarray(p)
 
 
-__all__ = ["CAMERAS_EXTERNAL", "OSC_POS_SCALE", "OSC_ROT_SCALE", "POS_GAIN_M", "ROT_GAIN_RAD", "SUPPORT_NAMES", "ObjectClouds",
+__all__ = ["AEGIS_PREFER_LIST_WORDING", "NAME_WORDINGS", "obstacle_query_phrase", "CAMERAS_EXTERNAL", "OSC_POS_SCALE", "OSC_ROT_SCALE", "POS_GAIN_M", "ROT_GAIN_RAD", "SUPPORT_NAMES", "ObjectClouds",
            "ObstacleCloudSource", "axisangle_to_mat", "backproject", "backproject_uv", "box_iou", "center_component",
            "check_actions", "cloud_overlap", "depth_trim",
            "load_recorded_call", "mat_to_axisangle", "phrase_from_object", "propagate_ee", "quat_xyzw_to_mat",

@@ -36,7 +36,9 @@ BALL = [{"name": "ball", "center": EE + [GRIPPER_SEMI_AXES[0] + 0.05 + 0.03, 0, 
 
 @pytest.mark.parametrize("normals", ["relaxed", "fixed"])
 def test_violating_chunk_is_modified(normals):
-    f = KnowsSafetyFilter(obstacle_source="ellipsoids", cbf_params={"normals": normals})
+    # the original grip-site model: the Eq. 7 check below rebuilds the robot from GRIPPER_SEMI_AXES (F1 = hand_mvee is
+    # covered by test_knows_f1_hand_ellipsoid.py)
+    f = KnowsSafetyFilter(obstacle_source="ellipsoids", cbf_params={"normals": normals}, ee_model="grip_site_v0")
     assert isinstance(f, SafetyFilter)
     A = straight([1.0, 0, 0])
     res = f.filter(synth_obs(BALL), A)
