@@ -87,7 +87,13 @@ GRIPPER_SEMI_AXES = (0.04, 0.04, 0.07)
 HAND_MVEE_CENTER = (-0.0075, 0.0, -0.0699)
 HAND_MVEE_SEMI_AXES = (0.0332, 0.0884, 0.1287)
 HAND_MVEE_AXES = ((0.0, -0.085, -0.996), (-1.0, -0.001, -0.0), (-0.001, 0.996, -0.085))
-EE_MODELS = ("hand_mvee", "grip_site_v0")
+#: Frame fix (2026-11-10, KNOWS collapse diagnosis outputs/2026-11-10_KNOWS_collapse_진단): ``obs.ee_pose`` orientation is the
+#: robosuite ``robot0_right_hand`` body = the grip-site frame rotated by Rz(+90 deg) (``panda_gripper.xml:14`` quat
+#: (0.707, 0, 0, -0.707); measured 90.0 deg on 98 recorded frames). A grip-site-frame vector v is ``GRIP_SITE_TO_EE @ v``
+#: in the EE frame. ``hand_mvee`` (F1) applies it; ``hand_mvee_v1`` = the 2026-11-09 F1 without it (axes 90 deg off:
+#: 4.7 % of the hand + finger vertices inside, vs 94.2 % with it), kept only to reproduce those runs.
+GRIP_SITE_TO_EE = ((0.0, 1.0, 0.0), (-1.0, 0.0, 0.0), (0.0, 0.0, 1.0))
+EE_MODELS = ("hand_mvee", "hand_mvee_v1", "grip_site_v0")
 #: F3 track freeze: ``arm`` = paper Sec. 3.2 (default), ``off`` = the port before 2026-11-10
 TRACK_FREEZE = ("arm", "off")
 #: F4a target exclusion: ``source`` = the cloud source's rule (gt_seg: BDDL task objects; detector: GDINO target box),
@@ -202,10 +208,13 @@ class KnowsSafetyFilter:
             ee_model = "custom_grip_site"
             self.Q_local = np.diag(np.asarray(gripper_semi_axes, np.float64) ** 2)
             self.ee_offset = np.zeros(3)
-        elif ee_model == "hand_mvee":
+        elif ee_model in ("hand_mvee", "hand_mvee_v1"):
             V = np.asarray(HAND_MVEE_AXES, np.float64)
-            self.Q_local = V @ np.diag(np.asarray(HAND_MVEE_SEMI_AXES, np.float64) ** 2) @ V.T
-            self.ee_offset = np.asarray(HAND_MVEE_CENTER, np.float64)
+            Q_site = V @ np.diag(np.asarray(HAND_MVEE_SEMI_AXES, np.float64) ** 2) @ V.T
+            c_site = np.asarray(HAND_MVEE_CENTER, np.float64)
+            M = np.asarray(GRIP_SITE_TO_EE, np.float64) if ee_model == "hand_mvee" else np.eye(3)
+            self.Q_local = M @ Q_site @ M.T
+            self.ee_offset = M @ c_site
         elif ee_model == "grip_site_v0":
             self.Q_local = np.diag(np.asarray(GRIPPER_SEMI_AXES, np.float64) ** 2)
             self.ee_offset = np.zeros(3)
@@ -225,9 +234,13 @@ class KnowsSafetyFilter:
                 "cbf_params": dataclasses.asdict(self.params) | {"joint_weights": None},
                 "robot": {"ee_model": self.ee_model,
                           "semi_axes": np.sqrt(np.clip(np.linalg.eigvalsh(self.Q_local), 0, None)).tolist(),
-                          "center_offset_grip_frame_m": self.ee_offset.tolist(), "frame": "EE (grip site)",
-                          "calibration": ("hand + open-finger collision-mesh MVEE, margin 0 (F1 2026-11-09)"
-                                          if self.ee_model == "hand_mvee" else "port original (grip-site centred)")},
+                          "center_offset_ee_frame_m": self.ee_offset.tolist(),
+                          "frame": "obs.ee_pose (robot0_right_hand body = grip site * Rz(+90 deg))",
+                          "calibration": {"hand_mvee": "hand + open-finger collision-mesh MVEE, margin 0 (F1 2026-11-09), "
+                                                       "grip-site axes mapped to the EE frame (frame fix 2026-11-10)",
+                                          "hand_mvee_v1": "F1 2026-11-09 WITHOUT the frame fix (axes 90 deg off; "
+                                                          "reproduction only)"}.get(self.ee_model,
+                                                                                    "port original (grip-site centred)")},
                 "obstacle": (self.source.provenance() if self.source is not None
                              else {"obstacle_source": "ellipsoids", "privileged": False}),
                 "obstacle_fit": "KNOWS mvee (Khachiyan), shapes frozen at first call, centroids tracked",

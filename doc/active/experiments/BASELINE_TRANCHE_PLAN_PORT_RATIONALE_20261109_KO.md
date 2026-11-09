@@ -224,6 +224,40 @@ queue: `experiments/segmentation/bl_tranche_resume_queue.sh` (재실행 5 → �
 - **GT seg 판:** spatial 32 ep 합산 TSR / SSR / CAR 68.8 / 59.4 / 68.8 vs 논문 60.3 / 51.7 / 73.0 → CAR −4 pt, SSR +8 pt. 원문과 가까움 → **수정하지 않음**, 기존 run 유지. 점검의 수정 후보 (exact geometry ellipsoid, 머리 카메라만, mesh fit) 는 기록만 하고, 이후 suite 에서 FLAG 되면 그때 적용.
 - **detector 판:** 32 ep 합산 CAR 34.4 (−38.6 pt), SSR 18.8 (−33.0 pt) — 64 ep 미만이라 아직 FLAG 아님. AEGIS detector 판 (48 ep CAR 18.8, −50 pt) 과 같은 원인 (논문의 VLM 이름 단계를 일반 prompt 로 바꿈, R4) 으로 보이며, 두 detector 판 모두 FLAG 될 가능성이 높다. 그때의 개선안 후보는 두 방법에 공통인 'VLM 이름 단계' (AEGIS: 공식 GLM-4.5V, 비용 · 계정 필요) — 사용자 결정 사항.
 
+### 4.10 AEGIS · multi-link CBF detector 판: GLM-4.5V 이름 단계를 로컬 open VLM 으로 (2026-11-10 03:4x, dev-4a 자율 판정 — 사용자 위임 02:0x)
+
+**사용자 위임 (2026-11-10 02:0x):** "원문과 차이가 커 개선 후 재실행해야 하면 스스로 판정하고 진행. 결과를 끝까지 기다리지 말 것." → §4.8 의 64 ep 조건을 기다리지 않고, pilot (init 5–14) + tranche 1 이 같은 방향이면 적용한다.
+
+| 단계 | 내용 | 근거 |
+|---|---|---|
+| 1. 실제 결과 | AEGIS detector: pilot level 합산 CAR 약 45 %, tranche 1 48 ep CAR 18.8 % (원문 68.9). multi-link CBF detector: pilot 약 46 %, tranche 32 ep 34.4 % (원문 Table Ib 73.0) | MEASURED (`bl_tranche_check.py`) |
+| 2. 원문과의 차이 | 두 arm 모두 −24 ~ −50 pt, 두 분할에서 일관 → FLAG 로 판정 | §4.8 |
+| 3. 원인 | 원문은 VLM (AEGIS: GLM-4.5V, multi-link: Qwen3-VL) 이 지시문 · 영상으로 장애물 **하나**의 이름을 정하고 그 이름으로 Grounding DINO. port 는 일반 prompt "object" 의 상자 최대 8 개 (target 상자 제외) → 감시 장애물이 call 0 집합에 있는 episode 97 / 200 (object LI 0 / 40), 엉뚱한 물체가 장애물로 들어감 | AEGIS · multi-link 점검 README |
+| 4. 검토한 대체안 | (c) `candidate_list`: 공식 prefer_list 각 문구를 Grounding DINO 에 넣고 최고 점수 하나 → call-0 frame 7 개 중 정답 4 (빨간 테두리 접시 등에 'red milk carton' 이 고점) → **기각**. (d) `vlm_name`: 공식 GLM prompt (utils.py:478) 를 그대로 로컬 open VLM `Qwen/Qwen2.5-VL-7B-Instruct` (greedy) 가 답함 → pilot call-0 frame 24 개 (6 run × 4) 중 이름 정답 **20**, 그 이름의 Grounding DINO top-1 상자가 장애물을 맞힘 **19** (yellow book 이 주 실패 3 / 4) | `outputs/2026-11-10_detector_candidate_list/` (`probe_candidate_list_partial.json`, `probe_vlm_name.json`) |
+| 5. 적용 | AEGIS · multi-link CBF 의 detector 판 = `detector_prompt="vlm_name"` (serve_method 기본, weight `$AG3S_BASELINE_VLM_WEIGHT` = 로컬 사본). 이후 crop · ellipsoid · CBF 는 privileged names 판과 같은 경로. 비특권 (정답 이름 사용 안 함), 비용 0, 외부 API 없음. KNOWS detector 판은 그대로 (논문에 VLM 이름 단계 없음) | `safety_common.py` (vlm_name), `providers/vlm_namer.py`, `serve_method.py` |
+| 6. 적용 범위 | 기존 detector run (AEGIS spatial LI · LII · object LI, multi-link spatial LI · LII) 은 '수정 전' 기록으로 남기고 `-r2` 로 재실행, 나머지 블록 · LIBERO 도 새 판. 결과를 보고 적용했다는 사실을 표 caption / supplement 에 밝힌다 | queue B (arms queue) |
+| 7. 남은 편차 (선언) | VLM 이 GLM-4.5V / Qwen3-VL 이 아님 (transformers 4.53 에서 가능한 가장 가까운 open 모델), thinking mode 없음, 입력 영상 = port 의 머리 카메라 256 px (공식 1024 px) | — |
+
+**리뷰어 대응 문장 (초안, EN):** "The official AEGIS pipeline names the obstacle with the paid GLM-4.5V API (and multi-link CBF with
+Qwen3-VL). Our first non-privileged port replaced this step by a generic detector prompt, which left the monitored obstacle out of
+the hazard set in half of the episodes and fell 24–50 points below the reported CAR. We therefore restored the step with the
+official prompt verbatim, answered by the open Qwen2.5-VL-7B-Instruct model (greedy); it names the correct obstacle in 20 of 24
+held-out frames. All reported detector-variant numbers use this version; the first port's results are in the supplement."
+
+### 4.11 KNOWS F1 의 EE frame bug 수정 (2026-11-10 04:0x, dev-4a 자율 판정 — 사용자 위임)
+
+| 단계 | 내용 | 근거 |
+|---|---|---|
+| 1. 실제 결과 | spatial LI (16 ep): F1 만 — GT seg TSR / CAR 56.2 / 25.0, detector 37.5 / 6.2; F1 + F3 + F4a (`-r2`) — GT seg 56.2 / **6.2**, detector 37.5 / **0.0** (π0.5 단독 CAR 6.2) | MEASURED |
+| 2. 원문과의 차이 | KNOWS Naive (GT seg) CAR 82.2, KNOWS 76.4 → −57 ~ −76 pt. 같은 GT 장애물의 multi-link CBF 68.8 | §4.8 |
+| 3. 원인 | **F1 의 frame bug**: filter 가 받는 EE 자세 (`observation/state` axis-angle) 는 `robot0_right_hand` body 자세인데, F1 hand MVEE 는 grip-site (`right_gripper`) frame 에서 calibration → 두 frame 은 Rz(90°) 차이 (`panda_gripper.xml:14`, 기록 frame 98 개 모두 90.0°). 실제로 돈 ellipsoid 는 손 · 손가락 collision vertex 의 중앙 **4.7 %** 만 포함 (보정 시 94.2 %) → F1 이 사실상 적용되지 않았음. r2 의 손 · 손가락 충돌 10 건 모두 as-run h* > 0, 보정 frame 에서는 h* ≤ 0. F3 는 주원인 아님 (F1 → r2 차이 3 / 16 ep, McNemar p = 0.25; F3 는 추적 오차 34.8 → 14.5 mm 로 줄임), Eq. 12 ε slack · chunk 단위도 주원인 아님 | `outputs/2026-11-10_KNOWS_collapse_진단/README.md` (재생이 served chunk 를 1,425 call 에서 비트 단위로 재현) |
+| 4. 논문의 의도 | §3.1 "pose (c_R, R_R) is read from the proprioceptive state at each timestep and the semi-axes are calibrated offline" → calibration 한 frame 과 읽는 자세의 frame 이 같아야 함 | 논문 |
+| 5. 수정 | `GRIP_SITE_TO_EE` (= Rz(−90°) 회전, robosuite XML 에서 test 로 검증) 로 MVEE 축 · 중심을 EE frame 에 옮김: `Q_local = M Q_site Mᵀ`, `ee_offset = M c_site`. MVEE 값 · CBF · F3 · F4a 는 그대로. `ee_model="hand_mvee_v1"` = 수정 전 재현용 | `methods/knows/adapter.py`, `tests/test_knows_f1_hand_ellipsoid.py` (XML quat 대조, v1 재현), methods test 110 통과 |
+| 6. 적용 범위 | KNOWS ± GT 의 모든 tranche run 을 `-r3` 로 (spatial LI 를 먼저 돌려 closed-loop 효과 확인 후 계속). `-r2` 와 F1-only run 은 '수정 전' 기록 | queue C (`bl_tranche_queue_c.sh`) |
+| 7. 하지 않은 것 | 개발 분할 짝 측정 (R5) 은 표 채운 뒤 supplement 근거로; ε · fixed normals · γ_h · W · margin (R2) | — |
+
+**참고:** AEGIS 는 공식 code 의 EE ellipsoid 가 같은 right_hand frame 기준이라 (0.12 m 축이 y) 해당 없음. multi-link CBF 는 관절 FK 로 손 위치를 놓아 해당 없음.
+
 ## 5. 결과
 
 ### 5.1 Tranche 1 (init 15–18) — PLANNED (시작 후 채움)
@@ -255,3 +289,5 @@ queue: `experiments/segmentation/bl_tranche_resume_queue.sh` (재실행 5 → �
 | 2026-11-10 01:2x | F2 철회 (사용자 결정), 기존 run 12 개 재사용, KNOWS 4 · AEGIS names spatial LI 재실행, tranche 1 재개 (`bl_tranche_resume_queue.sh`) | §4.7 |
 | 2026-11-10 01:3x | 중간 점검 규칙 (20 pt · ≥ 64 ep) 고정, `bl_tranche_check.py` | §4.8, 사용자 결정 |
 | 2026-11-10 01:4x | multi-link CBF 점검 완료, §4.8 규칙상 GT 판 원문 근접 → 미수정, 논문 Table Ib 값 반영 (§4.1 정정) | §4.9 |
+| 2026-11-10 03:4x | AEGIS · multi-link CBF detector 판 → VLM 이름 (`vlm_name`, Qwen2.5-VL-7B, 공식 prompt), 기존 detector run 5 개 `-r2` 재실행 예정; KNOWS 원인 분석 중 | §4.10, 사용자 위임 |
+| 2026-11-10 04:0x | KNOWS F1 EE frame bug 수정 (Rz 90°), KNOWS ± GT 전부 `-r3` 재실행; queue C (KNOWS spatial LI 먼저 → 확정 arm 나머지 → AEGIS · CBF detector VLM 판 → KNOWS 나머지) | §4.10, §4.11, 사용자 위임 |

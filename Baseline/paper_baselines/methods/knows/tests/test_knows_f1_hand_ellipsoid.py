@@ -10,7 +10,9 @@ from __future__ import annotations
 import numpy as np
 
 from Baseline.paper_baselines.methods.interface import SceneObservation, validate_filter_result
-from Baseline.paper_baselines.methods.knows.adapter import HAND_MVEE_CENTER, KnowsSafetyFilter
+from Baseline.paper_baselines.methods.knows.adapter import GRIP_SITE_TO_EE, HAND_MVEE_CENTER, KnowsSafetyFilter
+
+M = np.asarray(GRIP_SITE_TO_EE)  # grip-site vector -> obs.ee_pose (robot0_right_hand) frame (frame fix 2026-11-10)
 
 EE = np.array([0.45, 0.0, 0.30])
 FIXED = {"normals": "fixed"}
@@ -18,7 +20,8 @@ FIXED = {"normals": "fixed"}
 
 def obs(obstacles):
     T = np.eye(4)
-    T[:3, 3] = EE  # grip-site frame = world frame
+    T[:3, :3] = M.T  # ee_pose = robot0_right_hand body, so that the grip-site frame (R_hand @ M) = world frame
+    T[:3, 3] = EE
     return SceneObservation(rgb={}, depth={}, intrinsics={}, T_base_cam={}, q=np.zeros(7), ee_pose=T, gripper=0.08,
                             instruction="pick", extras={"obstacle_ellipsoids": obstacles})
 
@@ -35,7 +38,7 @@ def one(a):
 
 
 def inside(f, p):
-    d = np.asarray(p, float) - f.ee_offset
+    d = M @ np.asarray(p, float) - f.ee_offset  # p in the grip-site frame
     return float(d @ np.linalg.solve(f.Q_local, d)) <= 1.0
 
 
@@ -43,7 +46,7 @@ def test_default_model_and_provenance():
     f = KnowsSafetyFilter(obstacle_source="ellipsoids")
     rob = f.provenance()["robot"]
     assert rob["ee_model"] == "hand_mvee"
-    assert np.allclose(rob["center_offset_grip_frame_m"], HAND_MVEE_CENTER)
+    assert np.allclose(rob["center_offset_ee_frame_m"], M @ np.asarray(HAND_MVEE_CENTER))
     assert np.allclose(sorted(rob["semi_axes"]), [0.0332, 0.0884, 0.1287], atol=1e-4)
     v0 = KnowsSafetyFilter(obstacle_source="ellipsoids", ee_model="grip_site_v0").provenance()["robot"]
     assert v0["ee_model"] == "grip_site_v0" and np.allclose(sorted(v0["semi_axes"]), [0.04, 0.04, 0.07])
@@ -81,3 +84,15 @@ def test_wrist_rotation_moves_the_offset_hand():
     assert new.intervened[0] and not old.intervened[0]
     st = new.info["steps"][0]
     assert st["h_star_next"] >= (1 - 0.5) * st["h_star"] - 1e-4  # Eq. 7 on the true barrier, lever arm included
+
+
+def test_frame_fix_matches_the_robosuite_gripper_and_v1_reproduces_the_bug():
+    # panda_gripper.xml:14  <body name="right_gripper" quat="0.707107 0 0 -0.707107">  (w, x, y, z) relative to right_hand
+    w, x, y, z = 0.707107, 0.0, 0.0, -0.707107
+    R_hand_site = np.array([[1 - 2 * (y * y + z * z), 2 * (x * y - z * w), 2 * (x * z + y * w)],
+                            [2 * (x * y + z * w), 1 - 2 * (x * x + z * z), 2 * (y * z - x * w)],
+                            [2 * (x * z - y * w), 2 * (y * z + x * w), 1 - 2 * (x * x + y * y)]])
+    assert np.allclose(R_hand_site, M, atol=1e-5)
+    pts = [(0.09, 0.0, -0.07), (-0.09, 0.0, -0.07), (0.0, 0.0, -0.12)]
+    v1 = KnowsSafetyFilter(obstacle_source="ellipsoids", ee_model="hand_mvee_v1")
+    assert not all(inside(v1, p) for p in pts)  # the 2026-11-09 runs: hand tips outside (axes 90 deg off)

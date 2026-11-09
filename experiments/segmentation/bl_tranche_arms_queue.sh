@@ -4,6 +4,7 @@
 # detector arms -> VLM naming; KNOWS -> F3/F4a collapse diagnosis), instead of idling or producing runs to be discarded.
 # A block counts as done when a run dir bl<T>-<tag>-<suite>-L<lvl>[-r2|-r3] with closed_loop_metrics.json exists
 # (non-INVALID); new runs get SUFFIX (default empty) on the run-id. Same protocol as bl_tranche_queue.sh.
+# filters: SUITES (default "spatial object goal long"), LEVELS ("I II"), LIBERO_SUITES (all four; "" = none)
 # usage: SAFE_ARMS_SEL="none| aegis|--gt multilink_cbf|--gt" LIBERO_ARMS_SEL="none|" [SUFFIX=-r2] [INITS=..] [T=t1] \
 #        bash experiments/segmentation/bl_tranche_arms_queue.sh
 set -u
@@ -37,8 +38,8 @@ done_run() {  # run-id stem -> 0 if a finished, non-INVALID run exists (SUFFIX e
 }
 LM=Baseline/paper_baselines/closed_loop/launch_method.py
 log "baseline tranche $T ARMS queue: HEAD $(git rev-parse --short HEAD) safe=[${SAFE_ARMS[*]:-}] libero=[${LIBERO_ARMS[*]:-}] suffix='$SUFFIX'"
-for suite in spatial object goal long; do
-  for lvl in I II; do
+for suite in ${SUITES-spatial object goal long}; do
+  for lvl in ${LEVELS-I II}; do
     split=$(label safelibero_$suite $lvl)
     for a in "${SAFE_ARMS[@]}"; do
       m=${a%%|*}; g=${a#*|}; tag=$m${g:+-gt}; stem=bl$T-$tag-$suite-L$lvl
@@ -49,7 +50,7 @@ for suite in spatial object goal long; do
     done
   done
 done
-for suite in libero_spatial libero_object libero_goal libero_10; do
+for suite in ${LIBERO_SUITES-libero_spatial libero_object libero_goal libero_10}; do
   split=$(label $suite -)
   for a in "${LIBERO_ARMS[@]}"; do
     m=${a%%|*}; tag=$m; stem=bl$T-$tag-${suite#libero_}

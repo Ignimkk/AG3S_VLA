@@ -585,7 +585,18 @@ def build_server(args, *, policy=None, record_root=None) -> tuple[MethodServer, 
                 kw.setdefault("exclude", "task_objects")  # target / destination are None: nothing excluded
             elif arm["obstacles"] == "detector":
                 kw.setdefault("obstacle_source", "detector")
-                kw.setdefault("detector_prompt", "all_objects")
+                # AEGIS / multi-link CBF: the papers' VLM names ONE hazard (AEGIS: GLM-4.5V API, multi-link: Qwen3-VL)
+                # -> the official AEGIS prompt answered by a local open VLM (vlm_name, 2026-11-10 interim-check fix,
+                # doc §4.10; weights from $AG3S_BASELINE_VLM_WEIGHT, a local copy of Qwen/Qwen2.5-VL-7B-Instruct);
+                # KNOWS keeps all_objects (its paper has no VLM naming step)
+                if arm["method"] in ("aegis", "multilink_cbf"):
+                    from Baseline.paper_baselines.providers.vlm_namer import DEFAULT_VLM
+
+                    kw.setdefault("detector_prompt", "vlm_name")
+                    kw.setdefault("vlm_weight", os.environ.get("AG3S_BASELINE_VLM_WEIGHT") or DEFAULT_VLM)
+                    kw.setdefault("vlm_device", args.sidecar_device)
+                else:
+                    kw.setdefault("detector_prompt", "all_objects")
                 kw.setdefault("detector_device", args.sidecar_device)
                 kw.setdefault("detector_weight", args.detector_weight)
                 if arm.get("target") == "attention":  # KNOWS F4a (arms.resolve: knows detector default)

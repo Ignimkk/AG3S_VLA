@@ -1,8 +1,8 @@
 """Interim check of the baseline tranche against the original papers (dev-4a, 2026-11-10; user ruling 01:3x KST:
 "keep the current ports; check the running results midway and apply the improvement only if they are far below the paper").
 
-Reads closed_loop_metrics.json of every finished tranche run (``bl<T>-<arm>-<suite>-L<lvl>[-r2]``; the -r2 rerun supersedes
-the first run), pools episodes per arm x level over the suites finished so far, and compares with the paper values.
+Reads closed_loop_metrics.json of every finished tranche run (``bl<T>-<arm>-<suite>-L<lvl>[-rN]``; the highest -rN rerun
+supersedes), pools episodes per arm x level over the suites finished so far, and compares with the paper values.
 
 Flag rule (fixed before looking at any tranche result, doc §4.8):
   * harness sanity: pi0.5 alone within 10 pt of the KNOWS paper's pi0.5 row (else the harness, not the port, is suspect);
@@ -39,7 +39,7 @@ GAP_PT, MIN_EP, SANITY_PT = 20.0, 64, 10.0
 
 
 def runs(tag: str) -> dict:
-    pat = re.compile(rf"^(\d{{8}}T\d{{6}})_[0-9a-f]+_bl{tag}-(.+)-(spatial|object|goal|long)-L(I|II)(-r2)?-")
+    pat = re.compile(rf"^(\d{{8}}T\d{{6}})_[0-9a-f]+_bl{tag}-(.+)-(spatial|object|goal|long)-L(I|II)(-r[0-9])?-")
     best = {}
     for d in ROOT.iterdir():
         m = pat.match(d.name)
@@ -47,7 +47,7 @@ def runs(tag: str) -> dict:
             continue
         stamp, arm, suite, lvl, r2 = m.groups()
         key = (arm, suite, lvl)
-        rank = (bool(r2), stamp)
+        rank = (int(r2[2:]) if r2 else 1, stamp)  # -r3 > -r2 > first run
         if key not in best or rank > best[key][0]:
             best[key] = (rank, d)
     return {k: v[1] for k, v in best.items()}

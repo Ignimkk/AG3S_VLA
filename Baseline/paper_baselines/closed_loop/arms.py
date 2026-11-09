@@ -103,10 +103,15 @@ ARMS: dict[str, Arm] = {a.name: a for a in (
         COMMON_FILTER_DEVIATIONS + ("target exclusion by the Grounding DINO target box (paper: VLA attention, Eq. 4)",
                                     "obstacles = Grounding DINO 'object' boxes minus the target box, box-cropped depth")),
     Arm("aegis", "filter", "aegis", "[10] VLSA / AEGIS", "detector", None,
-        COMMON_FILTER_DEVIATIONS + ("GLM-4.5V obstacle naming replaced by a generic Grounding DINO prompt minus the "
+        COMMON_FILTER_DEVIATIONS + ("GLM-4.5V obstacle naming (one obstacle, 'preferably from prefer_list') replaced by "
+                                    "the official prompt answered by a local open VLM (Qwen2.5-VL-7B-Instruct, "
+                                    "greedy) -> one Grounding DINO phrase (detector_prompt=vlm_name, 2026-11-10; before: a "
+                                    "generic Grounding DINO prompt minus the "
                                     "target box (= offline arm aegis:detector_all)",)),
     Arm("multilink_cbf", "filter", "multilink_cbf", "[1] Multi-link safety filter", "detector", None,
-        COMMON_FILTER_DEVIATIONS + ("same obstacle source as aegis; moving-hazard optical flow omitted",)),
+        COMMON_FILTER_DEVIATIONS + ("same obstacle source as aegis (paper: Qwen3-VL names one hazard -> here Qwen2.5-VL-7B "
+                                    "with the official AEGIS prompt, vlm_name, 2026-11-10); moving-hazard "
+                                    "optical flow omitted",)),
     Arm("omniguide", "guidance", "omniguide", "[19] OmniGuide", None, "detector", COMMON_GUIDANCE_DEVIATIONS),
     Arm("constrained_flow_matching", "guidance", "constrained_flow_matching", "[5] Constrained flow matching", None,
         "detector", COMMON_GUIDANCE_DEVIATIONS + ("paper uses SafeLIBERO GT spheres (privileged); here the depth cloud",)),
