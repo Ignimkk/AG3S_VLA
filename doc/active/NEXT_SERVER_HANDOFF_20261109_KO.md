@@ -89,6 +89,19 @@ cuRobo TSDF / ESDF 로 넘겨 **집기 · 놓기는 그대로 하면서 장애�
 → **이전 서버 수치와 새 서버 수치를 짝으로 비교하지 않는다.** 새 서버에서 지금 구성 (pe123458) 을 **anchor 로 다시 돌리고**
 후보를 그 anchor 와 비교한다 (T0). run-id 는 새 TAG (예: `…n2`) 로 — 비교 script 는 run-id 마다 가장 최근 run 을 쓴다.
 
+## 4.0 서버 역할 · baseline 선행 실행 (사용자 결정 2026-11-09 16:5x–17:xx)
+
+- **이전 서버 (H200 1 장, `/mnt/dev/AG3S_VLA`) = baseline 전용.** 2026-11-09 17:xx 부터 `experiments/segmentation/bl_tranche_queue.sh` (tranche 1 = init 15–18,
+  SafeLIBERO 7 arm × 128 ep + LIBERO 4 arm × 160 ep, 약 25 h) 실행 중. 이 run 들은 **논문 표에 들어가는 실제 결과**. 계획 · port 근거 · 결과 표:
+  [`experiments/BASELINE_TRANCHE_PLAN_PORT_RATIONALE_20261109_KO.md`](experiments/BASELINE_TRANCHE_PLAN_PORT_RATIONALE_20261109_KO.md).
+  queue 가 도는 동안 **이전 서버의 HEAD 를 바꾸지 않는다** (git pull · commit 금지). 끝나면 결과를 그 문서 §5 에 채우고 commit · push.
+- **새 서버 = AG3S 개발** (아래 T0–T4). 개발 비교는 개발 분할 (init 0–14) 에서만.
+- **같은 기계 조건:** 표의 모든 arm 은 같은 기계 → **동결한 AG3S 의 보고 run (T5) 은 이전 서버에서** 돌리거나, 먼저 두 서버의 π0.5 단독 출력이 같은지
+  확인한다 (같은 init · seed 의 VLA 단독 몇 ep 의 action 비교).
+- 규모: 계획의 **1/10 (tranche 1) 먼저**, 나머지 9/10 은 나중에 `INITS=… T=t2 …` 로 더하고 같은 문서 · 표를 고친다 (사용자 결정).
+- AEGIS 는 공식 코드 (GLM-4.5V API) 대신 **port 판** (비용 결정). port 가 원 논문 보고값보다 낮게 나오는 점 (AEGIS CAR, KNOWS 전반) 은 위 문서 §4.3 —
+  표에 보고값 (†) 을 같이 두고 주장 범위를 한정한다. KNOWS port 는 9/10 전에 구현 점검 권장.
+
 ## 4. 다음 작업 (순서대로, 각 단계 끝에 commit · 저장)
 
 | # | 작업 | 명령 (checkout 에서) | 시간 (이전 서버 실측) | 판정 · 산출 |
@@ -98,7 +111,7 @@ cuRobo TSDF / ESDF 로 넘겨 **집기 · 놓기는 그대로 하면서 장애�
 | T2 | τ_obs 5 mm 후보 (E1a 작은 접촉 대응) | profile 에 판 등록: (T1 채택 판) + `("--passthrough-obstacle-tolerance-mm", "5")` (argparse 뒤 값이 이김), 이름 `…-to5`. 회귀 test 뒤 `pe2b_queue.sh` | 3.5 h | 위험 = 장애물 행 거절 증가로 HOLD · 시간 초과 → LIBERO 27 · LS 10 하락 여부 |
 | T3 | PE10 목적지 등록 지연 | 설계 메모: 쥔 동안 손 밖 attention 1 위의 3 frame 연속 조건 완화 또는 등록 형상 누적. **offline 채점 먼저** (목적지 점 기록이 chunk 에 없음 → replay 필요). 도구 `sl_pe_records/2026-11-09_집기놓기_장애물취급/dest_latency.py` | 설계 1 일 | 위험 = 장애물이 목적지로 등록 (SafeLIBERO) |
 | T4 | PE8 첫 held call 틈 · 서랍 t4 | attach 직전 closing 의 manipulated 형상 + 손 frame 으로 첫 call 보완 (손끝 경계 필수). t4 는 첫 call 기하 미인증 HOLD 3–8 + 접근 identity — PE6 (`--no-target-certify`) 는 미채택 (G162–G163) | | |
-| **T5** | **구성 동결 (S0)** → headline E1a init 15–49 (AG3S + π0.5 짝) | `V=<동결 판> TAG=<tag> VLA=1 bash experiments/segmentation/e1a_headline_queue.sh` | AG3S 140 ep ≈ 4–5 h + VLA | 원고 Tab. 1 의 AG3S 행. baseline (AEGIS · CBF · KNOWS) 15–49 는 dev-38 (SL-QE) 과 같은 기계에서 |
+| **T5** | **구성 동결 (S0)** → 보고 run: baseline 과 같은 init (tranche 1 = 15–18, 이후 19–49) · 같은 서버 (이전 서버, §4.0) | `V=<동결 판> TAG=<tag> VLA=1 bash experiments/segmentation/e1a_headline_queue.sh` | AG3S 140 ep ≈ 4–5 h + VLA | 원고 Tab. 1 의 AG3S 행. baseline (AEGIS · CBF · KNOWS) 15–49 는 dev-38 (SL-QE) 과 같은 기계에서 |
 | T6 | 최종 계획의 자료 다시 뽑기 (동결 판으로) | `sl_pe_records/2026-11-09_최종실험_자료수집/` 의 `e4f_labels.py <tag>` (E4-F 실패 분류) · `timing_summary.py` (E6 · Tab. S11, **같은 날 · 같은 lock 으로 baseline 과 함께 재측정**) · `paired_candidates.py <tag>` (Fig. 1 · Video 후보) | 각 수 분 (CPU) | 원고 반영은 dev-4d (paper/) 담당 |
 
 T0 와 T1 은 하나의 queue 로 이어 돌려도 된다 (두 번째를 첫 번째 queue log 의 'queue pe2b end' 뒤에 시작). 단, **사용자 규칙: 단계 끝마다 commit 후 다음 단계** — 자동으로 이어 붙이기 전에 사용자에게 확인.
