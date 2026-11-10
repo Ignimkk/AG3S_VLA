@@ -3283,3 +3283,33 @@ LIBERO π0.5: 100.0 / 100.0 / 97.5 / 97.5 (spatial / object / goal / 10, 각 40 
 ### 다음
 
 queue E (AEGIS detector 나머지 + LIBERO AEGIS → KNOWS ±GT `-r3` + LIBERO KNOWS) → multi-link detector 나머지 + LIBERO multi-link (같은 HEAD d452c804). 이후 AG3S 검증용 control arm (+ generic geometry, + external segmentation; AG3S freeze S0 필요) 과 남은 9/10 tranche.
+
+### 갱신 (2026-11-11 04:1x) — queue F 중단 · Tab. 1 비교 방식 변경
+
+**결정 (사용자, 다른 세션이 전달):**
+- 03:xx · 03:4x: 논문 Tab. 1 의 baseline 은 각 원문의 **보고값**과 비교한다. baseline 보고 run (init 19–49) 은 계획의 맨 마지막 (주말 AG3S 논문 실험 뒤) 으로 옮긴다. KNOWS 판정 (F5 · `-r4`) 도 그 행 안에서 한다. 근거 문서 §4.18.
+- 03:5x: AG3S 개선 run 이 GPU 를 먼저 쓴다. queue F 는 03:52 에 queue shell 만 종료했다. 그때 돌던 run (LIBERO multi-link goal-r2) 은 04:05 에 끝났다 (40 ep, metrics 있음).
+- 보류한 run: LIBERO multi-link libero_10-r2, LIBERO-Safety π0.5 init 19 (60 ep). `bl_tranche_queue_f.sh` 를 다시 실행하면 끝난 block 을 건너뛰고 이어서 돈다.
+
+**현재 결과 (04:1x, `outputs/2026-11-09_baseline_tranche/t1/README.md` 재생성):**
+
+| arm | block | n | TSR | SSR | CAR | 논문 CAR | 차이 (pt) |
+|---|---|---|---|---|---|---|---|
+| π0.5 | 8 / 8 | 128 | 56.2 | 10.9 | 14.8 | 17.7 | −2.9 |
+| AEGIS | 8 / 8 | 128 | 70.3 | 43.8 | 59.4 | 68.9 | −9.5 |
+| AEGIS-GT | 8 / 8 | 128 | 71.1 | 44.5 | 60.2 | 68.9 | −8.7 |
+| multi-link CBF (detector) | 8 / 8 | 128 | 63.3 | 36.7 | 51.6 | 73.0 | **−21.4** |
+| multi-link CBF-GT (exact) | 8 / 8 | 128 | 64.8 | 43.0 | 67.2 | 73.0 | −5.8 |
+| KNOWS | 4 / 8 | 64 | 60.9 | 21.9 | 23.4 | 72.6 | −49.2 |
+| KNOWS-GT | 5 / 8 | 80 | 76.2 | 48.8 | 51.2 | 79.2 | −27.9 |
+
+LIBERO (장애물 없음) 성공률, spatial / object / goal / 10:
+- π0.5: 100 / 100 / 97.5 / 97.5
+- AEGIS: 95 / 85 / 80 / 90
+- multi-link CBF: 95 / 90 / 82.5 / –
+
+**관찰:**
+- multi-link detector 판이 8 block 을 모두 채운 뒤 −21.4 pt 로 §4.8 FLAG 선을 넘었다.
+  - 원인은 §4.14 진단과 같다: 공통 perception 의 recall 한계 (R4 로 선언한 대체 detector). GT 판 (exact) 은 −5.8 pt 다.
+  - port 결함이 아니므로 수정하지 않는다. Tab. 1 은 원문 보고값과 비교하므로 이 수치는 port 검증 기록으로만 쓴다.
+- KNOWS-GT 는 goal LI-r3 가 들어오면서 5 block 이 됐고 CAR 51.2 다. 판정은 §4.17 · §4.18 대로 계획의 맨 마지막에서 한다.

@@ -377,6 +377,26 @@ M3 은 효과가 측정상 0 이므로 적용하지 않고 선언된 편차로 �
 - detector 판: 수정 없음 (R4 recall 한계). attention target 중심 기록을 추가해 F4a 오제외를 셀 수 있게 하는 것은 기록 개선 (결과 불변).
 - 원문 충돌 정의 "contacted any non-target obstacle" 와 SafeLIBERO 1 mm 규칙의 차이 가능성 [I] 은 검증 불가 → R3 대로 SafeLIBERO 규칙 유지, 공개.
 
+### 4.18 baseline 보고 run 을 계획의 맨 마지막으로 이동 — Tab. 1 본 비교는 원문 보고값 (사용자 결정 2026-11-11 03:xx · 03:4x 정정, dev-e1 전달)
+
+| 항목 | 결정 |
+|---|---|
+| 논문 Tab. 1 baseline 행 | 각 원문의 **보고값** (재구현 · 재실행 비교 안 함). 근거 `paper/notes/PAPER_REVISION_REPORTED_COMPARISON_20261111_KO.md` |
+| 우리 측정 행 | π0.5 anchor · AG3S-VLA · AG3S-VLA GT oracle. 통제 baseline (generic geometry · external segmentation) 삭제 |
+| queue F (init 15–18 port 검증 + LIBERO-Safety π0.5 init 19) | **끝까지.** π0.5 단독이 원문 보고값을 재현한다는 anchor 근거 (tranche 1 π0.5 CAR 14.8 vs 원문 17.7, −2.9 pt) |
+| baseline 보고 run (init 19–49, 약 210 GPU h) | 취소 아님 — **계획의 맨 마지막으로 이동** (03:4x 정정: 시간 문제로 뺀 것). 선행 조건: 주말 AG3S 논문 실험 (11-14–15) 이 끝난 뒤 사용자 지시로 시작. 동결 port, AG3S 와 같은 init · seed · 기계, AG3S 가 쓴 init 19–28 부터, AEGIS ±GT → multi-link ±GT → KNOWS ±GT 순. π0.5 는 AG3S 실험의 anchor 재사용. 용도: 같은 episode 짝 비교 (McNemar) 로 supplement · rebuttal (본문 Tab. 1 은 원문 보고값 그대로) |
+| KNOWS 판정 (§4.17 F5) · `-r4` 재실행 · 남은 KNOWS tranche 1 | 맨 마지막 행 안으로 이동 — KNOWS 보고 run 앞에서 판정 · 실행 |
+| 이유 | 마감 11-17 20:59 KST 까지 210 h 와 AG3S 논문 실험 (약 50 GPU h, 주말 11-14–15) 을 둘 다 못 돌림 + port 충실도 문제 (KNOWS-GT CAR 등) |
+| 마감 전 범위 | 전체 210 GPU h 는 마감 (11-17 20:59 KST) 전에 일부만 가능 — 끝난 만큼 supplement (또는 Tab. 1 "our runs" 행), 나머지는 rebuttal · camera-ready |
+
+지금까지의 tranche 1 결과 (§4.13–4.17, BL-14) 는 그대로 둔다. 그 결과는 port 검증 기록이고 Tab. 1 수치가 아니다. queue F 가 끝나면 `bl_tranche_report.py` 로 표 · 그림을 다시 만들고 경계 commit 만 한다. 그 뒤 GPU run 은 AG3S 논문 실험이 끝나고 사용자가 지시할 때까지 시작하지 않는다.
+
+**queue F 중단 (사용자 지시 11-11 03:5x, dev-57 전달: AG3S 개선 run 이 GPU 를 먼저 쓴다).**
+- 03:52 에 queue shell 만 pid 로 종료했다. 그때 돌던 LIBERO multi-link goal-r2 는 04:05 에 끝났다 (40 ep, 82.5 %).
+- 보류: LIBERO multi-link libero_10-r2 (약 35 분), LIBERO-Safety π0.5 init 19 60 ep (약 1.5–2 h).
+- 재개: `bl_tranche_queue_f.sh` 를 다시 실행하면 끝난 block 은 건너뛴다. dev-57 이 GPU 가 비는 구간 (2 h 이상) 을 알려 오면 그때 돌린다.
+- 04:1x 현재 multi-link detector 판은 8/8 block 이고 CAR 51.6 (−21.4 pt, FLAG 선 넘음) 이다. §4.14 의 recall 진단과 같은 원인이라 수정하지 않는다 (BL-14 갱신 04:1x).
+
 
 ## 5. 결과
 
