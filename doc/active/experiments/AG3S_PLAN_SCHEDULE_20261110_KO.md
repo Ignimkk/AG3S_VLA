@@ -171,6 +171,7 @@ T5 뒤에 하면 이 서버에서 끝낸다. **이전 시점은 T5 와의 순서
 | 2026-11-11 03:5x | dev-55: P6-st1 끝 — **ST1 미채택** (LIBERO 27 21 · SafeLIBERO 안전 성공 5 · > 50 mm 3 · LS 5 위반 0; 규칙 6 중 3 미달). 모듈은 기본 꺼짐으로 branch `wip/stage-track` 에 보존 (`STAGE_TRACK_ST1_KO.md`). 다음 세션 인계: `doc/active/NEXT_SESSION_HANDOFF_20261111_KO.md` (개선 후보 순서 T1 → 정답 latch → ST2). |
 | 2026-11-11 03:5x | dev-57: 사용자 지시 — 목표 = 논문 Tab. 1–3 지표 최대화, dev-57 이 GPU 우선. dev-4a queue F 03:52 중지 (goal-r2 까지 끝, libero_10-r2 · LS π0.5 60 ep 보류). 채택 규칙을 E1a 40 SSR 주 기준으로 바꿈 (결과 전 고정, §9.2), 다른 suite 점검 셋 (init 15–18) 추가, 순서 변경 (§9.3). T1 E1a 40 시작. |
 | 2026-11-11 05:2x | dev-57: **T1 (PE11 단독 판) E1a 40 = TSR 22 · CAR 23 · SSR 15 — 지금 구성과 같음 → 미채택** (§9.4). 겨냥한 C 6 ep 중 충돌이 없어진 것은 1 (t3 e8, 대신 시간 초과), 새 큰 충돌 1 (t3 e14 252 mm). 40 ep 중 31 ep 은 step 수 · 변위까지 같음 → 같은 기계의 재실행은 재현된다. 다음 = 지금 구성의 다른 suite 점검 1 차 (MS, init 15 · 16). `-to0` 를 `-to5` 보다 먼저 (§9.3). |
+| 2026-11-11 07:1x | dev-57: **다른 suite 점검 1 차 (지금 구성, 56 ep) = TSR 24 · CAR 31 · SSR 17** (42.9 / 55.4 / 30.4 %); 같은 episode 의 π0.5 28 · 11 · 8, AEGIS port 35 · 32 · 21, multi-link port 28 · 32 · 19 (§9.5). CAR 은 baseline 과 같고 **TSR 이 가장 낮다** — 실패 31 ep 중 끝까지 HOLD 가 6 (target 못 찾음 3 · 쥔 물체 가림 3). 충돌 17 ep 의 offline 분석 (§9.6) 에서 나온 후보 **SL-SOTA1** (장애물 물체 행 전용 여유 `-om*`, `-ntc`) 를 commit 5a2460a8 로 넣음 (기본 꺼짐). 다음 = smoke → 묶음 판 `…-pe12345811-to0-om15p10s40-ntc-tro` E1a 40. |
 
 ---
 
@@ -226,3 +227,44 @@ queue: `experiments/segmentation/sota_queue.sh` (`STAGE=e1a|guard`), 기록 `out
 T1 기제 확인 (C 6 ep, 장애물 최대 변위 mm, 기준 → T1) [M]: t1 e6 312.6 → 312.6 (같은 step 77 에 충돌) · t1 e12 188.8 → 303.4 (성공으로 바뀜, 충돌은 남음) · t1 e14 328.9 → 70.9 · t2 e10 1449.6 → 1392.0 · t3 e8 2.3 → 0.0 (충돌 없어짐, 시간 초과로 실패) · t3 e13 487.3 → 487.3. 새 충돌 t3 e14 (0 → 252.3 mm, 실패). 즉 closed loop 에서는 6 ep 중 1 ep 만 충돌이 없어졌다 — offline (장애물 voxel 유지 39 / 39) 과 다르다. 원인은 기록으로 확인 예정 [해석: 장애물이 장애물 집합에 남아도 그 시점의 chunk 가 통과 기준 τ_obs 안이면 막지 못한다].
 
 재현성 [M]: 두 판의 40 ep 중 31 ep 은 종료 step · 충돌 step · 변위가 모두 같다 (PE11 flag 가 작동하지 않은 episode). 같은 기계 · 같은 seed 의 재실행 차이는 0 으로 볼 수 있고, 판 사이의 episode 맞바뀜은 그 flag 의 실제 효과다.
+
+### 9.5 다른 suite 점검 1 차 [M] (2026-11-11 05:23–07:12, HEAD 50608a57, `…-pe123458`, task 0–3 × init 15 · 16, seed 7, `main_aegis`)
+
+n · TSR · CAR · SSR. baseline 열은 dev-4a tranche 1 의 같은 기계 · 같은 episode (`outputs/2026-11-09_baseline_tranche/t1/blocks.csv`); 원본 `outputs/2026-11-11_SOTA_개선/ms/ms_paired_pe123458.json` (`ms_paired.py`).
+
+| cell | AG3S `…-pe123458` | π0.5 only | AEGIS port (detector) | multi-link port (detector) | multi-link port (GT) |
+|---|---|---|---|---|---|
+| Object L-I | 8 · 5 · 4 · 4 | 8 · 3 · 1 · 1 | 8 · 6 · 4 · 3 | 8 · 6 · 2 · 2 | 8 · 3 · 5 · 2 |
+| Object L-II | 8 · 5 · 5 · 3 | 8 · 5 · 3 · 2 | 8 · 4 · 4 · 2 | 8 · 4 · 4 · 2 | 8 · 5 · 4 · 2 |
+| Goal L-I | 8 · 3 · 4 · 2 | 8 · 2 · 0 · 0 | 8 · 6 · 6 · 5 | 8 · 4 · 4 · 3 | 8 · 4 · 6 · 3 |
+| Goal L-II | 8 · 3 · 5 · 3 | 8 · 4 · 4 · 3 | 8 · 6 · 3 · 2 | 8 · 6 · 7 · 6 | 8 · 7 · 7 · 7 |
+| Long L-I | 8 · 2 · 5 · 2 | 8 · 4 · 2 · 1 | 8 · 4 · 5 · 2 | 8 · 3 · 7 · 3 | 8 · 4 · 7 · 3 |
+| Long L-II | 8 · 3 · 7 · 2 | 8 · 4 · 0 · 0 | 8 · 4 · 6 · 4 | 8 · 3 · 5 · 1 | 8 · 4 · 6 · 2 |
+| Spatial L-II | 8 · 3 · 1 · 1 | 8 · 6 · 1 · 1 | 8 · 5 · 4 · 3 | 8 · 2 · 3 · 2 | 8 · 5 · 5 · 4 |
+| **합** | **56 · 24 · 31 · 17** | 56 · 28 · 11 · 8 | 56 · 35 · 32 · 21 | 56 · 28 · 32 · 19 | 56 · 32 · 40 · 23 |
+| % (TSR / CAR / SSR) | 42.9 / 55.4 / 30.4 | 50.0 / 19.6 / 14.3 | 62.5 / 57.1 / 37.5 | 50.0 / 57.1 / 33.9 | 57.1 / 71.4 / 41.1 |
+
+읽는 법 [해석]: AG3S 의 CAR (31) 은 detector baseline (32) 과 같다. 차이는 TSR 이다 (24 vs AEGIS 35, π0.5 28). E1a 40 도 같다 — KNOWS-GT port 33 · 22 · 21 vs AG3S 22 · 23 · 15: 충돌 없는 episode 수는 같고 그중 실패가 AG3S 8, KNOWS 1. → 개선 방향은 '충돌을 더 막기' 보다 **'충돌 없이 끝까지 성공하기'** (HOLD 교착 · QP 개입 뒤 못 쥠) 다. Spatial L-II 는 CAR 1 / 8 로 따로 볼 것.
+
+실패 31 ep 의 형태 [D] (앞 6 cell 27 ep 기준): 끝까지 HOLD 6 (`no_target · no_admissible` 로 110 call 전부 3 = Long task 2; `degraded · manipulated occluded` 3), HOLD 조금 2, HOLD 없이 실패 19 (다수는 π0.5 도 충돌로 실패하고 AEGIS 는 성공).
+
+### 9.6 SL-SOTA1 후보 (결과 전 기록, 07:1x)
+
+근거 = E1a 충돌 17 ep 의 offline 분석 (`outputs/2026-11-11_SOTA_개선/README.md` §2, 그림 `offline/fig_first_contact_pe123458.png`):
+
+| 관측 [M] | 수치 | 후보 |
+|---|---|---|
+| 장애물이 target 과 한 연결 성분이라 장애물 집합에서 빠짐 | 5 ep (접촉점–집합 거리 140–270 mm) | PE11 (`…-pe12345811`) + `--obstacle-surface-tol-mm 40` (PE11 뒤에도 21–40 mm) |
+| 장애물 행이 τ_obs 10 mm 안이라 통과 | 5 ep (model 거리 0–7 mm) | `-to0` + `--obstacle-row-margin-mm 15` |
+| QP 를 풀고도 닿음 (계획 ↔ 실제 10–30 mm, 손목 회전으로 회피) | 5 ep | `-tro` + `--obstacle-row-priority 10` + 여유 |
+| world model 이 손 아래 장애물 면을 놓침 | 접촉점 ESDF 12–27 mm | 여유 |
+| target 을 못 찾아 처음부터 HOLD | E1a t0 e7 (60 / 60), MS Long task 2 (110 / 110) 3 ep | `-ntc` (`--no-target-certify`, PE6) |
+| `-tro` 판 (E1a 24 · 20 · 17) 의 충돌 20 ep 중 변위 ≤ 13 mm | 11 ep | 여유 |
+
+위험 [M]: 안전 성공 15 ep 중 12 ep 이 장애물을 실제 20 mm 안으로 지난다 → 여유 15 mm (model 표면에서 30 mm) 가 성공을 줄일 수 있다. 판정은 §9.2 그대로 (E1a 40 SSR, 기준 = `…-pe123458` 15).
+
+| 순서 | 판 | 목적 |
+|---|---|---|
+| a | `…-pe12345811-to0-om15p10s40-ntc-tro`, E1a t0 e7 · e10 (smoke, `sota_sub_queue.sh`) | 새 코드 경로 · 기록 확인 (채택 판정 아님) |
+| b | 같은 판 E1a 40 | 묶음의 효과 |
+| c | b 의 결과에 따라 구성 요소를 나눠 봄 (`-to0-tro`, `-ntc-tro`, `om25`) 또는 guard | |
