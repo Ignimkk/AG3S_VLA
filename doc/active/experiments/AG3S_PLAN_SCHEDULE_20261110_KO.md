@@ -12,6 +12,7 @@ baseline [`BASELINE_TRANCHE_PLAN_PORT_RATIONALE_20261109_KO.md`](BASELINE_TRANCH
 
 ## 1. 한눈에
 
+- **계획 변경 (사용자 결정 2026-11-11):** 논문 Tab. 1 은 baseline 을 **원문 보고값**과 비교한다. dev-4a 의 baseline 보고 run (init 19–49) 은 취소가 아니라 **계획의 맨 마지막으로 이동** (AG3S 논문 실험 뒤, 사용자 지시 11-11 03:4x), queue F 는 끝까지. AG3S 논문 실험은 주말 (11-14–15). 문헌 배치 · 표 구조 · 문장 초안: [`paper/notes/PAPER_REVISION_REPORTED_COMPARISON_20261111_KO.md`](../../../paper/notes/PAPER_REVISION_REPORTED_COMPARISON_20261111_KO.md).
 - **지금 AG3S 구성:** `…-pe123458` (GT 없는 최종 후보). 평가 규약 [M]: 평가 LIBERO 27 **22** · SafeLIBERO 11 안전 성공 **6** · LIBERO-Safety 10 **5** (위반 0) · E1a 40 (개발 분할) SSR **15** (목표 > 23 미달).
 - **GPU 는 dev-4a 의 baseline queue 가 11/11 정오 무렵까지 쓴다.** 그 사이 run 경계마다 lock 이 풀리므로 짧은 작업을 끼워 넣는다.
 - **이번 세션 (dev-55) 의 다음 GPU 작업 = 새 단계 추정기 (`…-pe123458-st1`) 를 줄인 평가 규약 48 ep 로 1 회 (약 1.4 h).** 정답 latch arm (`-ol`) 은 조건부.
@@ -27,21 +28,26 @@ baseline [`BASELINE_TRANCHE_PLAN_PORT_RATIONALE_20261109_KO.md`](BASELINE_TRANCH
 
 | 시각 (KST) | 세션 | 작업 | 목적 (한 줄) | GPU | 산출 · 판정 |
 |---|---|---|---|---|---|
-| 11-09 18:5x – 진행 중 | dev-4a | baseline tranche 1 (init 15–18): π0.5 · AEGIS(±GT) · multi-link CBF(±GT) · KNOWS(±GT), SafeLIBERO 4 suite × LI/LII + LIBERO 4 suite | **논문 Tab. 1 의 baseline 행** — AG3S 를 논리적으로 검증하는 비교 대상. 원문과 차이가 크면 원인을 찾아 port 를 고침 (BL-14) | 독점 | `outputs/2026-11-09_baseline_tranche/t1/`, BL-14 |
+| 11-09 18:5x – 진행 중 | dev-4a | baseline tranche 1 (init 15–18 = **baseline port 검증 분할**, 사용자 판정 11-10 23:1x A안): π0.5 · AEGIS(±GT) · multi-link CBF(±GT) · KNOWS(±GT), SafeLIBERO 4 suite × LI/LII + LIBERO 4 suite | **논문 Tab. 1 의 baseline 행** — AG3S 를 논리적으로 검증하는 비교 대상. 원문과 차이가 크면 원인을 찾아 port 를 고침 (BL-14) | 독점 | `outputs/2026-11-09_baseline_tranche/t1/`, BL-14 |
 | 11-10 16:03 – 22:2x | dev-55 | 제약 단계 추종 P0–P5b (hidden h_10 + gripper → 4 단계) | latch 의 단계 오류 (늦은 HELD · 빈 닫힘 미감지) 를 줄여 제약이 맞는 단계에 걸리게 | P3 만 공유 3 분 | README §1–§11, worktree branch `wip/stage-track` |
 | 11-10 18:4x – 진행 중 | dev-f1 | AMRC → SDM 서버 이전 준비 (pull · bootstrap script, /root · Qwen cache 복사) | 이 pod 를 SDM 으로 옮김 (NAS · image 공유 불가 → SSH 로 약 450 GB pull) | 없음 | `/mnt/dev/_migration/README_KO.md` |
 | 11-10 21:3x – 22:3x | (dev-4a subagent) | LIBERO-Safety 사전 판정 H1 · H2 · B1, tranche C queue 작성 (실행 안 함) | Tab. 2 π0.5 행을 공식 `pi05_libero_safety` 로 낼 준비 | 없음 | `outputs/2026-11-10_LIBERO-Safety_사전판정/README.md` |
-| 11-10 22:41 – ~07:00 | dev-4a | **queue E**: KNOWS ±GT `-r3` SafeLIBERO 12 run 남음 + LIBERO KNOWS 4 | KNOWS port 수정판의 tranche 1 채우기 | 독점 | 원래 ~05:30 종료, st1 를 끼우면 ~07:00 |
+| 11-10 22:41 – 11-11 00:3x | dev-4a | **queue E** (중단): KNOWS ±GT `-r3` SafeLIBERO 5 run 끝 (object LII 는 HEAD 변경으로 metric 사후 작성) | KNOWS-GT 64 ep CAR 43.8 vs 논문 82.2 / 76.1 → FLAG, 진단으로 | 독점 | baseline 문서 §4.17 |
+| 11-11 00:1x – ~02:30 | dev-4a (subagent) | KNOWS-GT 차이 진단 (CPU) | 원인 → R1 수정 여부 | 없음 | `outputs/2026-11-11_KNOWS_GT_gap/` |
 | 11-10 ~23:00 | dev-55 | 이 계획서 · P5b commit (branch `wip/stage-track`, 공유 checkout HEAD 불변) | 단계 경계 기록 (규칙: 단계 끝 commit) | — | |
 | 11-10 ~23:20 (run 경계) | dev-55 | **P5b GPU 확인** (`p5b_gpu_check.py`, 공유 lock, 약 5 분) | 서버 경로 (attention model 복사본) 의 h_10 이 학습에 쓴 P3 feature 와 같은지, 요청당 추가 ms | 공유 | 통과 조건: 상대 오차 < 1e-2 · 단계 일치 ≥ 0.99 |
-| 11-10 ~23:40 – ~01:05 | dev-55 | **P6-st1**: `…-pe123458-st1` × 평가 LIBERO 27 + SafeLIBERO 11 + LIBERO-Safety 10 (48 ep) | 새 단계 추정기가 실제 벤치마크 지표를 올리는지 (§4 기준) | 독점 | 위 GPU 확인 통과 시에만 |
+| 11-10 23:20 – 11-11 03:41 (실측) | dev-55 | **P6-st1 (끝남)**: `…-pe123458-st1` × 평가 LIBERO 27 + SafeLIBERO 11 + LIBERO-Safety 10 (48 ep) | 새 단계 추정기가 실제 벤치마크 지표를 올리는지 | 독점 | **미채택** [M]: LIBERO 27 21 (vs 22), SafeLIBERO 11 성공 · 안전 성공 · 충돌 8 · 5 · 5 (vs 8 · 6 · 4), > 50 mm 3 (vs 1), LS 10 5 (vs 5, 위반 0). 원인 = 요청 하나의 판정으로 attach / detach 를 바꾸는 깜빡임. `doc/active/experiments/STAGE_TRACK_ST1_KO.md` |
 | 11-11 ~01:05 – 02:00 | dev-55 | P6 분석 (CPU): 성공 · 안전 성공 · 충돌 + closed-loop 단계 오류 (P2 재채점) | 성공률 변화가 단계 추종 때문인지 기제 확인 | — | README §12 |
-| 11-11 ~07:00 – ~12:00 | dev-4a | queue E → F 경계 commit, **queue F**: multi-link detector 4 SafeLIBERO block + LIBERO multi-link 4 + LIBERO-Safety π0.5 tranche C (60 ep, init 15) | baseline tranche 1 마무리 + Tab. 2 π0.5 행 | 독점 | 그 뒤 AG3S 동결 (S0) 전까지 dev-4a GPU 계획 없음 |
+| 11-11 ~00:3x – ~06:00 | dev-4a | queue E → F 경계 commit, **queue F** (앞당김): multi-link detector 4 SafeLIBERO block + LIBERO multi-link 4 + LIBERO-Safety π0.5 tranche C (60 ep, **init 19**) | baseline tranche 1 마무리 (port 검증) + Tab. 2 π0.5 행의 첫 1/10 | 독점 | 끝나면 AEGIS · multi-link · π0.5 port **동결** (A안). KNOWS 는 표 맨 아래 마지막 행 |
 | 11-11 ~12:00 – 13:25 | dev-55 | (조건부) **P6-ol**: `…-pe123458-ol` 같은 48 ep | st1 이 지금 latch 와 차이가 없을 때만 — 단계를 완벽히 맞히면 오르는가 (상한) | 독점 | |
 | 11-11 ~13:30 – 17:00 | dev-55 (제안) | **T1** PE11 단독 판 `…-pe12345811` 평가 규약 전체 + E1a 5–14 | 남은 충돌 기제 C (장애물이 대상과 한 덩어리) 대응의 closed-loop 판정 | 독점 | G163 기준 |
+| (이동) | dev-4a | ~~baseline 보고 run~~ → **표의 맨 마지막 행으로 이동** (사용자 지시 11-11 03:4x) | — | — | — |
+| **11-14 – 11-15 (주말, 사용자 일정)** | 미정 (사용자 지정) | **AG3S 논문 실험**: SafeLIBERO 4 suite × L-I · L-II (AG3S 최종 구성 · AG3S GT oracle · π0.5 anchor, 같은 init · seed), LIBERO, ablation, + grounding · LIBERO-Safety · 실로봇 | 원고 Tab. 1–3 · Fig. 3 | 독점 | 범위 권고 init 19–28, 약 46–51 GPU h [D, 거칠게] (수정안 §10.4). **선행: 최종 구성 동결 (사용자 결정 대기)**. 4 suite · 2 level 은 줄이지 않는다 (원문 값이 4 suite 평균) |
 | 미정 (사용자 결정) | dev-f1 / 사용자 | SDM 쪽 rsync (약 1–1.5 h, 이 pod NFS 읽기) → AMRC run 이 모두 멈춘 뒤 최종 delta | 서버 이전 | 없음 (IO) | 이전 후 anchor 재측정 필요 (§5) |
+| **계획의 마지막** (사용자 지시 11-11 00:4x) — **AG3S 논문 실험 뒤로 이동 (사용자 지시 11-11 03:4x; 아래 맨 마지막 행의 일부로 실행)** | dev-4a | **KNOWS 판정 · 남은 tranche 1 · 동결** (F5 적용 · `-r4` 재실행 · KNOWS 보고 run 모두 보류; Tab. 1 KNOWS 행은 원문 보고값, 진단 결과는 port 충실도 근거로만 남김): 진단 (`outputs/2026-11-11_KNOWS_GT_gap/`, 00:1x 시작) 결과로 (a) 원문 근거 R1 수정 → 새 판으로 KNOWS ±GT tranche 1 전체 (SafeLIBERO 16 + LIBERO 4 run, 약 8 h) 또는 (b) 수정 없음 → 남은 11 run (약 5 h) 와 차이 · 원인 공개. 그 뒤 KNOWS port 동결 → KNOWS 보고 run (init 19–49) | Tab. 1 KNOWS 행 | 독점 | baseline 문서 §4.17. **진단 끝 (00:3x): 권고 = F5** (GT 판을 원문 Naive 정의 't = 0 고정, 갱신 없음' 으로 → GT 판 `-r4` 재실행, 약 8 h 중 GT 8 block · 2.7 h), detector 판 수정 없음 (recall 한계) |
+| **계획의 맨 마지막** (사용자 지시 11-11 03:4x: 시간 문제로 뺀 것이므로 취소하지 않고 마지막에 둔다) | dev-4a | **baseline 직접 실행 (port) 보고 run**: 동결 port, AG3S 와 **같은 init · seed · 기계** — AEGIS ±GT · multi-link ±GT (+ π0.5 는 AG3S 실험의 anchor 재사용), KNOWS ±GT 는 판정 (F5 · `-r4`) 뒤 | 같은 episode 짝 비교 (McNemar) — 원문 보고값 비교보다 강한 근거. 마감 전에 끝난 만큼 supplement (또는 Tab. 1 의 "our runs" 행) 에, 나머지는 rebuttal · camera-ready 용 | 독점 | **선행: 주말 AG3S 논문 실험 (11-14–15) 이 모두 끝난 뒤.** 순서 권고: AG3S 가 쓴 init (19–28) 부터 → AEGIS → multi-link → KNOWS. 전체 init 19–49 는 약 210 GPU h [D] 라 마감 (11-17 20:59 KST) 전에는 일부만 가능. Tab. 1 의 본 비교는 원문 보고값 그대로 |
 
-규칙 (모든 세션): GPU 는 `scripts/setup/gpu_lock.py` 로만 (closed-loop = 독점, offline 추출 = 공유), 바깥 flock 금지; queue 가 도는 동안 공유 checkout 의 HEAD 불변; 단계 끝마다 commit 후 다음 단계 (자동 연쇄 금지); CPU 작업은 세션당 2 core 이하 — **`OMP_NUM_THREADS=MKL_NUM_THREADS=OPENBLAS_NUM_THREADS=1`** (11-10 P4 가 다중 thread BLAS 로 dev-4a run 을 3–4 배 느리게 함); E1a init 15–49 는 사용자 승인 없이는 보지 않는다 (G171).
+규칙 (모든 세션): GPU 는 `scripts/setup/gpu_lock.py` 로만 (closed-loop = 독점, offline 추출 = 공유), 바깥 flock 금지; queue 가 도는 동안 공유 checkout 의 HEAD 불변; 단계 끝마다 commit 후 다음 단계 (자동 연쇄 금지); CPU 작업은 세션당 2 core 이하 — **`OMP_NUM_THREADS=MKL_NUM_THREADS=OPENBLAS_NUM_THREADS=1`** (11-10 P4 가 다중 thread BLAS 로 dev-4a run 을 3–4 배 느리게 함); E1a init 15–49 는 사용자 승인 없이는 보지 않는다 (G171). **보고 분할 = init 19–49** (11-10 23:1x 사용자 A안: init 15–18 은 baseline port 수정을 결정할 때 본 분할이라 'baseline port 검증 분할' 로 표시, 모든 arm · AG3S headline 에서 뺌).
 
 ---
 
@@ -111,7 +117,7 @@ baseline [`BASELINE_TRANCHE_PLAN_PORT_RATIONALE_20261109_KO.md`](BASELINE_TRANCH
 
 | 순위 | 작업 | 목적 · 노리는 실패 | 담당 | GPU | 상태 |
 |---|---|---|---|---|---|
-| 1 | **P6-st1** 단계 추정기 closed-loop (줄인 평가 규약 48 ep) | §4.3 의 S3 진입 지연 · 빈 닫힘 → s9 t1 · LS human_safety · 무충돌 실패 | dev-55 | 1.4 h | 구현 · test 끝 (P5b), GPU 확인 대기 |
+| ~~1~~ 끝 | **P6-st1** 단계 추정기 — **미채택 (11-11 03:41)**, 다음 세션 인계 `doc/active/NEXT_SESSION_HANDOFF_20261111_KO.md` closed-loop (줄인 평가 규약 48 ep) | §4.3 의 S3 진입 지연 · 빈 닫힘 → s9 t1 · LS human_safety · 무충돌 실패 | dev-55 | 1.4 h | 구현 · test 끝 (P5b), GPU 확인 대기 |
 | 2 | (조건부) P6-ol 정답 latch | st1 무변화 시 '단계 추종의 상한' 판정 | dev-55 | 1.4 h | 서버 기능 있음 (SL14) |
 | 3 | **T1** PE11 단독 판 평가 규약 + E1a 5–14 | 충돌 기제 C (6–7 ep) | dev-55 (제안) / dev-4a | 3.5 h | 판 등록 · test 끝 |
 | 4 | T2 τ_obs 5 mm (`…-to5`) | 충돌 기제 A (5 ep), SafeLIBERO t2 e2 | 미정 | 3.5 h | 판 등록 필요 |
@@ -119,7 +125,8 @@ baseline [`BASELINE_TRANCHE_PLAN_PORT_RATIONALE_20261109_KO.md`](BASELINE_TRANCH
 | 6 | T4 PE8 첫 held call 틈 · 서랍 t4 | LIBERO s9 t1 · t4, LS human_safety | 미정 | | P6 결과 보고 설계 (S2→S3 경계를 단계 추정기가 이미 당김) |
 | 7 | 잘못된 물체 파지 감지 (새) | E1a t1 e8 · t2 e10 — 장애물 · 다른 그릇을 쥠 | 미정 | offline 먼저 | 후보: 쥔 물체 위치 vs target 추정 비교 [P] |
 | 8 | PLACED 미도달 확인 | `--placed-no-seed-certify` · `home` 이 실제로 쓰이는지 | 미정 | CPU (기록) | |
-| 9 | **S0 동결 → T5 보고 run** (E1a init 15–49 + baseline 과 같은 기계 · 같은 init) | 논문 headline | 사용자 결정 | 4–5 h + VLA | init 15–49 는 사용자 승인 필요 |
+| 9 | **S0 동결 → T5 보고 run** (E1a **init 19–49** + baseline 과 같은 기계 · 같은 init) | 논문 headline | 사용자 결정 | 4–5 h + VLA | 보고 분할은 사용자 승인 필요 (A안: 15–18 제외) |
+| 9a | (11-11 변경) T5 의 구성: AG3S 최종 구성 + **AG3S GT oracle** + **π0.5 anchor**, SafeLIBERO 4 suite × L-I · L-II, 같은 init · seed. baseline arm 은 돌리지 않음 (원문 보고값) | Tab. 1 우리 행 3 개 | 사용자 결정 | ≈ 26–29 h (+ LIBERO · ablation) | 주말 예정 |
 | 10 | T6 최종 자료 재추출 (E4-F 분류 · timing · Fig. 1 후보) | 원고 | 동결 뒤 | CPU | |
 
 **서버 이전 주의 (dev-f1 작업과 연결):** 기계가 바뀌면 XLA kernel 차이로 π0.5 chunk 자체가 달라져 closed-loop 결과가 바뀐다 (11-03 확인).
@@ -153,3 +160,11 @@ T5 뒤에 하면 이 서버에서 끝낸다. **이전 시점은 T5 와의 순서
 | 시각 (KST) | 내용 |
 |---|---|
 | 2026-11-10 22:5x | 처음 작성 (dev-55). dev-4a · dev-f1 의 22:4x 답장으로 일정 확정. |
+| 2026-11-10 23:2x | dev-4a: 사용자 A안 반영 — 보고 분할 init 19–49 (15–18 = baseline port 검증 분할), baseline port 는 queue F 뒤 동결, LS tranche C init 15 → 19, 'baseline 보고 run' 행 추가. 근거 `BASELINE_TRANCHE_PLAN_PORT_RATIONALE_20261109_KO.md` §4.16. |
+| 2026-11-10 23:3x | dev-4a: 사용자 판정 — 서버 이전에 따른 출력 차이 (같은 기계 조건) 는 세션이 고려하지 않음, 사용자가 직접 해결 · 논문에 기술. |
+| 2026-11-11 00:2x | dev-4a: KNOWS-GT FLAG → queue E 중단 · queue F 앞당김 · KNOWS 나머지는 F 뒤 (baseline 문서 §4.17). 23:58 dev-f1 commit 으로 HEAD 가 queue 중 바뀜 → 규칙 재확인 요청. |
+| 2026-11-11 00:4x | dev-4a: 사용자 지시 — KNOWS 판정 · 재실행을 계획의 마지막 행으로; 동결 · 보고 run 은 AEGIS · multi-link · π0.5 먼저, KNOWS 는 판정 뒤. |
+| 2026-11-11 03:xx | dev-e1: 사용자 결정 — Tab. 1 baseline 은 원문 보고값 비교, baseline 보고 run 보류 (queue F 는 끝까지), Tab. 1 에 AG3S GT oracle 행 추가 · 통제 baseline 2 개 (generic geometry · external segmentation) 삭제 · VLPSA 는 Related Work 논의만, AG3S 논문 실험은 주말. 근거 `paper/notes/PAPER_REVISION_REPORTED_COMPARISON_20261111_KO.md`. dev-4a · dev-55 · SDM이전방법 세션에 전달. |
+| 2026-11-11 03:2x | dev-4a: dev-e1 전달 반영 — 마지막 행 (KNOWS 판정 · 재실행) 도 보류 표시. queue F 는 끝까지 (03:05 기준 LIBERO multi-link object 진행 중, 그 뒤 goal · 10 · LIBERO-Safety π0.5 60 ep). queue F 뒤 자동 후속 run 없음 (`bl_tranche_queue_f.sh` 는 LS 뒤 종료). baseline 문서 §4.18. |
+| 2026-11-11 03:4x | dev-e1: 사용자 지시 — baseline 직접 실행 (port) 보고 run 은 보류가 아니라 **계획의 맨 마지막** (AG3S 논문 실험 뒤). KNOWS 판정 · 재실행도 그 행에 포함. Tab. 1 의 본 비교 (원문 보고값) 는 그대로. |
+| 2026-11-11 03:5x | dev-55: P6-st1 끝 — **ST1 미채택** (LIBERO 27 21 · SafeLIBERO 안전 성공 5 · > 50 mm 3 · LS 5 위반 0; 규칙 6 중 3 미달). 모듈은 기본 꺼짐으로 branch `wip/stage-track` 에 보존 (`STAGE_TRACK_ST1_KO.md`). 다음 세션 인계: `doc/active/NEXT_SESSION_HANDOFF_20261111_KO.md` (개선 후보 순서 T1 → 정답 latch → ST2). |
