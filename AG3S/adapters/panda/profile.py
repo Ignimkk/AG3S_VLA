@@ -1156,6 +1156,27 @@ for _b in ((PE_VERSIONS[6], PE_VERSIONS[11], PE_VERSIONS[6] + "-to0", PE_VERSION
     SOTA_NTC_VERSIONS = SOTA_NTC_VERSIONS + (_b + "-ntc", _b + "-ntc-tro")
 del _b
 SOTA_VERSIONS = SOTA_VERSIONS + SOTA_NTC_VERSIONS
+#: SL-SOTA2 / SL-SOTA3 (dev-57, 2026-11-11) on the obstacle-row margin versions: ``-pt<n>`` = --obstacle-row-patience n (the
+#: margin is dropped after n consecutive calls inside it, until a chunk clears it again), ``-pg<g*10>`` =
+#: --ee-action-qp-progress g (the blocked correction prefers up while held / toward the target before the grasp). E1a task 0
+#: of ...-om15p10s40-ntc-tro: CAR 3 -> 7, SSR 1 -> 4 of 10, and 5 episodes out of steps in front of what blocked them
+#: (the mug under the descent, the forearm at the moka pot / wine bottle, the target / plate read as an obstacle).
+#: Name = <-om* base>[-ntc][-pt<n>][-pg<k>][-tro].
+SOTA_STALL_VERSIONS: tuple[str, ...] = ()
+_SOTA_STALL_SUFFIXES: dict[str, tuple[str, ...]] = {
+    "-pt6": ("--obstacle-row-patience", "6"),
+    "-pg4": ("--ee-action-qp-progress", "0.4"),
+    "-pt6-pg4": ("--obstacle-row-patience", "6", "--ee-action-qp-progress", "0.4"),
+    "-pt3": ("--obstacle-row-patience", "3"),
+    "-pt3-pg4": ("--obstacle-row-patience", "3", "--ee-action-qp-progress", "0.4"),
+}
+for _b in tuple(v for v in SOTA_OM_VERSIONS + SOTA_NTC_VERSIONS if "-om" in v and not v.endswith("-tro")):
+    for _suffix, _flags in _SOTA_STALL_SUFFIXES.items():
+        AG3S_VERSIONS[_b + _suffix] = tuple(AG3S_VERSIONS[_b]) + _flags
+        AG3S_VERSIONS[_b + _suffix + "-tro"] = AG3S_VERSIONS[_b + _suffix] + ("--ee-action-qp-translation-only",)
+        SOTA_STALL_VERSIONS = SOTA_STALL_VERSIONS + (_b + _suffix, _b + _suffix + "-tro")
+del _b, _suffix, _flags
+SOTA_VERSIONS = SOTA_VERSIONS + SOTA_STALL_VERSIONS
 GT15_VERSIONS = GT15_VERSIONS + SOTA_VERSIONS
 #: (G88c, 03:5x) the A-alone ablation queued as ``…-obst3`` (gtto23, not started yet) gets the same two fixes, so A alone and
 #: A + B differ only by the held point model: ``…-obst3`` := A'' + no carve + support "under" (``…-obst3-pts`` = B'' keeps

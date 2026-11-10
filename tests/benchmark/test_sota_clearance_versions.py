@@ -6,7 +6,7 @@ BASE = "AG3S-commonto-att-termsoff-pass-zr-ee-hdp-loose2-obst4-pts-nocarve-fh-t1
 
 
 def test_names_and_flags():
-    assert len(pf.SOTA_VERSIONS) == 8 + len(pf.SOTA_OM_VERSIONS) + len(pf.SOTA_NTC_VERSIONS)
+    assert len(pf.SOTA_VERSIONS) == 8 + len(pf.SOTA_OM_VERSIONS) + len(pf.SOTA_NTC_VERSIONS) + len(pf.SOTA_STALL_VERSIONS)
     assert set(pf.SOTA_VERSIONS) <= set(pf.GT15_VERSIONS)
     for b in (BASE + "pe123458", BASE + "pe12345811"):
         base = tuple(pf.AG3S_VERSIONS[b])
@@ -38,3 +38,15 @@ def test_no_target_certify_versions():
         assert tuple(pf.AG3S_VERSIONS[name]) == tuple(pf.AG3S_VERSIONS[parent]) + (extra,)
         assert tuple(pf.AG3S_VERSIONS[name]).count("--no-target-certify") == 1
         assert pf.version_server_flags(name)
+
+
+def test_stall_versions():
+    assert len(pf.SOTA_STALL_VERSIONS) == 5 * 2 * 16 and len(set(pf.SOTA_VERSIONS)) == len(pf.SOTA_VERSIONS)
+    name = BASE + "pe12345811-to0-om15p10s40-ntc-pt6-pg4-tro"
+    assert name in pf.SOTA_STALL_VERSIONS
+    v = tuple(pf.AG3S_VERSIONS[name])
+    assert v[-5:] == ("--obstacle-row-patience", "6", "--ee-action-qp-progress", "0.4", "--ee-action-qp-translation-only")
+    for n in pf.SOTA_STALL_VERSIONS:
+        assert pf.version_server_flags(n)
+    fam = pf.version_flag_values(pf.parse_v11ab_args())
+    assert "ee_action_qp_progress" not in fam and "obstacle_row_patience" not in fam

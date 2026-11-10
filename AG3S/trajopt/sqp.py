@@ -103,6 +103,15 @@ class TrajectoryOptimizer:
     #: correction bends the policy's position only, as the E1a multi-link CBF does (E1a task 3: the F7 QP moved rx / ry / rz
     #: by ~1.0 on the first intervention, the grasp pose was lost; G110).
     ee_action_fixed_dims = None
+    #: SL-SOTA2 (dev-57, 2026-11-11, `--ee-action-qp-progress GAIN`, default off = None): ``{"dims": (x, y, z action
+    #: columns), "gain": float, "full_at_m": float, "link": str, "min_xy_m": float}`` -- while the policy chunk violates an
+    #: obstacle-object row (the pass-through record's `obstacle_rows.violation_m` > 0) the action QP's cost becomes
+    #: ``1/2 ||Da||^2 - g * sum_k u . Da[k, dims]`` with ``g = gain * min(1, violation / full_at_m)``: among the corrections
+    #: that meet the rows it prefers the one that also moves along ``u`` -- up (+z) while an object is held, horizontally
+    #: toward the grounded target before the grasp (`_progress_direction`). The min-norm correction only brakes: smoke E1a
+    #: t0 e10 with the obstacle-row margin hovered 27 calls above the mug (the bowl 150 mm to the side) and ran out of steps;
+    #: t0 e12 / e9 held the bowl 19 / 6 calls with the forearm (link5) in front of the moka pot / wine bottle.
+    ee_action_progress = None
     ee_action_scaled_quad_weight = 1.0e4
     ee_action_scaled_linear_weight = 1.0e2
 
@@ -1405,6 +1414,7 @@ class TrajectoryOptimizer:
             return False
         # SL-SOTA1 (2026-11-11): the obstacle-object rows keep `obstacle_row_margin` more than their floor (None = 0, as before)
         margin = float(getattr(self.config.sqp, "obstacle_row_margin", None) or 0.0)
+        patience = getattr(self.config.sqp, "obstacle_row_patience", None)   # SL-SOTA3 (None = the margin always holds)
         try:
             full = bool(getattr(self.config.sqp, "passthrough_obstacle_full_horizon", False))   # SL-GTTO22
             worst, pair = self.linearizer.obstacle_object_rows(
@@ -1413,13 +1423,29 @@ class TrajectoryOptimizer:
             import traceback
             record["obstacle_rows"] = {"error": repr(exc), "where": traceback.format_exc(limit=-3)[-900:]}
             return True
+        patience_rec = None
+        if margin > 0.0 and patience is not None:
+            # SL-SOTA3: the margin is a preference with a limit. After `patience` consecutive calls whose policy chunk is
+            # inside it the margin is dropped (the floor and its tolerance stay) until a chunk clears the full margin again.
+            inside = bool(np.isfinite(worst) and float(worst) < margin)
+            blocked = int(getattr(self, "_obstacle_blocked_calls", 0)) + 1 if inside else 0
+            relaxed = bool(getattr(self, "_obstacle_margin_relaxed", False)) if inside else False
+            if blocked > int(patience):
+                relaxed = True
+            self._obstacle_blocked_calls, self._obstacle_margin_relaxed = blocked, relaxed
+            patience_rec = {"calls": int(patience), "blocked_calls": blocked, "relaxed": relaxed}
+            if relaxed:
+                margin = 0.0
+        self._obstacle_margin_now = margin
         violation = max(0.0, margin - float(worst)) if np.isfinite(worst) else 0.0
         record["obstacle_rows"] = {"tolerance_m": float(tol), "violation_m": violation,
                                    "worst": pair if pair is None else {k: pair.get(k) for k in (
                                        "step", "link", "obstacle", "clearance_m", "point_m", "n_obstacle_rows",
                                        "n_rows", "n_beneath", "n_object_points")}}
-        if margin > 0.0:
+        if margin > 0.0 or patience_rec is not None:
             record["obstacle_rows"]["margin_m"] = margin   # SL-SOTA1: key only when on
+        if patience_rec is not None:
+            record["obstacle_rows"]["patience"] = patience_rec
         return violation > float(tol)
 
 
@@ -1483,10 +1509,29 @@ class TrajectoryOptimizer:
         # `obstacle_row_priority` times the other rows' -- the L1 slack otherwise trades one deep obstacle row against many
         # shallow contact-surface rows.
         orm = getattr(getattr(cfg, "sqp", None), "obstacle_row_margin", None)
+        if orm is not None and getattr(getattr(cfg, "sqp", None), "obstacle_row_patience", None) is not None:
+            orm = float(getattr(self, "_obstacle_margin_now", orm))   # SL-SOTA3: 0 while the margin is relaxed
         prio = float(getattr(getattr(cfg, "sqp", None), "obstacle_row_priority", 1.0) or 1.0)
         if orm is not None:
             rec["obstacle_row_margin_m"] = float(orm)
             rec["obstacle_row_priority"] = prio
+            if float(orm) <= 0.0:
+                orm = None   # SL-SOTA3: the margin is relaxed -- the plain rows and equal slack weights, as without it
+        prog, prog_q = getattr(self, "ee_action_progress", None), None   # SL-SOTA2 (None = off: the cost below as before)
+        if prog:
+            ob = ((passthrough_record or {}).get("obstacle_rows") or {}) if isinstance(passthrough_record, dict) else {}
+            violation = float(ob.get("violation_m") or 0.0)
+            gain = float(prog["gain"]) * min(1.0, violation / max(float(prog.get("full_at_m", 0.02)), 1e-9))
+            direction, why = (None, "no obstacle-object row violated") if gain <= 0.0 else self._progress_direction(
+                prog, reference, q_now, scene)
+            rec["progress"] = {"gain": round(gain, 4), "violation_m": violation, "mode": why,
+                               "direction": None if direction is None else [round(float(v), 3) for v in direction]}
+            if direction is not None:
+                R = amap.get("R_world_base")   # the position action is a world-frame step, the geometry is in the base frame
+                u = np.asarray(direction, np.float64) if R is None else np.asarray(R, np.float64) @ np.asarray(direction, np.float64)
+                prog_q = np.zeros(n_x)
+                for axis, dim in enumerate(prog["dims"]):
+                    prog_q[np.arange(a_ref.shape[0]) * a_ref.shape[1] + int(dim)] = -gain * float(u[axis])
         it = 0
         for it in range(1, int(self.ee_action_iterations) + 1):
             orow = None
@@ -1525,6 +1570,8 @@ class TrajectoryOptimizer:
                 q = np.concatenate([np.zeros(n_x), np.full(n, float(self.ee_action_slack_weight))])
             if orow is not None and prio != 1.0 and orow.any():   # SL-SOTA1: the obstacle-object rows' slack costs more
                 q[n_x:] = q[n_x:] * np.where(orow, prio, 1.0)
+            if prog_q is not None:   # SL-SOTA2: prefer the correction that also makes progress
+                q[:n_x] += prog_q
             A = sp.vstack([sp.hstack([sp.csc_matrix(G), sp.identity(n)]),
                            sp.hstack([sp.identity(n_x), sp.csc_matrix((n_x, n))]),
                            sp.hstack([sp.csc_matrix((n, n_x)), sp.identity(n)])], format="csc")
@@ -1562,6 +1609,34 @@ class TrajectoryOptimizer:
             result.metrics["passthrough_clear"] = passthrough_record
         self.last_ee_action = {"delta_action": da.copy(), "trajectory": trajectory.copy()}
         return result
+
+    def _progress_direction(self, prog: dict, reference, q_now, scene):
+        """SL-SOTA2 — `(unit direction (3,) in the base frame or None, mode)` the blocked correction should prefer.
+        HELD: up (carry the object over what the arm cannot pass). Before the grasp (SEARCHING / LATCHED): horizontally
+        from the hand (`prog["link"]` spheres at the first row) toward the grounded target's centroid, when it is more than
+        `min_xy_m` away. CLOSING or no target: none."""
+        try:
+            gc = getattr(scene, "grasp_contact", None) or {}
+            latch = str(gc.get("latch")) if gc else None
+            if latch == "held":
+                return np.array([0.0, 0.0, 1.0]), "held: up"
+            if latch == "closing":
+                return None, "closing"
+            target = getattr(scene, "manipulated_points", None)
+            if target is None or not len(target):
+                return None, "no target"
+            centres = np.asarray(self.linearizer.sphere_states(reference, q_now)[0], np.float64)[0]
+            n = int(self.linearizer.n_spheres)
+            idx = [i for i in range(n) if self.linearizer._query_name(i) == str(prog.get("link"))]
+            if not idx:
+                return None, "no hand spheres"
+            d = np.asarray(target, np.float64).reshape(-1, 3).mean(axis=0)[:2] - centres[idx].mean(axis=0)[:2]
+            dist = float(np.linalg.norm(d))
+            if dist <= float(prog.get("min_xy_m", 0.04)):
+                return None, "over the target"
+            return np.array([d[0] / dist, d[1] / dist, 0.0]), "before the grasp: toward the target"
+        except Exception as exc:   # the solve must not die on the preference
+            return None, "error: " + repr(exc)
 
     def _linearize_with_obstacle_floor(self, trajectory, q_now, scene, margin: float, rec: dict):
         """SL-SOTA1 — `linearizer.linearize` with `margin` as the row floor of the obstacle-object rows:

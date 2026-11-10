@@ -567,4 +567,5 @@ def ee_action_map(kin: PandaKinematics, conv: Conversion, horizon: int, response
             M[k * ARM_DOF:(k + 1) * ARM_DOF, j * 6:j * 6 + 3] = A[:, :3] * cp
             M[k * ARM_DOF:(k + 1) * ARM_DOF, j * 6 + 3:j * 6 + 6] = A[:, 3:] * cr
     a_ref = np.clip(np.asarray(conv.delta[:H, :6], np.float64), -OSC_INPUT_CLIP, OSC_INPUT_CLIP)
-    return {"M": M, "a_ref": a_ref}
+    # SL-SOTA2: "R_world_base" lets a reader turn a base-frame direction into the world-frame position action
+    return {"M": M, "a_ref": a_ref, "R_world_base": np.asarray(conv.R_world_base, np.float64).copy()}

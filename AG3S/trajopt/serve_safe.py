@@ -2707,6 +2707,13 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--obstacle-surface-tol-mm", type=float, default=None, metavar="MM",
                     help="SL-SOTA1 — --passthrough-obstacle-tolerance-mm 와 함께만. 행의 최근접 표면점이 장애물 물체 점 집합에서 "
                          "MM 안이면 그 물체 위로 본다 (sqp.obstacle_object_surface_tolerance; 주지 않으면 20 mm)")
+    ap.add_argument("--ee-action-qp-progress", type=float, default=None, metavar="GAIN",
+                    help="SL-SOTA2 — --ee-action-qp · --passthrough-obstacle-tolerance-mm 와 함께만. policy chunk 가 장애물 물체 "
+                         "행을 어길 때 action QP 의 비용에 −g·Σ u·Da 를 더한다 (g = GAIN × min(1, 위반 / 20 mm); u = 쥔 동안 위, "
+                         "쥐기 전 target 쪽 수평): 같은 행을 만족하는 보정 중 나아가는 쪽을 고른다 (optimizer.ee_action_progress)")
+    ap.add_argument("--obstacle-row-patience", type=int, default=None, metavar="N",
+                    help="SL-SOTA3 — --obstacle-row-margin-mm 와 함께만. policy chunk 가 N call 연속으로 여유 안쪽이면 여유를 내려놓고 "
+                         "(floor · 허용치는 그대로) chunk 가 여유 밖으로 나올 때 다시 켠다 (sqp.obstacle_row_patience)")
     # SL-SOTA1 — end
     # SL-GTTO10 — begin (lead self-ruling G53, 2026-11-07; user caution 2)
     ap.add_argument("--oracle-destination", action="store_true",
@@ -4785,6 +4792,16 @@ def reject_bad_flag_combinations(ap: argparse.ArgumentParser, args, *, seed_map_
             ap.error("--obstacle-row-priority 는 --obstacle-row-margin-mm 와 함께만")
         if not (float(args.obstacle_row_priority) >= 1.0 and math.isfinite(float(args.obstacle_row_priority))):
             ap.error(f"--obstacle-row-priority 는 1 이상이어야 합니다 (got {args.obstacle_row_priority})")
+    if getattr(args, "ee_action_qp_progress", None) is not None:   # SL-SOTA2
+        if getattr(args, "passthrough_obstacle_tolerance_mm", None) is None or not getattr(args, "ee_action_qp", False):
+            ap.error("--ee-action-qp-progress 는 --passthrough-obstacle-tolerance-mm · --ee-action-qp 와 함께만")
+        if not (0.0 < float(args.ee_action_qp_progress) <= 1.0):
+            ap.error(f"--ee-action-qp-progress 는 0 초과 1 이하 (got {args.ee_action_qp_progress})")
+    if getattr(args, "obstacle_row_patience", None) is not None:   # SL-SOTA3
+        if getattr(args, "obstacle_row_margin_mm", None) is None:
+            ap.error("--obstacle-row-patience 는 --obstacle-row-margin-mm 와 함께만")
+        if int(args.obstacle_row_patience) < 1:
+            ap.error(f"--obstacle-row-patience 는 1 이상 (got {args.obstacle_row_patience})")
     if getattr(args, "obstacle_surface_tol_mm", None) is not None:   # SL-SOTA1
         if getattr(args, "passthrough_obstacle_tolerance_mm", None) is None:
             ap.error("--obstacle-surface-tol-mm 는 --passthrough-obstacle-tolerance-mm 의 행 분류입니다 — 함께 주십시오")
@@ -4965,6 +4982,8 @@ def passthrough_overrides(args) -> dict:
         out["obstacle_row_priority"] = float(args.obstacle_row_priority)
     if getattr(args, "obstacle_surface_tol_mm", None) is not None:
         out["obstacle_object_surface_tolerance"] = float(args.obstacle_surface_tol_mm) / 1000.0
+    if getattr(args, "obstacle_row_patience", None) is not None:   # SL-SOTA3
+        out["obstacle_row_patience"] = int(args.obstacle_row_patience)
     return out
 # --- T88 — end ---
 
