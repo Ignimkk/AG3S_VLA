@@ -413,6 +413,9 @@ class PandaSafeServer:
         gt = gt_perception_call_record(self._policy)
         if gt is not None:   # SL-GTTO — key only with the GT perception on (every other response unchanged)
             response["panda/gt_perception"] = gt
+        if getattr(self._policy, "stage_track", None) is not None:
+            # stage track (P5b): the EE chunk the client executes from -> the next request's last executed gripper row
+            self._policy._stage_prev_actions = np.array(response["actions"], np.float64, copy=True)  # noqa: SLF001
         return response
 
     @staticmethod
@@ -1062,10 +1065,12 @@ def build_safe_server(policy, args, *, attention_model=None, gpu_warm_up: bool =
         ss.announce_self_filter(ag3s.self_filter_settings(), cli=dict(kw["self_filter"]))
     served_policy = policy
     attn_kw, attn_rec = attention_policy_kwargs(args, tokenizer=attention_model is not None)
+    stage_track_probe = load_stage_track(args, attention_model)   # stage track (P5b): None unless --stage-track
     if attention_model is not None:
         from AG3S.trajopt.attention_policy import AttentionPolicy
 
-        served_policy = AttentionPolicy(policy, attention_model, subtask_probe=None, **attn_kw)
+        served_policy = AttentionPolicy(policy, attention_model, subtask_probe=None, **attn_kw,
+                                        **({"stage_hidden": True} if stage_track_probe is not None else {}))   # P5b (off: no kwarg)
     constraint = ag3s.constraint_robot_model
     kin = pa.PandaKinematics(constraint)
     response_name = getattr(args, "response_model", "robosuite141")   # SL11
@@ -1096,6 +1101,8 @@ def build_safe_server(policy, args, *, attention_model=None, gpu_warm_up: bool =
                       **final_kw, **abox_kw)
     if getattr(args, "oracle_latch", False):
         safe.oracle_latch = True   # SL14: the latch follows the request's ag3s/oracle_grasp (default off: class attribute False)
+    if stage_track_probe is not None:
+        safe.stage_track = stage_track_probe   # P5b: the latch follows the stage probe (default off: class attribute None)
     grasp_contact = ss.apply_grasp_contact_flags(safe, args)  # V11AB-pb4 / pb5 (all off = V11AB)
     if getattr(args, "ee_action_qp", False):   # SL-GTTO9 (F7): the TO solves in the policy's action space
         chunk_policy.ee_optimizer = safe.refiner.optimizer
@@ -1134,6 +1141,10 @@ def build_safe_server(policy, args, *, attention_model=None, gpu_warm_up: bool =
     if getattr(args, "oracle_latch", False):   # SL14 -- keys only with the flag (the earlier servers' dump is unchanged)
         info["oracle_latch"] = {"needs_client_flag": "--oracle-grasp (metadata oracle_grasp_required)", "request_key": "ag3s/oracle_grasp",
                                 "rule": "held (target touches both fingers) -> attach; not held -> detach + searching; HELD: release/revoke follow the oracle"}
+    if stage_track_probe is not None:   # P5b -- key only with the flag (the earlier servers' dump is unchanged)
+        info["stage_track"] = {**stage_track_probe.record(),
+                               "rule": "S3 -> held (attach), else not held (detach -> searching), via the --oracle-latch path; S1 while CLOSING -> "
+                                       "searching; features: h_10 of an extra prefix pass + GRIP with a shadow latch (record grasp.stage_track)"}
     if getattr(args, "placed_rearm", False):
         info["placed_rearm"] = {"rule": "latch PLACED and measured opening >= gripper_closed_below -> SEARCHING (record grasp.rearm)"}
     if getattr(args, "grasp_opening_rule", False):   # SL14 (KS) -- key only with the flag
@@ -1162,6 +1173,25 @@ def build_safe_server(policy, args, *, attention_model=None, gpu_warm_up: bool =
         return PandaSafeServer(safe, chunk_policy, mode=mode, observe_only=True,
                                **({"gap_opening": True} if gap_opening else {})), info
     return PandaSafeServer(safe, chunk_policy, mode=mode, **({"gap_opening": True} if gap_opening else {})), info
+
+
+def load_stage_track(args, attention_model):
+    """P5b ``--stage-track ASSET`` (``default`` = ``AG3S/ag3s/asset/stage_track/h10_grip_v1.npz``): the probe, or None when the flag
+    is absent. Refused with ``--oracle-latch`` (both drive the latch) and without the attention model (the hidden pass runs
+    on it)."""
+    spec = getattr(args, "stage_track", None)
+    if not spec:
+        return None
+    if getattr(args, "oracle_latch", False):
+        raise SystemExit("--stage-track and --oracle-latch both drive the grasp latch; give one")
+    if attention_model is None:
+        raise SystemExit("--stage-track needs the attention model (its prefix pass gives the hidden feature)")
+    from AG3S.trajopt.stage_track import StageTrackProbe, default_asset_path
+
+    probe = StageTrackProbe.load(default_asset_path() if spec == "default" else spec)
+    logging.warning("stage track (P5b): ON — probe %s (md5 %s); the latch follows S3 / not S3, S1 releases CLOSING",
+                    probe.name, probe.md5)
+    return probe
 
 
 def final_options_on(args) -> list[str]:

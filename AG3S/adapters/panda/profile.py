@@ -1092,6 +1092,14 @@ GT15_VERSIONS = GT15_VERSIONS + PE_VERSIONS[10:]
 PE_VERSIONS = PE_VERSIONS + ("AG3S-commonto-att-termsoff-pass-zr-ee-hdp-loose2-obst4-pts-nocarve-fh-t100-pe12345811",)
 AG3S_VERSIONS[PE_VERSIONS[11]] = tuple(AG3S_VERSIONS[PE_VERSIONS[6]]) + ("--scene-obstacle-target-cut",)
 GT15_VERSIONS = GT15_VERSIONS + PE_VERSIONS[11:]
+#: P5b 제약 단계 추종 (2026-11-10, outputs/2026-11-10_제약단계_추종 §10): two arms on the final pe123458 for the P6 closed-loop
+#: comparison. ``-ol`` = + ``--oracle-latch`` (the latch follows MuJoCo's held = the stage-tracking upper bound; the launchers
+#: pass the client ``--oracle-grasp`` via :func:`needs_oracle_grasp`). ``-st1`` = + ``--stage-track default`` (h_10 + GRIP probe
+#: ``AG3S/ag3s/asset/stage_track/h10_grip_v1.npz`` drives the latch). Kept in their own tuple (no PE_VERSIONS index moves).
+STAGE_TRACK_VERSIONS: tuple[str, ...] = (PE_VERSIONS[6] + "-ol", PE_VERSIONS[6] + "-st1")
+AG3S_VERSIONS[STAGE_TRACK_VERSIONS[0]] = tuple(AG3S_VERSIONS[PE_VERSIONS[6]]) + ORACLE_LATCH_FLAGS
+AG3S_VERSIONS[STAGE_TRACK_VERSIONS[1]] = tuple(AG3S_VERSIONS[PE_VERSIONS[6]]) + ("--stage-track", "default")
+GT15_VERSIONS = GT15_VERSIONS + STAGE_TRACK_VERSIONS
 #: SL-QE2 (dev-e5, 2026-11-09 01:xx, G111): B5 (GT) / B5 without GT with the action QP bending the position only
 #: (--ee-action-qp-translation-only; E1a task 3: the F7 QP turned rx / ry / rz by ~1.0 and the grasp pose was lost, G110).
 QE2_VERSIONS: tuple[str, ...] = ("AG3S-commonto-gt2-termsoff-pass-zr-ee-hdp-loose2-obst3-pts-nocarve-fh-t100-tro",

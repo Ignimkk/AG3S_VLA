@@ -38,6 +38,7 @@ the backend call has no `want_hsr5` kwarg and the result has no key.
 from __future__ import annotations
 
 import logging
+import time
 import traceback
 from typing import Any, Optional
 
@@ -77,7 +78,8 @@ class AttentionPolicy:
                  subtask_probe: Any = "default", attention_source: Any = None,
                  noun_tokens: Any = None, task_probe: Any = None, sampler: Any = None,
                  backend: Any = None, default_prompt: Optional[str] = None,
-                 prefix_feature: bool = False, hsr6_probe: Any = None, hsr5_probe: Any = None):
+                 prefix_feature: bool = False, hsr6_probe: Any = None, hsr5_probe: Any = None,
+                 stage_hidden: bool = False):
         self._policy = policy
         if sampler is None:
             from AG3S.ag3s.experiments.sources.pi05_attention import AttentionSampler
@@ -92,6 +94,13 @@ class AttentionPolicy:
         #: T82 (`serve_safe --hsr5`, default None = off): the 5-stage probe on the hidden h_4 feature of the same noun
         #: prefix pass -> `result["hsr5"]`. None: no key, the backend is called exactly as before (no `want_hsr5`).
         self._hsr5_probe = hsr5_probe
+        # --- stage track (P5b 2026-11-10) — begin
+        #: `serve_safe --stage-track` (default False = off): one extra jitted prefix pass with the gemma hidden stack after the
+        #: attention pass -> `result[stage_track.STAGE_HIDDEN_KEY]` (h_10 pooled, 6144 floats; `SafePolicy` pops it). Off: no
+        #: key, no pass, every path exactly as before.
+        self._stage_hidden = bool(stage_hidden)
+        self._stage_pass = None
+        # --- stage track — end
         # T57-A — begin. Default (both None) = the pre-T57 cell and path (`infer` never reaches the
         # extended branch). `attention_source`: a SPEC string or `AttentionSource`; `task_probe`: a
         # `NounProbe` (T55 prereg); `noun_tokens`: `NounTokens` (needed by a noun source or the probe).
@@ -207,7 +216,25 @@ class AttentionPolicy:
             return result
         if feature is not None:
             self._label_feature(result, feature)
+        if self._stage_hidden:   # stage track (P5b) — off: no call
+            self._add_stage_hidden(obs, result)
         return result
+
+    # --- stage track (P5b 2026-11-10) — begin ----------------------------------------------
+    def _add_stage_hidden(self, obs: dict[str, Any], result: dict[str, Any]) -> None:
+        """`result[STAGE_HIDDEN_KEY]` = the h_10 stage feature of this request's observation, or the key left out (logged)
+        when the pass fails — `SafePolicy` then has no stage for the request (the evidence latch stays in charge)."""
+        from AG3S.trajopt.stage_track import STAGE_HIDDEN_KEY, build_stage_hidden_pass
+
+        try:
+            if self._stage_pass is None:
+                self._stage_pass = build_stage_hidden_pass(self._sampler)
+            t0 = time.perf_counter()
+            feat = self._stage_pass(self._policy._input_transform(dict(obs)))  # noqa: SLF001
+            result[STAGE_HIDDEN_KEY] = {"feature": feat, "ms": round((time.perf_counter() - t0) * 1000.0, 2)}
+        except Exception:  # noqa: BLE001 — the stage feature failing must not fail the policy call
+            logging.warning("stage-track hidden pass failed:\n%s", traceback.format_exc())
+    # --- stage track — end
 
     # --- T57-A: attention source · task probe (only with a flag) ----------------------------
     def _infer_extended(self, obs: dict[str, Any], result: dict[str, Any]) -> dict[str, Any]:
@@ -291,6 +318,8 @@ class AttentionPolicy:
             self._label_feature(result, feature)
         if self._hsr5_probe is not None:
             self._label_hsr5(result, out)
+        if self._stage_hidden:   # stage track (P5b) — off: no call
+            self._add_stage_hidden(obs, result)
         return result
 
     # --- T90 — begin

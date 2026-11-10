@@ -2967,6 +2967,8 @@ def build_parser() -> argparse.ArgumentParser:
                          "셋 (empty_below · blocked_gap · hold_empty_below) 을 그 척도로 다시 두고 (robots/panda/description/"
                          "gripper_gap_calibration.json), HSR6 attach-assist 도 reach 검사를 통과해야 한다. 정책에 주는 state 개도 · 손가락 "
                          "모델은 그대로. RB-Y1 서버는 거절. 기본 off")
+    ap.add_argument("--stage-track", default=None, metavar="ASSET",
+                    help="P5b 제약 단계 추종 (2026-11-10, benchmark branch, Panda 서버만) — π0.5 prefix hidden h_10 + gripper feedback 의 4 단계 추정기 (S1 approach · S2 grasp · S3 carry+place · S4 released) 로 grasp latch 를 움직인다: S3 이면 held (attach), 아니면 not held (detach → SEARCHING) — --oracle-latch 와 같은 길; CLOSING 중 S1 이면 닫힘 시도를 푼다. 지금 규칙의 latch 는 그림자로 계속 돌며 그 상태가 feature 다. ASSET = npz 경로 또는 default (AG3S/ag3s/asset/stage_track/h10_grip_v1.npz). --oracle-latch 와 함께 쓸 수 없다. RB-Y1 서버는 거절. 기본 off")
     ap.add_argument("--oracle-latch", action="store_true",
                     help="SL14 (benchmark branch, Panda 서버만, 진단 — 채택 후보 아님) — grasp latch 의 attach · detach 를 MuJoCo 정답으로 "
                          "바꾼다. client 가 요청마다 보내는 ag3s/oracle_grasp = {held, target_body} (대상 물체 geom 이 왼손가락 · 오른손가락 "
@@ -4121,6 +4123,9 @@ def reject_panda_only_flags(ap: argparse.ArgumentParser, args) -> None:
                  "거절합니다")
     if getattr(args, "oracle_target_volume", False):   # SL13
         ap.error("--oracle-target-volume 은 Panda LIBERO client 의 정답 segmentation 진단입니다 (--robot panda 만). RB-Y1 서버는 "
+                 "거절합니다")
+    if getattr(args, "stage_track", None):   # P5b
+        ap.error("--stage-track 은 Panda 서버의 grasp latch 단계 추정기입니다 (--robot panda 만, Panda 기록으로 학습). RB-Y1 서버는 "
                  "거절합니다")
     if getattr(args, "oracle_latch", False) or getattr(args, "placed_rearm", False):   # SL14
         ap.error("--oracle-latch · --placed-rearm 은 Panda 서버의 grasp latch 진단 · 변경입니다 (--robot panda 만). RB-Y1 서버는 "

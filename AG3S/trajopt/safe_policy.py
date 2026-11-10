@@ -201,6 +201,10 @@ class SafePolicy:
     #: SL14 `--oracle-latch` (diagnostic, Panda server only): the latch's attach / detach follow the simulator's ground truth
     #: (`ag3s/oracle_grasp`). Class default = off (test doubles built without `__init__` read "evidence only", as before).
     oracle_latch: bool = False
+    #: stage track (P5b 2026-11-10, `serve_safe --stage-track ASSET`, Panda only): the `stage_track.StageTrackProbe`; its S3 /
+    #: not-S3 drives the latch through the `--oracle-latch` path, S1 while CLOSING releases the closing. Class default None = off
+    #: (test doubles built without `__init__` read "evidence only", as before). Mutually exclusive with `oracle_latch`.
+    stage_track: Any = None
     #: AG3S-CORE-EVAL-A6 — same reason (test doubles built without `__init__` read "no palm allowance record").
     _last_neighbour_palm_contact: dict = {}
     #: SL6-H (HSR6 ⑤) — same reason: no placement-contact record.
@@ -722,6 +726,8 @@ class SafePolicy:
         self._last_classification = {}
         # 잠금도 에피소드 상태다. 남기면 다음 과제가 지난 과제의 조작 대상을 물려받는다.
         self._latch.reset()
+        if self.stage_track is not None:   # stage track (P5b) — off: nothing
+            self._stage_track_reset()
         self._identity.reset()
         self._follow_to_streak = 0
         self._last_follow_to = {}
@@ -811,6 +817,13 @@ class SafePolicy:
         if isinstance(result, dict) and IFG_PREFIX_L8_KEY in result:
             result = dict(result)
             gate_feature = result.pop(IFG_PREFIX_L8_KEY)
+        # stage track (P5b) — the hidden feature never goes on the wire either (only `AttentionPolicy(stage_hidden=True)` adds it).
+        stage_hidden = None
+        if self.stage_track is not None and isinstance(result, dict):
+            from AG3S.trajopt.stage_track import STAGE_HIDDEN_KEY
+
+            result = dict(result)
+            stage_hidden = result.pop(STAGE_HIDDEN_KEY, None)
         # IFG-REC — while a retreat is active the policy's chunk is replaced by the retreat (off: untouched).
         self._last_recovery = {}
         if self._recovery is not None:
@@ -842,6 +855,9 @@ class SafePolicy:
                          "state": policy_obs.get("state"),
                          # SUBTASK-c: `AttentionPolicy` 가 실은 subtask label (없으면 None).
                          "subtask": result.get("subtask") if isinstance(result, dict) else None}
+        if self.stage_track is not None:   # stage track (P5b) — off: `_pending` as before
+            self._pending["stage_hidden"] = stage_hidden
+            self._pending["policy_obs"] = policy_obs
         # --- T91c — begin: a request whose `_scene_fn` does not run must not report the previous request's stage
         self._last_phase_machine = {}
         # --- T91c — end
@@ -2153,17 +2169,17 @@ class SafePolicy:
         # T26: 목적지는 AG3S 가 등록(또는 주입받은) destination 이다. 잠금에는 그 이름만 준다.
         destination = getattr(self.ag3s, "destination", None)
         self._latch.set_destination(None if destination is None else destination.label)
+        if self.stage_track is not None:   # stage track (P5b): the shadow latch sees the same destination
+            self._stage_shadow().set_destination(None if destination is None else destination.label)
         self._destination_points = (None if destination is None
                                     else np.asarray(destination.points, np.float64))
 
         metrics = getattr(target, "metrics", {}) or {}
-        event = self._latch.update(
-            label=label,
-            score=float(getattr(target, "confidence", 0.0) or 0.0),
-            runner_up=float(metrics.get("runner_up_score", 0.0) or 0.0),
-            gripper=gripper,
-            placed=placed,
-        )
+        update_kw = dict(label=label, score=float(getattr(target, "confidence", 0.0) or 0.0),
+                         runner_up=float(metrics.get("runner_up_score", 0.0) or 0.0), gripper=gripper, placed=placed)
+        event = self._latch.update(**update_kw)
+        if self.stage_track is not None:   # stage track (P5b): the shadow latch takes the same target-lock step
+            self._stage_shadow().update(**update_kw)
 
         # **evidence 모드(T22 기본)에서는 `update` 가 attach/detach 를 내지 않는다** — 그 판단은
         # 제약을 짓기 전에 `_advance_grasp` 가 했다. 아래는 `legacy_gripper_attach=True` 의 옛 경로다.
@@ -2453,8 +2469,8 @@ class SafePolicy:
             held3d = self.held_3d.evaluate(
                 state16=self._pending.get("state"), gripper_columns=self.gripper_columns,
                 robot_state=q, openings=openings, target_centre=self._held_3d_target_centre())
-        event = self._latch.observe_grasp(
-            signal, reach_m=reach,
+        grasp_kw = dict(
+            reach_m=reach,
             manipulated_id=None if manip is None else int(manip.id),
             manipulated_state=None if manip is None else str(manip.state),
             placed=placed, held_observation=held_observation,
@@ -2466,11 +2482,17 @@ class SafePolicy:
             # T82 — the closing release, only with --hsr5 (off: no kwarg, the call as before).
             **({"closing_release": {"stage": self._hsr5_stage(), "frames": int(self.hsr5.release_frames)}}
                if self.hsr5 is not None else {}))
+        event = self._latch.observe_grasp(signal, **grasp_kw)
+        if self.stage_track is not None:   # stage track (P5b): the shadow latch observes the same request (its state is a feature)
+            self._stage_shadow().observe_grasp(signal, **grasp_kw)
         if self.hsr5 is not None and "closing_release" in (event.evidence or {}):
             self._hsr5_source("closing_release")
         oracle_rec = None
         if self.oracle_latch:   # SL14 (off: this block does not exist for the call)
             event, oracle_rec = self._oracle_latch_pre(event, phase_before, signal.opening)
+        stage_rec = None
+        if self.stage_track is not None:   # stage track (P5b; off: this block does not exist for the call)
+            event, stage_rec = self._stage_track_pre(event, phase_before, signal, hand)
         if self._carry_from_closing():
             # IFG-HSR2: remember the request this grasp attempt entered CLOSING on; forget it when the latch
             # leaves CLOSING / HELD (opened, revoked, placed) — a new attempt starts a new carry.
@@ -2532,6 +2554,10 @@ class SafePolicy:
         if oracle_rec is not None and oracle_rec.get("held") is not None:   # SL14
             self._oracle_latch_post(oracle_rec, manip=manip, q=q, parent_link=parent_link, allowed=allowed, hand=hand,
                                     opening=signal.opening, reach=reach)
+        if stage_rec is not None and stage_rec.get("held") is not None:   # stage track (P5b): the same path as the oracle
+            self._oracle_latch_post(stage_rec, manip=manip, q=q, parent_link=parent_link, allowed=allowed, hand=hand,
+                                    opening=signal.opening, reach=reach)
+            self._stage_track_post(stage_rec)
         self._last_grasp_record = {
             "mode": "evidence",
             "hand": hand,
@@ -2552,6 +2578,8 @@ class SafePolicy:
         }
         if oracle_rec is not None:
             self._last_grasp_record["oracle"] = oracle_rec   # SL14 — {held, overrode, evidence_state, ...}, only with --oracle-latch
+        if stage_rec is not None:
+            self._last_grasp_record["stage_track"] = stage_rec   # stage track (P5b) — only with --stage-track
         if cfg.placed_rearm:
             # SL14 `--placed-rearm` — key only with the flag: True on the request the latch left PLACED for SEARCHING.
             self._last_grasp_record["rearm"] = bool((event.evidence or {}).get("rearm"))
@@ -2665,6 +2693,74 @@ class SafePolicy:
         elif not held and self._latch.phase is GraspPhase.PLACED:
             self._latch.force_release()
             rec["rearmed_from_placed"] = True
+
+    # --- stage track (P5b 2026-11-10, `--stage-track ASSET`) ---------------------------------------------------------
+    def _stage_shadow(self) -> GraspLatch:
+        """The shadow latch: the evidence latch as configured, fed the same `update` / `observe_grasp` inputs as the real one
+        and never forced — its state is the probe's latch feature (the asset was trained on the unforced latch)."""
+        sh = getattr(self, "_stage_shadow_latch", None)
+        if sh is None:
+            sh = GraspLatch(self._latch.config, evidence=self._latch.evidence, external_destination=True)
+            self._stage_shadow_latch = sh
+        return sh
+
+    def _stage_track_reset(self) -> None:
+        self._stage_shadow().reset()
+        self._stage_prev_gap = None
+        self._stage_prev_actions = None
+
+    def _stage_track_pre(self, event, phase_before, signal, hand):
+        """This request's stage from the h_10 feature (`_pending["stage_hidden"]`) and the GRIP features
+        (`stage_track.grip_features`: gap of the request's finger qpos, the previous request's gap, the measured opening, the
+        shadow latch state after this request's `observe_grasp`, the last executed gripper row). ``held`` = S3. As
+        `_oracle_latch_pre`: while the latch was HELD, an evidence detach is void when the stage is still S3. No stage (no
+        feature / no gripper state / probe error) -> ``held`` None: the evidence latch alone decides this request."""
+        from AG3S.trajopt import stage_track as st
+
+        pending = self._pending.get("stage_hidden")
+        fb = self._pending.get("exec_feedback") or {}
+        gap = st.gap_mm_of_state(self._stage_policy_state())
+        prev_gap = getattr(self, "_stage_prev_gap", None)
+        self._stage_prev_gap = gap if gap is not None else prev_gap
+        measured = self._latch_gripper_signal(str(hand))      # the value this request's `latch_signal` records
+        shadow = self._stage_shadow().phase.value
+        last = st.last_executed_command(getattr(self, "_stage_prev_actions", None), fb.get("n_exec"), fb.get("n_steps"))
+        rec = {"held": None, "stage": None, "p": None, "shadow_state": shadow, "evidence_state": self._latch.phase.value,
+               "overrode": None, "probe": self.stage_track.name}
+        if pending is None or gap is None:
+            rec["error"] = "no hidden feature (the policy-side pass failed)" if pending is None else "no gripper qpos in the request"
+            return event, rec
+        grip = st.grip_features(gap_mm=gap, prev_gap_mm=prev_gap, measured_opening=measured, latch_state=shadow,
+                                last_command=last)
+        try:
+            pred = self.stage_track.predict(pending["feature"], grip)
+        except Exception as exc:  # noqa: BLE001 — no stage for this request (the evidence latch alone decides)
+            rec["error"] = f"probe failed: {type(exc).__name__}: {exc}"
+            return event, rec
+        rec.update({"stage": pred["stage"], "p": pred["p"], "held": pred["index"] == st.HELD_STAGE,
+                    "hidden_ms": pending.get("ms"), "grip": [round(float(x), 5) for x in grip]})
+        if rec["held"] and phase_before is GraspPhase.HELD and event.detach:
+            self._latch.force_hold(signal.opening)
+            event = dataclasses.replace(
+                event, phase=GraspPhase.HELD, attach=False, detach=False, revoked=False, slipped=False,
+                note=event.note + " [stage-track: S3 — detach 취소]")
+            rec["suppressed_detach"] = True
+        return event, rec
+
+    def _stage_track_post(self, rec) -> None:
+        """After `_oracle_latch_post` made the latch agree with ``held``: S1 (approach) while the latch is CLOSING releases the
+        closing (an empty / failed close — P2 E-fail, the latch alone stays in CLOSING), back to SEARCHING (the target lock
+        stays, the next `update` goes LATCHED)."""
+        from AG3S.trajopt.stage_track import STAGES, APPROACH_STAGE
+
+        if rec.get("stage") == STAGES[APPROACH_STAGE] and self._latch.phase is GraspPhase.CLOSING:
+            self._latch.force_release()
+            rec["closing_released"] = True
+
+    def _stage_policy_state(self):
+        """The LIBERO policy state of this request (``observation/state`` = eef pos 3, axis-angle 3, gripper qpos 2), or None."""
+        obs = self._pending.get("policy_obs") or {}
+        return obs.get("observation/state")
 
     def _grasp_continuity_gate(self) -> Optional[str]:
         """이 청크에서 continuity 항을 끌 사유, 또는 `None` (T37 K1).
