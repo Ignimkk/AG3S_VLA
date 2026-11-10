@@ -729,6 +729,9 @@ PORTED_FINAL_CONFIG_DESTS: tuple[str, ...] = (
     'no_target_certify',
     # SL-PE7: the attention vets the grasp seed (clustering key)
     'close_seed_attention_ratio',
+    # SL-SOTA1 (dev-57, 2026-11-11): the obstacle-object rows' own margin / slack priority / surface tolerance (sqp keys
+    # through serve_safe.passthrough_overrides, same path as passthrough_obstacle_tolerance_mm)
+    'obstacle_row_margin_mm', 'obstacle_row_priority', 'obstacle_surface_tol_mm',
 )
 #: SL-GTTO — the target extents the Panda server runs (``--target-extent``; SL7 attention-surface, SL-GTTO oracle-visible).
 PORTED_TARGET_EXTENTS: tuple[str, ...] = ("estimated", "attention-surface", "oracle-visible")

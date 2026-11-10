@@ -67,6 +67,17 @@ from AG3S.trajopt.types import ChunkLayout, JointLimits, TrajOptResult, TrajOptS
 _LIMIT_TOLERANCE = 1e-6
 
 
+def _obstacle_row_kwargs(cfg) -> dict:
+    """The classification switches of `linearizer.obstacle_object_rows` / `obstacle_object_mask` from `config.sqp`
+    (a key only when its switch is on, so a linearizer without the newer keywords is called as before)."""
+    kw: dict[str, Any] = {"beneath": bool(getattr(cfg, "passthrough_obstacle_beneath", False))}
+    if getattr(cfg, "passthrough_obstacle_class_tests", False):   # SL-PE4
+        kw["class_tests"] = True
+    if getattr(cfg, "obstacle_object_surface_tolerance", None) is not None:   # SL-SOTA1
+        kw["surface_tol"] = float(cfg.obstacle_object_surface_tolerance)
+    return kw
+
+
 class TrajectoryOptimizer:
     """Stateful across chunks, because that is where the warm start comes from.
 
@@ -1392,22 +1403,25 @@ class TrajectoryOptimizer:
         tol = getattr(self.config.sqp, "passthrough_obstacle_tolerance", None)
         if tol is None:
             return False
+        # SL-SOTA1 (2026-11-11): the obstacle-object rows keep `obstacle_row_margin` more than their floor (None = 0, as before)
+        margin = float(getattr(self.config.sqp, "obstacle_row_margin", None) or 0.0)
         try:
             full = bool(getattr(self.config.sqp, "passthrough_obstacle_full_horizon", False))   # SL-GTTO22
             worst, pair = self.linearizer.obstacle_object_rows(
-                reference, q_now, scene, steps=None if full else self.lookahead_from,
-                beneath=bool(getattr(self.config.sqp, "passthrough_obstacle_beneath", False)),
-                **({"class_tests": True} if getattr(self.config.sqp, "passthrough_obstacle_class_tests", False) else {}))
+                reference, q_now, scene, steps=None if full else self.lookahead_from, **_obstacle_row_kwargs(self.config.sqp))
         except Exception as exc:   # fail closed: an unreadable classification is not a clear chunk
             import traceback
             record["obstacle_rows"] = {"error": repr(exc), "where": traceback.format_exc(limit=-3)[-900:]}
             return True
-        violation = max(0.0, -float(worst)) if np.isfinite(worst) else 0.0
+        violation = max(0.0, margin - float(worst)) if np.isfinite(worst) else 0.0
         record["obstacle_rows"] = {"tolerance_m": float(tol), "violation_m": violation,
                                    "worst": pair if pair is None else {k: pair.get(k) for k in (
                                        "step", "link", "obstacle", "clearance_m", "point_m", "n_obstacle_rows",
                                        "n_rows", "n_beneath", "n_object_points")}}
+        if margin > 0.0:
+            record["obstacle_rows"]["margin_m"] = margin   # SL-SOTA1: key only when on
         return violation > float(tol)
+
 
     def _finish_passthrough(self, reference, q_now, scene, template, reference_violation, previous_chunk, notes,
                             started, geometry_certified, envelope, record) -> TrajOptResult:
@@ -1464,14 +1478,31 @@ class TrajectoryOptimizer:
         rec = {"iterations": 0, "rows": [], "status": [], "slack_max_m": 0.0}
         if fixed:
             rec["fixed_dims"] = [int(d) for d in fixed]   # SL-QE2
+        # SL-SOTA1 (2026-11-11, `sqp.obstacle_row_margin`, None = off: the loop below as before): the obstacle-object rows
+        # (the classification of the pass-through test) are held `margin` above their floor, and their slack costs
+        # `obstacle_row_priority` times the other rows' -- the L1 slack otherwise trades one deep obstacle row against many
+        # shallow contact-surface rows.
+        orm = getattr(getattr(cfg, "sqp", None), "obstacle_row_margin", None)
+        prio = float(getattr(getattr(cfg, "sqp", None), "obstacle_row_priority", 1.0) or 1.0)
+        if orm is not None:
+            rec["obstacle_row_margin_m"] = float(orm)
+            rec["obstacle_row_priority"] = prio
         it = 0
         for it in range(1, int(self.ee_action_iterations) + 1):
-            rows = self.linearizer.linearize(trajectory, q_now, scene, cfg)
+            orow = None
+            if orm is not None:
+                rows, omask = self._linearize_with_obstacle_floor(trajectory, q_now, scene, float(orm), rec)
+            else:
+                rows, omask = self.linearizer.linearize(trajectory, q_now, scene, cfg), None
             used = rows.used & np.isfinite(rows.value)
             ks, rs = np.nonzero(used)
             rec["rows"].append(int(ks.size))
             if ks.size == 0:
                 break
+            if omask is not None:
+                from .linearize import ESDF_SLOT
+                orow = (np.asarray(rows.slot)[ks, rs] == ESDF_SLOT) & omask[ks, np.asarray(rows.sphere)[ks, rs]]
+                rec.setdefault("n_obstacle_rows", []).append(int(orow.sum()))
             G = np.einsum("nj,njx->nx", rows.gradient[ks, rs],
                           M.reshape(H, nq, n_x)[ks])                        # (n, n_x)
             b = backoff - rows.value[ks, rs] + G @ x
@@ -1480,6 +1511,8 @@ class TrajectoryOptimizer:
                 reach = gn > 1e-9
                 rec.setdefault("n_rows_unreachable", []).append(int((~reach).sum()))
                 G, b = G[reach] / gn[reach, None], b[reach] / gn[reach]
+                if orow is not None:
+                    orow = orow[reach]
                 if G.shape[0] == 0:
                     rec["status"].append("no reachable row")
                     break
@@ -1490,6 +1523,8 @@ class TrajectoryOptimizer:
             else:
                 P = sp.block_diag([sp.identity(n_x), sp.identity(n) * 1e-6], format="csc")
                 q = np.concatenate([np.zeros(n_x), np.full(n, float(self.ee_action_slack_weight))])
+            if orow is not None and prio != 1.0 and orow.any():   # SL-SOTA1: the obstacle-object rows' slack costs more
+                q[n_x:] = q[n_x:] * np.where(orow, prio, 1.0)
             A = sp.vstack([sp.hstack([sp.csc_matrix(G), sp.identity(n)]),
                            sp.hstack([sp.identity(n_x), sp.csc_matrix((n_x, n))]),
                            sp.hstack([sp.csc_matrix((n, n_x)), sp.identity(n)])], format="csc")
@@ -1527,6 +1562,23 @@ class TrajectoryOptimizer:
             result.metrics["passthrough_clear"] = passthrough_record
         self.last_ee_action = {"delta_action": da.copy(), "trajectory": trajectory.copy()}
         return result
+
+    def _linearize_with_obstacle_floor(self, trajectory, q_now, scene, margin: float, rec: dict):
+        """SL-SOTA1 — `linearizer.linearize` with `margin` as the row floor of the obstacle-object rows:
+        `(rows, is_obstacle_object (H, n_query) or None)`. The returned values are `clearance − floor`, so the QP row
+        `value + grad . Dq + s >= backoff` holds those rows `margin` higher and the row selection sees them that much
+        earlier. A classification that cannot be read falls back to the plain linearization (recorded)."""
+        cfg = self.config
+        try:
+            states = self.linearizer.sphere_states(trajectory, q_now)
+            floor, omask = self.linearizer.obstacle_row_floor(np.asarray(states[0], np.float64), scene, margin,
+                                                              **_obstacle_row_kwargs(cfg.sqp))
+        except Exception as exc:   # the solve must not die on the classification
+            rec.setdefault("obstacle_floor_error", repr(exc))
+            return self.linearizer.linearize(trajectory, q_now, scene, cfg), None
+        if floor is None:
+            return self.linearizer.linearize(trajectory, q_now, scene, cfg), None
+        return self.linearizer.linearize(trajectory, q_now, scene, cfg, states=states, row_floor=floor), omask
 
     def _seed_is_aligned(self, continuity) -> bool:
         """T43 TP (`warm_start_lookahead`) — is shifting the last plan by `execution_length` this

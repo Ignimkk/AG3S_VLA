@@ -2696,6 +2696,18 @@ def build_parser() -> argparse.ArgumentParser:
                     help="SL-GTTO16 (A) — --passthrough-when-clear 에서만. --violation-tolerance-mm 의 τ 를 장애물 물체 행 "
                          "(최근접 표면이 target · 받침면 · 목적지 · 쥔 물체 자기 흔적이 아닌 행) 에는 적용하지 않는다: 그 행이 floor 보다 "
                          "MM 넘게 모자라면 pass-through 거절 (sqp.passthrough_obstacle_tolerance)")
+    # SL-SOTA1 (dev-57, 2026-11-11) — begin
+    ap.add_argument("--obstacle-row-margin-mm", type=float, default=None, metavar="MM",
+                    help="SL-SOTA1 — --passthrough-obstacle-tolerance-mm · --ee-action-qp 와 함께만. 장애물 물체 행은 floor 보다 "
+                         "MM 더 떨어져야 한다: 그 행이 floor + MM 보다 허용치 넘게 모자라면 pass-through 거절, action QP 는 그 행을 "
+                         "floor + MM (+ backoff) 로 잡는다 (sqp.obstacle_row_margin). 주지 않으면 예전 그대로")
+    ap.add_argument("--obstacle-row-priority", type=float, default=None, metavar="W",
+                    help="SL-SOTA1 — --obstacle-row-margin-mm 와 함께만. action QP 에서 장애물 물체 행의 slack 가중을 W 배 "
+                         "(sqp.obstacle_row_priority, 1 이상)")
+    ap.add_argument("--obstacle-surface-tol-mm", type=float, default=None, metavar="MM",
+                    help="SL-SOTA1 — --passthrough-obstacle-tolerance-mm 와 함께만. 행의 최근접 표면점이 장애물 물체 점 집합에서 "
+                         "MM 안이면 그 물체 위로 본다 (sqp.obstacle_object_surface_tolerance; 주지 않으면 20 mm)")
+    # SL-SOTA1 — end
     # SL-GTTO10 — begin (lead self-ruling G53, 2026-11-07; user caution 2)
     ap.add_argument("--oracle-destination", action="store_true",
                     help="SL-GTTO10 F8a — --grounding-source oracle 에서만. client 가 oracle_seg_meta['destination'] 으로 "
@@ -4763,6 +4775,21 @@ def reject_bad_flag_combinations(ap: argparse.ArgumentParser, args, *, seed_map_
         ap.error("--passthrough-obstacle-full-horizon 는 --passthrough-obstacle-tolerance-mm 와 함께만")
     if getattr(args, "passthrough_obstacle_beneath", False) and getattr(args, "passthrough_obstacle_tolerance_mm", None) is None:
         ap.error("--passthrough-obstacle-beneath 는 --passthrough-obstacle-tolerance-mm 의 행 분류입니다 — 함께 주십시오")
+    if getattr(args, "obstacle_row_margin_mm", None) is not None:   # SL-SOTA1
+        if getattr(args, "passthrough_obstacle_tolerance_mm", None) is None or not getattr(args, "ee_action_qp", False):
+            ap.error("--obstacle-row-margin-mm 는 --passthrough-obstacle-tolerance-mm · --ee-action-qp 와 함께만")
+        if not (float(args.obstacle_row_margin_mm) >= 0.0 and math.isfinite(float(args.obstacle_row_margin_mm))):
+            ap.error(f"--obstacle-row-margin-mm 는 0 이상이어야 합니다 (got {args.obstacle_row_margin_mm})")
+    if getattr(args, "obstacle_row_priority", None) is not None:   # SL-SOTA1
+        if getattr(args, "obstacle_row_margin_mm", None) is None:
+            ap.error("--obstacle-row-priority 는 --obstacle-row-margin-mm 와 함께만")
+        if not (float(args.obstacle_row_priority) >= 1.0 and math.isfinite(float(args.obstacle_row_priority))):
+            ap.error(f"--obstacle-row-priority 는 1 이상이어야 합니다 (got {args.obstacle_row_priority})")
+    if getattr(args, "obstacle_surface_tol_mm", None) is not None:   # SL-SOTA1
+        if getattr(args, "passthrough_obstacle_tolerance_mm", None) is None:
+            ap.error("--obstacle-surface-tol-mm 는 --passthrough-obstacle-tolerance-mm 의 행 분류입니다 — 함께 주십시오")
+        if not (float(args.obstacle_surface_tol_mm) >= 0.0 and math.isfinite(float(args.obstacle_surface_tol_mm))):
+            ap.error(f"--obstacle-surface-tol-mm 는 0 이상이어야 합니다 (got {args.obstacle_surface_tol_mm})")
     if getattr(args, "passthrough_obstacle_tolerance_mm", None) is not None:   # SL-GTTO16
         if not getattr(args, "passthrough_when_clear", False):
             ap.error("--passthrough-obstacle-tolerance-mm 는 --passthrough-when-clear 와 함께만")
@@ -4932,6 +4959,12 @@ def passthrough_overrides(args) -> dict:
         out["passthrough_obstacle_class_tests"] = True
     if getattr(args, "passthrough_obstacle_full_horizon", False):   # SL-GTTO22
         out["passthrough_obstacle_full_horizon"] = True
+    if getattr(args, "obstacle_row_margin_mm", None) is not None:   # SL-SOTA1
+        out["obstacle_row_margin"] = float(args.obstacle_row_margin_mm) / 1000.0
+    if getattr(args, "obstacle_row_priority", None) is not None:
+        out["obstacle_row_priority"] = float(args.obstacle_row_priority)
+    if getattr(args, "obstacle_surface_tol_mm", None) is not None:
+        out["obstacle_object_surface_tolerance"] = float(args.obstacle_surface_tol_mm) / 1000.0
     return out
 # --- T88 — end ---
 
