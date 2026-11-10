@@ -3240,3 +3240,46 @@ LIBERO-Safety VLA 단독(각 10 ep): L0 3 suite 공식 위반 0 · 0 · 1(full-t
 ### 범위 밖 · 다음
 
 offline 분할 재현(입력만 준비), F2 · F6 cell(외부 / GT mask를 AG3S 제약에 주입), guidance arm, 다른 suite · test split, LIBERO-Safety L1 · L2와 그 위 AG3S · filter arm.
+
+## BL-14 — BASELINE-TRANCHE-1: 논문 baseline 의 원문 충실도 점검 · 수정 · tranche 1 (2026-11-09 ~ 11-10)
+
+> 2026-11-09 18:5x – 2026-11-10 16:1x KST, dev-4a. 사용자 위임 (2026-11-10 02:0x "원문과 차이가 크면 스스로 판정해 개선 후 재실행, 나의 요청이 있기 전까지 계속") 에 따른 자율 수행.
+> 목적: AG3S 를 논리적으로 검증하는 Tab. 1 (E1a) 의 baseline 행 (`paper/evidence/AG3S-VLA_CVPR2027_FINAL_EXPERIMENT_PLAN_20261108_KO.md`).
+> 판정 · 근거 정본: [`doc/active/experiments/BASELINE_TRANCHE_PLAN_PORT_RATIONALE_20261109_KO.md`](../../../doc/active/experiments/BASELINE_TRANCHE_PLAN_PORT_RATIONALE_20261109_KO.md) §4.4–4.14 (원칙 R1–R5, 수정마다 실제 → 차이 → 원인 → 수정 → 범위).
+> 결과 표 · figure: `experiments/segmentation/bl_tranche_report.py` → `outputs/2026-11-09_baseline_tranche/t1/` (README.md, blocks.csv, fig1_pooled_vs_paper.png, fig2_car_blocks.png; git 제외). 점검: `bl_tranche_check.py`. 원시 run: storage `results/benchmark/*_blt1-*`.
+> 조건: SafeLIBERO 4 suite × LI/LII × task 0–3 × init 15–18 (16 ep / block), LIBERO 4 suite × task 0–9 × init 15–18, seed 7, `main_aegis` step budget, 1 mm 충돌 규칙, chunk-level filtering (F2 철회, 공통 편차).
+
+### 수정 이력 (원문 대비 큰 차이 → 원인 → R1 수정)
+
+| 시각 (KST) | arm | 실제 → 원인 | 수정 | 효과 (같은 block CAR) |
+|---|---|---|---|---|
+| 11-09 18:57 | KNOWS | 손 ellipsoid 가 Panda 손을 덮지 않음 | F1 hand + finger MVEE | (F1 frame bug 로 무효, 아래) |
+| 11-09 20:01 | AEGIS | 장애물 이름 문구가 공식 prefer_list 와 다름 | 공식 prefer_list 문구 | AEGIS-GT spatial LI 43.8 → 56.2 |
+| 11-10 03:4x | AEGIS · multi-link detector | generic prompt 로 장애물을 놓침 (GLM-4.5V 미사용) | 공식 GLM prompt 를 로컬 Qwen2.5-VL-7B 가 답함 → Grounding DINO | AEGIS spatial LI 12.5 → 50.0, object LI 0.0 → 43.8 |
+| 11-10 04:0x | KNOWS | F1 ellipsoid 를 grip-site frame 으로 보정했는데 right_hand frame 에 적용 (Rz 90°) | frame 변환 | KNOWS-GT spatial LI 6.2 → 43.8 |
+| 11-10 05:1x | multi-link GT | GT seg 점군에 공식 80 % trim → 긴 물체 (wine bottle) hazard 가 작음 | 논문 privileged 조건 "exact geometry" (collision geom MVEE) | object LI 6.2 → 62.5 |
+| 11-10 15:4x | multi-link detector | 64 ep CAR 40.6 (논문 73.0) — 진단: filter 정상, 공통 perception trim + AEGIS 공식 tall EE ellipsoid 차이, M3 효과 0 / 14 | **수정 없음** (R2) | — |
+
+### 현재 결과 (16:13, 현재 판 pool; levels + 끝난 suite)
+
+| arm | block | n | TSR | SSR | CAR | 논문 CAR | 차이 |
+|---|---|---|---|---|---|---|---|
+| π0.5 | 8 / 8 | 128 | 56.2 | 10.9 | 14.8 | 17.7 | −2.9 |
+| AEGIS (VLM 이름) | 7 / 8 | 112 | 74.1 | 43.8 | 57.1 | 68.9 | −11.8 |
+| AEGIS-GT (privileged 이름) | 8 / 8 | 128 | 71.1 | 44.5 | 60.2 | 68.9 | −8.7 |
+| multi-link CBF | 4 / 8 | 64 | 68.8 | 32.8 | 40.6 | 73.0 | −32.4 |
+| multi-link CBF-GT (exact) | 8 / 8 | 128 | 64.8 | 43.0 | 67.2 | 73.0 | −5.8 |
+| KNOWS | 2 / 8 | 32 | 46.9 | 3.1 | 15.6 | 72.6 | (진행 중) |
+| KNOWS-GT | 2 / 8 | 32 | 71.9 | 43.8 | 53.1 | 79.2 | (진행 중) |
+
+LIBERO π0.5: 100.0 / 100.0 / 97.5 / 97.5 (spatial / object / goal / 10, 각 40 ep).
+
+### 관찰
+
+- π0.5 단독과 AEGIS-GT · multi-link-GT 가 논문 수준 (CAR 차이 ≤ 9 pt) → 공통 harness 가 baseline 에 불리하지 않다는 근거.
+- AEGIS (VLM 이름) 와 AEGIS-GT (privileged 이름) 는 block 6 개에서 episode 단위로 동일 (성공 · step 수 · policy call 이 16/16 같음; 다른 commit 의 2 block 은 13–15/16). VLM 이 prefer_list 에서 정답 장애물 이름을 그대로 고르므로 Grounding DINO 입력이 같아진다 → SafeLIBERO 에서는 이름 단계가 병목이 아니고, AEGIS 의 남은 차이는 cloud · trim · EE 모델 쪽이다 [I].
+- multi-link detector < AEGIS (object suite) 는 noise 가 아님 (McNemar p = 0.004) 이지만 port 결함도 아님 — 원문 그대로의 공통 perception 의 한계를 AEGIS 의 공식 EE heuristic 이 덮는 차이. 논문 Table Ib 는 4 suite 합산이라 goal · long 이후 다시 비교.
+
+### 다음
+
+queue E (AEGIS detector 나머지 + LIBERO AEGIS → KNOWS ±GT `-r3` + LIBERO KNOWS) → multi-link detector 나머지 + LIBERO multi-link (같은 HEAD d452c804). 이후 AG3S 검증용 control arm (+ generic geometry, + external segmentation; AG3S freeze S0 필요) 과 남은 9/10 tranche.

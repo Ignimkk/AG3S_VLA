@@ -272,6 +272,112 @@ held-out frames. All reported detector-variant numbers use this version; the fir
 
 **같은 시점 KNOWS (§4.11) closed-loop 확인:** spatial LI GT seg `-r3` TSR / CAR 75.0 / **43.8** (수정 전 r2 6.2), detector `-r3` 62.5 / 6.2 (detector recall 한계, R4). GT seg 는 64 ep 이 모이면 다시 판정.
 
+### 4.13 queue D 초기 점검 — spatial LI, 수정한 세 arm (2026-11-10 06:31, dev-4a 자율 판정)
+
+각 칸은 같은 block (spatial LI, init 15–18, 16 ep) 의 수정 전 → 수정 후 값이다 (TSR / SSR / CAR, %).
+
+| arm | 수정 전 (c027b00d) | 수정 후 (d452c804, `-r2`) | 논문 | 판정 |
+|---|---|---|---|---|
+| AEGIS detector (VLM naming, §4.10) | 50.0 / 12.5 / 12.5 | 87.5 / 50.0 / **50.0** | CAR 68.9 (level 합산) | 큰 개선. 차이 −19 pt 로 16 ep 에서는 FLAG 기준 (20 pt) 안 → 진행, ≥ 64 ep 에서 재판정 |
+| multi-link CBF detector (VLM naming) | 50.0 / 12.5 / 12.5 | 75.0 / 43.8 / **50.0** | 60.3 / 51.7 / 73.0 | 큰 개선. 차이 −23 pt 이지만 16 ep (95 % CI 폭 ≈ ±24 pt) → 진행, ≥ 64 ep 에서 재판정 |
+| multi-link CBF GT (exact, §4.12) | 68.8 / 56.2 / 68.8 (seg) | 68.8 / 43.8 / 62.5 | 60.3 / 51.7 / 73.0 | spatial LI 는 원래 문제 block 이 아니었음 (seg 도 68.8) → 판정 불가. **결정 block 은 object LI** (seg CAR 6.2, wine bottle). queue D step 2 의 object LI `-r2` 끝에서 판정 |
+
+**판정:** 세 arm 모두 중단할 근거가 없어 queue D 를 그대로 진행한다. 다음 점검은 multi-link GT exact object LI (예상 ~10:2x KST) 이다. 그 block 의 CAR 이 여전히 원문보다 20 pt 넘게 낮으면 §4.12 의 '다음 후보' (M3 robot ellipsoid mesh 재 fit) 를 적용하고 multi-link GT 를 `-r3` 으로 다시 돌린다.
+
+**결정 block 결과 (2026-11-10 11:33):** multi-link GT exact object LI `-r2` TSR / SSR / CAR 50.0 / 31.2 / **62.5** (seg 6.2 → 62.5), spatial LII `-r2` 68.8 / 62.5 / 75.0. 64 ep pool (object LII 는 아직 seg) 68.8 / 42.2 / 60.9 → 논문 대비 CAR −12 pt, SSR −10 pt, FLAG 아님. **§4.12 수정이 원인을 해소했다고 판정, M3 은 적용하지 않음.** 같은 시점에 SafeLIBERO 4 suite 를 다 채운 arm: π0.5 단독 LI 50.0 / 4.7 / 6.2, LII 62.5 / 17.2 / 23.4 (논문 대비 CAR −6.2 / +0.4) · AEGIS-GT 128 ep 71.1 / 44.5 / 60.2 (CAR −8.7) — 공통 harness 가 원문 수준을 재현한다는 근거.
+
+**pool 해석 주의:** `bl_tranche_check.py` 는 block 마다 가장 높은 `-rN` 을 고른다. 그래서 detector arm 이 아직 `-r2` 가 없는 block 에서는 수정 전 run 을 섞어 보여 준다 (06:31 의 AEGIS pooled CAR 31.2 는 수정 전 object LI · spatial LII 를 포함). queue D 의 step 3 가 그 block 을 `-r2` 로 대체한 뒤의 pool 이 판정 대상이다.
+
+### 4.14 detector 판 64 ep 판정 (2026-11-10 15:14, dev-4a 자율 판정)
+
+| arm | spatial LI | spatial LII | object LI | object LII | 64 ep TSR / SSR / CAR | 논문 | 판정 |
+|---|---|---|---|---|---|---|---|
+| AEGIS detector (VLM naming) | 50.0 | 56.2 | 43.8 | 68.8 | 76.6 / 46.9 / **54.7** | CAR 68.9 | −14 pt → 통과, 진행 |
+| multi-link CBF detector (VLM naming) | 50.0 | 56.2 | **12.5** | 43.8 | 68.8 / 32.8 / **40.6** | 60.3 / 51.7 / 73.0 | −32 pt → **FLAG** |
+
+(block 칸 = CAR %, 16 ep.) object LI 에서도 VLM 이름은 맞다 ("black wine bottle", in prefer_list). 두 arm 은 같은 perception (같은 VLM 이름, 같은 head cloud, 같은 공식 trim) 을 쓰는데, multi-link 의 object CAR 은 9 / 32 로 AEGIS 의 18 / 32 보다 낮다. 논문에서는 multi-link 가 AEGIS 이상 (73.0 vs 69.25) 이므로, 원인은 perception 보다 multi-link filter 쪽일 가능성이 있다 [I]. 후보: §4.12 의 M3 (guarded ellipsoid 가 Panda collision mesh 를 다 감싸지 않음), filter 개입 차이, task 물체 밀기 (범위 밖), noise.
+
+**조치:** queue D 를 'aegis goal LI-r2' 끝에서 멈추고, 같은 HEAD 로 queue E (`bl_tranche_queue_e.sh`: AEGIS detector 나머지 + LIBERO AEGIS → KNOWS ±GT `-r3`) 를 시작했다. multi-link detector 의 남은 block 과 LIBERO multi-link 는 진단 (`outputs/2026-11-10_multilinkCBF_detector_FLAG/`) 이 끝나 R1 수정 여부를 정한 뒤 돌린다. 이미 끝난 multi-link detector `-r2` 4 block 은 수정이 있으면 '수정 전' 기록으로 남긴다.
+
+**진단 결과와 판정 (2026-11-10 15:4x, `outputs/2026-11-10_multilinkCBF_detector_FLAG/README.md`):**
+
+| 질문 | 결과 |
+|---|---|
+| 같은 perception 인가 | object 32 쌍 ep 모두 VLM 이름 · head box 동일 [M], offline replay 로 served chunk 재현 [D] |
+| noise 인가 | 쌍 비교: AEGIS 만 충돌 0, multi-link 만 충돌 9, 둘 다 14 → McNemar p = 0.004 [D]. noise 아님. spatial 은 4 vs 4 |
+| multi-link 충돌 부위 | object LI 14/14 gripper (hand 11, finger 3). LII 는 9 건 중 6 건이 쥔 task 물체가 장애물을 민 것 (논문 모델 범위 밖) [M] |
+| filter 동작 | 접촉 전 14/14 개입 (중앙 10 step 전), QP 실패 · fallback 0, filter 자신의 h 는 접촉 row 에서 +1.0–4.7 cm [M] → filter 는 정상, hazard 가 작아서 '떨어져 있다' 고 판단 |
+| 원인 | 공통 perception (공식 80 % trim + head 1 view) 의 hazard 가 작다 (접촉 body mesh 가 3.8–7.5 cm 밖). AEGIS 는 공식 EE ellipsoid 가 그 오차를 덮는다. 특히 instruction 에 orange juice · milk · alphabet soup 이 있으면 켜지는 공식 tall ellipsoid (0.06, 0.12, 0.20) (`main_aegis.py:161-164`), gripper mesh 바깥 margin 55 mm. multi-link 의 gripper ellipsoid 는 mesh 에 맞게 작다 (margin ~20 mm) [D] |
+| M3 (mesh 재 fit) 효과 | 14 접촉 중 h* ≤ 0 로 바뀌는 것 0 건, h* 차이 ≤ 1.4 mm [D] → CAR 효과 ≈ 0 |
+| 공식 two-view (head + backview) | hazard 가 두꺼워지지만 multi-link h* ≤ 0 0/14 그대로 [D] |
+
+**판정: port 수정 없음.** multi-link filter 는 논문대로 동작하고, object suite 의 multi-link < AEGIS 차이는 (1) 논문 그대로의 공통 perception trim 과 (2) AEGIS 공식 tall-object EE heuristic 의 차이에서 온다. 다음은 하지 않는다:
+- multi-link gripper 에 AEGIS 손 ellipsoid 나 cm 단위 margin 을 주는 것 (결과를 보고 정한 값 → R2 위반; 논문은 margin 값을 주지 않음).
+- trim 을 빼는 것 (R2).
+
+M3 은 효과가 측정상 0 이므로 적용하지 않고 선언된 편차로 남긴다 (guarded ellipsoid 출처 = cuRobo sphere, mesh 대비 gripper 81 % 포함 · 최대 9.5 mm 밖, 접촉 h* 차이 ≤ 1.4 mm). 논문 Table Ib 는 4 suite 합산이라 object suite 만으로 'multi-link ≥ AEGIS' 를 확인할 수 없고, goal · long 이 남아 있다. multi-link detector 의 이미 끝난 4 block 은 유효하며, 남은 block 은 같은 HEAD 에서 queue E 다음에 돌린다.
+
+### 4.15 LIBERO-Safety tranche C 보류 해제 (2026-11-10 22:4x, 사용자 지시 "LIBERO safety 도 1/10 만큼")
+
+근거: `outputs/2026-11-10_LIBERO-Safety_사전판정/README.md` (CPU 점검, GPU 미사용).
+
+| 선행 판정 | 결과 | 근거 |
+|---|---|---|
+| H1 공식 `pi05_libero_safety` weight + TrainConfig | 해결 (2026-11-04 G8 · G9 · G15 에서 이미 완료; E1 protocol · 계획 §1.3 의 "H1 필요" 문구가 낡음) | config `third_party/openpi/src/openpi/training/config.py:785-810`, HF @e66d84bf sha256 일치, GPU smoke 1 ep `official_comparable: true` |
+| H2 controller 동등성 | π0.5 단독: 해결 (client 가 fork OSC kp 750 · 출력 ±2 · 입력 clip ±1 을 쓰고 action 을 바꾸지 않음 = 공식 data · weight 와 같은 controller). **action 을 고치는 arm (AG3S · control arm · filter arm) 은 robosuite 1.4.1 단위 (0.05 m / 0.5 rad) 를 가정 → fork-native profile 이 필요** (README §3.3) | [M] CPU 측정 |
+| B1 공식 cost 가 robot 접촉을 못 셈 | 해결: 계획대로 공식 cost 로 종료 + 보조 열 (geom-id robot 접촉, 제약별 평가). 보조 기준 SR 은 재실행 없이 계산 가능 | client · `bl_tranche_ls_report.py` |
+
+**결정 (dev-4a):**
+- checkpoint = 공식 `pi05_libero_safety` (논문 Table 3 π0.5 와 비교 가능한 유일한 조건).
+- tranche C = 4 suite × L0–L2 × task 0–4 × **init 15 → 19 (§4.16)** × seed 7 = 60 ep, 공식 cost 종료, L2 먼저. 전체 10 trial 은 init 19–28 (§4.16 보고 분할 19–49; init 5–14 는 개발 분할이라 쓰지 않음).
+- 본문 CR 은 공식 값 (R1), 보조 CR_aux 를 옆 열로 같이 보고.
+- 실행: `experiments/segmentation/bl_tranche_libero_safety_queue.sh` (DRY 12/12 통과), 예상 GPU 1.4 h. 지금 queue (KNOWS → multi-link detector) 뒤에 실행.
+- filter arm (AEGIS · multi-link · KNOWS) 의 LIBERO-Safety 실행은 계획 Tab. 2 밖이고 구현 2–3 일 (launcher · 단위 · GT 장애물 정의) → **하지 않음 (사용자 판정 2026-11-10 23:0x)**. LIBERO-Safety 의 비교는 계획대로 π0.5 / + generic / + external / AG3S 4 arm.
+
+
+### 4.16 보고 분할 = init 19–49, baseline port 동결 (사용자 판정 2026-11-10 23:1x, A안)
+
+| 항목 | 내용 |
+|---|---|
+| 문제 | R5 (§4.6) 는 "수정은 개발 분할 (init 5–14) 에서 확인, 보고 분할은 고정 뒤 한 번" 인데, §4.10–4.12 의 수정 (VLM 이름 · KNOWS frame · multi-link exact geometry) 은 tranche 1 = **init 15–18 (보고 분할의 일부) 결과를 보고** 결정했다 (사용자 위임 02:0x 아래). 결과를 보고 고친 분할을 headline 에 넣으면 R5 · G171 과 어긋난다 |
+| 완화 요인 | 수정은 모두 원문 · 공식 code 근거 (값 조정 아님; margin · trim 제거 같은 값 선택은 거절, §4.14), 방향은 baseline 성능 상승 = AG3S 에 보수적 |
+| 결정 (A안) | init 15–18 = **'baseline port 검증 분할'** 로 표시하고 모든 arm (π0.5 · baseline · AG3S) 의 headline 에서 뺀다. **보고 분할 = init 19–49 (31 init)**. baseline port 는 queue F 가 끝나면 **동결** (이후 수정 = 새 실험 ID). LIBERO-Safety tranche C 도 init 19 (전체 10 trial = init 19–28) |
+| 기각 | B: 15–49 유지 + 공개 (방어 약함). C: 수정 전·후를 5–14 에서 재검증 (GPU 1–2 일) |
+| 반영 | 공동 계획서 `AG3S_PLAN_SCHEDULE_20261110_KO.md` §2 · §5 (23:2x), `bl_tranche_queue_f.sh` (LS `INITS=19`) |
+
+### 4.17 KNOWS-GT 64 ep FLAG → queue E 중단, queue F 앞당김 (2026-11-11 00:1x, dev-4a 자율 판정)
+
+| block (`-r3`, 16 ep) | KNOWS-GT TSR / SSR / CAR | KNOWS detector TSR / SSR / CAR |
+|---|---|---|
+| spatial LI | 75.0 / 43.8 / 43.8 | 62.5 / 6.2 / 6.2 |
+| spatial LII | 62.5 / 25.0 / 37.5 | 68.8 / 37.5 / 37.5 |
+| object LI | 81.2 / 56.2 / 56.2 | 31.2 / 6.2 / 6.2 |
+| object LII | 68.8 / 37.5 / 37.5 | 81.2 / 37.5 / 43.8 (사후 metric, 아래) |
+| **64 ep** | **71.9 / 40.6 / 43.8** | **60.9 / 21.9 / 23.4** |
+| 논문 (LI / LII) | 73.0 / 63.1 / 82.2 · 67.8 / 55.6 / 76.1 ("Naive GT seg") | 67.5 / 59.9 / 76.4 · 71.1 / 53.8 / 68.8 |
+
+- KNOWS-GT CAR −35 pt (64 ep) → §4.8 FLAG. 같은 harness 의 π0.5 · AEGIS-GT · multi-link-GT 는 원문 ±9 pt 안이므로 harness 보다 KNOWS port 쪽 원인 [I].
+- §4.16 (A안) 에서 port 동결은 queue F 뒤 → 지금은 init 15–18 (port 검증 분할) 로 수정 가능.
+- **조치:** queue E 를 'knows-gt goal LI-r3' 끝에서 멈추고 (남은 KNOWS SafeLIBERO 7 run + LIBERO KNOWS 4 는 진단 뒤), queue F (multi-link detector 나머지 + LIBERO multi-link + LIBERO-Safety π0.5 init 19) 를 먼저 돌린다. 진단: `outputs/2026-11-11_KNOWS_GT_gap/`.
+- **HEAD 변경 사고:** 23:58 에 dev-f1 의 migration commit (69d7060a, 문서 · migration script 만) 이 HEAD 를 바꿔, 'knows object LII-r3' 의 마지막 provenance 기록이 거절됨 (launcher rc=1). client 는 16/16 끝남 → 같은 `metrics.summarize` 로 `closed_loop_metrics.json` 을 사후 작성, run dir 에 `POSTHOC_METRICS_NOTE.txt`. 이후 run 은 69d7060a (실행 경로 code 동일).
+- **사용자 지시 (2026-11-11 00:4x):** 진단은 지금 하되 KNOWS 판정 · 재실행은 공동 계획서의 **마지막 행**으로. 따라서 동결 순서: π0.5 · AEGIS ±GT · multi-link ±GT 는 queue F 뒤 동결 → 보고 run 가능, KNOWS ±GT 는 판정 뒤 동결.
+
+**진단 결과 (2026-11-11 00:3x, `outputs/2026-11-11_KNOWS_GT_gap/README.md`; CPU, 기록 재생 — closed loop 아님):**
+
+| 항목 | 결과 |
+|---|---|
+| KNOWS-GT 충돌 36 건의 첫 접촉 [M] | 팔 link 5–7: 12 · 쥔 / 다른 물체: 7 · 간접 (로봇 접촉 없음): 11 · 손 / 손가락 (EE): 6 |
+| 원문 모델 범위 | 36 건 중 30 건 (83 %) 은 원문이 다루지 않는 부위 — 원문 §3.5 "only ... end effector ellipsoid ...; other components of the robot arm are not considered". EE filter 자체는 동작 (EE 접촉 π0.5 37/53 → 6/36). 같은 EE-only 인 AEGIS-GT 도 같은 양상 (같은 4 block CAR 56.2) |
+| port 고유 원인 | **GT 판의 정의가 원문 행과 다름.** 원문 Tab. 1 "Naive (GT segmentation)" = "a single fixed obstacle ellipsoid is placed using ground-truth segmentation at t = 0 and never updated" (KNOWS §4.1, 확인함). 우리 GT 판은 매 call head + wrist GT mask 로 중심을 다시 재고 F3 tracking 을 씀 → 정적 장애물의 추정 중심이 중앙 35 mm (p90 72 mm) 흔들림, 4 건은 실제 겹침인데 h > 0 [D] |
+| 나머지 EE 충돌 | chunk 단위 지연 3 (공통 편차) · 장애물 MVEE 의 가시면 한계 1 |
+| detector 판 | 충돌 49 건 중 38 건에서 장애물이 제약 집합에 없음; call 0 에 장애물 빠짐 45/64 → Grounding DINO recall (R4 로 선언한 YOLOE 대체) 이 지배. F4a 오제외와 분리 불가 (target track 중심 미기록) |
+
+**권고 (판정은 공동 계획서 마지막 행, 사용자 지시 00:4x):**
+- **F5 (R1):** KNOWS-GT 판을 원문 Naive 정의대로 — t = 0 에 GT segmentation 으로 놓은 장애물 ellipsoid 를 고정 (`serve_method.py` gt seg 분기에서 knows 이면 `track_centroids=False`; adapter 는 이미 지원, F3 자동 생략). 예상 CAR 43.8 → 50–57 (원문 대비 약 −25 pt 는 남음: 팔 · 물체 접촉은 원문 모델 밖, 값 조정 금지 R2). 적용하면 GT 판 tranche 1 전체를 `-r4` 로 재실행.
+- detector 판: 수정 없음 (R4 recall 한계). attention target 중심 기록을 추가해 F4a 오제외를 셀 수 있게 하는 것은 기록 개선 (결과 불변).
+- 원문 충돌 정의 "contacted any non-target obstacle" 와 SafeLIBERO 1 mm 규칙의 차이 가능성 [I] 은 검증 불가 → R3 대로 SafeLIBERO 규칙 유지, 공개.
+
+
 ## 5. 결과
 
 ### 5.1 Tranche 1 (init 15–18) — PLANNED (시작 후 채움)
