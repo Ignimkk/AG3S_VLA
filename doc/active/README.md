@@ -11,6 +11,7 @@
 | [BRANCHES.md](BRANCHES.md) | branch별 목적과 기준(main / feature/panda-benchmark / feature/ag3s-development). 세션 시작 때 읽는다 |
 | [SHARED_STORAGE_AND_PYTHON.md](SHARED_STORAGE_AND_PYTHON.md) | storage 경로와 interpreter 설정의 정본 |
 | [migration/source-manifest.json](migration/source-manifest.json) | migration source 기준(branch · commit) |
+| [migration/SDM_MIGRATION_RUNBOOK_20261110_KO.md](migration/SDM_MIGRATION_RUNBOOK_20261110_KO.md) | **AMRC → SDM 서버 이전 절차** (clone · 데이터 전송 · bootstrap · 검증, SSH 불가 시 대안). 스크립트 `scripts/setup/migration/` |
 | [migration/GPU_OUTPUT_IMPLEMENTATION_REPORT.md](migration/GPU_OUTPUT_IMPLEMENTATION_REPORT.md) | GPU 환경 설치 · 검증 · 삭제 조건 |
 | [migration/LEGACY_RETIREMENT_REPORT.md](migration/LEGACY_RETIREMENT_REPORT.md) | legacy 정리의 최신 판정 |
 | [plans/develope_PLAN.md](plans/develope_PLAN.md) · [develope_PLAN_SUMMARY.md](plans/develope_PLAN_SUMMARY.md) | 개발 방향의 기준(§0.10 PAPER-FIRST) |
