@@ -970,6 +970,12 @@ class SqpConfig:
     #: (`linearize._OBJECT_SURFACE_TOL_M` = 0.02 when None). E1a: the side of an obstacle under the hand is missing from
     #: the 3-request set while the field still holds it (set distance 21-40 mm at the collision call).
     obstacle_object_surface_tolerance: Optional[float] = None
+    #: SL-SOTA3 (dev-57, 2026-11-11): with `obstacle_row_margin`, the number of consecutive calls the policy chunk may sit
+    #: inside the margin before the margin is dropped (the floor and `passthrough_obstacle_tolerance` stay) until a chunk
+    #: clears the full margin again. E1a task 0 with a 15 mm margin: CAR 3 -> 7 of 10, but 5 episodes hovered in front of
+    #: an obstacle the policy kept steering into (or of the target / destination read as an obstacle) and ran out of steps.
+    #: None = the margin always holds.
+    obstacle_row_patience: Optional[int] = None
     # --- T88 — end ---
 
     def validate(self) -> None:
@@ -995,6 +1001,11 @@ class SqpConfig:
                 raise TrajOptConfigError(f"sqp.{name} must be None or >= 0, got {value!r}")
         if self.obstacle_row_margin is not None and self.passthrough_obstacle_tolerance is None:
             raise TrajOptConfigError("sqp.obstacle_row_margin needs sqp.passthrough_obstacle_tolerance (the obstacle-object rows)")
+        if self.obstacle_row_patience is not None:   # SL-SOTA3
+            if isinstance(self.obstacle_row_patience, bool) or not isinstance(self.obstacle_row_patience, int) or self.obstacle_row_patience < 1:
+                raise TrajOptConfigError(f"sqp.obstacle_row_patience must be None or an int >= 1, got {self.obstacle_row_patience!r}")
+            if self.obstacle_row_margin is None:
+                raise TrajOptConfigError("sqp.obstacle_row_patience needs sqp.obstacle_row_margin")
         if not (math.isfinite(float(self.obstacle_row_priority)) and float(self.obstacle_row_priority) >= 1.0):
             raise TrajOptConfigError(f"sqp.obstacle_row_priority must be >= 1, got {self.obstacle_row_priority!r}")
         if isinstance(self.multi_seed, bool) or not isinstance(self.multi_seed, int) or self.multi_seed < 0:
@@ -1574,6 +1585,7 @@ _OMIT_WHEN_DEFAULT.update({("sqp", "passthrough_obstacle_beneath"): False})
 _OMIT_WHEN_DEFAULT.update({("sqp", "passthrough_obstacle_class_tests"): False})   # SL-PE4
 _OMIT_WHEN_DEFAULT.update({("sqp", "obstacle_row_margin"): None, ("sqp", "obstacle_row_priority"): 1.0,
                            ("sqp", "obstacle_object_surface_tolerance"): None})   # SL-SOTA1
+_OMIT_WHEN_DEFAULT.update({("sqp", "obstacle_row_patience"): None})   # SL-SOTA3
 _OMIT_WHEN_DEFAULT.update({("sqp", "passthrough_obstacle_full_horizon"): False})   # SL-GTTO22   # SL-GTTO16 A'
 # --- T88 — end ---
 #: T72 — the grasp-set reach constraint: without `--grasp-set-to` the config dump keeps the keys it had before.

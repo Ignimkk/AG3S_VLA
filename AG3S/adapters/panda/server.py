@@ -732,6 +732,9 @@ PORTED_FINAL_CONFIG_DESTS: tuple[str, ...] = (
     # SL-SOTA1 (dev-57, 2026-11-11): the obstacle-object rows' own margin / slack priority / surface tolerance (sqp keys
     # through serve_safe.passthrough_overrides, same path as passthrough_obstacle_tolerance_mm)
     'obstacle_row_margin_mm', 'obstacle_row_priority', 'obstacle_surface_tol_mm',
+    # SL-SOTA2: the action QP prefers the correction that also makes progress (SafePolicy optimizer attribute, set below)
+    # SL-SOTA3: the obstacle-row margin's patience (sqp key, same path as the margin)
+    'ee_action_qp_progress', 'obstacle_row_patience',
 )
 #: SL-GTTO — the target extents the Panda server runs (``--target-extent``; SL7 attention-surface, SL-GTTO oracle-visible).
 PORTED_TARGET_EXTENTS: tuple[str, ...] = ("estimated", "attention-surface", "oracle-visible")
@@ -1109,6 +1112,11 @@ def build_safe_server(policy, args, *, attention_model=None, gpu_warm_up: bool =
         if getattr(args, "ee_action_qp_translation_only", False):   # SL-QE2 (off: every action dim free, as before)
             safe.refiner.optimizer.ee_action_fixed_dims = (3, 4, 5)   # Panda a_ref = [pos 3, rot 3] (action.ee_action_map)
             grasp_contact = {**grasp_contact, "ee_action_qp_translation_only": True}
+        if getattr(args, "ee_action_qp_progress", None) is not None:   # SL-SOTA2 (off: the min-norm cost as before)
+            # Panda a_ref = [pos 3, rot 3]: dims 0-2 = the world-frame step of the OSC position action
+            safe.refiner.optimizer.ee_action_progress = {"dims": (0, 1, 2), "gain": float(args.ee_action_qp_progress),
+                                                         "full_at_m": 0.02, "link": "panda_hand", "min_xy_m": 0.04}
+            grasp_contact = {**grasp_contact, "ee_action_qp_progress": float(args.ee_action_qp_progress)}
     gpu = gpu_seeds_setup(safe, to_config, warm_up=gpu_warm_up)
     inert = []
     ss.announce_subtask_from_latch(args)   # SL7 (T92): one start line when on

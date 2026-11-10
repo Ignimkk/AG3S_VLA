@@ -20,7 +20,7 @@ from AG3S.trajopt.linearize import ESDF_SLOT  # noqa: E402
 def _sqp(**kw):
     base = dict(passthrough_obstacle_tolerance=0.0, passthrough_obstacle_full_horizon=True, passthrough_obstacle_beneath=False,
                 passthrough_obstacle_class_tests=False, obstacle_row_margin=None, obstacle_row_priority=1.0,
-                obstacle_object_surface_tolerance=None)
+                obstacle_object_surface_tolerance=None, obstacle_row_patience=None)
     base.update(kw)
     return types.SimpleNamespace(**base)
 
@@ -247,3 +247,153 @@ def test_real_linearizer_applies_the_floor_to_its_esdf_block(monkeypatch):
     assert np.allclose(rows.value[esdf & ~on_obstacle], 0.012)
     other = (np.asarray(plain.slot) != ESDF_SLOT) & plain.used                  # candidate / plane rows: untouched
     assert np.allclose(np.sort(plain.value[other]), np.sort(rows.value[(np.asarray(rows.slot) != ESDF_SLOT) & rows.used]))
+
+
+# --- SL-SOTA2: the progress preference of the action QP -------------------------------------------------------------------
+class _ProgLin:
+    """Three steps, three action dims (x, y, z) that integrate into joints 0-2. The one collision row (step 2) wants
+    joint 0 >= 0.01; no row sees joints 1 and 2. One 'hand' sphere at the origin."""
+
+    n_spheres = 1
+
+    def linearize(self, traj, q_now, scene, cfg):
+        value = np.full((3, 1), np.inf)
+        grad = np.zeros((3, 1, 3))
+        used = np.zeros((3, 1), bool)
+        value[2, 0] = -0.01 + traj[0, 2]
+        grad[2, 0, 0] = 1.0
+        used[2, 0] = True
+        return types.SimpleNamespace(value=value, gradient=grad, used=used)
+
+    def full_violation(self, traj, q_now, scene):
+        return max(0.0, 0.01 - traj[0, 2])
+
+    def sphere_states(self, traj, q_now):
+        return np.zeros((3, 1, 3)), None
+
+    def _query_name(self, i):
+        return "panda_hand"
+
+
+PROG = {"dims": (0, 1, 2), "gain": 0.4, "full_at_m": 0.02, "link": "panda_hand", "min_xy_m": 0.04}
+
+
+def _prog_solve(prog, record, scene=None, R=None):
+    from AG3S.trajopt.sqp import TrajectoryOptimizer
+
+    opt = TrajectoryOptimizer.__new__(TrajectoryOptimizer)
+    opt.config = types.SimpleNamespace(reduction=types.SimpleNamespace(linearization_backoff=0.0),
+                                       safety=types.SimpleNamespace(violation_tolerance=1e-6))
+    opt.linearizer = _ProgLin()
+    M = np.zeros((3 * 3, 3 * 3))
+    for k in range(3):
+        for j in range(k + 1):
+            M[k * 3:(k + 1) * 3, j * 3:(j + 1) * 3] = np.eye(3)
+    opt.ee_action_map = {"M": M, "a_ref": np.zeros((3, 3)), **({} if R is None else {"R_world_base": R})}
+    opt.ee_action_progress = prog
+    opt._finish = lambda traj, *a, **k: types.SimpleNamespace(trajectory=traj, metrics={})
+    res = opt._solve_ee_action(np.zeros((3, 3)), np.zeros(3), scene, None, 0.01, None, [], 0.0, True, record)
+    return opt.last_ee_action["delta_action"], res.metrics["ee_action_qp"]
+
+
+VIOL = {"obstacle_rows": {"violation_m": 0.03}}
+HELD = types.SimpleNamespace(grasp_contact={"latch": "held"}, manipulated_points=None)
+
+
+def test_progress_default_off_and_only_with_an_obstacle_row_violation():
+    from AG3S.trajopt.sqp import TrajectoryOptimizer
+
+    assert TrajectoryOptimizer.ee_action_progress is None
+    da, rec = _prog_solve(None, VIOL, HELD)
+    assert np.allclose(da[:, 0], 0.01 / 3, atol=1e-5) and np.allclose(da[:, 1:], 0.0, atol=1e-6) and "progress" not in rec
+    for record in (None, {"obstacle_rows": {"violation_m": 0.0}}, {"reason": "collision"}):
+        da, rec = _prog_solve(PROG, record, HELD)            # no obstacle-object row violated: the min-norm correction
+        assert np.allclose(da[:, 1:], 0.0, atol=1e-6) and rec["progress"]["gain"] == 0.0 and rec["progress"]["direction"] is None
+
+
+def test_progress_lifts_while_held_and_keeps_the_row():
+    da, rec = _prog_solve(PROG, VIOL, HELD)
+    assert np.allclose(da[:, 2], 0.4, atol=1e-4) and np.allclose(da[:, 1], 0.0, atol=1e-5)   # up, full gain above 20 mm
+    assert np.allclose(da[:, 0], 0.01 / 3, atol=1e-4)                                        # the collision row as before
+    assert rec["progress"]["mode"] == "held: up" and rec["progress"]["direction"] == [0.0, 0.0, 1.0]
+    da, rec = _prog_solve(PROG, {"obstacle_rows": {"violation_m": 0.005}}, HELD)
+    assert np.allclose(da[:, 2], 0.1, atol=1e-4) and rec["progress"]["gain"] == pytest.approx(0.1)   # scaled by the violation
+
+
+def test_progress_goes_toward_the_target_before_the_grasp():
+    scene = types.SimpleNamespace(grasp_contact={"latch": "latched"}, manipulated_points=np.array([[0.0, 0.2, -0.1]]))
+    da, rec = _prog_solve(PROG, VIOL, scene)
+    assert np.allclose(da[:, 1], 0.4, atol=1e-4) and np.allclose(da[:, 2], 0.0, atol=1e-5)   # +y toward the target, no z
+    assert rec["progress"]["mode"].startswith("before the grasp")
+    Rx = np.array([[1.0, 0.0, 0.0], [0.0, 0.0, -1.0], [0.0, 1.0, 0.0]])                      # base +y is world +z
+    da, _ = _prog_solve(PROG, VIOL, scene, R=Rx)
+    assert np.allclose(da[:, 1], 0.0, atol=1e-4) and np.allclose(da[:, 2], 0.4, atol=1e-4)
+    for sc, mode in ((types.SimpleNamespace(grasp_contact={"latch": "closing"}, manipulated_points=np.zeros((1, 3))), "closing"),
+                     (types.SimpleNamespace(grasp_contact={"latch": "searching"}, manipulated_points=None), "no target"),
+                     (types.SimpleNamespace(grasp_contact={"latch": "latched"}, manipulated_points=np.array([[0.0, 0.02, 0.0]])),
+                      "over the target")):
+        da, rec = _prog_solve(PROG, VIOL, sc)
+        assert np.allclose(da[:, 1:], 0.0, atol=1e-5) and rec["progress"]["mode"] == mode
+
+
+def test_progress_and_patience_flag_plumbing():
+    from AG3S.adapters.panda import server as srv
+    from AG3S.trajopt import serve_safe as ss
+    from tests.trajopt.test_t88_passthrough_when_clear import BASE as ARGV
+
+    ap = ss.build_parser()
+    a = ap.parse_args(ARGV)
+    assert a.ee_action_qp_progress is None and a.obstacle_row_patience is None
+    assert "obstacle_row_patience" not in ss.passthrough_overrides(a)
+    a = ap.parse_args(ARGV + ["--ee-action-qp-progress", "0.4", "--obstacle-row-patience", "6"])
+    assert a.ee_action_qp_progress == pytest.approx(0.4) and ss.passthrough_overrides(a)["obstacle_row_patience"] == 6
+    assert {"ee_action_qp_progress", "obstacle_row_patience"} <= set(srv.PORTED_FINAL_CONFIG_DESTS)
+    ok = ["--passthrough-when-clear", "--passthrough-obstacle-tolerance-mm", "0", "--ee-action-qp"]
+    for bad in (["--ee-action-qp-progress", "0.4"], ok + ["--ee-action-qp-progress", "1.5"],
+                ok + ["--obstacle-row-patience", "6"], ok + ["--obstacle-row-margin-mm", "15", "--obstacle-row-patience", "0"]):
+        with pytest.raises(SystemExit):
+            ss.reject_bad_flag_combinations(ap, ap.parse_args(ARGV + bad))
+
+
+# --- SL-SOTA3: the margin's patience -----------------------------------------------------------------------------------
+def test_patience_drops_the_margin_after_n_blocked_calls_and_rearms():
+    from AG3S.trajopt.sqp import TrajectoryOptimizer
+
+    opt = TrajectoryOptimizer.__new__(TrajectoryOptimizer)
+    opt.config = types.SimpleNamespace(sqp=_sqp(obstacle_row_margin=0.015, obstacle_row_patience=2))
+    opt.lookahead_from = 5
+    seen = []
+    for worst in (0.010, 0.010, 0.010, 0.010, -0.002, 0.020, 0.010):
+        opt.linearizer = _RowsLin(worst)
+        record: dict = {}
+        refused = opt._obstacle_row_refuses(None, None, None, record)
+        seen.append((refused, record["obstacle_rows"]["margin_m"], record["obstacle_rows"]["patience"]["relaxed"],
+                     opt._obstacle_margin_now))
+    # calls 1-2: inside the margin, refused; call 3: patience (2) spent, the margin is dropped and 10 mm passes;
+    # call 5: below the floor itself, refused even without the margin; call 6: clear of the full margin, re-armed; call 7: refused
+    assert [s[0] for s in seen] == [True, True, False, False, True, False, True]
+    assert [s[2] for s in seen] == [False, False, True, True, True, False, False]
+    assert [s[1] for s in seen] == [0.015, 0.015, 0.0, 0.0, 0.0, 0.015, 0.015] == [s[3] for s in seen]
+
+
+def test_without_patience_the_margin_always_holds():
+    for _ in range(3):
+        refused, record, _kw = _refuses(0.010, obstacle_row_margin=0.015)
+        assert refused and "patience" not in record["obstacle_rows"]
+
+
+def test_relaxed_margin_reaches_the_action_qp():
+    from AG3S.trajopt.sqp import TrajectoryOptimizer
+
+    opt = TrajectoryOptimizer.__new__(TrajectoryOptimizer)
+    opt.config = types.SimpleNamespace(reduction=types.SimpleNamespace(linearization_backoff=0.0),
+                                       safety=types.SimpleNamespace(violation_tolerance=1e-6),
+                                       sqp=_sqp(obstacle_row_margin=0.03, obstacle_row_priority=10.0, obstacle_row_patience=2))
+    opt.linearizer = _Lin()
+    opt.ee_action_map = {"M": np.ones((1, 1)), "a_ref": np.zeros((1, 1))}
+    opt._finish = lambda traj, *a, **k: types.SimpleNamespace(trajectory=traj, metrics={})
+    opt._obstacle_margin_now = 0.0                           # what `_obstacle_row_refuses` left: relaxed
+    res = opt._solve_ee_action(np.zeros((1, 1)), np.zeros(1), None, None, 0.0, None, [], 0.0, True, None)
+    assert abs(float(opt.last_ee_action["delta_action"][0, 0])) < 1e-6 and res.metrics["ee_action_qp"]["obstacle_row_margin_m"] == 0.0
+    assert opt.linearizer.floors == [None] or all(f is None for f in opt.linearizer.floors)   # the plain rows, no floor
+    assert "n_obstacle_rows" not in res.metrics["ee_action_qp"]
