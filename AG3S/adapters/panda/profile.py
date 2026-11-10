@@ -1108,6 +1108,24 @@ GT15_VERSIONS = GT15_VERSIONS + QE2_VERSIONS[-1:]
 QE2_VERSIONS = QE2_VERSIONS + ("AG3S-commonto-att-termsoff-pass-zr-ee-hdp-loose2-obst4-pts-nocarve-fh-t100-pe12345811-tro",)
 AG3S_VERSIONS[QE2_VERSIONS[-1]] = tuple(AG3S_VERSIONS[QE2_VERSIONS[-1][:-len("-tro")]]) + ("--ee-action-qp-translation-only",)
 GT15_VERSIONS = GT15_VERSIONS + QE2_VERSIONS[-1:]
+#: SOTA clearance candidates (dev-57, 2026-11-11, AG3S_PLAN_SCHEDULE_20261110_KO.md §9): the obstacle-object row of the
+#: pass-through. pe123458 E1a 40: 5 collided episodes passed through with that row 6-9.7 mm inside its 10 mm margin (A) and
+#: 3 touched right after an action-QP solve (B) -- with tau_obs 10 mm the passed chunk may have 0 mm modelled clearance.
+#: ``-to5`` / ``-to0`` = --passthrough-obstacle-tolerance-mm 5 / 0 (argparse: the later value wins). Name =
+#: <base>[-to<k>][-tro]; all default off. (A larger --obstacle-margin is NOT registered here: it is a V11AB base option,
+#: and a GT15 version that sets it makes version_flag_values add the final-version keys to every V11AB record.)
+SOTA_VERSIONS: tuple[str, ...] = ()
+_SOTA_SUFFIXES: dict[str, tuple[str, ...]] = {
+    "-to5": ("--passthrough-obstacle-tolerance-mm", "5"),
+    "-to0": ("--passthrough-obstacle-tolerance-mm", "0"),
+}
+for _b in (PE_VERSIONS[6], PE_VERSIONS[11]):   # pe123458, pe12345811
+    for _suffix, _flags in _SOTA_SUFFIXES.items():
+        AG3S_VERSIONS[_b + _suffix] = tuple(AG3S_VERSIONS[_b]) + _flags
+        AG3S_VERSIONS[_b + _suffix + "-tro"] = AG3S_VERSIONS[_b + _suffix] + ("--ee-action-qp-translation-only",)
+        SOTA_VERSIONS = SOTA_VERSIONS + (_b + _suffix, _b + _suffix + "-tro")
+del _b, _suffix, _flags
+GT15_VERSIONS = GT15_VERSIONS + SOTA_VERSIONS
 #: (G88c, 03:5x) the A-alone ablation queued as ``…-obst3`` (gtto23, not started yet) gets the same two fixes, so A alone and
 #: A + B differ only by the held point model: ``…-obst3`` := A'' + no carve + support "under" (``…-obst3-pts`` = B'' keeps
 #: the flags it was evaluated with -- it was built above from the earlier definition).
