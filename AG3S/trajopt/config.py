@@ -957,6 +957,19 @@ class SqpConfig:
     #: needed no class tests; the GT-free scene set holds the held bowl / supports, and the SL-GTTO19 override switched off
     #: the Panda held-object rules for exactly those rows (pe123b s8 t9 call 14-23). False = SL-GTTO19 as before.
     passthrough_obstacle_class_tests: bool = False
+    #: SL-SOTA1 (dev-57, 2026-11-11): the obstacle-object rows keep this much (m) MORE than their floor. With a value the
+    #: pass-through is refused when such a row is below `floor + margin` by more than `passthrough_obstacle_tolerance`, and
+    #: the action QP (`ee_action_qp`) holds those rows at `floor + margin` (+ backoff) through `linearize(row_floor=)`.
+    #: E1a pe123458: the passed chunk may sit 0 mm from the modelled surface (10 mm floor, 10 mm tolerance) while the world
+    #: model misses 12-27 mm of an obstacle under the hand and the executed motion is 10-15 mm off the plan. None = off.
+    obstacle_row_margin: Optional[float] = None
+    #: SL-SOTA1: slack-weight multiplier of the obstacle-object rows in the action QP (with `obstacle_row_margin`); 1 = as
+    #: the other rows.
+    obstacle_row_priority: float = 1.0
+    #: SL-SOTA1: how far (m) a row's nearest surface point may be from the obstacle-object point set and still be on it
+    #: (`linearize._OBJECT_SURFACE_TOL_M` = 0.02 when None). E1a: the side of an obstacle under the hand is missing from
+    #: the 3-request set while the field still holds it (set distance 21-40 mm at the collision call).
+    obstacle_object_surface_tolerance: Optional[float] = None
     # --- T88 — end ---
 
     def validate(self) -> None:
@@ -976,6 +989,14 @@ class SqpConfig:
                 math.isfinite(float(self.passthrough_obstacle_tolerance)) and float(self.passthrough_obstacle_tolerance) >= 0.0):
             raise TrajOptConfigError(
                 f"sqp.passthrough_obstacle_tolerance must be None or >= 0, got {self.passthrough_obstacle_tolerance!r}")
+        for name in ("obstacle_row_margin", "obstacle_object_surface_tolerance"):   # SL-SOTA1
+            value = getattr(self, name)
+            if value is not None and not (math.isfinite(float(value)) and float(value) >= 0.0):
+                raise TrajOptConfigError(f"sqp.{name} must be None or >= 0, got {value!r}")
+        if self.obstacle_row_margin is not None and self.passthrough_obstacle_tolerance is None:
+            raise TrajOptConfigError("sqp.obstacle_row_margin needs sqp.passthrough_obstacle_tolerance (the obstacle-object rows)")
+        if not (math.isfinite(float(self.obstacle_row_priority)) and float(self.obstacle_row_priority) >= 1.0):
+            raise TrajOptConfigError(f"sqp.obstacle_row_priority must be >= 1, got {self.obstacle_row_priority!r}")
         if isinstance(self.multi_seed, bool) or not isinstance(self.multi_seed, int) or self.multi_seed < 0:
             raise TrajOptConfigError(f"sqp.multi_seed must be an int >= 0, got {self.multi_seed!r}")
         if self.gpu_seeds not in ("off", "curobo"):   # AG3S-PRE-CORE-TO E3-b
@@ -1551,6 +1572,8 @@ _OMIT_WHEN_DEFAULT.update({("sqp", "passthrough_limit_tolerance"): 0.0})   # SL-
 _OMIT_WHEN_DEFAULT.update({("sqp", "passthrough_obstacle_tolerance"): None})   # SL-GTTO16
 _OMIT_WHEN_DEFAULT.update({("sqp", "passthrough_obstacle_beneath"): False})
 _OMIT_WHEN_DEFAULT.update({("sqp", "passthrough_obstacle_class_tests"): False})   # SL-PE4
+_OMIT_WHEN_DEFAULT.update({("sqp", "obstacle_row_margin"): None, ("sqp", "obstacle_row_priority"): 1.0,
+                           ("sqp", "obstacle_object_surface_tolerance"): None})   # SL-SOTA1
 _OMIT_WHEN_DEFAULT.update({("sqp", "passthrough_obstacle_full_horizon"): False})   # SL-GTTO22   # SL-GTTO16 A'
 # --- T88 — end ---
 #: T72 — the grasp-set reach constraint: without `--grasp-set-to` the config dump keeps the keys it had before.

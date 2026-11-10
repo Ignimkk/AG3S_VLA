@@ -6,7 +6,8 @@ BASE = "AG3S-commonto-att-termsoff-pass-zr-ee-hdp-loose2-obst4-pts-nocarve-fh-t1
 
 
 def test_names_and_flags():
-    assert len(pf.SOTA_VERSIONS) == 8 and set(pf.SOTA_VERSIONS) <= set(pf.GT15_VERSIONS)
+    assert len(pf.SOTA_VERSIONS) == 8 + len(pf.SOTA_OM_VERSIONS) + len(pf.SOTA_NTC_VERSIONS)
+    assert set(pf.SOTA_VERSIONS) <= set(pf.GT15_VERSIONS)
     for b in (BASE + "pe123458", BASE + "pe12345811"):
         base = tuple(pf.AG3S_VERSIONS[b])
         assert "--ee-action-qp-translation-only" not in base and base.count("--passthrough-obstacle-tolerance-mm") == 1
@@ -27,3 +28,13 @@ def test_later_value_wins_in_the_server_parser():
 def test_v11ab_record_keys_unchanged():
     fam = pf.version_flag_values(pf.parse_v11ab_args())
     assert "palm_shell" not in fam and "passthrough_obstacle_tolerance_mm" not in fam
+
+
+def test_no_target_certify_versions():
+    assert len(pf.SOTA_NTC_VERSIONS) == 24 and len(set(pf.SOTA_VERSIONS)) == len(pf.SOTA_VERSIONS)
+    for name in pf.SOTA_NTC_VERSIONS:
+        parent = name[:-len("-tro")] if name.endswith("-tro") else name[:-len("-ntc")]
+        extra = "--ee-action-qp-translation-only" if name.endswith("-tro") else "--no-target-certify"
+        assert tuple(pf.AG3S_VERSIONS[name]) == tuple(pf.AG3S_VERSIONS[parent]) + (extra,)
+        assert tuple(pf.AG3S_VERSIONS[name]).count("--no-target-certify") == 1
+        assert pf.version_server_flags(name)

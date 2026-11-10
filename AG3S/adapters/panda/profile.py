@@ -1125,6 +1125,37 @@ for _b in (PE_VERSIONS[6], PE_VERSIONS[11]):   # pe123458, pe12345811
         AG3S_VERSIONS[_b + _suffix + "-tro"] = AG3S_VERSIONS[_b + _suffix] + ("--ee-action-qp-translation-only",)
         SOTA_VERSIONS = SOTA_VERSIONS + (_b + _suffix, _b + _suffix + "-tro")
 del _b, _suffix, _flags
+#: SL-SOTA1 (dev-57, 2026-11-11): the obstacle-object rows' own margin on top of ``-to0`` -- ``-om<mm>`` =
+#: --obstacle-row-margin-mm (pass-through refused below floor + mm, the action QP holds those rows there), ``p<w>`` =
+#: --obstacle-row-priority (their slack weight), ``s<mm>`` = --obstacle-surface-tol-mm (row <-> scene obstacle set). E1a
+#: pe123458 (outputs/2026-11-11_SOTA_개선/offline): the world model misses 12-27 mm of an obstacle under the hand, the
+#: executed motion is 10-15 mm off the QP plan, the obstacle set is 21-40 mm from the surface the hand touches.
+#: Name = <base>-to0-om<mm>[p<w>][s<mm>][-tro]; all default off.
+SOTA_OM_VERSIONS: tuple[str, ...] = ()
+_SOTA_OM_SUFFIXES: dict[str, tuple[str, ...]] = {
+    "-om15": ("--obstacle-row-margin-mm", "15"),
+    "-om15p10": ("--obstacle-row-margin-mm", "15", "--obstacle-row-priority", "10"),
+    "-om15p10s40": ("--obstacle-row-margin-mm", "15", "--obstacle-row-priority", "10", "--obstacle-surface-tol-mm", "40"),
+    "-om25p10s40": ("--obstacle-row-margin-mm", "25", "--obstacle-row-priority", "10", "--obstacle-surface-tol-mm", "40"),
+}
+for _b in (PE_VERSIONS[6] + "-to0", PE_VERSIONS[11] + "-to0"):
+    for _suffix, _flags in _SOTA_OM_SUFFIXES.items():
+        AG3S_VERSIONS[_b + _suffix] = tuple(AG3S_VERSIONS[_b]) + _flags
+        AG3S_VERSIONS[_b + _suffix + "-tro"] = AG3S_VERSIONS[_b + _suffix] + ("--ee-action-qp-translation-only",)
+        SOTA_OM_VERSIONS = SOTA_OM_VERSIONS + (_b + _suffix, _b + _suffix + "-tro")
+del _b, _suffix, _flags
+SOTA_VERSIONS = SOTA_VERSIONS + SOTA_OM_VERSIONS
+#: ``-ntc`` = --no-target-certify (SL-PE6, G158: a no-target frame is certified with every surface an obstacle instead of a
+#: HOLD). pe123458 / pe123458-tro E1a t0 e7: `no_target` (grounding no_admissible) from call 0 -> 60 HOLDs, the arm never
+#: moved (pi0.5 alone succeeds). PE6 was only evaluated together with PE7. Name = <SOTA base>-ntc[-tro].
+SOTA_NTC_VERSIONS: tuple[str, ...] = ()
+for _b in ((PE_VERSIONS[6], PE_VERSIONS[11], PE_VERSIONS[6] + "-to0", PE_VERSIONS[11] + "-to0")
+           + tuple(v for v in SOTA_OM_VERSIONS if not v.endswith("-tro"))):
+    AG3S_VERSIONS[_b + "-ntc"] = tuple(AG3S_VERSIONS[_b]) + ("--no-target-certify",)
+    AG3S_VERSIONS[_b + "-ntc-tro"] = AG3S_VERSIONS[_b + "-ntc"] + ("--ee-action-qp-translation-only",)
+    SOTA_NTC_VERSIONS = SOTA_NTC_VERSIONS + (_b + "-ntc", _b + "-ntc-tro")
+del _b
+SOTA_VERSIONS = SOTA_VERSIONS + SOTA_NTC_VERSIONS
 GT15_VERSIONS = GT15_VERSIONS + SOTA_VERSIONS
 #: (G88c, 03:5x) the A-alone ablation queued as ``…-obst3`` (gtto23, not started yet) gets the same two fixes, so A alone and
 #: A + B differ only by the held point model: ``…-obst3`` := A'' + no carve + support "under" (``…-obst3-pts`` = B'' keeps

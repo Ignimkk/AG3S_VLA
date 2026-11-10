@@ -1957,7 +1957,7 @@ class CollisionLinearizer:
     # --- SL-GTTO16 (A) — begin: the obstacle-object rows of a trajectory (read only by `sqp._clear_passthrough`)
     def obstacle_object_rows(self, trajectory: np.ndarray, q_now: np.ndarray, scene: SceneSnapshot,
                              steps: Optional[int] = None, beneath: bool = False,
-                             class_tests: bool = False) -> tuple[float, Optional[dict]]:
+                             class_tests: bool = False, surface_tol: Optional[float] = None) -> tuple[float, Optional[dict]]:
         """`(worst clearance over the ESDF rows whose nearest surface is an obstacle object, identity)` — `inf`, `None`
         when there is no such row (or no field).
 
@@ -1973,6 +1973,39 @@ class CollisionLinearizer:
             return float("inf"), None
         states = self.sphere_states(trajectory, q_now)
         centres = np.asarray(states[0], np.float64)
+        got = self.obstacle_object_mask(centres, scene, beneath=beneath, class_tests=class_tests, surface_tol=surface_tol)
+        if got is None:
+            return float("inf"), None
+        clear, obst, n_beneath, oop = got
+        if steps is not None:
+            clear, obst, centres = clear[:steps], obst[:steps], centres[:steps]
+        if not obst.any():
+            # record only: with the GT / scene obstacle set, say how large it was (0 rows is not "no set")
+            return float("inf"), (None if oop is None else {"n_obstacle_rows": 0, "n_rows": int(obst.size),
+                                                           "n_object_points": int(len(oop))})
+        masked = np.where(obst, clear, np.inf)
+        flat_i = int(np.argmin(masked))
+        value = float(masked.reshape(-1)[flat_i])
+        if not np.isfinite(value):
+            return float("inf"), None
+        step, query = np.unravel_index(flat_i, masked.shape)
+        point = np.asarray(centres[step, query], np.float64)
+        return value, {"step": int(step), "query": int(query), "link": self._query_name(int(query)),
+                       "clearance_m": value, "point_m": [round(float(x), 4) for x in point],
+                       "obstacle": self._esdf_label_name(point, scene),
+                       "n_obstacle_rows": int(obst.sum()), "n_rows": int(obst.size), "n_beneath": n_beneath,
+                       **({} if oop is None else {"n_object_points": int(len(oop))})}
+
+    def obstacle_object_mask(self, centres: np.ndarray, scene: SceneSnapshot, beneath: bool = False,
+                             class_tests: bool = False, surface_tol: Optional[float] = None):
+        """The classification of :meth:`obstacle_object_rows` on given query centres ``(H, n_query, 3)`` (SL-SOTA1,
+        2026-11-11: the action QP reads the same mask to give those rows their own floor). ``None`` without a field or
+        without ESDF rows; else ``(clearance (H, n_query), is_obstacle_object (H, n_query), n_beneath, object points)``.
+        ``surface_tol`` (m, default ``_OBJECT_SURFACE_TOL_M``): how far the row's nearest surface point may be from the
+        obstacle-object point set and still be on it."""
+        if scene.esdf is None:
+            return None
+        centres = np.asarray(centres, np.float64)
         shape = tuple(centres.shape[:2])                       # (H, n_query) -- every array below is read to this
         size = shape[0] * shape[1]
 
@@ -1984,7 +2017,7 @@ class CollisionLinearizer:
 
         clear = np.asarray(self._esdf_clearance(centres, scene), np.float64)
         if not clear.size:
-            return float("inf"), None
+            return None
         clear = rows(clear, "clearance")
         flat = centres.reshape(-1, 3)
         d = rows(scene.esdf.distance(flat), "distance")
@@ -2033,7 +2066,7 @@ class CollisionLinearizer:
             surf = flat - d.reshape(-1, 1) * np.where(ok[:, None], g / np.maximum(gn, _EPS), 0.0)
             if len(oop):
                 from scipy.spatial import cKDTree
-                on = (cKDTree(oop).query(surf)[0] <= _OBJECT_SURFACE_TOL_M) & ok
+                on = (cKDTree(oop).query(surf)[0] <= (_OBJECT_SURFACE_TOL_M if surface_tol is None else float(surface_tol))) & ok
             else:
                 on = np.zeros(len(flat), bool)
             # SL-PE4 (`class_tests`): the set says "an obstacle object is the nearest surface", the class tests above may
@@ -2073,24 +2106,22 @@ class CollisionLinearizer:
             under &= ok.reshape(shape)
             n_beneath = int((under & obst).sum())
             obst &= ~under
-        if steps is not None:
-            clear, obst, centres = clear[:steps], obst[:steps], centres[:steps]
-        if not obst.any():
-            # record only: with the GT / scene obstacle set, say how large it was (0 rows is not "no set")
-            return float("inf"), (None if oop is None else {"n_obstacle_rows": 0, "n_rows": int(obst.size),
-                                                           "n_object_points": int(len(oop))})
-        masked = np.where(obst, clear, np.inf)
-        flat_i = int(np.argmin(masked))
-        value = float(masked.reshape(-1)[flat_i])
-        if not np.isfinite(value):
-            return float("inf"), None
-        step, query = np.unravel_index(flat_i, masked.shape)
-        point = np.asarray(centres[step, query], np.float64)
-        return value, {"step": int(step), "query": int(query), "link": self._query_name(int(query)),
-                       "clearance_m": value, "point_m": [round(float(x), 4) for x in point],
-                       "obstacle": self._esdf_label_name(point, scene),
-                       "n_obstacle_rows": int(obst.sum()), "n_rows": int(obst.size), "n_beneath": n_beneath,
-                       **({} if oop is None else {"n_object_points": int(len(oop))})}
+        return clear, obst, n_beneath, oop
+
+    def obstacle_row_floor(self, centres: np.ndarray, scene: SceneSnapshot, margin: float, beneath: bool = False,
+                           class_tests: bool = False, surface_tol: Optional[float] = None):
+        """SL-SOTA1 — ``(row_floor (H, width) for :meth:`linearize`, is_obstacle_object (H, n_query))``: ``margin`` on the
+        ESDF rows :meth:`obstacle_object_mask` calls obstacle-object rows, 0 elsewhere (candidate and plane rows too).
+        ``(None, None)`` when there is no field / no ESDF row (linearize then runs as without a floor)."""
+        got = self.obstacle_object_mask(centres, scene, beneath=beneath, class_tests=class_tests, surface_tol=surface_tol)
+        if got is None:
+            return None, None
+        _, obst, _, _ = got
+        horizon, n_query = obst.shape
+        head = self.n_spheres * (scene.n_slots + scene.n_planes)
+        floor = np.zeros((horizon, head + n_query))
+        floor[:, head:] = np.where(obst, float(margin), 0.0)
+        return floor, obst
     # --- SL-GTTO16 (A) — end
 
     def _identify(self, block: str, idx, centres: np.ndarray, scene: SceneSnapshot,
