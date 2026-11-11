@@ -71,6 +71,7 @@
 | 공유 checkout 의 계획서 사본 | `doc/active/experiments/AG3S_PLAN_SCHEDULE_20261110_KO.md` 는 공유 checkout 에서 untracked, branch 에는 commit 됨 | 다음 commit 때 공유 checkout 쪽에도 추가 (dev-4a 와 합의) |
 | CPU 작업 | `OMP_NUM_THREADS=MKL_NUM_THREADS=OPENBLAS_NUM_THREADS=1`, 세션당 2 core | 11-10 P4 가 다중 thread BLAS 로 dev-4a run 을 3–4 배 느리게 했음 |
 | GPU | `scripts/setup/gpu_lock.py` 로만, 바깥 flock 금지. closed-loop launcher 는 run 마다 독점 lock 을 스스로 잡는다 | queue 가 도는 동안 그 checkout 의 HEAD 를 바꾸지 않는다 |
+| SDM 이전 (2026-11-12 08:00 AMRC 제거) | 코드 · 문서는 GitHub 로 옮긴다. storage `*.npz` · `*.npy` 는 옮기지 않는다 (남는 것 · 빠지는 것은 `outputs/2026-11-10_제약단계_추종/README.md` §13). queue 의 done_run 은 run-id 만 보므로, AMRC run 과 이름이 같으면 SDM run 이 건너뛰어진다 | SDM 에서는 **`TAG` 끝에 `-sdm`** (예: `V=…-pe123458-ol TAG=pe123458ol-sdm bash …/p6_queue.sh`). run-id 가 `gtto-$TAG-…` 라서 이것만으로 된다. 비교 기준도 기계가 같아야 하므로 SDM 에서 base `…-pe123458` 를 `TAG=pe123458-sdm` 으로 다시 돌린 뒤 `p6_compare.py pe123458ol-sdm pe123458-sdm` |
 
 ## 5. 세션
 
