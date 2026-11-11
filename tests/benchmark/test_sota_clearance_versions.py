@@ -10,7 +10,8 @@ def test_names_and_flags():
                                      + len(pf.SOTA_GATE_VERSIONS) + len(pf.SOTA_HELD_VERSIONS)
                                      + len(pf.SOTA_SCALED_VERSIONS) + len(pf.SOTA_HANDB_VERSIONS)
                                      + len(pf.SOTA_PEAK_VERSIONS) + len(pf.SOTA_ROTREL_VERSIONS)
-                                     + len(pf.SOTA_REACHSTICKY_VERSIONS) + len(pf.SOTA_ZONE_VERSIONS))
+                                     + len(pf.SOTA_REACHSTICKY_VERSIONS) + len(pf.SOTA_ZONE_VERSIONS)
+                                     + len(pf.SOTA_ZONEPALM_VERSIONS))
     assert set(pf.SOTA_VERSIONS) <= set(pf.GT15_VERSIONS)
     for b in (BASE + "pe123458", BASE + "pe12345811"):
         base = tuple(pf.AG3S_VERSIONS[b])

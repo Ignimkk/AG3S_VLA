@@ -1201,10 +1201,46 @@ class CollisionLinearizer:
                 c = np.asarray(gc["centroid"], np.float64).reshape(3)
                 horiz = np.linalg.norm(flat[:, :2] - c[None, :2], axis=1).reshape(shape)
                 rel = (horiz <= float(gc.get("zone_radius", 0.10))) & auth[None, :]
+                keep = gc.get("zone_keep_palm_obstacles")
+                if keep is not None:
+                    # SL-SOTA13 (`--grasp-zone-keep-palm-obstacles`, off: no key) — the palm's rows whose nearest surface
+                    # is an obstacle object (the scene / GT obstacle-object set, and not the target or a support by the
+                    # class test) are NOT released: the fingers straddle the target, the palm above it has no business
+                    # inside a neighbour. E1a ...-hb-qs-tro task 0 init 7 / 13: the palm sphere on the storage box read
+                    # -5 .. -13 mm and was released (72 / 93 mm from the bowl's centroid) -> success + collision.
+                    palm = np.zeros(n_query, bool)
+                    pm = np.asarray(keep.get("links", ()), bool).reshape(-1)[:self.n_spheres]
+                    palm[:pm.shape[0]] = pm
+                    cand = rel & palm[None, :] & (cls == _OBSTACLE)
+                    kept = np.zeros(shape, bool)
+                    if cand.any():
+                        on = self._on_obstacle_object_surface(d, flat, scene, float(keep.get("surface_tol", _OBJECT_SURFACE_TOL_M)))
+                        if on is not None:
+                            kept = cand & on.reshape(shape)
+                    rec["zone_kept_palm_rows"] = int(kept.sum())
+                    rel = rel & ~kept
                 margin = np.where(rel, -1.0, margin)
                 rec["zone_release_rows"] = int(rel.sum())
         self._last_grasp_contact = rec
         return margin
+    @staticmethod
+    def _on_obstacle_object_surface(d: np.ndarray, flat: np.ndarray, scene: SceneSnapshot, tol: float) -> Optional[np.ndarray]:
+        """SL-SOTA13 — `(N,)` bool: the row's nearest surface point ``p − d·∇d`` lies within ``tol`` of the obstacle-object
+        point set (`scene.obstacle_object_points`, the same membership test as `obstacle_object_mask`). None without a set."""
+        oop = getattr(scene, "obstacle_object_points", None)
+        if oop is None:
+            return None
+        oop = np.asarray(oop, np.float64).reshape(-1, 3)
+        flat = np.asarray(flat, np.float64).reshape(-1, 3)
+        if not len(oop):
+            return np.zeros(len(flat), bool)
+        g = np.asarray(scene.esdf.gradient(flat), np.float64).reshape(-1, 3)
+        gn = np.linalg.norm(g, axis=1, keepdims=True)
+        ok = gn[:, 0] > _EPS
+        surf = flat - np.asarray(d, np.float64).reshape(-1, 1) * np.where(ok[:, None], g / np.maximum(gn, _EPS), 0.0)
+        from scipy.spatial import cKDTree
+        return (cKDTree(oop).query(surf)[0] <= float(tol)) & ok
+
     def _placement_contact_margin(self, pc: dict, margin: np.ndarray, d: np.ndarray, centres: np.ndarray,
                                   radii: np.ndarray, scene: SceneSnapshot, n_query: int) -> np.ndarray:
         """SL6-H (HSR6 ⑤) — `margin` with the **held** rows whose nearest surface is beneath the held object set to −1 m.
