@@ -1,0 +1,182 @@
+{
+ "totals": {
+  "E1a 40 (Spatial L-I)": {
+   "n": 40,
+   "current_TSR_CAR_SSR": [
+    22,
+    23,
+    15
+   ],
+   "qs_TSR_CAR_SSR": [
+    22,
+    32,
+    18
+   ],
+   "reference_pct": [
+    63.0,
+    67.5,
+    53.0
+   ],
+   "reference": "KNOWS Spatial L-I (reported)"
+  },
+  "other suites (56 ep)": {
+   "n": 56,
+   "current_TSR_CAR_SSR": [
+    24,
+    31,
+    17
+   ],
+   "qs_TSR_CAR_SSR": [
+    24,
+    40,
+    19
+   ],
+   "reference_pct": [
+    67.5,
+    76.4,
+    59.9
+   ],
+   "reference": "KNOWS 4-suite L-I (reported)"
+  }
+ },
+ "cells": {
+  "Object L-I": {
+   "current_TSR_CAR_SSR": [
+    5,
+    4,
+    4
+   ],
+   "qs_TSR_CAR_SSR": [
+    5,
+    7,
+    5
+   ],
+   "n": 8
+  },
+  "Object L-II": {
+   "current_TSR_CAR_SSR": [
+    5,
+    5,
+    3
+   ],
+   "qs_TSR_CAR_SSR": [
+    4,
+    8,
+    4
+   ],
+   "n": 8
+  },
+  "Goal L-I": {
+   "current_TSR_CAR_SSR": [
+    3,
+    4,
+    2
+   ],
+   "qs_TSR_CAR_SSR": [
+    4,
+    3,
+    1
+   ],
+   "n": 8
+  },
+  "Goal L-II": {
+   "current_TSR_CAR_SSR": [
+    3,
+    5,
+    3
+   ],
+   "qs_TSR_CAR_SSR": [
+    4,
+    3,
+    2
+   ],
+   "n": 8
+  },
+  "Long L-I": {
+   "current_TSR_CAR_SSR": [
+    2,
+    5,
+    2
+   ],
+   "qs_TSR_CAR_SSR": [
+    2,
+    6,
+    2
+   ],
+   "n": 8
+  },
+  "Long L-II": {
+   "current_TSR_CAR_SSR": [
+    3,
+    7,
+    2
+   ],
+   "qs_TSR_CAR_SSR": [
+    1,
+    6,
+    1
+   ],
+   "n": 8
+  },
+  "Spatial L-II": {
+   "current_TSR_CAR_SSR": [
+    3,
+    1,
+    1
+   ],
+   "qs_TSR_CAR_SSR": [
+    4,
+    7,
+    4
+   ],
+   "n": 8
+  }
+ },
+ "shapes": [
+  {
+   "set": "current, other suites",
+   "n": 56,
+   "safe_success": 17,
+   "no grasp: QP persists before the grasp": 2,
+   "no grasp: few QP calls": 4,
+   "still holding at the end": 5,
+   "grasped, released, not completed": 14,
+   "HOLD to the end": 7,
+   "success + collision": 7
+  },
+  {
+   "set": "-qs, other suites",
+   "n": 56,
+   "safe_success": 19,
+   "no grasp: QP persists before the grasp": 11,
+   "no grasp: few QP calls": 2,
+   "still holding at the end": 6,
+   "grasped, released, not completed": 11,
+   "HOLD to the end": 2,
+   "success + collision": 5
+  },
+  {
+   "set": "current, E1a 40",
+   "n": 40,
+   "safe_success": 15,
+   "no grasp: QP persists before the grasp": 0,
+   "no grasp: few QP calls": 4,
+   "still holding at the end": 1,
+   "grasped, released, not completed": 8,
+   "HOLD to the end": 5,
+   "success + collision": 7
+  },
+  {
+   "set": "-qs, E1a 40",
+   "n": 40,
+   "safe_success": 18,
+   "no grasp: QP persists before the grasp": 7,
+   "no grasp: few QP calls": 0,
+   "still holding at the end": 7,
+   "grasped, released, not completed": 4,
+   "HOLD to the end": 0,
+   "success + collision": 4
+  }
+ ],
+ "source": "sota_compare.py ms pe123458 pkgFqs; offline/shape.py (shape_*.json); plan §9.13 / §9.16"
+}
