@@ -11,7 +11,7 @@
 #   kit      /mnt/dev/_migration   (root config tarball, Qwen cache, manifest)                 ~16 GB
 #   tree     working trees over the clone: gitignored + untracked + uncommitted files, venvs, .python, .runtime,
 #            .cache (minus uv), outputs/ ... (.git excluded)                                     ~54 GB
-#   storage  /mnt/dev/AG3S_VLA-storage                                                          ~380 GB
+#   storage  /mnt/dev/AG3S_VLA-storage, FILTERED: visuals+records+checkpoints+LS assets (+extra list)
 #   all      git -> kit -> tree -> storage
 # Every rsync mode is resumable: rerun the same mode. Nothing is ever deleted on SDM.
 set -uo pipefail
@@ -38,7 +38,10 @@ ensure_ssh() {
   fi
 }
 
-RS=(rsync -aH --numeric-ids --partial --info=progress2,stats1)
+# The rsync sender runs ON AMRC (CPU + NFS IO there): lowest priority, optional bandwidth cap (BWLIMIT=KB/s, e.g. 50000).
+# Tell the AMRC GPU-queue sessions before a big pull: closed-loop runs are wall-clock sensitive.
+RS=(rsync -aH --numeric-ids --partial --info=progress2,stats1 --rsync-path="nice -n 19 ionice -c3 rsync")
+[ -n "${BWLIMIT:-}" ] && RS+=(--bwlimit="$BWLIMIT")
 pull() { "${RS[@]}" -e "$SSH" "$@"; }
 
 do_git() {
@@ -83,13 +86,30 @@ do_tree() {
   cd "$ROOT" && echo "--- git status vs AMRC manifest (should list the same files)" && git status --short | head -40
 }
 
+# storage: user decision 2026-11-11 -- move visuals + records only, never the bulk npz/npy (~174 GB of results).
+# Always: checkpoints/, extracted LIBERO-Safety assets (may hold npy/meshes, so taken whole).
+# Extra npz/npy that sessions asked for: /mnt/dev/_migration/storage_extra_include.txt on AMRC (read fresh each run).
+do_storage() {
+  local extra=/tmp/storage_extra_include.txt
+  $SSH "$R" cat /mnt/dev/_migration/storage_extra_include.txt 2>/dev/null | grep -E '^[+-] ' > "$extra" || true
+  local f=(--prune-empty-dirs --filter="merge $extra"
+    --include='/checkpoints/***'
+    --include='/benchmarks/libero-safety/assets_94ccca77/***'
+    --include='/benchmarks/libero-safety/assets_zip_94ccca77/CHECKSUMS.json'
+    --include='*/')
+  for e in mp4 webm gif png jpg jpeg svg pdf html json jsonl log md csv tsv txt patch yaml yml tex; do f+=(--include="*.$e"); done
+  f+=(--exclude='*')
+  echo "storage filter: $(wc -l < "$extra") extra +/- rule(s) from AMRC"
+  pull "${f[@]}" "$R:/mnt/dev/AG3S_VLA-storage/" /mnt/dev/AG3S_VLA-storage/
+}
+
 case "$MODE" in
   probe)   probe ;;
   git)     probe; ensure_ssh; do_git ;;
   kit)     probe; ensure_ssh; pull "$R:/mnt/dev/_migration/" /mnt/dev/_migration/ ;;
   tree)    probe; ensure_ssh; do_tree ;;
-  storage) probe; ensure_ssh; pull "$R:/mnt/dev/AG3S_VLA-storage/" /mnt/dev/AG3S_VLA-storage/ ;;
+  storage) probe; ensure_ssh; do_storage ;;
   all)     probe; ensure_ssh; do_git && pull "$R:/mnt/dev/_migration/" /mnt/dev/_migration/ && do_tree &&
-           pull "$R:/mnt/dev/AG3S_VLA-storage/" /mnt/dev/AG3S_VLA-storage/ ;;
+           do_storage ;;
   *)       die "unknown mode: $MODE" ;;
 esac

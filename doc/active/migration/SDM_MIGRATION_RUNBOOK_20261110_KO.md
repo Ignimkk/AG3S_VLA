@@ -5,6 +5,49 @@
 AI-Stack(INFINITIX, KETI) 에서 이 pod를 **AMRC 서버 → SDM 서버**로 옮기는 전체 절차다.
 SDM 에서 `git clone` 하는 것부터 환경 검증까지 순서대로 따라가면 된다.
 
+## 0. 마감과 일정 (사용자 결정 2026-11-11 17:0x)
+
+**완전 이전이다. AMRC GPU 서버는 2026-11-12 08:00 이후 제거된다.** 실험은 이전 중에도 돌려도 되지만, 완료된 실험은 기록하고 commit 해야 하며
+시각화 자료도 함께 옮긴다. 모든 계획 문서는 보존한다 (git + 작업 트리째 전송).
+
+| 시각 (KST) | 할 일 |
+|---|---|
+| SDM 컨테이너 준비 즉시 | 1 차 전송 (`git` → `kit` → `tree` → `storage`). AMRC 쪽 rsync 는 nice 19 · ionice idle, 실험과 병행. 시작 시각을 GPU queue 세션에 알린다 |
+| 11-11 22:00 | storage 에서 추가로 옮길 npz/npy 요청 마감 (`/mnt/dev/_migration/storage_extra_include.txt`) |
+| 11-12 05:00 | 마지막 GPU run 종료 (05:00 에 걸치는 run 은 시작하지 않음) |
+| 11-12 05:30 | 각 세션 결과 기록 · commit 마감 (queue 경계에서). `/root` 최종 백업 |
+| 11-12 05:30–07:00 | 최종 차이분 전송: 같은 mode 재실행 (`git` · `kit` · `tree` · `storage`) |
+| 11-12 07:00–08:00 | SDM 확인: git HEAD · branch 가 AMRC 와 같음, file 수 비교, bootstrap. 08:00 이후 AMRC 는 없음 |
+
+**storage 는 걸러서 옮긴다 (사용자 결정):** 시각화 · 기록 (`mp4 webm gif png jpg jpeg svg pdf html json jsonl log md csv tsv txt patch yaml yml tex`),
+`checkpoints/` 전체, 풀어 둔 LIBERO-Safety `assets_94ccca77/` 전체만 옮긴다. `*.npz` · `*.npy` (results 의 약 174 GB) 는 옮기지 않는다.
+세션이 요청한 예외만 `storage_extra_include.txt` 로 추가한다 (11-11: dev-4a KNOWS-GT r3 method_calls 3.3 GB).
+`assets.zip` (10 GB) 은 풀어 둔 폴더와 중복이라 `CHECKSUMS.json` 만 옮긴다.
+**결과:** storage episode npz 에서 다시 계산하는 분석 (예: stage-track P3–P5 재생성) 은 SDM 에서 할 수 없다. 이미 만든 json · figure · outputs/ 는 남는다.
+
+### 0-1. 채택한 경로: AMRC → Ubuntu PC 디스크 → SDM (사용자 결정 2026-11-11 17:xx)
+
+두 서버에 동시에 닿는 기기가 없다. AMRC 는 사내 wifi 의 Ubuntu PC 에서만, SDM 은 VPN 으로만 접속되고, 두 컨테이너끼리는
+양방향 모두 `No route to host` 다 (SDM → AMRC 172.21.121.110:30587 실측 17:3x). 그래서 **마감 전에 Ubuntu PC 로 모두 받고,
+AMRC 제거 뒤 같은 PC 에서 VPN 으로 SDM 에 올린다.** 08:00 마감은 PC 다운로드에만 걸린다. 스크립트: `scripts/setup/migration/pc_relay.sh`.
+
+```bash
+# Ubuntu PC (사내 wifi). 스크립트 가져오기 (AMRC 비밀번호)
+mkdir -p ~/ag3s_migration && scp -P 30587 root@172.21.121.110:/mnt/dev/AG3S_VLA/scripts/setup/migration/pc_relay.sh ~/ag3s_migration/
+cd ~/ag3s_migration && export AMRC=root@172.21.121.110 AMRC_PORT=30587
+bash pc_relay.sh check                       # 접속 + PC 여유 공간 (필요 약 200–230 GB)
+bash pc_relay.sh download kit                # 16 GB  — 먼저 작은 것으로 속도 확인
+bash pc_relay.sh download tree               # ~54 GB — checkout 통째 (.git · worktree · venv · outputs/ · 미커밋 포함)
+bash pc_relay.sh download storage            # 필터 적용 (§0)
+# 05:30 이후 최종 차이분: 같은 명령 재실행 → bash pc_relay.sh verify 로 남은 차이 확인
+# AMRC 제거 뒤 (PC 에서 VPN 연결):
+SDM=root@<SDM_IP> SDM_PORT=<SDM_PORT> bash pc_relay.sh upload
+# SDM: bash /mnt/dev/AG3S_VLA/scripts/setup/migration/bootstrap_sdm.sh
+```
+- checkout 은 `.git` 째 옮기므로 SDM 에서 clone/fetch (`pull_from_amrc.sh git`) 가 필요 없다. 같은 `/mnt/dev` 경로라 worktree 링크와 venv 도 그대로다.
+- AMRC 쪽 rsync sender 는 nice 19 · ionice idle. 시작 시각은 GPU queue 세션 (dev-57) 에 알린다.
+- PC 는 다운로드가 끝날 때까지 (최종 차이분 07:00 경) 절전하지 않는다. 비밀번호를 여러 번 묻지 않게 PC 에서 `ssh-copy-id -p 30587 root@172.21.121.110` 을 먼저 해 둔다.
+
 | 스크립트 (`scripts/setup/migration/`) | 실행 위치 | 하는 일 |
 |---|---|---|
 | `amrc_manifest.sh` | AMRC | git·branch·worktree·submodule·`uv pip freeze`·apt 기록 → `/mnt/dev/_migration/manifest/<stamp>/` |
@@ -32,7 +75,7 @@ SDM 에서 `git clone` 하는 것부터 환경 검증까지 순서대로 따라�
 | 미커밋 수정 · untracked 파일 (다른 세션 WIP 포함) | working tree | 작음 | `pull … tree` (.git 제외 rsync) |
 | venv 5개 + uv Python (`.python/`) | `AG3S_VLA/.venv-*`, `.python` | 22 GB | `pull … tree` — **그대로 복사** (§8 참조) |
 | `.runtime/` (MagickWand, LIBERO config) · `.cache/` (paper_baselines 21 GB 등) · `outputs/` · `Grounded-SAM-2` · `papers/` | gitignored | ~26 GB | `pull … tree` (`.cache/uv` 15 GB 는 제외) |
-| 체크포인트 · 데이터셋 · 결과 | `/mnt/dev/AG3S_VLA-storage` | **380 GB** (results 327 · benchmarks 30 · checkpoints 24) | `pull … storage` |
+| 체크포인트 · 데이터셋 · 결과 | `/mnt/dev/AG3S_VLA-storage` | **380 GB** (results 327 · benchmarks 30 · checkpoints 24) | `pull … storage` — **§0 필터 적용** (npz/npy 제외) |
 | `/root` 설정: Claude memory/session, codex, rclone gdrive token, uv, `.bashrc` | 컨테이너 내부 | 0.3 GB | `_migration/root_home/*.tar.gz` → `pull … kit` → bootstrap |
 | Qwen2.5-VL-7B (`/root/.cache/ag3s_local`) | 컨테이너 내부 | 16 GB | `_migration/cache/` → `pull … kit` → bootstrap 이 symlink |
 | apt 패키지 (osmesa, ffmpeg, texlive, rclone, rsync …) | 이미지 | – | bootstrap 이 재설치 |
@@ -151,6 +194,20 @@ venv 에 대한 규칙**이고, 이 checkout 자신의 venv 를 같은 경로로
 ## 9. SSH 전송이 안 될 때
 
 위에서부터 시도한다. 어느 경로든 끝나면 F(bootstrap)·G(검증)는 같다.
+
+**2026-11-11 17:3x 실측: SDM → AMRC (172.21.121.110:30587) 도 `No route to host`.** 그래서 F0 를 쓴다.
+
+**F0 (채택) — PC 를 중계로 한 SSH 역방향 터널.** PC 가 두 컨테이너 SSH 에 모두 접속되면, PC 에서 아래를 띄워 둔다.
+그러면 SDM 의 `127.0.0.1:2222` 가 PC 를 거쳐 AMRC SSH 로 연결된다. `pull_from_amrc.sh` 는 고치지 않고 그대로 쓴다
+(`AMRC_HOST=127.0.0.1 AMRC_PORT=2222`). 이어받기 · 필터 · git fetch 모두 동작하고, 속도는 PC 네트워크로 정해진다.
+**전송이 끝날 때까지 PC 와 이 터미널을 켜 둔다 (절전 금지).**
+```bash
+# PC: SDM 의 2222 → (PC) → AMRC 172.21.121.110:30587
+ssh -N -o ServerAliveInterval=30 -o ExitOnForwardFailure=yes -R 2222:172.21.121.110:30587 -p <SDM_PORT> root@<SDM_IP>
+# SDM:
+timeout 5 bash -c 'echo > /dev/tcp/127.0.0.1/2222' && echo OK
+export AMRC_HOST=127.0.0.1 AMRC_PORT=2222
+```
 
 | # | 경로 | 조건 | 속도 / 비고 |
 |---|---|---|---|
