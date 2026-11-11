@@ -1266,6 +1266,17 @@ for _b in tuple(v for v in SOTA_VERSIONS if "-pt6-" in v and "-hr150" in v and v
     SOTA_REACHSTICKY_VERSIONS = SOTA_REACHSTICKY_VERSIONS + (_b[:-len("-tro")] + "-rs-tro",)
 del _b
 SOTA_VERSIONS = SOTA_VERSIONS + SOTA_REACHSTICKY_VERSIONS
+#: SL-SOTA12 (dev-57, 2026-11-12, plan §9.20): ``-zr60`` = the grasp zone (SL-GTTO5 F4 release of every hand / finger row within
+#: the zone radius of the manipulated object's centroid, whatever the nearest surface is) shrunk from 100 mm to 60 mm
+#: (``--grasp-zone-radius-mm 60``, the existing V11AB-pb5 flag -- no new code). E1a ...-hb-qs-tro task 0 init 7 / 13 (success +
+#: collision 32 / 12 mm): the hand sphere that touched the storage box read -5 .. -13 mm on the box but lay 72 / 93 mm from the
+#: bowl's centroid, so its row was released. On the frozen-candidate family with and without ``-rs``.
+SOTA_ZONE_VERSIONS: tuple[str, ...] = ()
+for _b in tuple(v for v in SOTA_VERSIONS if "-pt6-" in v and "-hr150" in v and (v.endswith("-qs-tro") or v.endswith("-qs-rs-tro"))):
+    AG3S_VERSIONS[_b[:-len("-tro")] + "-zr60-tro"] = tuple(AG3S_VERSIONS[_b]) + ("--grasp-zone-radius-mm", "60")
+    SOTA_ZONE_VERSIONS = SOTA_ZONE_VERSIONS + (_b[:-len("-tro")] + "-zr60-tro",)
+del _b
+SOTA_VERSIONS = SOTA_VERSIONS + SOTA_ZONE_VERSIONS
 GT15_VERSIONS = GT15_VERSIONS + SOTA_VERSIONS
 #: (G88c, 03:5x) the A-alone ablation queued as ``…-obst3`` (gtto23, not started yet) gets the same two fixes, so A alone and
 #: A + B differ only by the held point model: ``…-obst3`` := A'' + no carve + support "under" (``…-obst3-pts`` = B'' keeps

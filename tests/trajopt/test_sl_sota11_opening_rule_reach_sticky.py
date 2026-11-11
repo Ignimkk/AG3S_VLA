@@ -119,7 +119,7 @@ def test_flag_plumbing_and_versions():
     for n in pf.SOTA_REACHSTICKY_VERSIONS:
         assert pf.version_server_flags(n)
     for name, flags in pf.AG3S_VERSIONS.items():
-        if name not in pf.SOTA_REACHSTICKY_VERSIONS:
+        if name not in pf.SOTA_REACHSTICKY_VERSIONS and not (name in pf.SOTA_ZONE_VERSIONS and "-rs-" in name):
             assert "--grasp-opening-rule-reach-sticky" not in flags, name
     assert "grasp_opening_rule_reach_sticky" not in pf.version_flag_values(pf.parse_v11ab_args())
 
@@ -150,3 +150,44 @@ def test_the_policy_attaches_the_geometry_whose_reach_passed():
     gate = sp.ag3s._held_record["reach_gate"]                                      # noqa: SLF001
     # the snapshot is the geometry that was within reach (about 50 mm), not the latest one (about 200 mm)
     assert gate["sticky"] is True and gate["over_limit"] is False and gate["dist_mm"] < 120.0
+
+
+# ------------------------------------------------------------------ SL-SOTA12 ``-zr60``: the grasp zone radius 100 -> 60 mm
+def test_zone_radius_versions():
+    from AG3S.adapters.panda import profile as pf
+
+    base = "AG3S-commonto-att-termsoff-pass-zr-ee-hdp-loose2-obst4-pts-nocarve-fh-t100-pe12345811-to0-om15p10s40-ntc-pt6-pg4-hr150"
+    for mid in ("-qs", "-hb-qs", "-hb-qs-rs"):
+        name = base + mid + "-zr60-tro"
+        assert name in pf.SOTA_ZONE_VERSIONS and name in pf.GT15_VERSIONS
+        v = tuple(pf.AG3S_VERSIONS[name])
+        assert v[-2:] == ("--grasp-zone-radius-mm", "60") and v[:-2] == tuple(pf.AG3S_VERSIONS[base + mid + "-tro"])
+        args = pf.parse_v11ab_args(argv=pf.version_server_argv(name) + list(v))
+        assert args.grasp_zone_radius_mm == 60.0 and args.grasp_zone_release is True
+        assert pf.version_server_flags(name)
+    ref = pf.parse_v11ab_args(argv=pf.version_server_argv(base + "-hb-qs-tro") + list(pf.AG3S_VERSIONS[base + "-hb-qs-tro"]))
+    assert ref.grasp_zone_radius_mm == 100.0
+    for name, flags in pf.AG3S_VERSIONS.items():
+        if name not in pf.SOTA_ZONE_VERSIONS:
+            assert "--grasp-zone-radius-mm" not in flags, name
+
+
+def test_zone_radius_reaches_the_release_rule():
+    """The release mask of `_grasp_contact_margin` follows `zone_radius`: a hand row 90 mm from the centroid is released at
+    100 mm and kept at 60 mm."""
+    import types
+
+    import numpy as np
+
+    from AG3S.trajopt.linearize import CollisionLinearizer
+
+    lin = types.SimpleNamespace(n_spheres=2, _obstacle_rows=lambda d, flat, scene, d_object: np.zeros((1, 2), np.int8))
+    flat = np.array([[0.03, 0.0, 0.1], [0.09, 0.0, 0.1]])
+    out = {}
+    for r in (0.10, 0.06):
+        gc = {"latch": "latched", "authorized": np.array([True, True]), "held_exempt": False, "zone_allowance": None,
+              "zone_radius": r, "centroid": np.zeros(3), "zone_release": True}
+        m = CollisionLinearizer._grasp_contact_margin(lin, gc, np.zeros((1, 2)), np.full((1, 2), 0.05), flat, None,
+                                                      np.full((1, 2), 0.2), (1, 2), 2)
+        out[r] = (m.reshape(-1).tolist(), lin._last_grasp_contact["zone_release_rows"])
+    assert out[0.10] == ([-1.0, -1.0], 2) and out[0.06] == ([-1.0, 0.0], 1)
