@@ -2743,6 +2743,11 @@ def build_parser() -> argparse.ArgumentParser:
                     help="SL-QE2 (dev-e5, 2026-11-09) — --ee-action-qp 에서만. action 공간 QP 가 위치 (x y z) action 만 고치고 회전 "
                          "(rx ry rz) 은 policy 값 그대로 둔다 (optimizer.ee_action_fixed_dims = 회전 열). E1a task 3: F7 QP 의 첫 개입이 "
                          "회전을 ~1.0 까지 바꿔 쥐는 자세를 잃음 (G110). 기록 to.ee_action_qp.fixed_dims")
+    ap.add_argument("--ee-action-qp-rotation-release", action="store_true",
+                    help="SL-SOTA10 — --ee-action-qp-translation-only · --obstacle-row-patience 와 함께만. 장애물 행 인내 한도가 "
+                         "소진된 동안 (여유 안쪽 chunk 가 한도보다 오래 이어짐) action QP 의 회전 열을 다시 푼다 — 위치만으로는 "
+                         "팔 link 행을 장애물에서 뗄 수 없는 교착용 (optimizer.ee_action_rotation_release, 기록 "
+                         "to.ee_action_qp.rotation_released)")
     ap.add_argument("--ee-action-qp-scaled", action="store_true",
                     help="SL-GTTO11 F9a — --ee-action-qp 에서만. action 공간 QP 의 충돌 행을 행 norm 으로 정규화하고 slack 을 "
                          "quadratic 벌점 (1e4) + 선형 1e2 로 푼다 (G50 offline: 20000 회 미수렴 → ~150 회). action 이 닿지 않는 행 "
@@ -4330,6 +4335,9 @@ def reject_bad_flag_combinations(ap: argparse.ArgumentParser, args, *, seed_map_
         ap.error("--grasp-opening-rule-moved 는 --grasp-opening-rule 의 attach 검사입니다 — 함께 주십시오")
     if getattr(args, "ee_action_qp_translation_only", False) and not getattr(args, "ee_action_qp", False):   # SL-QE2
         ap.error("--ee-action-qp-translation-only 는 --ee-action-qp 의 QP 변수만 줄입니다 — 함께 주십시오")
+    if getattr(args, "ee_action_qp_rotation_release", False) and not (   # SL-SOTA10
+            getattr(args, "ee_action_qp_translation_only", False) and getattr(args, "obstacle_row_patience", None) is not None):
+        ap.error("--ee-action-qp-rotation-release 는 --ee-action-qp-translation-only · --obstacle-row-patience 와 함께만")
     if getattr(args, "ee_action_qp_scaled", False) and not getattr(args, "ee_action_qp", False):   # SL-GTTO11
         ap.error("--ee-action-qp-scaled 는 --ee-action-qp 의 QP 형태만 바꿉니다 — 함께 주십시오")
     for flag in ("oracle_admissible", "oracle_held_target", "oracle_destination", "oracle_robot_mask",
