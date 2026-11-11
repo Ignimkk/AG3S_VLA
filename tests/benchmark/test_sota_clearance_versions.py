@@ -42,7 +42,7 @@ def test_no_target_certify_versions():
 
 
 def test_stall_versions():
-    assert len(pf.SOTA_STALL_VERSIONS) == 5 * 2 * 16 and len(set(pf.SOTA_VERSIONS)) == len(pf.SOTA_VERSIONS)
+    assert len(pf.SOTA_STALL_VERSIONS) == 6 * 2 * 16 and len(set(pf.SOTA_VERSIONS)) == len(pf.SOTA_VERSIONS)
     name = BASE + "pe12345811-to0-om15p10s40-ntc-pt6-pg4-tro"
     assert name in pf.SOTA_STALL_VERSIONS
     v = tuple(pf.AG3S_VERSIONS[name])

@@ -1169,6 +1169,9 @@ _SOTA_STALL_SUFFIXES: dict[str, tuple[str, ...]] = {
     "-pt6-pg4": ("--obstacle-row-patience", "6", "--ee-action-qp-progress", "0.4"),
     "-pt3": ("--obstacle-row-patience", "3"),
     "-pt3-pg4": ("--obstacle-row-patience", "3", "--ee-action-qp-progress", "0.4"),
+    # a stronger preference (E1a t0 init 6 with -pt6-pg4-hr150: the arm did climb over the moka pot, tip z 0.14 -> 0.36 m
+    # over 30 calls, and ran out of steps as it got through)
+    "-pt6-pg8": ("--obstacle-row-patience", "6", "--ee-action-qp-progress", "0.8"),
 }
 for _b in tuple(v for v in SOTA_OM_VERSIONS + SOTA_NTC_VERSIONS if "-om" in v and not v.endswith("-tro")):
     for _suffix, _flags in _SOTA_STALL_SUFFIXES.items():
