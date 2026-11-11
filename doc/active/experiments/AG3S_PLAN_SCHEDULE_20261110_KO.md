@@ -187,6 +187,7 @@ T5 뒤에 하면 이 서버에서 끝낸다. **이전 시점은 T5 와의 순서
 | 2026-11-12 01:1x | dev-57: **`pkgFin2` (`…-hr150-hb-qs-rs-zr60-tro`) LIBERO 27 = 23** (8 · 7 · 8; `pkgFin` 23, 지금 구성 22; 00:33–01:10, HEAD 69efac96) — §9.22. guard 통과 → E1a task 1 · 2 · 3. |
 | 2026-11-12 02:2x | dev-57: **`pkgFin2` (`-rs` + `-zr60`) E1a 40 = TSR 20 · CAR 34 · SSR 20** (`pkgFin` 22 · 34 · 20; 01:11–02:23) — §9.22. 얻음 5 (t0 e5 · e11 · e13, t2 e5 · e9), 잃음 5 (t2 e8 · e12 · e14, t3 e5 · e10) → SSR 같고 TSR −2: **합친 판은 채택하지 않음.** task 0 의 이득 (6 → 9) 을 task 2 · 3 의 손실이 지움 — 두 후보를 나눠 잰다 (`-rs` 만 먼저). |
 | 2026-11-12 02:4x | dev-57: **`-rs` 만 (`…-hr150-hb-qs-rs-tro`) E1a task 0 = SSR 7 / 10** (`pkgFin` 6; 02:25–02:40, HEAD 6460ffa6) — §9.22. 바뀐 것은 e11 하나 (latch 고장 → sticky reach 로 call 19 에 attach, 24 call 에 안전 성공), 나머지 9 ep 은 call 수 · attach call 까지 `pkgFin` 과 같음. → 동결 후보 = `pkgFrs` (`pkgFin` + `-rs`). 남은 시간은 `pkgFrs` 의 다른 suite 점검. |
+| 2026-11-12 03:1x | dev-57: `pkgFrs` 다른 suite goal L-II · goal L-I 16 ep = TSR 6 · CAR 7 · SSR 3 (`-qs` 판 8 · 6 · 3, 지금 구성 6 · 9 · 5; 02:40–03:18) — latch 가 걸렸던 두 episode 는 풀리지 않음 (goal L-II t0 e16 은 call 19 에 attach 됐지만 7 call 뒤 놓침). zone 에서 풀린 행을 GT 로 가름 → 후보 SL-SOTA13 `-zp` (손바닥의 장애물 물체 행만 남김) 를 결과 전 기록 (§9.22). 다른 suite 점검을 멈추고 `-zp` 를 먼저 잼. |
 | 2026-11-12 01:4x | dev-4a: SDM 세팅 끝 (사용자 실행, venv 6 개 · GPU 확인). SDM 에서 π0.5 단독 측정 ①–③ 행 추가 (§2). SDM이전방법 확인: 05:30–07:00 delta 는 사용자 PC 로만 · SDM 쓰기는 08:00 뒤 사용자 upload 때 (EXISTING=archive 권고). dev-57 확인: ① 중복 아님, AG3S 쪽 GPU 우선 → block 경계에서 넘김. |
 
 ---
@@ -640,3 +641,31 @@ E1a 40 의 episode 별 차이 (`pkgFin` → `pkgFin2`) [M]: 얻음 t0 e5 · e11 
 - `-zr60` 은 채택하지 않는다 (위). task 0 의 성공 + 충돌 2 ep (e7 · e13) 은 그대로 남는다 → zone 규칙의 다른 안은 §9.23 B-1.
 
 **다음 (결과 전, 02:4x):** `pkgFrs` 의 다른 suite 점검 init 15 · 16 — cell 순서 goal L-II → goal L-I → spatial L-II → object L-II → long L-I → object L-I (약 115 분, 04:40 무렵 끝; long L-II 는 05:00 을 넘겨 이전 후로). `-qs` 판 · `pkgFin` 의 같은 cell 과 짝 비교. latch 가 걸렸던 goal L-II t0 e16 · goal L-I t3 e16 이 풀리는지 본다.
+
+**`pkgFrs` 의 다른 suite 점검 — 2 cell 에서 멈춤 [M] (02:40–03:18, `ms-pkgFrs-*`, HEAD fedc3688):**
+
+| cell (n · TSR · CAR · SSR) | 지금 구성 | `-qs` 판 | `pkgFin` | `pkgFrs` |
+|---|---|---|---|---|
+| Goal L-I | 8 · 3 · 4 · 2 | 8 · 4 · 3 · 1 | 8 · 3 · 3 · 1 | 8 · 3 · 3 · 1 (`pkgFin` 과 episode 별로 같음) |
+| Goal L-II | 8 · 3 · 5 · 3 | 8 · 4 · 3 · 2 | — | 8 · 3 · 4 · 2 |
+| 합 (16 ep) | 6 · 9 · 5 | 8 · 6 · 3 | — | 6 · 7 · 3 |
+
+- **[M]** latch 가 걸렸던 두 episode: goal L-II t0 e16 은 call 19 에 sticky reach 로 attach 됐으나 7 call 뒤 그릇을 놓쳐 실패 그대로, goal L-I t3 e16 은 달라지지 않음 (sticky 가 쓰이지 않음). `-rs` 의 실측 이득은 지금까지 E1a t0 e11 하나다.
+- **[M]** Goal 16 ep 에서는 지금 구성 (SSR 5) 이 `-qs` 계열 (3) 보다 높다 — 성공 + 충돌 (1.7–17.5 mm 의 작은 접촉) 과 놓침이 원인. 다른 suite 전체 (56 ep) 로는 `-qs` 판이 높았다 (§9.16).
+
+**후보 SL-SOTA13 `-zp` (결과 전 기록, 03:1x).** `-zr60` 이 task 2 · 3 에서 잃은 것은 zone 을 통째로 줄여 손가락 행까지 묶었기 때문이다. zone 에서 풀린 행을 GT 로 다시 갈랐다 (`offline/zone_rows.py`, `pkgFin` E1a 40 의 LATCHED · CLOSING call, 실행되는 5 step 안에 기록된 여유 < 0 인 손바닥 · 손가락 구를 가장 가까운 점군의 실제 물체로 분류; GT 는 채점만) [D]:
+
+| 풀린 행 중 침투가 예측된 것 (행 수) | 안전 성공 20 ep | 성공 + 충돌 2 ep (t0 e7 · e13) | 실패 18 ep |
+|---|---:|---:|---:|
+| 손바닥 (`panda_hand`) ↔ target | 893 | 77 | 322 |
+| 손바닥 ↔ **지정 장애물** | **0** | **48** (2 ep 모두) | 6 (2 ep) |
+| 손바닥 ↔ 그 밖의 물체 | 0 | 0 | 50 (인식이 틀린 episode 의 `akita_black_bowl_2`) |
+| 손가락 ↔ target 이 아닌 물체 | 7 (ramekin · 접시 · stove · cabinet) | 0 | 24 |
+
+같은 집계를 여유 < 20 mm 로 넓히면 안전 성공 7 ep 에서도 손바닥이 장애물 0–20 mm 옆을 지난다 (`zone_rows_thr20/`) — 접근 여유까지 요구하면 성공을 막는다.
+
+| 후보 | flag · 판 (worktree `wip/sota-om` 3f218ff7 · 170e1d6d, 기본 꺼짐) | 내용 | 위험 |
+|---|---|---|---|
+| SL-SOTA13 | `--grasp-zone-keep-palm-obstacles` · `…-qs[-rs]-zp-tro` | grasp zone (반경 100 mm 그대로) 에서 **손바닥 (hold link) 행 가운데 가장 가까운 표면이 장애물 물체인 행** (장애물 물체 점 집합 위 + 거리 분류가 target · 받침이 아님) 은 풀지 않는다. 손가락 행은 그대로 푼다. 남긴 행은 자기 여유 (장애물 바닥 10 mm) 에서만 묶고 장애물 행 접근 여유 (15 mm) 는 더하지 않는다. 기록 `to.grasp_contact.zone_kept_palm_rows` | GT 없는 분류가 target 가장자리 · 받침을 장애물 물체로 읽으면 쥐기 직전에 손바닥이 막힌다 (위 표는 GT 분류). 인내 한도가 소진되면 남긴 행도 15 mm 더 풀린다 |
+
+**순서를 다시 바꾼다 (결과 전, 03:1x):** `pkgFrs` 다른 suite 점검은 goal L-II · goal L-I 16 ep 에서 멈추고 (latch 가 걸렸던 두 episode 가 든 cell), `-zp` 를 먼저 잰다 — 이유: 맞으면 E1a 에서 +2 (t0 e7 · e13 → 23 / 40) 이고 Goal suite 의 작은 접촉 (성공 + 충돌 5 ep, §9.16) 도 같은 원인일 수 있다. (h) `…-hr150-hb-qs-rs-zp-tro` (TAG `pkgSzp`) E1a task 0 — 기준 `pkgSrs` task 0 (SSR 7); 통과 = e7 · e13 중 하나 이상이 안전 성공으로 바뀌고 잃는 안전 성공이 없음. (i) 통과면 같은 판 (TAG `pkgFzp`) E1a task 2 · 3 → task 1 (05:00 전에 끝나는 것까지). 통과하지 못하면 `pkgFrs` 의 남은 cell 을 잇는다.
