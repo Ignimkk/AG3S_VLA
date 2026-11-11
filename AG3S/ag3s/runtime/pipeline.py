@@ -1157,7 +1157,9 @@ class AG3S:
         from AG3S.ag3s.stages.held_motion import HeldMotionTracker, hand_pose_and_tip
 
         if self._held_motion is None:
-            self._held_motion = HeldMotionTracker()
+            reach = getattr(getattr(getattr(self, "config", None), "clustering", None),
+                            "scene_obstacle_held_motion_reach", None)   # SL-SOTA5 (None: as before)
+            self._held_motion = HeldMotionTracker(**({} if reach is None else {"reach_min_m": float(reach)}))
         T, tip, _hold = hand_pose_and_tip(self.constraint_robot_model, robot_state)
         if T is None:
             self._held_motion.last = {"why": "no_hand_pose"}

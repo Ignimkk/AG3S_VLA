@@ -1116,6 +1116,8 @@ def t43t_identity_section(args) -> dict:
         out["close_seed_attention_ratio"] = float(args.close_seed_attention_ratio)
     if getattr(args, "attention_peak_seed", None) is not None:   # SL-PE9 (off: no key)
         out["attention_peak_seed"] = float(args.attention_peak_seed)
+    if getattr(args, "scene_obstacle_held_reach_mm", None) is not None:   # SL-SOTA5 (off: no key)
+        out["scene_obstacle_held_motion_reach"] = float(args.scene_obstacle_held_reach_mm) / 1000.0
     if getattr(args, "oracle_obstacle_support", None) is not None:   # SL-GTTO21 (off: no key)
         out["oracle_obstacle_support"] = str(args.oracle_obstacle_support)
     if getattr(args, "refused_identity_release", None) is not None:
@@ -2664,6 +2666,10 @@ def build_parser() -> argparse.ArgumentParser:
                     help="SL-PE8 — --scene-obstacle-objects 에서 attach 중이면 손과 같이 움직인 점 (손 frame 에서 제자리, 정지로 "
                          "설명 안 됨, 손끝 + 물체 폭 + 20 mm 안) 을 쥔 물체로 보고 장애물 물체에서 뺌 "
                          "(clustering.scene_obstacle_held_motion)")
+    ap.add_argument("--scene-obstacle-held-reach-mm", type=float, default=None, metavar="MM",
+                    help="SL-SOTA5 — --scene-obstacle-held-motion 과 함께만. 손과 같이 움직인 점을 쥔 물체로 볼 수 있는 손끝 거리의 "
+                         "하한 (기본: 인식된 물체 폭 + 20 mm 만). 인식이 물체의 일부만 잡았을 때 나머지가 장애물로 남는 것을 막는다 "
+                         "(clustering.scene_obstacle_held_motion_reach)")
     ap.add_argument("--scene-obstacle-held-exclude", action="store_true",
                     help="SL-PE3 — --scene-obstacle-objects 에서 attach 중이면 지금 손 안의 쥔 물체 점 15 mm 안 성분도 뺌 "
                          "(clustering.scene_obstacle_held_exclude)")
@@ -4802,6 +4808,11 @@ def reject_bad_flag_combinations(ap: argparse.ArgumentParser, args, *, seed_map_
             ap.error("--ee-action-qp-progress 는 --passthrough-obstacle-tolerance-mm · --ee-action-qp 와 함께만")
         if not (0.0 < float(args.ee_action_qp_progress) <= 1.0):
             ap.error(f"--ee-action-qp-progress 는 0 초과 1 이하 (got {args.ee_action_qp_progress})")
+    if getattr(args, "scene_obstacle_held_reach_mm", None) is not None:   # SL-SOTA5
+        if not getattr(args, "scene_obstacle_held_motion", False):
+            ap.error("--scene-obstacle-held-reach-mm 는 --scene-obstacle-held-motion 과 함께만")
+        if not (0.0 < float(args.scene_obstacle_held_reach_mm) <= 300.0):
+            ap.error(f"--scene-obstacle-held-reach-mm 는 0 초과 300 이하 (got {args.scene_obstacle_held_reach_mm})")
     if getattr(args, "ee_action_qp_gate_rows", False):   # SL-SOTA4
         if getattr(args, "passthrough_obstacle_tolerance_mm", None) is None or not getattr(args, "ee_action_qp", False):
             ap.error("--ee-action-qp-gate-rows 는 --passthrough-obstacle-tolerance-mm · --ee-action-qp 와 함께만")

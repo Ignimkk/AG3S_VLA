@@ -1191,6 +1191,18 @@ for _b in ((PE_VERSIONS[6], PE_VERSIONS[11], PE_VERSIONS[6] + "-ntc", PE_VERSION
     SOTA_GATE_VERSIONS = SOTA_GATE_VERSIONS + (_b + "-gr", _b + "-gr-tro")
 del _b
 SOTA_VERSIONS = SOTA_VERSIONS + SOTA_GATE_VERSIONS
+#: SL-SOTA5 (dev-57, 2026-11-11): ``-hr150`` = --scene-obstacle-held-reach-mm 150 (SL-PE8's reach is at least 150 mm from
+#: the fingertips). E1a ...-ntc-pt6-pg4-tro t0 init 6: the carried bowl's own image blocked the hand for 23 calls -- the
+#: perceived target was a 61 mm piece of it, so the reach (81 mm) left the far wall in the obstacle set.
+#: Registered on pe123458 / pe12345811 (± -ntc) and on the ...-om15p10s40-ntc* SOTA versions. Name = <base>[...]-hr150[-tro].
+SOTA_HELD_VERSIONS: tuple[str, ...] = ()
+for _b in ((PE_VERSIONS[6], PE_VERSIONS[11], PE_VERSIONS[6] + "-ntc", PE_VERSIONS[11] + "-ntc")
+           + tuple(v for v in SOTA_VERSIONS if "-om15p10s40-ntc" in v and not v.endswith("-tro"))):
+    AG3S_VERSIONS[_b + "-hr150"] = tuple(AG3S_VERSIONS[_b]) + ("--scene-obstacle-held-reach-mm", "150")
+    AG3S_VERSIONS[_b + "-hr150-tro"] = AG3S_VERSIONS[_b + "-hr150"] + ("--ee-action-qp-translation-only",)
+    SOTA_HELD_VERSIONS = SOTA_HELD_VERSIONS + (_b + "-hr150", _b + "-hr150-tro")
+del _b
+SOTA_VERSIONS = SOTA_VERSIONS + SOTA_HELD_VERSIONS
 GT15_VERSIONS = GT15_VERSIONS + SOTA_VERSIONS
 #: (G88c, 03:5x) the A-alone ablation queued as ``…-obst3`` (gtto23, not started yet) gets the same two fixes, so A alone and
 #: A + B differ only by the held point model: ``…-obst3`` := A'' + no carve + support "under" (``…-obst3-pts`` = B'' keeps
