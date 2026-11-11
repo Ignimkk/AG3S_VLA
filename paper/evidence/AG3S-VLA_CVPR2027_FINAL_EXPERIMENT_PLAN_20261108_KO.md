@@ -1,8 +1,45 @@
 # AG3S-VLA CVPR 2027 최종 실험 계획 — 원고의 빨간 글씨를 측정값으로 바꾸기
 
-- 작성: 2026-11-08 KST. 상태: **`PLANNED`** (실행 승인 아님). 상위 문서: [AG3S-VLA_CVPR2027_Experimental_Design.md](AG3S-VLA_CVPR2027_Experimental_Design.md)(E1–E7, 표기 규칙), [E1 baseline protocol](../experiments/configs/E1_SAFELIBERO_LIBEROSAFETY_BASELINE_PROTOCOL_20261104_KO.md).
+- 작성: 2026-11-08 KST. 상태: **`PLANNED`** (실행 승인 아님). **2026-11-11 계획 변경: §0.0.** 상위 문서: [AG3S-VLA_CVPR2027_Experimental_Design.md](AG3S-VLA_CVPR2027_Experimental_Design.md)(E1–E7, 표기 규칙), [E1 baseline protocol](../experiments/configs/E1_SAFELIBERO_LIBEROSAFETY_BASELINE_PROTOCOL_20261104_KO.md).
 - 대상 원고: `paper/latex/exp_section/04_experiments.tex`(4.1–4.4), `05_conclusion.tex`. 두 파일의 **빨간 글씨(`\proj{…}`) 165곳**은 모두 투영값이다. 이 문서는 그 하나하나를 어떤 실험의 어떤 산출물로 대체할지 정한다.
 - 원칙: 투영값은 목표이지 결과가 아니다. 결과가 투영과 다르면 **원고를 결과에 맞춘다.** 표본·분할·임계값은 실행 전에 이 문서에서 고정하고, 사후에 바꾸면 변경 이력을 남긴다. 문헌 보고값(†)과 자체 측정값(R)은 끝까지 섞지 않는다.
+
+## 0.0 계획 변경 — 2026-11-11 (사용자 결정, 이 절이 아래 내용보다 우선)
+
+근거 · 문헌 배치 · 표 구조 · 영문 초안: [`PAPER_REVISION_REPORTED_COMPARISON_20261111_KO.md`](../notes/PAPER_REVISION_REPORTED_COMPARISON_20261111_KO.md) (원고 수정은 그 문서를 따른다).
+
+| 항목 | 이전 (11-08) | 변경 (11-11) |
+|---|---|---|
+| Tab. 1 baseline 행 (E1a) | AEGIS 공식 코드 · multi-link* · KNOWS* 를 같은 evaluator 로 직접 실행 | **각 원문의 보고값** (VLSA · KNOWS · CFM, contemporaneous multi-link) 을 조건 열 (장애물 정보 · 충돌 기준) 과 함께 나열. 재구현 · 재실행 안 함. 이유: 마감 (11-17 20:59 KST) 까지 baseline 보고 run 약 210 GPU h 와 AG3S 실험을 둘 다 못 돌림, port 충실도 (KNOWS-GT CAR −35 pt 등) |
+| 우리가 측정하는 Tab. 1 행 | 9 arm | **3 행: π0.5 alone (anchor) · AG3S-VLA · AG3S-VLA GT oracle** (최종 구성에서 인식만 GT). 같은 init · seed, 4 suite × L-I · L-II |
+| 통제 baseline (+ generic geometry, + external segmentation) | Tab. 1 행 | **삭제**. external segmenter 대비 근거는 Tab. 3 ablation 의 "Extent: graph → external mask" 행과 Tab. 4 grounding (E2) 이 맡음 |
+| 보고값 블록 (†) | VLSA (합산) · KNOWS | + **AEGIS level 별** (VLSA supplement S1–S4 에서 계산: L-I TSR / CAR 63.8 / 65.4, L-II 71.2 / 72.4) + **CFM** (L-I 84.6 / 84.0, L-II 78.6 / 81.6, sim GT · SSR 없음) + **multi-link Tab. Ib** (합산 60.3 / 73.0 / SSR 51.7). 값 · 대조: `paper/evidence/reported_baselines_20261111/` |
+| VLPSA · SafeHarness · DetAug · NUDGE (2026-09-15 이후) | 없음 | Related Work 에서 인용 · 논의만 (CVPR 2027 contemporaneous 규정). 표에 넣지 않음 |
+| dev-4a baseline 보고 run (init 19–49) | 예정 | **계획의 맨 마지막으로 이동** (사용자 지시 11-11 03:4x: AG3S 논문 실험 뒤, AG3S 와 같은 init 부터 AEGIS → multi-link → KNOWS; 끝난 만큼 supplement 의 같은 episode 짝 비교로, 나머지는 rebuttal 용). Tab. 1 본 비교는 원문 보고값. tranche 1 (init 15–18) 결과는 "π0.5 단독이 원문을 재현한다" 는 anchor 근거 · supplement Tab. S13 기록으로 사용 |
+| Tab. S13 (port 대조) | AEGIS 공식 vs port, KNOWS* 재현 | tranche 1 port 검증 기록으로 축소 (선택) |
+| 실험 흐름 | — | CVPR 2026 형식의 연구 질문: Q1 π0.5 대비 (짝 비교) · Q2 원문 보고값 대비 (나란히, 검정 없음) · Q3 GT oracle 대비 (짝) · Q4 ablation (짝) — 수정안 §10.2 |
+| 일정 | §4 순서표 | AG3S 논문 실험은 **11-14–15 주말** (사용자 일정). E1b · E2/E3 · E5 · E7 은 모두 유지 · 실행 |
+
+아래 §1.2 · §3.2 · §4 · §6 (Tab. S13) · §7 · §10.1 에서 baseline 직접 실행을 전제로 한 부분은 이 표로 읽는다.
+
+### 0.0.1 변경된 분할 · 표본 · 순서 (2026-11-11 최종 확인에서 추가 — §4 순서표 · §9 체크리스트 · §1.5 의 분할보다 우선)
+
+분할: 개발 init 5–14, baseline port 검증 init 15–18, **보고 init 19–49** (사용자 결정 A, 11-10). 아래 run 은 모두 보고 분할 · 같은 기계 · 같은 seed. 시간은 거친 추정 [D] (AG3S ≤ 약 2 min/ep).
+
+| 순서 | 실험 | arm | 범위 (권고, 사용자 확정 전) | ep | GPU (상한) | 선행 조건 · 미확인 |
+|---|---|---|---|---:|---:|---|
+| 0 | S0 동결 | — | — | — | — | **최종 구성 확정 (사용자 결정 대기).** st1 은 미채택 (dev-55, 11-11), PE11 (T1) 판정 대기 |
+| 1 | E1a SafeLIBERO | AG3S · AG3S GT oracle · π0.5 anchor | 4 suite × 4 task × L-I · L-II × init 19–28 | 3 × 320 | ≈ 26–29 h | GT oracle = **최종 구성에서 인식만 GT 로 바꾼 판** — 판 등록 필요 (지금의 B5 는 다른 구성) |
+| 2 | E1a LIBERO (장애물 없음) | AG3S · π0.5 | 4 suite × 10 task × init 19–23 | 2 × 200 | ≈ 9–11 h | |
+| 3 | E5 ablation | **변형 7 개 (§1.5 그대로) + 원고 Tab. 2 의 "Stage: grasp state only" 행 = 8 개** | L-I, 4 suite × 4 task × init 19–23, 순서 1 의 AG3S 와 짝 (표본만 320 → 80 ep 로 줄임; 여유가 있으면 init 19–28 로) | 8 × 80 | ≈ 21 h | **분할만 바꾼다: §1.5 의 init 5–14 는 개발 분할이라 보고 분할로.** 구현 필요 (§1.5): nearest-object 선택기, external mask 경로 (Grounded-SAM-2 lift). 나머지는 flag 가 최종 구성에서 한 요소만 바꾸는지 확인 |
+| 4 | E4-F 실패 분류 · E6 timing | (순서 1 의 기록) | — | — | CPU | |
+| 5 | E2/E3 grounding | AG3S · Grounded-SAM-2 · YOLOE | held-out 진단 장면 | — | offline (공유 lock) | GT 생성기 · held-out 장면 목록 (§1.6) |
+| 6 | E1b LIBERO-Safety | π0.5 · AG3S | 물리 track, 범위 미정 | — | 미정 | π0.5 tranche C (60 ep) 는 queue F 에서 측정 중. **AG3S arm 은 controller 처리 (H2) 가 "변경 필요" 상태** (`outputs/2026-11-10_LIBERO-Safety_사전판정/README.md`) |
+| 7 | E7 실로봇 | π0.5 · AG3S (이전 계획의 generic · external arm 은 D4 에 맞춰 뺄지 사용자 확인) | 4 task × 20 trial | 160 (2 arm) | 로봇 | 하드웨어 · 안전 절차 · pilot 10 trial (§1.4). GPU 와 병행 가능 |
+| 마지막 | baseline port 보고 run | AEGIS ±GT → multi-link ±GT → KNOWS ±GT | init 19–28 부터 | — | 최대 ≈ 210 h | AG3S 실험 뒤 사용자 지시 |
+
+순서 1–3 만으로 독점 GPU 약 56–61 h 다 (ablation 8 변형 기준). **주말 이틀 (48 h) 에는 순서 1–3 도 다 들어가지 않는다** — 5–7 을 마감 (11-17 20:59 KST) 안에 하려면 GPU 가 비는 11-11 오전 (queue F 종료) – 11-13 을 쓰거나 범위를 줄여야 한다 (일정은 사용자 결정).
+
 
 ## 0. 한눈에 보기
 
@@ -33,6 +70,9 @@
 | NVIDIA H200 1장 | 측정 하드웨어 | timing 측정 시 1 job 독점 | E6 |
 
 ### 1.2 Tab. 1 — LIBERO + SafeLIBERO (E1a)
+
+> **2026-11-11 변경 (§0.0):** baseline 행은 원문 보고값, 우리 측정은 π0.5 anchor · AG3S-VLA · AG3S-VLA GT oracle 3 행. 통제 baseline 2 개 삭제. 아래의 9 arm 구성은 이전 계획이다.
+
 
 행 9개 × 열 7개(LIBERO SR; Level I/II × TSR · SSR · CAR). 모든 셀이 투영값. ETS · SBU · CNF · suite별 값은 supplement.
 
@@ -139,6 +179,9 @@ E1a AG3S arm의 **모든** 충돌 episode와 무충돌 실패 episode를 라벨�
 - 산출: supplement Tab. S1(hyperparameter 선정표).
 
 ### 3.2 E1a — SafeLIBERO + LIBERO
+
+> **2026-11-11 변경 (§0.0):** baseline 행은 원문 보고값, 우리 측정은 π0.5 anchor · AG3S-VLA · AG3S-VLA GT oracle 3 행. 통제 baseline 2 개 삭제. 아래의 9 arm 구성은 이전 계획이다.
+
 - §1.2. 명령 초안은 E1 protocol §2.6. 순서: pilot(5–14) 9 arm → headline 4 arm 전체(5–49) → 여유 시 나머지.
 - 추가 기록 flag: `end_reason`, 충돌 row의 (link, body, named?) 정보, CSC용 접촉 step 수(가능하면).
 
@@ -161,6 +204,9 @@ E1a AG3S arm의 **모든** 충돌 episode와 무충돌 실패 episode를 라벨�
 - §1.4. 하드웨어 · calibration · 안전 절차 문서 → pilot 10 trial → 최종 횟수 확정 → 320 trial.
 
 ## 4. 우선순위와 시간 (ESTIMATED)
+
+> **2026-11-11:** 이 표는 11-08 의 계획 (9 arm · 5–49 분할 · 수 주 분량) 이다. 지금의 순서 · 표본은 §0.0.1.
+
 
 | 순서 | 항목 | 표본 | 추정 시간 | 비고 |
 |---|---|---|---|---|
@@ -239,10 +285,12 @@ E1a AG3S arm의 **모든** 충돌 episode와 무충돌 실패 episode를 라벨�
 
 ## 9. 완료 체크리스트
 
+> 2026-11-11: 아래 E1a · E5 항목은 §0.0.1 로 대체 (E1a = AG3S · GT oracle · π0.5 anchor 3 arm; E5 = 변형은 그대로, 분할만 보고 분할).
+
 - [ ] S0 LOCK 파일 · Tab. S1
-- [ ] E1a pilot 9 arm → 투영 대비 방향 판정 → 원고 수정
-- [ ] E5 7 변형
-- [ ] E1a headline 4 arm 전체 분할
+- [ ] ~~E1a pilot 9 arm~~ → E1a 3 arm (AG3S · GT oracle · π0.5), init 19–28, 4 suite × 2 level + LIBERO 2 arm
+- [ ] E5 7 변형 + Stage 행 (보고 분할 init 19–, full 과 짝)
+- [ ] ~~E1a headline 4 arm 전체 분할~~ → baseline port 보고 run 은 계획의 맨 마지막
 - [ ] E2/E3 GT 생성기 검증 → 실행 → Fig. 5 자료
 - [ ] E4-F 전수 라벨링 → Tab. S9, Fig. S1
 - [ ] E6 split 목록 · timing(최적화 전후)
@@ -258,6 +306,9 @@ E1a AG3S arm의 **모든** 충돌 episode와 무충돌 실패 episode를 라벨�
 아래 표의 수치는 **원고 v3의 투영값(목표)** 이다. 각 칸은 `결과 파일 → 집계 script → NUMBER_MAP` 으로 연결된 뒤에만 검정 글씨가 된다. "예상 결과"는 가설이고, "판정"은 결과가 가설과 다를 때 원고를 어떻게 고칠지 미리 정한 규칙이다.
 
 ### 10.1 Tab. 1 — LIBERO + SafeLIBERO (E1a)
+
+> **2026-11-11 변경 (§0.0):** baseline 행은 원문 보고값, 우리 측정은 π0.5 anchor · AG3S-VLA · AG3S-VLA GT oracle 3 행. 통제 baseline 2 개 삭제. 아래의 9 arm 구성은 이전 계획이다.
+
 
 **실험 내용.** 같은 frozen π0.5-LIBERO · 같은 공식 evaluator · 같은 (suite, level, task, init 5–49, seed 7)에서 9개 arm을 돌린다. LIBERO 열은 장애물 없는 원 suite(4 suite × 10 task × init 5–49). SafeLIBERO는 4 suite × 4 task × Level I/II. 집계는 suite 동일 가중 평균. 채울 셀 = 9 arm × 7 열 = 63개(+ supplement의 ETS · SBU · CNF · suite별).
 

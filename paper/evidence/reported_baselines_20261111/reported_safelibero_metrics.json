@@ -1,0 +1,409 @@
+{
+  "data_type": "REPORTED (transcribed) + DERIVED (means); every transcription asserted against printed averages",
+  "vlsa_full_action": {
+    "pi05": {
+      "per_level_4suite_mean": {
+        "L1": {
+          "TSR": 54.625,
+          "CAR": 11.875,
+          "SSR": null
+        },
+        "L2": {
+          "TSR": 60.875,
+          "CAR": 22.375,
+          "SSR": null
+        }
+      },
+      "pooled": {
+        "TSR": 57.75,
+        "CAR": 17.125,
+        "SSR": null
+      },
+      "spatial_L1": {
+        "TSR": 65.0,
+        "CAR": 14.5,
+        "SSR": null
+      }
+    },
+    "aegis": {
+      "per_level_4suite_mean": {
+        "L1": {
+          "TSR": 63.75,
+          "CAR": 65.375,
+          "SSR": null
+        },
+        "L2": {
+          "TSR": 71.25,
+          "CAR": 72.375,
+          "SSR": null
+        }
+      },
+      "pooled": {
+        "TSR": 67.5,
+        "CAR": 68.875,
+        "SSR": null
+      },
+      "spatial_L1": {
+        "TSR": 57.0,
+        "CAR": 66.5,
+        "SSR": null
+      }
+    }
+  },
+  "knows": {
+    "no_cbf": {
+      "per_level_4suite_mean": {
+        "L1": {
+          "TSR": 55.0,
+          "CAR": 12.375,
+          "SSR": 11.5
+        },
+        "L2": {
+          "TSR": 57.75,
+          "CAR": 23.0,
+          "SSR": 20.0
+        }
+      },
+      "spatial_L1": {
+        "TSR": 67.5,
+        "CAR": 13.5,
+        "SSR": 13.5
+      }
+    },
+    "naive_gt": {
+      "per_level_4suite_mean": {
+        "L1": {
+          "TSR": 73.0,
+          "CAR": 82.25,
+          "SSR": 63.125
+        },
+        "L2": {
+          "TSR": 67.75,
+          "CAR": 76.125,
+          "SSR": 55.625
+        }
+      },
+      "spatial_L1": {
+        "TSR": 69.0,
+        "CAR": 74.0,
+        "SSR": 61.0
+      }
+    },
+    "knows": {
+      "per_level_4suite_mean": {
+        "L1": {
+          "TSR": 67.5,
+          "CAR": 76.375,
+          "SSR": 59.875
+        },
+        "L2": {
+          "TSR": 71.125,
+          "CAR": 68.75,
+          "SSR": 53.75
+        }
+      },
+      "spatial_L1": {
+        "TSR": 63.0,
+        "CAR": 67.5,
+        "SSR": 53.0
+      }
+    }
+  },
+  "cfm": {
+    "pi05_t": {
+      "per_level_4suite_mean": {
+        "L1": {
+          "TSR": 46.0,
+          "CAR": 12.375,
+          "SSR": null
+        },
+        "L2": {
+          "TSR": 55.75,
+          "CAR": 25.0,
+          "SSR": null
+        }
+      },
+      "spatial_L1": {
+        "TSR": 60.0,
+        "CAR": 17.0,
+        "SSR": null
+      }
+    },
+    "aegis_t": {
+      "per_level_4suite_mean": {
+        "L1": {
+          "TSR": 68.75,
+          "CAR": 75.5,
+          "SSR": null
+        },
+        "L2": {
+          "TSR": 67.5,
+          "CAR": 80.2,
+          "SSR": null
+        }
+      },
+      "spatial_L1": {
+        "TSR": 65.5,
+        "CAR": 73.5,
+        "SSR": null
+      }
+    },
+    "cfm": {
+      "per_level_4suite_mean": {
+        "L1": {
+          "TSR": 84.625,
+          "CAR": 84.0,
+          "SSR": null
+        },
+        "L2": {
+          "TSR": 78.625,
+          "CAR": 81.625,
+          "SSR": null
+        }
+      },
+      "spatial_L1": {
+        "TSR": 75.5,
+        "CAR": 77.5,
+        "SSR": null
+      }
+    }
+  },
+  "multilink": {
+    "pi05": {
+      "pooled": {
+        "TSR": 60.0,
+        "CAR": 16.56,
+        "SSR": 15.06
+      }
+    },
+    "aegis_authors_code_qwen": {
+      "pooled": {
+        "TSR": 64.88,
+        "CAR": 69.25,
+        "SSR": 49.75
+      }
+    },
+    "oscbf": {
+      "pooled": {
+        "TSR": 60.56,
+        "CAR": 33.12,
+        "SSR": 27.88
+      }
+    },
+    "multilink_full": {
+      "pooled": {
+        "TSR": 60.31,
+        "CAR": 73.0,
+        "SSR": 51.69
+      }
+    },
+    "multilink_frozen": {
+      "pooled": {
+        "TSR": 61.62,
+        "CAR": 74.81,
+        "SSR": 52.88
+      }
+    },
+    "ee_coverage": {
+      "pooled": {
+        "TSR": 65.62,
+        "CAR": 68.69,
+        "SSR": 51.56
+      }
+    }
+  },
+  "vlpsa": {
+    "pi05": {
+      "pooled": {
+        "TSR": 49.1,
+        "CAR": 23.1,
+        "SSR": 18.3
+      },
+      "spatial_pooled": {
+        "TSR": 57.8,
+        "CAR": 20.8,
+        "SSR": 19.2
+      }
+    },
+    "vlsa_star": {
+      "pooled": {
+        "TSR": 68.1,
+        "CAR": 73.0,
+        "SSR": 54.4
+      },
+      "spatial_pooled": {
+        "TSR": 73.8,
+        "CAR": 70.5,
+        "SSR": 59.8
+      }
+    },
+    "vlpsa": {
+      "pooled": {
+        "TSR": 55.5,
+        "CAR": 91.2,
+        "SSR": 52.1
+      },
+      "spatial_pooled": {
+        "TSR": 72.2,
+        "CAR": 89.8,
+        "SSR": 66.5
+      }
+    }
+  },
+  "safedojo": {
+    "openvla_oft_sft": {
+      "per_level_4suite_mean": {
+        "L1": {
+          "TSR": 52.12,
+          "CAR": null,
+          "SSR": 39.0
+        },
+        "L2": {
+          "TSR": 52.12,
+          "CAR": null,
+          "SSR": 43.38
+        }
+      },
+      "spatial_L1": {
+        "TSR": 29.5,
+        "CAR": null,
+        "SSR": 22.5
+      }
+    },
+    "aegis_on_oft": {
+      "per_level_4suite_mean": {
+        "L1": {
+          "TSR": 32.38,
+          "CAR": null,
+          "SSR": 28.5
+        },
+        "L2": {
+          "TSR": 33.13,
+          "CAR": null,
+          "SSR": 30.5
+        }
+      }
+    },
+    "ppo": {
+      "per_level_4suite_mean": {
+        "L1": {
+          "TSR": 54.12,
+          "CAR": null,
+          "SSR": 39.88
+        },
+        "L2": {
+          "TSR": 52.12,
+          "CAR": null,
+          "SSR": 43.25
+        }
+      }
+    },
+    "safevla": {
+      "per_level_4suite_mean": {
+        "L1": {
+          "TSR": 54.25,
+          "CAR": null,
+          "SSR": 45.0
+        },
+        "L2": {
+          "TSR": 56.5,
+          "CAR": null,
+          "SSR": 49.5
+        }
+      },
+      "spatial_L1": {
+        "TSR": 41.0,
+        "CAR": null,
+        "SSR": 34.5
+      }
+    },
+    "wmpo": {
+      "per_level_4suite_mean": {
+        "L1": {
+          "TSR": 60.62,
+          "CAR": null,
+          "SSR": 44.88
+        },
+        "L2": {
+          "TSR": 55.75,
+          "CAR": null,
+          "SSR": 46.12
+        }
+      },
+      "spatial_L1": {
+        "TSR": 54.0,
+        "CAR": null,
+        "SSR": 41.0
+      }
+    },
+    "wovr": {
+      "per_level_4suite_mean": {
+        "L1": {
+          "TSR": 50.62,
+          "CAR": null,
+          "SSR": 37.62
+        },
+        "L2": {
+          "TSR": 50.12,
+          "CAR": null,
+          "SSR": 44.0
+        }
+      }
+    },
+    "safedojo": {
+      "per_level_4suite_mean": {
+        "L1": {
+          "TSR": 64.5,
+          "CAR": null,
+          "SSR": 53.25
+        },
+        "L2": {
+          "TSR": 57.0,
+          "CAR": null,
+          "SSR": 49.62
+        }
+      },
+      "spatial_L1": {
+        "TSR": 59.5,
+        "CAR": null,
+        "SSR": 51.5
+      }
+    }
+  },
+  "safeharness": {
+    "gpt55": {
+      "L1": {
+        "TSR": 86.2,
+        "CAR": 90.0,
+        "SSR": 80.0
+      },
+      "L2": {
+        "TSR": 71.2,
+        "CAR": 83.8,
+        "SSR": 66.3
+      },
+      "all": {
+        "TSR": 78.8,
+        "CAR": 86.9,
+        "SSR": 73.1
+      }
+    },
+    "gpt6_astra": {
+      "L1": {
+        "TSR": 90.0,
+        "CAR": 92.5,
+        "SSR": 83.8
+      },
+      "L2": {
+        "TSR": 72.5,
+        "CAR": 91.2,
+        "SSR": 72.5
+      },
+      "all": {
+        "TSR": 81.2,
+        "CAR": 91.9,
+        "SSR": 78.1
+      }
+    }
+  }
+}

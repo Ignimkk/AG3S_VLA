@@ -44,7 +44,7 @@ bash pc_relay.sh download storage            # 필터 적용 (§0)
 SDM=root@<SDM_IP> SDM_PORT=<SDM_PORT> bash pc_relay.sh upload
 # SDM: bash /mnt/dev/AG3S_VLA/scripts/setup/migration/bootstrap_sdm.sh
 ```
-- checkout 은 `.git` 째 옮기므로 SDM 에서 clone/fetch (`pull_from_amrc.sh git`) 가 필요 없다. 같은 `/mnt/dev` 경로라 worktree 링크와 venv 도 그대로다.
+- ~~checkout 은 `.git` 째 옮기므로 SDM 에서 clone/fetch 가 필요 없다~~ → **11-12 01:5x 변경 (§0-2): 코드는 GitHub 로만 합친다.** SDM 은 이미 fresh checkout 이 있으므로 relay 의 checkout 은 `EXISTING=archive` 로 `/mnt/dev/AG3S_VLA_amrc` 에 참고용으로만 둔다.
 - AMRC 쪽 rsync sender 는 nice 19 · ionice idle. 시작 시각은 GPU queue 세션 (dev-57) 에 알린다.
 - PC 는 다운로드가 끝날 때까지 (최종 차이분 07:00 경) 절전하지 않는다. 비밀번호를 여러 번 묻지 않게 PC 에서 `ssh-copy-id -p 30587 root@172.21.121.110` 을 먼저 해 둔다.
 
@@ -53,6 +53,57 @@ SDM=root@<SDM_IP> SDM_PORT=<SDM_PORT> bash pc_relay.sh upload
 | `amrc_manifest.sh` | AMRC | git·branch·worktree·submodule·`uv pip freeze`·apt 기록 → `/mnt/dev/_migration/manifest/<stamp>/` |
 | `pull_from_amrc.sh <mode>` | SDM | SSH 로 AMRC 에서 당겨옴. mode = `probe` · `git` · `kit` · `tree` · `storage` · `all` |
 | `bootstrap_sdm.sh` | SDM | apt 재설치 · `/root` 설정 복원 · cache link · GPU/venv/freeze/render 검사 |
+
+### 0-2. 08:00 전 AMRC 마감 · SDM 합치기 규칙 (11-12 01:5x, SDM fresh setup 완료 후)
+
+SDM 은 `SDM_FRESH_SETUP_20261111_KO.md` §1–§7 로 GitHub 에서 새로 세팅되었고 venv · GPU 검증까지 끝났다 (dev-4a 11-12 새벽 확인).
+그래서 **코드 · 문서는 GitHub 로만 합치고, relay 로 SDM checkout 을 덮어쓰지 않는다.**
+
+**1. AMRC: 08:00 전에 push 할 것이 하나도 남지 않게 한다** (각 세션 마지막 commit 06:00 뒤, 사용자가 push)
+
+```bash
+cd /mnt/dev/AG3S_VLA
+git fetch -q origin
+git log --branches --not --remotes --oneline     # 비어 있어야 함
+git status --short                               # 남은 WIP 는 commit (아래 표)
+for w in .claude/worktrees/*/; do echo "$w"; git -C "$w" status --short | grep -v '^ T \|^?? \.\(python\|runtime\|venv-\)'; done
+git push origin --all
+```
+
+11-12 01:52 기준 상태:
+
+| branch | origin 대비 | 비고 |
+|---|---|---|
+| `feature/panda-benchmark` | 0 (cdea34d3 push 됨 01:41) | 06:00 까지 dev-57 · 보존 commit 이 더 붙는다 |
+| `wip/stage-track` | **1 ahead** (b92d1c23, ST1 보존) | origin 은 7a140dbc. 반드시 push |
+| `wip/sota-om` | **origin 에 없음** | dev-57 worktree `.claude/worktrees/sota-om` |
+| `worktree-agent-a5af2649e9e869962` | **origin 에 없음** | SL-GTTO · GTTO2 보존 commit 4b11ec8e |
+
+worktree 의 ` T` (submodule typechange) 와 `?? .python .runtime .venv-*` 는 venv symlink 라 commit 대상이 아니다.
+미커밋 주인 미확인 파일과 dev-e1 이 남긴 계획 문서는 05:00 경계 뒤 `feature/panda-benchmark` 에 보존 commit 1 개로 넣는다
+(계획 문서를 SDM 의 같은 branch 에서 이어 쓰기 위함). `recon_gt.log`, `paper/AG3S_*.pdf` 3 개는 commit 하지 않고 relay 로만 옮긴다.
+
+**2. relay upload 는 `EXISTING=archive`**
+
+```bash
+SDM=root@<SDM_IP> SDM_PORT=<SDM_PORT> EXISTING=archive bash pc_relay.sh upload
+```
+
+- AMRC checkout 은 `/mnt/dev/AG3S_VLA_amrc` 에 참고용으로 들어간다. git 으로 옮겨지지 않는 `outputs/` figure · PDF 초안 등은 거기서 꺼내 쓴다.
+  그 안의 venv 는 경로가 `/mnt/dev/AG3S_VLA` 라 쓸 수 없다.
+- `replace` 는 오늘 검증한 SDM checkout · venv 를 `AG3S_VLA.fresh-<stamp>` 로 밀어내므로 쓰지 않는다.
+- upload 뒤 `bootstrap_sdm.sh` 는 `/root` (Claude memory 포함) 복원과 Qwen cache link 용으로만 돌린다. apt 재설치는 이미 된 것과 같아 무해하다.
+
+**3. 결과 폴더: run-id 충돌 (실제 위험)**
+
+relay 는 AMRC storage 를 SDM `results/benchmark/` 에 그대로 합친다 (`--delete` 없음). 폴더 이름 앞에 시각 · commit 이 붙어 덮어쓰기는 없다.
+하지만 queue 의 "이미 끝난 run 이면 건너뛰기" 가 **run-id 만 보고** 판단한다
+(`experiments/segmentation/bl_tranche_libero_safety_queue.sh` · `bl_tranche_arms_queue.sh` 의 `done_run`: `"$STORE"/*_<run-id>-vla_only`).
+SDM 에서 AMRC 와 같은 run-id 로 queue 를 돌리면 AMRC 결과를 보고 SDM run 을 건너뛴다.
+
+- **규칙: SDM 에서 만드는 run-id 는 모두 `-sdm` 으로 끝나게 한다** (queue 는 `SUFFIX=-sdm`, 직접 launch 는 `--run-id ...-sdm`).
+- AMRC 결과는 그 자리에 둔다. 계획서 · log 에 적힌 경로 참조가 깨지지 않는다.
+- 따라서 `SDM_FRESH_SETUP_20261111_KO.md` §8 의 "AMRC 결과는 `results/old_server/` 로" 는 필요 없다 (dev-4a 문서, 고침 요청함).
 
 ---
 
@@ -259,3 +310,4 @@ storage 는 하위 디렉터리별로 나눠 보낸다.
 | 2026-11-10 21:3x | AMRC 에 `rsync` 설치. SDM 포털 주소 `No route to host` 확인 |
 | 2026-11-10 23:50 | `amrc_manifest.sh` 1차 실행 (`manifest/20261110T235059`), venv 5개 freeze 기록 (현재 venv 와 동일 확인) |
 | 2026-11-10 23:5x | 이 runbook 과 `scripts/setup/migration/` 3개 작성. 스크립트는 문법 검사만 했고 SDM 에서 실행 전 |
+| 2026-11-12 01:5x | §0-2 추가: 코드는 GitHub 로만 합침 (미push branch 3 개 표), upload 는 `EXISTING=archive`, SDM run-id `-sdm` 규칙 (queue `done_run` 이 run-id 만 봄) |

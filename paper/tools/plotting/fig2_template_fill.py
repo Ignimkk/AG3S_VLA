@@ -20,6 +20,8 @@ Legend spheres for target / protected neighbour are recoloured to the paper's co
 
     .venv-ag3s/bin/python paper/tools/plotting/fig2_template_fill.py [abstract] [scene]
 Variant 'scene' draws slots p1-p3 on the head camera instead (fig02_method_pipeline_scene.*).
+Suffix '-mem' (abstract-mem, scene-mem) replaces module 2 by the observed-vs-remembered panel (*_mem.*, 2026-11-09);
+the original module-2 panel (target and attached spheres drawn alike) stays in the files without the suffix.
 """
 import datetime as dt, glob, hashlib, json, pathlib, subprocess, sys
 
@@ -367,6 +369,103 @@ def r_p3_scene(w, h):
                              "links): red = same minus the bowl, orange = depth pixels within 0.9 voxel of the voxels removed "
                              "from the target-free field, gold = hand collision spheres")
 
+# ------------------------------------------------------------------------------------------- module 2, revised ("mem")
+# What object memory recorded in this episode (summary_json.manipulated / target_exclusion.geometry_version):
+#   calls 0-9 (obs 20-65)   state visible, association accepted (shift 0.35-1.26 mm): the re-grounded target is the
+#                           same object; target_points are the current observation.
+#   calls 10-23 (obs 70-135) grounding no_seed / no_cluster, state occluded (age 1-14); exclusion source "attached":
+#                           the geometry observed at call 9 (observed_frame 9, 222 points) is kept and carried by the
+#                           hand as attached_query_spheres (80 spheres, r 17.3 mm); it is not re-observed.
+# The revised panel separates the two: observed = solid orange, remembered (not observed) = dashed orange outline.
+MEM_SEEN, MEM_KEPT = (30, 50), (90, 130)
+
+
+def _mem_masks(obs):
+    z = chunk(obs)
+    if "target_points" in z.files:                                   # observed target surface on the depth pixels
+        P, valid = sc.lift(obs)
+        Sp = np.c_[np.asarray(z["sphere_centres"]), np.asarray(z["sphere_radii"])]
+        T = np.asarray(z["target_points"], np.float64)
+        m = sc.up_mask(sc.near(P, valid, T, 0.008) & ~sc.in_spheres(P, valid, Sp, pad=0.006))
+        return "seen", m, project(T.mean(0)[None])[0][0]
+    A = np.asarray(z["attached_query_spheres"], np.float64).reshape(-1, 4)
+    return "kept", sc.sphere_mask(A), project(A[:, :3].mean(0)[None])[0][0]
+
+
+def r_p2_mem_scene(w, h):
+    fig = mpl_canvas(w, h, bg="#FFFFFF")
+    gx, gy, ww, hh = 0.012, 0.03, 0.488, 0.47
+    asp = (w * ww) / (h * hh)
+    meta = []
+    for n, obs in enumerate(MEM_SEEN + MEM_KEPT):
+        kind, m, c = _mem_masks(obs)
+        r, col = divmod(n, 2)
+        ax = fig.add_axes([gx + col * (ww + 0.0), 1 - (r + 1) * (hh + 0.02), ww - 0.012, hh]); ax.set_axis_off()
+        img = np.asarray(sc.big(sc.cam(EP["obs_agentview_image"][obs])))
+        cw = 330; ch = int(cw / asp)                                      # 768 px canvas window, same scale in all 4
+        cx, cy = (c[0] + 0.5) * 3, (c[1] + 0.5) * 3 + 25
+        x0 = int(np.clip(cx - cw / 2, 0, 768 - cw)); y0 = int(np.clip(cy - ch / 2, 0, 768 - ch))
+        sub, ms = img[y0:y0 + ch, x0:x0 + cw], m[y0:y0 + ch, x0:x0 + cw]
+        ax.imshow(sub, interpolation="lanczos")
+        ov = np.zeros(ms.shape + (4,))
+        if kind == "seen":
+            ov[ms] = [0.91, 0.44, 0.10, 0.62]
+            ax.imshow(ov, interpolation="bilinear")
+            ax.contour(ms.astype(float), levels=[0.5], colors=[ORANGE], linewidths=1.0)
+        else:
+            ov[ms] = [0.91, 0.44, 0.10, 0.16]
+            ax.imshow(ov, interpolation="bilinear")
+            ax.contour(ms.astype(float), levels=[0.5], colors=[ORANGE], linewidths=1.1, linestyles=[(0, (2.2, 1.4))])
+        ax.set_xlim(-0.5, cw - 0.5); ax.set_ylim(ch - 0.5, -0.5)
+        for sp in ax.spines.values():
+            sp.set_visible(False)
+        meta.append(dict(obs=obs, call=OBS.index(obs), drawn=kind, window_768px=[x0, y0, cw, ch]))
+    # row markers: solid chip = observed, dashed chip = remembered; arrow inside each row = time
+    for r, kind in enumerate(("seen", "kept")):
+        yc = 1 - (r + 0.5) * (hh + 0.02) - 0.01
+        fig.patches.append(matplotlib.patches.FancyArrow(0.47, yc, 0.045, 0, width=0.012, head_width=0.05, head_length=0.02,
+                                                         length_includes_head=True, transform=fig.transFigure,
+                                                         color="#1F4E79", zorder=5))
+        y_tag = 1 - r * (hh + 0.02) - 0.115
+        box = matplotlib.patches.FancyBboxPatch((0.03, y_tag), 0.055, 0.075, boxstyle="round,pad=0.004,rounding_size=0.01",
+                                                transform=fig.transFigure, zorder=6, mutation_aspect=w / h,
+                                                facecolor=ORANGE if kind == "seen" else "#FFFFFF", edgecolor=ORANGE,
+                                                linewidth=1.0, linestyle="-" if kind == "seen" else (0, (2, 1.3)))
+        fig.patches.append(box)
+    return mpl_to_img(fig), dict(frames=meta, remembered_geometry="attached_query_spheres (80, r 17.3 mm) = call-9 target "
+                                 "geometry (observed_frame 9, 222 points) carried with the hand",
+                                 content="top row (obs 30, 50): state visible, association accepted; solid orange = depth "
+                                         "pixels within 8 mm of that call's target points. bottom row (obs 90, 130): state "
+                                         "occluded, grounding no_seed / no_cluster; dashed orange = projected outline of the "
+                                         "attached spheres (geometry last observed at obs 65), not an observation. Tags: "
+                                         "filled = observed, dashed = remembered; arrows = time. Same 330 px window scale "
+                                         "on the 768 px upsampled head frame in all four.")
+
+
+def r_p2_mem(w, h):
+    lo, hi = np.array([0.28, -0.26, -0.02]), np.array([0.84, 0.30, 0.44])     # wider than r_p2: held geometry rises to z 0.28 m
+    z0 = chunk(30)
+    C = np.asarray(z0["filtered_cloud"], np.float64); sup = np.asarray(z0["support_mask"], bool)
+    fig = mpl_canvas(w, h); ax = setup3d(fig, lo, hi, elev=30, azim=10)
+    ax.set_position([-0.40, -0.47, 1.80, 2.15])                       # lift the scene so the placed bowl is not cut
+    m = inbox(C, lo, hi)
+    scatter3d(ax, C[m & sup][::3], "#D3D7DE", 0.6)
+    scatter3d(ax, C[m & ~sup], BLUE, 1.2, 0.25)
+    for obs in MEM_SEEN:                                              # observed: solid
+        scatter3d(ax, np.asarray(chunk(obs)["target_points"], np.float64), ORANGE, 3.0, 0.85)
+    for obs in MEM_KEPT:                                              # remembered: hollow, dashed rim
+        A = np.asarray(chunk(obs)["attached_query_spheres"], np.float64).reshape(-1, 4)[:, :3]
+        ax.scatter(*A.T, s=7, facecolors="none", edgecolors=ORANGE, linewidths=0.45, alpha=0.9, depthshade=False, rasterized=True)
+    path = np.array([eef_base(t) for t in range(MEM_SEEN[0], MEM_KEPT[-1] + 1)])
+    ax.plot(*path.T, ls=(0, (3, 2)), color="#1F4E79", lw=1.0)
+    ax.scatter(*path[-1], marker="o", s=14, c="#1F4E79", depthshade=False)
+    return mpl_to_img(fig), dict(obs_seen=list(MEM_SEEN), obs_kept=list(MEM_KEPT),
+                                 content="solid orange = observed target points (obs 30, 50; state visible); hollow orange = "
+                                         "attached-sphere centres (obs 90, 130; state occluded: geometry last observed at obs "
+                                         "65, carried with the hand, not re-observed); dashed navy = executed end-effector "
+                                         "path obs 30-130")
+
+
 # ------------------------------------------------------------------------------------------- template editing
 def inpaint(a, box, pad=3, iters=500):
     x0, y0, x1, y1 = box
@@ -390,7 +489,92 @@ def text(canvas, xy, s, size, bold=False, fill=(34, 39, 56), anchor="lm"):
     ImageDraw.Draw(canvas).text((xy[0] * S, xy[1] * S), s, font=f, fill=fill, anchor=anchor)
 
 
-def main(variant="abstract"):
+# ------------------------------------------------------------------------------------------- module 4, revised ("mem")
+# Schematic of the stage recognition in the manuscript (03_method.tex, HSR) and the code (ag3s/stages/subtask_probe.py):
+# a linear probe on the frozen pi0.5's own hidden state (prefix K/V cache of PaliGemma = VLM backbone, layer 4: mean over
+# text tokens ++ mean over image tokens, 512-d) gives pick / place / home; a second linear classifier adds the gripper
+# feedback (measured opening -> grasp state z_t) and the hand-target distance (template arrow below the box).
+# Diagram only: no per-frame probe output is recorded for this SafeLIBERO run (its calls record the grasp latch
+# searching / latched / held from gripper feedback), so no stage is highlighted as "current".
+PALM_PATH = [(978, 481, 1022, 507), (1015, 481, 1201, 523), (1196, 496, 1313, 508), (1301, 466, 1315, 507),
+             (1309, 466, 1497, 477), (1482, 433, 1499, 477)]   # template px; background there is 254 +- 1 (measured)
+M2_CAPTION_BOX = (786, 302, 990, 320)                  # template px of "track candidates over time"
+M4_BOX = (1383, 150, 1612, 421)                         # interior of the template's module-4 card (border at x 1377/1617)
+M4_BG = (248, 244, 254)
+PURPLE, PURPLE_D, INK, ARROW = (150, 92, 196), (109, 56, 130), (34, 39, 56), (57, 90, 134)
+
+
+def draw_m4(canvas):
+    dr = ImageDraw.Draw(canvas)
+    Q = lambda *v: [int(round(t * S)) for t in v]                                      # noqa: E731
+    x0, y0, x1, y1 = M4_BOX
+    dr.rectangle(Q(x0, y0, x1, y1), fill=M4_BG)
+
+    def rr(b, fill, edge, w=1.2, r=6, dash=False):
+        dr.rounded_rectangle(Q(*b), radius=r * S, fill=fill, outline=edge, width=max(1, int(w * S)))
+
+    def arrow(p, q, col=ARROW, w=1.6):
+        p, q = np.asarray(p, float), np.asarray(q, float)
+        d = (q - p) / np.linalg.norm(q - p); n = np.array([-d[1], d[0]])
+        dr.line(Q(*p, *(q - 6 * d)), fill=col, width=int(w * S))
+        dr.polygon([tuple(Q(*(q))), tuple(Q(*(q - 7 * d + 4 * n))), tuple(Q(*(q - 7 * d - 4 * n)))], fill=col)
+
+    def sub(xy, base, s, size, bold=False, fill=INK, anchor="lm"):
+        """text with a subscript t-style suffix; anchor 'lm' or 'mm' on the whole string"""
+        fb = ImageFont.truetype(FONT_B if bold else FONT_R, size * S)
+        fs_ = ImageFont.truetype(FONT_B if bold else FONT_R, int(size * 0.68) * S)
+        wb = dr.textlength(base, font=fb) / S; ws = dr.textlength(s, font=fs_) / S
+        x = xy[0] - (wb + ws) / 2 if anchor == "mm" else xy[0]
+        dr.text(Q(x, xy[1]), base, font=fb, fill=fill, anchor="lm")
+        dr.text(Q(x + wb + 0.5, xy[1] + size * 0.28), s, font=fs_, fill=fill, anchor="lm")
+
+    # (a) frozen pi0.5: VLM layers, layer 4 tapped
+    text(canvas, (1391, 161), "Frozen VLA π", 14, bold=True, fill=PURPLE_D)
+    fb = ImageFont.truetype(FONT_B, 14 * S); wpi = dr.textlength("Frozen VLA π", font=fb) / S
+    text(canvas, (1391 + wpi + 0.5, 165), "0.5", 9, bold=True, fill=PURPLE_D)
+    rr((1390, 172, 1478, 268), (255, 255, 255), (200, 186, 222), r=6)
+    text(canvas, (1434, 181), "VLM backbone", 11, fill=(96, 90, 120), anchor="mm")
+    bars = [(256, "L1", False), (237, "L4", True), (218, "⋮", None), (199, "L18", False)]
+    for yb, lab, hi in bars:
+        if hi is None:
+            text(canvas, (1434, yb + 1), "· · ·", 12, fill=(150, 140, 170), anchor="mm"); continue
+        rr((1398, yb - 7, 1470, yb + 7), PURPLE if hi else (234, 226, 246), PURPLE_D if hi else (205, 190, 228), w=1, r=3)
+        text(canvas, (1434, yb), lab, 11, bold=hi, fill=(255, 255, 255) if hi else (96, 90, 120), anchor="mm")
+    text(canvas, (1434, 276), "image + text tokens", 10, fill=(96, 90, 120), anchor="mm")
+    # (b) hidden state read from layer 4
+    arrow((1471, 237), (1497, 237), col=PURPLE_D)
+    rr((1498, 206, 1608, 262), (255, 255, 255), PURPLE, w=1.4, r=6)
+    text(canvas, (1553, 220), "hidden state", 14, bold=True, anchor="mm")
+    sub((1553, 236), "f", "t", 14, bold=True, anchor="mm")
+    text(canvas, (1553, 252), "prefix K/V, layer 4", 10, fill=(96, 90, 120), anchor="mm")
+    # (c) gripper feedback
+    rr((1390, 288, 1556, 322), (255, 255, 255), (186, 198, 218), w=1.2, r=6)
+    g = (1404, 305)                                            # parallel-jaw icon
+    dr.line(Q(g[0] - 9, g[1] - 9, g[0] + 9, g[1] - 9), fill=INK, width=2 * S)
+    dr.line(Q(g[0], g[1] - 13, g[0], g[1] - 9), fill=INK, width=2 * S)
+    for sx in (-1, 1):
+        dr.line(Q(g[0] + 9 * sx, g[1] - 9, g[0] + 9 * sx, g[1] + 8), fill=INK, width=2 * S)
+    dr.line(Q(g[0] - 5, g[1] + 2, g[0] + 5, g[1] + 2), fill=ARROW, width=S)
+    for sx in (-1, 1):
+        dr.polygon([tuple(Q(g[0] + 6 * sx, g[1] + 2)), tuple(Q(g[0] + 3 * sx, g[1] - 0.5)), tuple(Q(g[0] + 3 * sx, g[1] + 4.5))], fill=ARROW)
+    text(canvas, (1420, 298), "gripper feedback", 14, bold=True)
+    sub((1420, 313), "opening → grasp state z", "t", 11, fill=(80, 86, 104))
+    # (d) probe + classifier -> pick / place / home
+    arrow((1580, 263), (1580, 334), col=PURPLE_D)
+    arrow((1460, 323), (1460, 334))
+    rr((1408, 335, 1598, 357), (240, 232, 250), PURPLE, w=1.2, r=6)
+    text(canvas, (1503, 346), "linear probe + classifier", 13, bold=True, fill=PURPLE_D, anchor="mm")
+    arrow((1503, 358), (1503, 368), col=PURPLE_D)
+    chips = [((1394, 369, 1460, 391), "pick", (254, 240, 197), (236, 196, 92)),
+             ((1468, 369, 1534, 391), "place", (238, 217, 250), (190, 140, 230)),
+             ((1542, 369, 1608, 391), "home", (254, 213, 209), (232, 150, 146))]
+    for b, lab, fc, ec in chips:
+        rr(b, fc, ec, w=1.2, r=6)
+        text(canvas, ((b[0] + b[2]) / 2, (b[1] + b[3]) / 2), lab, 14, anchor="mm")
+    sub((1500, 406), "current stage s", "t", 15, anchor="mm")
+
+
+def main(variant="abstract", mem=False):
     OUT.mkdir(parents=True, exist_ok=True)
     tpl = Image.open(TEMPLATE).convert("RGB")
     a = np.asarray(tpl)
@@ -407,6 +591,11 @@ def main(variant="abstract"):
         ys, xs = np.where(sat > 40)
         bb = (x0 + xs.min(), y0 + ys.min(), x0 + xs.max(), y0 + ys.max()); leg[name] = bb
         a = inpaint(a, bb, pad=2)
+    if mem:                                                   # "palm-target distance" chip + its path into module 4 removed
+        a = a.copy()                                          # (user, 2026-11-10); flat fill with the measured background
+        for x0, y0, x1, y1 in PALM_PATH:
+            a[y0:y1 + 1, x0:x1 + 1] = 254
+        a = inpaint(a, M2_CAPTION_BOX)                        # module-2 caption "track candidates over time" (user, 2026-11-10)
     canvas = Image.fromarray(a).resize((tpl.width * S, tpl.height * S), Image.LANCZOS)
     dr = ImageDraw.Draw(canvas)
     for name, col in (("target", ORANGE), ("neighbour", BLUE)):
@@ -424,6 +613,9 @@ def main(variant="abstract"):
     text(canvas, (1329, 718), "lower onto plate", 20, anchor="mm")
     text(canvas, (1718, 569), "Success", 22, bold=True, anchor="mm")
     text(canvas, (1700, 718), "bowl on plate, episode ends", 20, anchor="mm")
+    if mem:
+        draw_m4(canvas)                                       # module 4 redrawn: hidden-state probe + gripper feedback
+        text(canvas, (888, 311), "keep the target's identity over time", 21, anchor="mm")
     # 2) recorded content into the image slots
     rec = {}
     for key, (x0, y0, x1, y1) in SLOTS.items():
@@ -433,7 +625,10 @@ def main(variant="abstract"):
         elif key == "p1":
             img, meta = (r_p1_scene if variant == "scene" else r_p1)(w, h)
         elif key == "p2":
-            img, meta = (r_p2_scene if variant == "scene" else r_p2)(w, h)
+            if mem:
+                img, meta = (r_p2_mem_scene if variant == "scene" else r_p2_mem)(w, h)
+            else:
+                img, meta = (r_p2_scene if variant == "scene" else r_p2)(w, h)
         elif key == "p3":
             img, meta = (r_p3_scene if variant == "scene" else r_p3)(w, h)
         elif key == "p5":
@@ -446,17 +641,18 @@ def main(variant="abstract"):
                                                  outline=(200, 205, 213), width=S)
         rec[key] = dict(slot_px_template=[x0, y0, x1, y1], **meta)
         print("filled", key)
-    stem = "fig02_method_pipeline" + ("_scene" if variant == "scene" else "")
+    stem = "fig02_method_pipeline" + ("_scene" if variant == "scene" else "") + ("_mem" if mem else "")
     png = OUT / f"{stem}.png"
     canvas.save(png, dpi=(canvas.width / WIDTH_IN,) * 2)
     pdf = OUT / f"{stem}.pdf"
     canvas.save(pdf, "PDF", resolution=canvas.width / WIDTH_IN)
-    side = dict(artifact=stem, variant=variant, png=str(png.relative_to(ROOT)), pdf=str(pdf.relative_to(ROOT)),
+    side = dict(artifact=stem, variant=variant, module2="revised: observed vs remembered" if mem else "original", png=str(png.relative_to(ROOT)), pdf=str(pdf.relative_to(ROOT)),
                 size_px=list(canvas.size), size_in=[WIDTH_IN, round(WIDTH_IN * canvas.height / canvas.width, 3)],
                 template=dict(file=str(TEMPLATE.relative_to(ROOT)), sha256=sha(TEMPLATE), size_px=[tpl.width, tpl.height],
                               note="AI-drawn layout supplied by the user (2026-11-09); its mock scenes are fully covered by the slots"),
                 episode=dict(run=str(RUN), stem=STEM, chunk_mapping=HOW, seed=7, init=9),
-                slots=rec, text_edits=dict(boxes=edits, legend_spheres=leg,
+                slots=rec, text_edits=dict(boxes=edits, legend_spheres=leg, removed_palm_target_path=PALM_PATH if mem else None,
+                                           module2_caption=dict(box=M2_CAPTION_BOX, new="keep the target's identity over time") if mem else None,
                                            note="inpainted and re-typeset (Nimbus Sans Narrow) because the template text did "
                                                 "not match the recorded setup; see module docstring"),
                 font_warning="template text is raster at ~16-22 px of 1920 px; at 6.875 in this prints at ~4.1-5.7 pt "
@@ -469,5 +665,5 @@ def main(variant="abstract"):
 
 
 if __name__ == "__main__":
-    for v in (sys.argv[1:] or ["abstract", "scene"]):
-        main(v)
+    for v in (sys.argv[1:] or ["abstract", "scene"]):        # suffix -mem: revised module 2 (separate output files)
+        main(v.removesuffix("-mem"), mem=v.endswith("-mem"))

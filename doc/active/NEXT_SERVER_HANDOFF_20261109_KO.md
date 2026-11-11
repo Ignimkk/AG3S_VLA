@@ -91,6 +91,12 @@ cuRobo TSDF / ESDF 로 넘겨 **집기 · 놓기는 그대로 하면서 장애�
 
 ## 4.0 서버 역할 · baseline 선행 실행 (사용자 결정 2026-11-09 16:5x–17:xx)
 
+> **갱신 (사용자 결정 2026-11-10 16:2x KST): 새 서버는 없다.** 아래 T0–T6 도 이 H200 (`/mnt/dev/AG3S_VLA`) 에서 baseline queue
+> 사이에 끼워 넣어 수행한다 (GPU lock, 바깥 flock 금지, queue 가 도는 동안 HEAD 불변). 따라서 §3 의 '기계 차이' 주의와
+> T0 (새 서버 anchor) 는 해당 없음 — 11-09 의 pe123458 run 이 같은 기계 anchor 다. 같은 서버에서 제약 단계 추종
+> (hidden state + gripper, `outputs/2026-11-10_제약단계_추종/README.md`) 도 진행 중이며, T3 (목적지 등록 지연) · T4 (첫 held call)
+> 와 같은 S2→S3 경계를 다룬다.
+
 - **이전 서버 (H200 1 장, `/mnt/dev/AG3S_VLA`) = baseline 전용.** 2026-11-09 17:xx 부터 `experiments/segmentation/bl_tranche_queue.sh` (tranche 1 = init 15–18,
   SafeLIBERO 7 arm × 128 ep + LIBERO 4 arm × 160 ep, 약 25 h) 실행 중. 이 run 들은 **논문 표에 들어가는 실제 결과**. 계획 · port 근거 · 결과 표:
   [`experiments/BASELINE_TRANCHE_PLAN_PORT_RATIONALE_20261109_KO.md`](experiments/BASELINE_TRANCHE_PLAN_PORT_RATIONALE_20261109_KO.md).

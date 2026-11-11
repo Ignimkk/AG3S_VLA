@@ -509,3 +509,83 @@ Step 4 종료 시점의 다음 구성 작업은 Step 5: 공식 template과 manus
 ## 2026-11-09 14:58 KST — Fig. 2 B①: target 밖 seed 표시 제외 (사용자 요청)
 
 - B① 장면판에서 target 점에서 2 cm보다 먼 seed를 그리지 않음(표시 선택). call 2 기록 seed 101개 중 95개 표시, 6개(병 4 · 서랍장 2, target까지 5.7–8.7 cm) 생략. 생략 수와 거리는 `fig02_method_pipeline_scene.json` `slots.p1`에 기록. caption에 "모든 seed가 그릇 위"라고 쓰지 않는다.
+
+## 2026-11-09 17:44 KST — Fig. 2 ②: 관측 vs 기억 구분 패널 새로 생성 (사용자 요청, 기존 파일 유지)
+
+- 이유: 기존 ②는 held 구간(obs 70–130)의 attached sphere를 obs 30, 50의 target 점과 같은 방식으로 그려, memory가 그릇을 계속 추적한 것처럼 보였음. 기록은 다름 — call 0–9(obs 20–65)는 state visible · association accepted(shift 0.35–1.26 mm), call 10–23(obs 70–135)은 grounding no_seed / no_cluster · state occluded(age 1–14) · exclusion source attached이고, `target_exclusion.geometry_version`이 observed_frame 9 · 222점(같은 sha1)으로 고정. 즉 obs 65에서 마지막으로 본 형상을 손에 붙여(attached_query_spheres 80개, r 17.3 mm) 들고 다니며, 다시 관측하지 않음.
+- 새 패널: 관측 = 주황 실선(채움), 기억(관측 아님) = 주황 점선 외곽.
+  - B 장면판(`r_p2_mem_scene`): 2 × 2 frame. 위 obs 30, 50(target 점 8 mm 이내 depth 픽셀), 아래 obs 90, 130(attached sphere 투영 외곽 점선). 네 frame 모두 768 px 확대 frame에서 같은 330 px 창. 행 앞 tag(채움 = 관측, 점선 = 기억), 행 안 화살표 = 시간.
+  - A 3D판(`r_p2_mem`): obs 30, 50 target 점 채움 + obs 90, 130 attached sphere 중심 속 빈 원 + 실행된 end-effector 경로(obs 30–130) 점선. 들린 그릇이 잘리지 않게 범위 확대.
+- 출력(새 파일): `paper/figures/fig02_method/fig02_method_pipeline_mem.{png,pdf,json}`, `fig02_method_pipeline_scene_mem.{png,pdf,json}`, 비교 `fig02_module2_compare_mem.png`(before / revised × A / B). 실행 `fig2_template_fill.py abstract-mem scene-mem`. 기존 `fig02_method_pipeline{,_scene}.*`, `fig02_modules123_compare.png`는 md5 동일 확인.
+- 남은 점: 템플릿 캡션 "track candidates over time"은 새 패널 의미(가려져도 마지막 형상 유지)와 어긋남. sphere 반경 17 mm 때문에 점선 외곽이 그릇보다 큼(기록 그대로).
+
+## 2026-11-10 KST — Fig. 2 ④ task stage recognition: hidden state + gripper feedback 도식 (사용자 요청, `*_mem` 파일에만)
+
+- `draw_m4()`가 템플릿 ④ 카드 내부(템플릿 px x 1383–1612, y 150–421)를 배경색으로 덮고 다시 그림. `fig02_method_pipeline_scene_mem.*`과 `fig02_method_pipeline_mem.*`에 적용. 기존 `fig02_method_pipeline{,_scene}.*`는 md5 동일.
+- 내용(원고 03_method.tex HSR 절과 `AG3S/ag3s/stages/subtask_probe.py` 기준): Frozen VLA π0.5의 VLM backbone(PaliGemma) layer 4 → hidden state f_t(prefix K/V: text 평균 ++ image 평균, 512-d) → linear probe. gripper feedback(측정 opening → grasp state z_t)이 classifier에 합류 → pick / place / home → current stage s_t. 템플릿의 5개 stage chip(approach … retreat)은 원고 label 3개로 바꿈.
+- 도식일 뿐임: 이 SafeLIBERO run의 call 기록에는 probe 출력이 없음(grasp latch searching / latched / held만 기록). 그래서 어떤 stage도 "현재"로 강조하지 않음. caption에 이 episode의 probe 출력처럼 쓰지 않는다.
+- 남은 점: ④ 안의 작은 글자(10–11 px / 1920 px)는 인쇄 ≈ 2.6–2.9 pt. 템플릿 하단 "gripper feedback z_t (open / hold / placed)"는 원고 z_t ∈ {free, held, uncertain}과 다름.
+
+## 2026-11-10 KST — Fig. 2: "palm–target distance" 제거 (사용자 요청, `*_mem` 파일에만)
+
+- 템플릿의 "palm–target distance" chip과 그 연결선(gripper feedback chip 아래 → ④ 아래 화살표)을 측정한 배경색(254)으로 덮음(`PALM_PATH`, 템플릿 px 6개 box, sidecar `text_edits.removed_palm_target_path`). gripper feedback chip과 ③으로 가는 화살표는 유지. 이로써 ④로 들어오는 바깥 화살표는 없음(gripper feedback은 ④ 안에 그려져 있음). 기존 `fig02_method_pipeline{,_scene}.*`는 md5 동일.
+
+## 2026-11-10 00:1x KST — HSR + gripper feedback 결합: Method · Supplementary draft (dev-38, 사용자 요청, `/cvpr-write`)
+
+- 새 파일: `paper/notes/HSR_GRIPPER_FUSION_DRAFT_20261110.md` (`DRAFT`). `latex/sections/*.tex` · `supplementary/supplementary.tex` 는 고치지 않았다.
+- 근거: offline 기록 재생 G174 (`outputs/2026-11-10_HSR6_gripper_재생/replay.json`, script `experiments/segmentation/hsr6_gripper_replay.py`). 40 SafeLIBERO dev episode, 정답은 sim 위치 근사, closed loop 아님.
+- 내용: (1) Method 문단 1A — `PLANNED`, closed loop 채택 · 검증 전에는 넣지 않는다. (2) `04_experiments.tex` SafeLIBERO 문장 수정안 1B. (3) supplementary 새 절과 표 3 개 (LaTeX). (4) 그림 · 영상 목록. (5) 제안 ID C021 · R027 · EXP-H1 (등록하지 않음).
+- 기록과 어긋남 발견: `04_experiments.tex` 의 "sub-task probe is replaced by the gripper rule because LIBERO demonstrations carry no phase labels". Panda probe 는 sim label 로 학습했고 (SL6-B), 지금의 gripper 규칙은 사용자 판정 P0m 에 따른 선택이다. 수정은 하지 않고 draft 에 제안만 했다.
+- 용어: 원고 규칙에 따라 "sub-task probe" 로 썼다.
+- manifest validator: 미실행. `python3 tools/analysis/validate_manifests.py` 가 `ModuleNotFoundError: jsonschema` 로 실패했고, checkout 의 venv 에도 jsonschema 가 없다. R027 은 미검증이다.
+
+## 2026-11-10 KST — Fig. 2 ② caption 변경 (사용자 요청, `*_mem` 파일에만)
+
+- "track candidates over time" → "keep the target's identity over time". 템플릿 px (786, 302, 990, 320)을 inpaint 후 Nimbus Sans Narrow 21 px로 다시 씀(sidecar `text_edits.module2_caption`). 새 ② 패널(관측 = 실선, 가려진 동안 = 마지막 형상 유지)과 의미를 맞춤. 기존 `fig02_method_pipeline{,_scene}.*`는 md5 동일.
+
+## 2026-11-10 KST — Fig. 1 v6 teaser: 축별 비교 + 다른 장면 gallery (사용자 요청)
+
+- 배경: 사용자가 figurelabs mock 2장(`fig01_teaser/Robot-Safety-Teaser-Figure-image-{1,4}.png`)의 스타일(사람–로봇 소통, Prior vs ours)은 좋지만 첫 페이지 teaser로는 내용이 빈약하다고 판단. mock은 AI가 그린 장면이라 쓰지 않고, 같은 구성을 기록 frame으로 다시 만듦. image-4의 "dialogue / clarify" 요소는 AG3S 기능이 아니라 넣지 않음(로봇 아이콘은 frozen VLA 표시용).
+- `paper/tools/plotting/cvpr_v6_fig1_compose.py` → `paper/figures/fig01_teaser/v6/fig01_v6.{pdf,png,json}`, 6.875 × 3.40 in, 최소 글자 7 pt, layout audit 위반 0.
+  - 위: 사람 아이콘 + 명령 말풍선 → frozen VLA(로봇 아이콘), 색 key.
+  - 가운데(t2 e9, init 9, seed 7, 둘 다 obs 110): Prior hero(AEGIS, detector box, 병 넘어짐) | Identity / Extent / Permission 축별 ✗/✓ thumbnail 짝 | AG3S hero(장애물 파랑, 들고 있는 그릇 보라, 손가락 금색, 병 그대로). Prior thumbnail = AEGIS box(병 box 없음, 서랍장+그릇을 한 box), KNOWS 손 ellipsoid. AG3S thumbnail = v4 asset r_identity / r_extent / r_permission.
+  - 아래 gallery: 같은 init·seed에서 VLA 단독 충돌 + AG3S 무충돌 성공인 episode 4개 — (t0 e9 wine bottle), (t2 e6 moka pot), (t2 e8 milk), (t3 e5 book). 왼쪽 = VLA 단독 collide_t + 40 frame, 오른쪽 = AG3S 마지막 frame. 선택 조건은 스크립트에서 assert(collided / not collided / official_success, init·seed 일치)로 확인하고 sidecar에 run · npz sha256 · frame 기록.
+  - 선택 근거 표(이번 세션 계산, spatial LI t0–t3 e5–14, 40 episode): VLA 단독 collided ∧ AG3S safe success인 episode는 (0,9), (2,5), (2,6), (2,8), (2,9), (2,11), (2,12), (2,14), (3,5). gallery는 장애물 · task가 겹치지 않게 4개 고름. 예시이며 비율이 아님(caption에 명시).
+- wrapper `paper/figures/fig01_teaser/figure_v6.tex`(caption 포함). `main.tex`는 아직 v3를 씀(바꾸지 않음).
+
+## 2026-11-10 KST — Fig. 1 v6: 원고 템플릿 크기에 맞춤 (사용자 요청)
+
+- 높이 3.40 → 3.01 in(hero 1.56 → 1.32, gallery 0.70 → 0.60, 위 band 0.36 → 0.33). 폭은 `\textwidth` 6.875 in 그대로. 최소 7 pt, layout audit 위반 0.
+- caption 6줄 → 4줄(`figure_v6.tex`): 축 설명을 한 문장씩으로 줄이고, gallery가 선택한 예시이며 비율이 아님을 유지.
+- 확인 빌드(scratchpad 복사본 `main_v6.tex`, `main.tex` 변경 없음, pdflatex + bibtex, undefined 0): 첫 페이지에 abstract 전체 + Introduction 시작이 들어감(v3 원고는 abstract 11줄만 들어감). 전체 11쪽으로 v3와 같음. 본문이 9쪽까지 가는 것은 v3에서도 같음(teaser와 무관).
+
+## 2026-11-11 KST — 원문 보고값 비교 · 관련연구 수정안 (사용자 요청)
+
+- 사용자 결정: SafeLIBERO 비교는 각 원문의 보고 지표로 한다. baseline 재구현 · 재실행 없음 (마감 11-17 20:59 KST).
+- 새 문서: `paper/notes/PAPER_REVISION_REPORTED_COMPARISON_20261111_KO.md` (수정 계획, 원고 tex 는 고치지 않음). 대상 PDF `paper/AG3S_ … (5).pdf` 의 줄 번호 기준.
+- 원문 확인 (PDF 직접): VLSA (+ supplement S1–S4), KNOWS, CFM, multi-link, VLPSA, SafeDojo, SafeHarness, DetAug, NUDGE · OmniGuide · Lan-o3dp (SafeLIBERO 아님). 공식 충돌 기준 = `benchmark/SafeLIBERO/main/main_aegis.py:370` (1 mm, L1, 매 step).
+- 변환 script `paper/tools/analysis/reported_safelibero_metrics.py` → `paper/evidence/reported_baselines_20261111/` (json, md). 옮긴 표 전부를 원문 인쇄 평균과 assert 대조 — 통과. 새 [D]: AEGIS level 별 (VLSA supplement, full action) L-I TSR / CAR 63.8 / 65.4, L-II 71.2 / 72.4.
+- 그림 `paper/tools/plotting/reported_safelibero_scatter.py` → `reported_tsr_car.png` (계획용, 원고용 아님).
+- 발견: CFM 의 π0.5 · AEGIS 행 = VLSA 평행이동 supplement 값 (재실행 아님으로 보임). CFM · VLPSA 는 GT 장애물 정보 사용. Multi-link 가 공식 1 mm · GT 없음 · 1,600 ep 로 우리 조건과 가장 같음. 원고 l.421–426 의 분할 기술 (5 dev / 45 report) 이 실제 결정 (5–14 / 15–18 / 19–49) 과 다름.
+- `papers/` 에 SafeHarness (2609.20822v2) · DetAug (2609.18395v1) PDF 추가.
+
+## 2026-11-11 KST — 수정안 §8 결정 반영 · §10 실험 구성 추가 (사용자 요청)
+
+- 사용자 결정: D3 AG3S GT oracle 행 넣음 · D4 통제 baseline 2 개 삭제 · D5 VLPSA 는 Related Work 논의만. D1 · D2 는 미정 (재설명 요청).
+- `PAPER_REVISION_REPORTED_COMPARISON_20261111_KO.md` §10 추가: CVPR 2026 논문 (ACoT · AVA · ActiveVLA · ForceVLA2) 실험 흐름 확인 — 주 비교 표는 원문 보고값 나열이 관행 (ACoT Tab. 2 "*" = 직접 재현 행만 표시). Q1–Q4 + 분석으로 재구성, 짝 비교 vs 보고값 비교 구분, 타당성 체크리스트 7 항, ablation 후보 4 행 (flag 확인 필요), GPU 예산 ≈ 46–51 h.
+- 확인: E2 (grounding) · E5 (ablation) · E7 (실로봇) · E1b (LIBERO-Safety) 는 계획 문서상 PLANNED (미실행). 원고 Tab. 2 · Tab. 3 · Fig. 3 · §4.4 수치는 측정 근거 없음 → 새 결정 D6 (동결) · D7 (미실행 실험 처리) 추가.
+
+## 2026-11-11 KST — 수정안: 사용자 방침 반영 (모든 실험 실행 · 문헌 배치 중심)
+
+- 사용자 방침: 계획한 실험은 모두 실행하며 "아직 안 했다" 는 이유로 원고에서 빼지 않는다. 수정안의 삭제 권고 (실로봇 · Tab. 3 · LIBERO-Safety) 를 철회, "측정값으로 교체" 로 바꿈 (§0 · §7 P0-1 · §8 D7 · §10.3).
+- 새 절 §A: 문헌 배치표 (논문 → Intro / Related Work / Tab. 1 / 기타, 역할), 원고에 넣을 capability 비교표 초안 ("정보를 어디서 가져오는가", 원문 사실만 — 넣기 전 칸별 재대조 필요), 실험별 비교 대상 문헌.
+
+## 2026-11-11 03:xx KST — 계획 변경을 계획 · 결과 문서에 반영 (사용자 승인)
+
+- `doc/active/experiments/AG3S_PLAN_SCHEDULE_20261110_KO.md`: §1 변경 요약, §2 baseline 보고 run 행 → 보류 + 주말 AG3S 실험 행, §5 9a, §8 기록.
+- `AG3S-VLA_CVPR2027_FINAL_EXPERIMENT_PLAN_20261108_KO.md`: §0.0 계획 변경 표 (이전 내용보다 우선) + §1.2 · §3.2 · §10.1 머리 주석.
+- `AG3S-VLA_EXPERIMENT_RESULTS_KO.md`: §1.1 같은 checkpoint 원문 보고값 (P, level 별 · 합산), §3.1 R 표를 π0.5 anchor · AG3S · AG3S GT oracle 3 행으로.
+- 수정안 문서에서 "측정값으로 교체" 문구 삭제 (사용자 지시; 실험은 주말).
+- 2026-11-11 03:4x: 사용자 지시 — baseline port 보고 run 은 보류가 아니라 계획의 맨 마지막 (AG3S 실험 뒤). 계획서 §1 · §2 · §8, 최종 실험 계획 §0.0, 결과 기록 §3.1, 수정안 D2 반영.
+- 2026-11-11 04:xx: 최종 확인 — 최종 실험 계획에 §0.0.1 (변경된 분할 · 표본 · 순서, 선행 조건 · 미확인 항목) 추가, §4 · §9 에 대체 주석. 발견: E5 분할 (5–14) · 표본 불일치, GT oracle 판 미등록, LIBERO-Safety AG3S arm H2 미해결, 실로봇 arm 구성 (generic · external) 미정, 주말 48 h 에는 E1a + LIBERO + ablation 만 들어감.
+- 2026-11-11 04:xx: ablation 정정 — §0.0.1 · 수정안 §10 에서 변형을 4 개로 줄였던 것을 철회, Tab. 2 의 8 행 (계획 §1.5 7 변형 + Stage) 모두 유지, 분할만 보고 분할로. GPU 추정 56–61 h.

@@ -9,7 +9,7 @@
 #   AMRC=root@172.21.121.110 AMRC_PORT=30587 bash pc_relay.sh check                 # ssh + free disk space
 #   AMRC=root@172.21.121.110 AMRC_PORT=30587 bash pc_relay.sh download [kit|tree|storage|all]   # resumable, rerun = delta
 #   AMRC=... AMRC_PORT=... bash pc_relay.sh verify                                   # what would still change (dry-run)
-#   SDM=root@<SDM_IP> SDM_PORT=<port> bash pc_relay.sh upload                       # later, on VPN
+#   SDM=root@<SDM_IP> SDM_PORT=<port> EXISTING=archive bash pc_relay.sh upload     # later, on VPN
 #   LOCAL=<dir> overrides the PC store (default ~/ag3s_migration); layout mirrors /mnt/dev.
 set -uo pipefail
 LOCAL=${LOCAL:-$HOME/ag3s_migration}
@@ -65,6 +65,7 @@ case "$CMD" in
     $S "$SDM" 'command -v rsync >/dev/null || (apt-get update -qq && apt-get install -y -qq rsync)' || die "cannot ssh to SDM"
     # Guard (dev-4a 2026-11-11): SDM may already hold a fresh checkout built from SDM_FRESH_SETUP_20261111_KO.md.
     # Uploading the AMRC checkout on top would mix .git objects/index and venv site-packages. Choose explicitly:
+    #   EXISTING=archive is the decided choice (2026-11-12, runbook §0-2): code/docs move via GitHub, this copy is reference only.
     #   EXISTING=replace  move SDM's checkout to /mnt/dev/AG3S_VLA.fresh-<stamp>, then upload AMRC's (AMRC venvs used)
     #   EXISTING=archive  keep SDM's checkout; put AMRC's at /mnt/dev/AG3S_VLA_amrc (reference only: its venvs
     #                     point at /mnt/dev/AG3S_VLA and are not usable there)
@@ -73,7 +74,7 @@ case "$CMD" in
       case "${EXISTING:-}" in
         replace) st=$(date +%Y%m%dT%H%M); $S "$SDM" mv /mnt/dev/AG3S_VLA "/mnt/dev/AG3S_VLA.fresh-$st" || die "mv"; echo "SDM checkout moved to AG3S_VLA.fresh-$st" ;;
         archive) dest=AG3S_VLA_amrc ;;
-        *) die "SDM already has /mnt/dev/AG3S_VLA (fresh setup?). Rerun with EXISTING=replace or EXISTING=archive (see script header)" ;;
+        *) die "SDM already has /mnt/dev/AG3S_VLA (fresh setup). Rerun with EXISTING=archive (decided 2026-11-12, runbook §0-2; code moves via GitHub only)" ;;
       esac
     fi
     "${RS[@]}" -e "$S" "$LOCAL/_migration/" "$SDM:/mnt/dev/_migration/" || die "upload _migration"

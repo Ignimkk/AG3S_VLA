@@ -28,6 +28,28 @@
 | II | WMPO | 55.75 | 46.12 | 277.17 | P, Table 2 |
 | II | SafeDojo | 57.00 | 49.62 | 277.00 | P, Table 2 |
 
+### 1.1 원문 보고값 P — 같은 π0.5-LIBERO checkpoint (2026-11-11 추가, Tab. 1 의 비교 대상)
+
+사용자 결정 (2026-11-11): 논문 Tab. 1 은 baseline 을 직접 실행하지 않고 아래 **원문 보고값**과 비교한다. 옮긴 값은 `paper/tools/analysis/reported_safelibero_metrics.py` 가 원문에 인쇄된 평균과 대조했다 (출력 `paper/evidence/reported_baselines_20261111/`). 조건 · 근거 쪽수: [`PAPER_REVISION_REPORTED_COMPARISON_20261111_KO.md`](../notes/PAPER_REVISION_REPORTED_COMPARISON_20261111_KO.md) §2–§3. D = 원문 표에서 계산한 4 suite 평균.
+
+| 출처 | 방법 | 장애물 정보 | 충돌 기준 | L-I TSR | L-I CAR | L-I SSR | L-II TSR | L-II CAR | L-II SSR | 유형 |
+|---|---|---|---|---:|---:|---:|---:|---:|---:|---|
+| VLSA Supp. S1–S4 (full action) | π₀.₅ | — | 1 mm | 54.6 | 11.9 | — | 60.9 | 22.4 | — | P → D |
+| VLSA Supp. S1–S4 (full action) | AEGIS | VLM + detector | 1 mm | 63.8 | 65.4 | — | 71.2 | 72.4 | — | P → D |
+| KNOWS Tab. 1 | π₀.₅ (No CBF) | — | 비target 접촉 | 55.0 | 12.4 | 11.5 | 57.8 | 23.0 | 20.0 | P → D |
+| KNOWS Tab. 1 | KNOWS | attention + YOLOE | 비target 접촉 | 67.5 | 76.4 | 59.9 | 71.1 | 68.8 | 53.8 | P → D |
+| KNOWS Tab. 1 | Naive (GT segmentation) | GT | 비target 접촉 | 73.0 | 82.2 | 63.1 | 67.8 | 76.1 | 55.6 | P → D |
+| CFM Tab. 2 | CFM | simulator GT | 최종 위치 | 84.6 | 84.0 | — | 78.6 | 81.6 | — | P |
+
+| 출처 (level · suite 합산만) | 방법 | 장애물 정보 | 충돌 기준 | TSR | CAR | SSR | 유형 |
+|---|---|---|---|---:|---:|---:|---|
+| VLSA Tab. I (full action) | π₀.₅ / AEGIS | VLM + detector | 1 mm | 57.8 / 67.5 | 17.1 / 68.9 | — | P |
+| Multi-link Tab. Ib (contemp., 1,600 ep) | π₀.₅ | — | 1 mm | 60.0 | 16.6 | 15.1 | P (CAR = 100 − C) |
+| Multi-link Tab. Ib | AEGIS (저자 코드, Qwen3-VL) | VLM + detector | 1 mm | 64.9 | 69.2 | 49.8 | P |
+| Multi-link Tab. Ib | Multi-link | VLM + detector | 1 mm | 60.3 | 73.0 | 51.7 | P |
+| VLPSA Tab. II (contemp.; 표에 넣지 않고 Related Work 논의만) | π₀.₅ / VLSA* / VLPSA | GT 라벨 | 제외 불가 충돌 | 49.1 / 68.1 / 55.5 | 23.1 / 73.0 / 91.2 | 18.3 / 54.4 / 52.1 | P |
+| SafeHarness Tab. 3 (contemp.; 논의만) | GPT-5.5 / GPT-6-Astra | SAM-3 + LLM | 1 mm, 900 step | 78.8 / 81.2 | 86.9 / 91.9 | 73.1 / 78.1 | P |
+
 ## 2. 원문 보고값 P — LIBERO-Safety
 
 **설명:** [LIBERO-Safety Table 3](https://arxiv.org/html/2606.23686), physical track L2의 안전 제약을 만족한 SR(%), 3개 학습 seed의 평균 ± 표준편차. AAG는 파지, TSA는 테이블 위 회피, FSHOA는 자유공간 회피다. HRI·L0·L1은 원문을 참조하고 전체 track 주장을 위해서는 별도로 기록한다.
@@ -48,20 +70,14 @@
 
 | Level | Method | TSR ↑ (%) | SSR ↑ (%) | CAR ↑ (%) | ETS ↓ | 실행 ID |
 |---|---|---:|---:|---:|---:|---|
-| I | π₀.₅ | TBD | TBD | TBD | TBD | TBD |
-| I | Generic geometry + fixed TO | TBD | TBD | TBD | TBD | TBD |
-| I | External segmentation + fixed TO | TBD | TBD | TBD | TBD | TBD |
-| I | AEGIS | TBD | TBD | TBD | TBD | TBD |
-| I | SafeVLA | TBD | TBD | TBD | TBD | TBD |
-| I | SafeDojo | TBD | TBD | TBD | TBD | TBD |
+| I | π₀.₅ (anchor) | TBD | TBD | TBD | TBD | TBD |
 | I | **AG3S-VLA** | **빈칸** | **빈칸** | **빈칸** | **빈칸** | **빈칸** |
-| II | π₀.₅ | TBD | TBD | TBD | TBD | TBD |
-| II | Generic geometry + fixed TO | TBD | TBD | TBD | TBD | TBD |
-| II | External segmentation + fixed TO | TBD | TBD | TBD | TBD | TBD |
-| II | AEGIS | TBD | TBD | TBD | TBD | TBD |
-| II | SafeVLA | TBD | TBD | TBD | TBD | TBD |
-| II | SafeDojo | TBD | TBD | TBD | TBD | TBD |
+| I | AG3S-VLA, GT oracle (인식만 GT) | TBD | TBD | TBD | TBD | TBD |
+| II | π₀.₅ (anchor) | TBD | TBD | TBD | TBD | TBD |
 | II | **AG3S-VLA** | **빈칸** | **빈칸** | **빈칸** | **빈칸** | **빈칸** |
+| II | AG3S-VLA, GT oracle (인식만 GT) | TBD | TBD | TBD | TBD | TBD |
+
+**2026-11-11 변경 (사용자 결정):** 이 표의 R 행은 π₀.₅ anchor · AG3S-VLA · AG3S-VLA GT oracle 3 개다 (같은 init · seed, 4 suite 평균; level 합산 값도 실행 기록에 남긴다 — VLSA · multi-link 보고값이 합산이므로). AEGIS · multi-link · KNOWS 는 직접 실행하지 않고 §1.1 의 원문 보고값과 비교한다. 통제 baseline (generic geometry · external segmentation + fixed TO) 행은 삭제했다. SafeVLA · SafeDojo 는 §1 의 P (OpenVLA-OFT) 로만 둔다. baseline port 의 tranche 1 (init 15–18, port 검증 분할) 측정값은 `doc/active/experiments/BASELINE_TRANCHE_PLAN_PORT_RATIONALE_20261109_KO.md` §5 에 있으며 이 표에 넣지 않는다. 실험 예정: 2026-11-14–15. baseline port 의 보고 분할 run 은 계획의 맨 마지막 (AG3S 실험 뒤) 이며, 측정되면 "직접 실행 (port, 같은 episode)" 행으로 이 표 아래에 따로 추가한다.
 
 원 방법 재현과 동일 TO의 통제 비교는 구분한다. OpenVLA-OFT·WMPO 등을 자체 평가한 경우 행을 추가한다. suite별·task별 성적과 collision step count는 실행 기록/원본에 연결한다.
 
