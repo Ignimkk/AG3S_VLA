@@ -173,6 +173,7 @@ T5 뒤에 하면 이 서버에서 끝낸다. **이전 시점은 T5 와의 순서
 | 2026-11-11 05:2x | dev-57: **T1 (PE11 단독 판) E1a 40 = TSR 22 · CAR 23 · SSR 15 — 지금 구성과 같음 → 미채택** (§9.4). 겨냥한 C 6 ep 중 충돌이 없어진 것은 1 (t3 e8, 대신 시간 초과), 새 큰 충돌 1 (t3 e14 252 mm). 40 ep 중 31 ep 은 step 수 · 변위까지 같음 → 같은 기계의 재실행은 재현된다. 다음 = 지금 구성의 다른 suite 점검 1 차 (MS, init 15 · 16). `-to0` 를 `-to5` 보다 먼저 (§9.3). |
 | 2026-11-11 07:1x | dev-57: **다른 suite 점검 1 차 (지금 구성, 56 ep) = TSR 24 · CAR 31 · SSR 17** (42.9 / 55.4 / 30.4 %); 같은 episode 의 π0.5 28 · 11 · 8, AEGIS port 35 · 32 · 21, multi-link port 28 · 32 · 19 (§9.5). CAR 은 baseline 과 같고 **TSR 이 가장 낮다** — 실패 31 ep 중 끝까지 HOLD 가 6 (target 못 찾음 3 · 쥔 물체 가림 3). 충돌 17 ep 의 offline 분석 (§9.6) 에서 나온 후보 **SL-SOTA1** (장애물 물체 행 전용 여유 `-om*`, `-ntc`) 를 commit 5a2460a8 로 넣음 (기본 꺼짐). 다음 = smoke → 묶음 판 `…-pe12345811-to0-om15p10s40-ntc-tro` E1a 40. |
 | 2026-11-11 09:0x | dev-57: **묶음 판 `…-pe12345811-to0-om15p10s40-ntc-tro` E1a 40 = TSR 19 · CAR 29 · SSR 17** (지금 구성 22 · 23 · 15; SSR 얻음 8 / 잃음 6, > 50 mm 9 → 6) — §9.7. 충돌은 줄었고 (CAR +6) 대신 step 예산을 넘긴 실패가 늘었다 (충돌 없는 실패 12 ep, 모두 `max_steps`). 주 기준 (SSR ≥ +1) 은 넘지만 guard 전이고, 교착을 풀면 더 오를 여지가 커서 채택 판정은 미룸. 교착 대응 **SL-SOTA2** (`--ee-action-qp-progress`, 판 `-pg4`) · **SL-SOTA3** (`--obstacle-row-patience`, 판 `-pt6` · `-pt3`) 을 commit 9728acbb 로 넣음 (기본 꺼짐). 다음 = `…-ntc-pt6-pg4-tro` E1a task 0 (10 ep) → 나머지 task. |
+| 2026-11-11 09:2x | dev-57: **`…-ntc-pt6-pg4-tro` E1a task 0 (10 ep) = TSR 8 · CAR 8 · SSR 7** (지금 구성 5 · 3 · 1, 묶음 판 5 · 7 · 4; 09:11–09:26, HEAD 4f350f61) — 교착 5 ep 중 4 ep 이 안전 성공으로 바뀜 (§9.8). QP 가 action 을 크게 흔드는 원인 (통과 판정이 받아들이는 model 위반까지 0 으로 되돌림; 묶음 판 QP call 894 중 469 가 반복 한도 · |Da| 중앙값 1.3–1.5) 을 겨냥한 **SL-SOTA4** (`--ee-action-qp-gate-rows`, 판 `-gr`) 를 commit 53177bcf 로 넣음 (기본 꺼짐, 결과 전 기록). 다음 = `-pt6-pg4` 판 task 1–3 으로 E1a 40 을 채움 → `-gr` 판. |
 
 ---
 
@@ -292,3 +293,27 @@ n · TSR · CAR · SSR. baseline 열은 dev-4a tranche 1 의 같은 기계 · �
 | SL-SOTA2 진행 선호 | `--ee-action-qp-progress G` · `-pg4` (G = 0.4) | 막힌 정도에 비례해 QP 목적 함수에 '쥔 동안 위로 · 쥐기 전 target 쪽 수평으로' 항을 더함 | QP 가 멈춤 대신 돌아가는 보정을 고르게 함 (e10 · e12) |
 
 순서: (a) `…-pe12345811-to0-om15p10s40-ntc-pt6-pg4-tro` E1a task 0 (10 ep, 묶음 판 task 0 = 5 · 7 · 4 와 같은 episode 목록) → (b) 교착이 줄면 task 1–3 으로 E1a 40 을 채움, 아니면 `-pt6` / `-pg4` 를 나눠 봄 → (c) 승자의 guard. 위험 [해석]: 여유를 내려놓는 동안 다시 닿을 수 있고 (CAR 하락), 진행 선호가 π0.5 의 쥐기 자세를 흐트러뜨릴 수 있다. 판정은 §9.2 그대로 (기준 = `…-pe123458` SSR 15; 묶음 판 17 과도 같이 적는다).
+
+### 9.8 인내 한도 + 진행 선호 판의 task 0 결과 [M], SL-SOTA4 후보 (결과 전 기록, 09:2x)
+
+`…-pe12345811-to0-om15p10s40-ntc-pt6-pg4-tro` E1a task 0 × init 5–14 (2026-11-11 09:11–09:26, HEAD 4f350f61, run-id `sub-pkgBpt6pg4-e1a-spatial-LI-t0`; 묶음 판과 같은 episode 목록):
+
+| 판 | TSR · CAR · SSR (10 ep) | > 50 mm | 실패 |
+|---|---|---:|---|
+| `…-pe123458` (기준) | 5 · 3 · 1 | 2 | |
+| 묶음 판 (`-ntc-tro`) | 5 · 7 · 4 | 1 | e7 · e9 · e10 · e12 · e14 (`max_steps`) |
+| + `-pt6-pg4` | **8 · 8 · 7** | 1 | e7 (충돌 없음, `max_steps`), e10 (쥔 뒤 충돌 134.9 mm, `max_steps`); e13 은 성공 + 충돌 1.3 mm |
+
+- 묶음 판의 교착 5 ep 중 e9 · e12 · e14 가 안전 성공이 됐다 (e12: 60 call → 18 call). e10 은 머그 위 교착은 풀렸으나 (QP 35 call → 4 call) 쥔 뒤 call 10 무렵 (step 53) 에 충돌. e7 은 target 을 쥔 뒤 30 call 을 통과로 보내고도 실패 (target 오인 계열).
+- 진행 선호 기록: QP call 110 개 중 '쥐기 전: target 쪽' 45 · '쥔 동안: 위' 39 (나머지는 closing · target 위). 인내 한도로 여유를 내려놓은 call 은 episode 당 0–11.
+- 10 ep 은 채택 판정 단위가 아니다 → task 1–3 을 같은 queue 형식으로 채워 E1a 40 을 만든다 (판정은 §9.2).
+
+**SL-SOTA4 후보 — action QP 가 통과 판정과 같은 행만 지킨다** (`--ee-action-qp-gate-rows`, 판 suffix `-gr`, commit 53177bcf, 기본 꺼짐):
+
+| 관측 [M] (묶음 판 E1a 40, call 기록) | 수치 |
+|---|---|
+| QP call 중 반복 한도 (4 회) 까지 간 것 | 469 / 894. 그때 |Da| 중앙값 1.27 (쥐기 전) · 1.46–1.55 (쥔 동안), 나머지는 0.39–0.45 |
+| 지금 구성 (`…-pe123458`) 도 같다 | 실행된 QP call 299 중 189 가 반복 한도, |Da| 1.3–1.6 |
+| 예: task 2 init 14 (기준에서는 안전 성공) | 접시에 내려놓는 call 30 에서 쥔 그릇 행이 접시의 15 mm 여유 안 (−1.8 mm) → 통과 거절 → QP 가 link7 ↔ 쥔 그릇 잔상의 68 mm model 위반 (통과 판정은 τ = 100 mm 까지 받아들임) 을 되돌리려 |Da| 1.52, 5 step 에 57 mm 이동 → 그릇을 놓침 |
+
+하는 일: QP 에서 장애물 물체 행이 아닌 ESDF 행 (쥔 물체 · target · support · 목적지 · 장애물 집합 밖) 의 floor 를 0 대신 −τ (통과 허용치) 로 둔다. 새 숫자는 없다 (τ 는 이미 있는 값). self · support plane 행은 그대로. 위험 [해석]: 장애물 집합에서 빠진 실제 장애물 (§9.6 의 첫 줄, PE11 + 표면 허용 40 mm 로 줄인 것) 은 QP 가 더 이상 밀어내지 않는다 → CAR 하락 가능. 순서: `-pt6-pg4` 판의 E1a 40 이 끝난 뒤 `…-ntc-pt6-pg4-gr-tro` 를 task 0 부터.
