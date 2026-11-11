@@ -174,6 +174,7 @@ T5 뒤에 하면 이 서버에서 끝낸다. **이전 시점은 T5 와의 순서
 | 2026-11-11 07:1x | dev-57: **다른 suite 점검 1 차 (지금 구성, 56 ep) = TSR 24 · CAR 31 · SSR 17** (42.9 / 55.4 / 30.4 %); 같은 episode 의 π0.5 28 · 11 · 8, AEGIS port 35 · 32 · 21, multi-link port 28 · 32 · 19 (§9.5). CAR 은 baseline 과 같고 **TSR 이 가장 낮다** — 실패 31 ep 중 끝까지 HOLD 가 6 (target 못 찾음 3 · 쥔 물체 가림 3). 충돌 17 ep 의 offline 분석 (§9.6) 에서 나온 후보 **SL-SOTA1** (장애물 물체 행 전용 여유 `-om*`, `-ntc`) 를 commit 5a2460a8 로 넣음 (기본 꺼짐). 다음 = smoke → 묶음 판 `…-pe12345811-to0-om15p10s40-ntc-tro` E1a 40. |
 | 2026-11-11 09:0x | dev-57: **묶음 판 `…-pe12345811-to0-om15p10s40-ntc-tro` E1a 40 = TSR 19 · CAR 29 · SSR 17** (지금 구성 22 · 23 · 15; SSR 얻음 8 / 잃음 6, > 50 mm 9 → 6) — §9.7. 충돌은 줄었고 (CAR +6) 대신 step 예산을 넘긴 실패가 늘었다 (충돌 없는 실패 12 ep, 모두 `max_steps`). 주 기준 (SSR ≥ +1) 은 넘지만 guard 전이고, 교착을 풀면 더 오를 여지가 커서 채택 판정은 미룸. 교착 대응 **SL-SOTA2** (`--ee-action-qp-progress`, 판 `-pg4`) · **SL-SOTA3** (`--obstacle-row-patience`, 판 `-pt6` · `-pt3`) 을 commit 9728acbb 로 넣음 (기본 꺼짐). 다음 = `…-ntc-pt6-pg4-tro` E1a task 0 (10 ep) → 나머지 task. |
 | 2026-11-11 09:2x | dev-57: **`…-ntc-pt6-pg4-tro` E1a task 0 (10 ep) = TSR 8 · CAR 8 · SSR 7** (지금 구성 5 · 3 · 1, 묶음 판 5 · 7 · 4; 09:11–09:26, HEAD 4f350f61) — 교착 5 ep 중 4 ep 이 안전 성공으로 바뀜 (§9.8). QP 가 action 을 크게 흔드는 원인 (통과 판정이 받아들이는 model 위반까지 0 으로 되돌림; 묶음 판 QP call 894 중 469 가 반복 한도 · |Da| 중앙값 1.3–1.5) 을 겨냥한 **SL-SOTA4** (`--ee-action-qp-gate-rows`, 판 `-gr`) 를 commit 53177bcf 로 넣음 (기본 꺼짐, 결과 전 기록). 다음 = `-pt6-pg4` 판 task 1–3 으로 E1a 40 을 채움 → `-gr` 판. |
+| 2026-11-11 11:4x | dev-57: **`…-pe12345811-to0-om15p10s40-ntc-pt6-pg4-hr150-tro` E1a 40 = TSR 23 · CAR 33 · SSR 18** (지금 구성 22 · 23 · 15, 묶음 판 19 · 29 · 17; > 50 mm 9 → 2; 10:09–11:36, HEAD 2ca92510) — §9.9. 주 기준 통과 (SSR +3, CAR +10). 그 사이: 인내 한도 bug 수정 (c9fd709c), `-gr` 판 task 0 = 5 · 6 · 4 (쓰지 않음), SL-SOTA5 (`-hr150`, 0df76355) task 0 = 9 · 8 · 7. 실패 17 ep 은 전부 `max_steps` (충돌 없는 실패 15). 다음 = 이 판의 guard (LIBERO 27 · SafeLIBERO 11 · LS 10) → 다른 suite 점검 1 차 (init 15 · 16). |
 
 ---
 
@@ -331,3 +332,28 @@ n · TSR · CAR · SSR. baseline 열은 dev-4a tranche 1 의 같은 기계 · �
 
 순서 갱신: (1) `…-ntc-pt6-pg4-tro` task 1–3 → E1a 40 으로 첫 채택 판정. (2) `-hr150` 을 얹은 판 task 0.
 
+### 9.9 `-pt6-pg4-hr150` 판의 E1a 40 [M] — 주 기준 통과 (11:4x)
+
+`…-pe12345811-to0-om15p10s40-ntc-pt6-pg4-hr150-tro` (2026-11-11 10:09–11:36, HEAD 2ca92510, `sota_sub_queue.sh` TAG `pkgEhr150`, run-id `sub-pkgEhr150-e1a-spatial-LI-t*`; 원본 `outputs/2026-11-11_SOTA_개선/compare_sub_pe123458_pkgEhr150.json`). task 0 만 먼저 본 결과는 9 · 8 · 7 로 `-pt6-pg4` 와 같았다 (9 ep 이 call 단위까지 같고 e6 만 다름 — 쥔 그릇의 잔상은 사라졌고 남은 막힘은 실제 moka pot ↔ link5 · 6 · 7, `offline/surface_owner_pkgEhr150_e6.json`).
+
+| 판 | E1a 40 TSR · CAR · SSR | % | task 0 · 1 · 2 · 3 의 SSR | > 50 mm | 충돌 없는 실패 | 기준 대비 SSR (얻음 / 잃음) |
+|---|---|---|---|---:|---:|---|
+| `…-pe123458` (기준) | 22 · 23 · 15 | 55.0 / 57.5 / 37.5 | 1 · 4 · 7 · 3 | 9 | 8 | — |
+| 묶음 판 (`-ntc-tro`) | 19 · 29 · 17 | 47.5 / 72.5 / 42.5 | 4 · 2 · 7 · 4 | 6 | 12 | +8 / −6 |
+| + `-pt6-pg4-hr150` | **23 · 33 · 18** | 57.5 / 82.5 / 45.0 | 7 · 2 · 6 · 3 | 2 | 15 | +7 / −4 (McNemar p = 0.55) |
+
+- 기준 대비 얻음 7: t0 e5 · e7 · e8 · e11 · e12 · e14, t2 e7. 잃음 4: t1 e5 · e11, t2 e5 · e6. 묶음 판 대비 얻음 6 (t0 e7 · e9 · e12 · e14, t2 e14, t3 e14) / 잃음 5 (t0 e6, t2 e6 · e13, t3 e8 · e13).
+- 충돌 7 ep: 성공 + 충돌 5 (t0 e10 62.3 mm · t0 e13 1.3 · t1 e9 176.3 · t1 e10 2.2 · t2 e10 5.4), 실패 + 충돌 2 (t1 e11 1.0 · t3 e9 4.9). 50 mm 를 넘는 것은 2 (기준 9).
+- **실패 17 ep 은 전부 `max_steps`** 다 (call 기록의 통과 P · QP Q · HOLD H 순서로 분류, `scratchpad/timeline.py`):
+
+| 형태 | episode | 수 |
+|---|---|---:|
+| 쥔 채 QP 가 이어짐 — 막는 행이 link5 · link6 (기준 판에서는 이 episode 들이 23–329 mm 충돌) | t0 e6, t1 e6 · e8 · e12 · e14 | 5 |
+| 쥐기 전 QP 가 이어지거나 끝까지 못 쥠 | t3 e6 · e8 · e9 · e10 · e13 | 5 |
+| 끝이 HOLD | t3 e11 (10 call) · e12 (34 call), t1 e11 (9 call) | 3 |
+| 쥐었다 놓은 뒤 통과만 이어지고 성공 판정이 안 남 (잘못 놓음 · 떨어뜨림 — 확인 전) | t1 e5, t2 e5 · e6 · e13 | 4 |
+
+- 판정 (§9.2): 주 기준 **통과** (SSR 15 → 18, CAR 23 → 33). 다만 episode 단위의 맞바뀜이 크다 (세 판 중 하나라도 안전 성공인 episode 는 26) — 40 ep 의 SSR ±2 는 판 사이 차이로 읽기 어렵고, 확실한 변화는 CAR (+10) 과 > 50 mm 충돌 (9 → 2) 이다. 그래서 채택은 guard 와 다른 suite 점검 (headline 의 7 / 8 은 Spatial L-I 밖) 을 본 뒤 정한다.
+- task 1 (2 / 10) · task 3 (3 / 10) 이 낮다. task 1 의 4 ep 은 기준 판이 크게 충돌하던 곳 (팔 link 가 키 큰 장애물에 닿는 경로) 이라 '충돌을 교착으로 바꾼' 상태 — 돌아가는 속도가 모자란다.
+
+순서 (11:4x): (1) 이 판의 guard — `sota_queue.sh STAGE=guard` (약 85 분). (2) 다른 suite 점검 1 차 (init 15 · 16, 56 ep, 약 1.9 h; 기준 판 24 · 31 · 17 과 짝 비교). (3) 그 사이 CPU 로 실패 17 ep 을 형태별로 분석해 다음 후보를 정한다 — 준비된 것은 진행 선호 gain 0.8 판 `-pt6-pg8` (돌아가는 속도; task 1 · 3 에서 거름).
