@@ -1217,6 +1217,16 @@ class CollisionLinearizer:
                         on = self._on_obstacle_object_surface(d, flat, scene, float(keep.get("surface_tol", _OBJECT_SURFACE_TOL_M)))
                         if on is not None:
                             kept = cand & on.reshape(shape)
+                    steps = keep.get("steps")
+                    if steps is not None:
+                        # SL-SOTA14 (`--grasp-zone-keep-palm-steps N`, off: no key) — only the first N horizon steps (the
+                        # ones executed before the next request) keep the palm rows; the chunk's tail is replanned, and
+                        # a tail that reaches toward an obstacle must not block a clean executed part. E1a
+                        # ...-hb-qs-rs-zp-tro task 3 init 5 / 8 / 10 (lost): 24 of the 26 blocked calls whose worst row was
+                        # the palm had it at step 5-9, on a real obstacle (mug, book, cookies box).
+                        kept = kept.copy()
+                        kept[max(int(steps), 0):] = False
+                        rec["zone_kept_palm_steps"] = int(steps)
                     rec["zone_kept_palm_rows"] = int(kept.sum())
                     rel = rel & ~kept
                     # The kept rows bind at the row's own margin (the 10 mm obstacle floor), not at the obstacle-row

@@ -113,7 +113,7 @@ def test_flag_plumbing_and_versions():
         assert args.grasp_zone_radius_mm == 100.0 and float(args.obstacle_surface_tol_mm) == 40.0
         assert pf.version_server_flags(name)
     for name, flags in pf.AG3S_VERSIONS.items():
-        if name not in pf.SOTA_ZONEPALM_VERSIONS:
+        if name not in pf.SOTA_ZONEPALM_VERSIONS + pf.SOTA_ZONEPALM5_VERSIONS:
             assert "--grasp-zone-keep-palm-obstacles" not in flags, name
     assert "grasp_zone_keep_palm_obstacles" not in pf.version_flag_values(pf.parse_v11ab_args())
 
@@ -135,3 +135,88 @@ def test_the_policy_passes_the_hold_link_mask():
     assert gc["zone_keep_palm_obstacles"]["links"].tolist() == [False, True, False]
     sp.grasp_zone_keep_palm_obstacles = None
     assert "zone_keep_palm_obstacles" not in SafePolicy._grasp_contact(sp, None)
+
+
+# ---- SL-SOTA14 (`--grasp-zone-keep-palm-steps`, version -zp5): the kept palm rows only on the executed horizon steps
+
+
+def _margin_steps(steps, n_steps=4):
+    """One palm sphere on the obstacle object at every one of ``n_steps`` horizon steps (same geometry as `_margin` sphere 0)."""
+    lin = types.SimpleNamespace(n_spheres=1, _obstacle_rows=lambda d, flat, scene, d_object: np.full((n_steps, 1), _OBSTACLE, np.int8),
+                                _on_obstacle_object_surface=CollisionLinearizer._on_obstacle_object_surface)
+    flat = np.tile(np.array([[0.17, 0.0, 0.1]]), (n_steps, 1))
+    scene = types.SimpleNamespace(esdf=_Esdf(), obstacle_object_points=np.array([[0.2, 0.0, 0.1]]))
+    keep = {"links": np.array([True]), "surface_tol": 0.02, "row_margin": 0.0}
+    if steps is not None:
+        keep["steps"] = steps
+    gc = {"latch": "closing", "authorized": np.array([True]), "held_exempt": False, "zone_allowance": None,
+          "zone_radius": 0.10, "centroid": np.array([0.12, 0.0, 0.0]), "zone_release": True, "zone_keep_palm_obstacles": keep}
+    m = CollisionLinearizer._grasp_contact_margin(lin, gc, np.full((n_steps, 1), 0.01), np.full((n_steps, 1), 0.03), flat, scene,
+                                                  np.full((n_steps, 1), 0.2), (n_steps, 1), 1)
+    return m.reshape(-1).tolist(), dict(lin._last_grasp_contact)
+
+
+def test_without_a_step_limit_every_horizon_step_keeps_the_palm_row():
+    m, rec = _margin_steps(None)
+    assert m == [0.01] * 4 and rec["zone_kept_palm_rows"] == 4 and rec["zone_release_rows"] == 0
+    assert "zone_kept_palm_steps" not in rec
+
+
+def test_the_step_limit_keeps_the_executed_steps_and_releases_the_tail():
+    m, rec = _margin_steps(2)
+    assert m == [0.01, 0.01, -1.0, -1.0]
+    assert rec["zone_kept_palm_rows"] == 2 and rec["zone_release_rows"] == 2 and rec["zone_kept_palm_steps"] == 2
+    m, rec = _margin_steps(9)   # longer than the horizon: the same as no limit
+    assert m == [0.01] * 4 and rec["zone_kept_palm_rows"] == 4
+
+
+def test_sl_sota14_flag_and_versions():
+    from AG3S.adapters.panda import profile as pf, server as srv
+    from AG3S.trajopt import serve_safe as ss
+    from tests.trajopt.test_t88_passthrough_when_clear import BASE as ARGV
+
+    ap = ss.build_parser()
+    assert ap.parse_args(ARGV).grasp_zone_keep_palm_steps is None
+    with pytest.raises(SystemExit):   # the step limit without the rule it limits
+        ss.reject_bad_flag_combinations(ap, ap.parse_args(ARGV + ["--grasp-zone-release", "--grasp-zone-keep-palm-steps", "5"]))
+    with pytest.raises(SystemExit):
+        ss.reject_bad_flag_combinations(ap, ap.parse_args(ARGV + ["--grasp-zone-release", "--grasp-zone-keep-palm-obstacles",
+                                                                  "--grasp-zone-keep-palm-steps", "0"]))
+    safe = types.SimpleNamespace()
+    out = ss.apply_grasp_contact_flags(safe, ap.parse_args(ARGV + ["--grasp-zone-release", "--grasp-zone-keep-palm-obstacles",
+                                                                   "--grasp-zone-keep-palm-steps", "5"]))
+    assert safe.grasp_zone_keep_palm_steps == 5 and out["grasp_zone_keep_palm_steps"] == 5
+    safe = types.SimpleNamespace()
+    out = ss.apply_grasp_contact_flags(safe, ap.parse_args(ARGV + ["--grasp-zone-release", "--grasp-zone-keep-palm-obstacles"]))
+    assert not hasattr(safe, "grasp_zone_keep_palm_steps") and "grasp_zone_keep_palm_steps" not in out
+    assert "grasp_zone_keep_palm_steps" in srv.PORTED_FINAL_CONFIG_DESTS
+    base = "AG3S-commonto-att-termsoff-pass-zr-ee-hdp-loose2-obst4-pts-nocarve-fh-t100-pe12345811-to0-om15p10s40-ntc-pt6-pg4-hr150"
+    for mid in ("-qs", "-hb-qs", "-hb-qs-rs"):
+        name = base + mid + "-zp5-tro"
+        assert name in pf.SOTA_ZONEPALM5_VERSIONS and name in pf.GT15_VERSIONS and name in pf.SOTA_VERSIONS
+        v = tuple(pf.AG3S_VERSIONS[name])
+        assert v[-2:] == ("--grasp-zone-keep-palm-steps", "5") and v[:-2] == tuple(pf.AG3S_VERSIONS[base + mid + "-zp-tro"])
+        args = pf.parse_v11ab_args(argv=pf.version_server_argv(name) + list(v))
+        assert args.grasp_zone_keep_palm_steps == 5 and args.grasp_zone_keep_palm_obstacles is True
+        assert pf.version_server_flags(name)
+    for name, flags in pf.AG3S_VERSIONS.items():
+        if name not in pf.SOTA_ZONEPALM5_VERSIONS:
+            assert "--grasp-zone-keep-palm-steps" not in flags, name
+
+
+def test_the_policy_passes_the_step_limit_only_when_set():
+    from AG3S.trajopt.safe_policy import SafePolicy
+
+    assert SafePolicy.grasp_zone_keep_palm_steps is None
+    sp = types.SimpleNamespace(held_hand_exempt=False, grasp_zone_allowance=None, closing_hand_exempt=False,
+                               grasp_zone_release=True, grasp_zone_radius=0.1, grasp_zone_keep_palm_obstacles=0.04,
+                               hold_links={"left": "panda_hand"},
+                               constraint_robot_model=types.SimpleNamespace(
+                                   sphere_link_names=["panda_link7", "panda_hand", "panda_leftfinger"]),
+                               _authorized_links=lambda cs: ["panda_hand", "panda_leftfinger"],
+                               ag3s=types.SimpleNamespace(manipulated=None),
+                               _latch=types.SimpleNamespace(phase=types.SimpleNamespace(value="latched")))
+    assert "steps" not in SafePolicy._grasp_contact(sp, None)["zone_keep_palm_obstacles"]
+    sp.grasp_zone_keep_palm_steps = 5
+    assert SafePolicy._grasp_contact(sp, None)["zone_keep_palm_obstacles"]["steps"] == 5
+

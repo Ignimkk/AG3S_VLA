@@ -715,6 +715,7 @@ PORTED_FINAL_CONFIG_DESTS: tuple[str, ...] = (
     'held_beneath_contact',
     # SL-GTTO5 F4 (user ruling 2026-11-05 ~09:3x "best direction"): the approach-zone release, same SafePolicy path
     'grasp_zone_release',
+    'grasp_zone_keep_palm_steps',   # SL-SOTA14 (dev-57, 2026-11-12): the kept palm rows only on the executed steps (same path)
     'grasp_zone_keep_palm_obstacles',   # SL-SOTA13 (dev-57, 2026-11-12): the palm's obstacle-object rows stay in the zone (same path)
     # SL-GTTO6 F5: occluded_target frames certified for the TO (SafePolicy switch, same path)
     'occluded_certify',
