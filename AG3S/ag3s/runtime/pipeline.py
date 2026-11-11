@@ -221,6 +221,9 @@ class AG3S:
         self._oracle_memory = None
         #: The record of the last frame's oracle step (`stats["target_free"]["oracle"]`).
         self._oracle_frame: Optional[dict[str, Any]] = None
+        #: SL-GTTO: the last frame's GT grounding record (`metrics["grounding_source"]`). None unless
+        #: `clustering.grounding_source == "oracle"`.
+        self._grounding_frame: Optional[dict[str, Any]] = None
         #: IFG-CL1: this frame's attention-surface record (`stats["target_free"]["attention_surface"]`) and code
         #: images (`{camera: (H, W) uint8}` or None), and this frame's render-mask record
         #: (`stats["robot_mask_render"]`). None unless `esdf.target_extent == "attention_surface"` /
@@ -476,6 +479,7 @@ class AG3S:
         # T46e A13: the oracle samples are per episode, like the TSDF.
         self._oracle_pending = None
         self._oracle_frame = None
+        self._grounding_frame = None   # SL-GTTO
         if self._oracle_memory is not None:
             self._oracle_memory.reset()
         self._surface_frame = None   # IFG-CL1
@@ -777,6 +781,119 @@ class AG3S:
             # the support guard = the ball's z_min (the same table protection as `ball` / `ball_owned`)
             z_floor=None if ball is None else float(ball.z_min))
         return ev, {**dict(self._oracle_frame or {}), **rec}
+
+    # --- SL-GTTO — begin
+    def _oracle_grounding_input(self, attention_cloud, support_mask, fusion):
+        """SL-GTTO §2-1 — `(cloud, exclude_mask, record)` for `ground_target` from this request's GT code images.
+
+        A fused point is a **code-1 point** when every observation of it (camera + pixel, `FusedPointCloud` CSR
+        block) that falls on a code image of this request reads code 1 (`oracle_segmentation.CODE_TARGET`) and at
+        least one does: a voxel that also holds a neighbour / table / robot pixel is not the target. The cloud
+        grounding gets is the same cloud (same indices, so every consumer of `point_indices` is unchanged) with
+        attention = raw attention = 1.0 on code-1 points and 0 elsewhere; the exclude mask is every non-code-1
+        point (connectivity and seeds only on code-1 points, support fit not consulted — the GT says these points
+        are the target). The segmentation is read, not consumed (`_oracle_update` folds it into the memory later
+        in the frame). No fusion, no segmentation or no code-1 point → an **empty** cloud: grounding sees no
+        geometry (`NO_GEOMETRY`) and `TargetConfirm` keeps / ages its last geometry as on any frame without one.
+        """
+        from AG3S.ag3s.runtime.oracle_segmentation import CODE_TARGET
+
+        n = len(attention_cloud)
+        rec: dict[str, Any] = {"source": "oracle", "n_cloud": int(n), "n_code1": 0, "n_mixed": 0,
+                               "n_unlabelled": int(n), "n_code1_on_support": 0, "cameras": []}
+        empty = AttentionPointCloud(PointCloud.empty(self.config.frame_id), np.zeros(0, np.float32),
+                                    np.zeros(0, np.float32))
+        seg = self._oracle_pending
+        labels = dict((seg or {}).get("labels") or {})
+        rec["target"] = ((seg or {}).get("meta") or {}).get("target")
+        if fusion is None:
+            rec["why"] = "no_fusion"
+            return empty, None, rec
+        if not labels:
+            rec["why"] = "no_segmentation"
+            return empty, None, rec
+        fused = fusion.cloud
+        if n == 0 or fused.n_observations == 0 or len(fused) != n:
+            rec["why"] = "no_points" if n == 0 else "cloud_mismatch"
+            return empty, None, rec
+        no_label = np.uint8(255)
+        obs_code = np.full(fused.n_observations, no_label, np.uint8)
+        for ci, cam in enumerate(fused.cameras):
+            lab = labels.get(getattr(cam, "value", str(cam)))
+            if lab is None:
+                continue
+            lab = np.asarray(lab)
+            sel = np.flatnonzero(fused.obs_camera == ci)
+            if not sel.size:
+                continue
+            rec["cameras"].append(getattr(cam, "value", str(cam)))
+            uv = fused.obs_uv[sel]
+            h, w = lab.shape[:2]
+            inside = (uv[:, 0] >= 0) & (uv[:, 0] < w) & (uv[:, 1] >= 0) & (uv[:, 1] < h)
+            codes = np.full(sel.size, no_label, np.uint8)
+            codes[inside] = lab[uv[inside, 1], uv[inside, 0]]   # (u, v) = (column, row), OpenCV rows
+            obs_code[sel] = codes
+        starts = fused.obs_offset[:-1]
+        labelled = np.add.reduceat((obs_code != no_label).astype(np.int64), starts)
+        ones = np.add.reduceat((obs_code == CODE_TARGET).astype(np.int64), starts)
+        code1 = (labelled > 0) & (ones == labelled)
+        rec.update({"n_code1": int(code1.sum()), "n_mixed": int(((ones > 0) & ~code1).sum()),
+                    "n_unlabelled": int((labelled == 0).sum())})
+        if support_mask is not None and len(support_mask) == n:
+            rec["n_code1_on_support"] = int((code1 & np.asarray(support_mask, bool)).sum())
+        if not code1.any():
+            rec["why"] = "no_code1_point"
+            return empty, None, rec
+        rec["why"] = None
+        att = code1.astype(np.float32)
+        return AttentionPointCloud(attention_cloud.cloud, att, att.copy()), ~code1, rec
+    # --- SL-GTTO — end
+
+    # --- SL-GTTO2 F2 — begin
+    def _oracle_held_target_mask(self, cameras):
+        """SL-GTTO2 F2 (`clustering.oracle_held_target`) — `cameras` with this request's code-1 pixels added to each
+        camera's TSDF depth mask while a grasp is active (closing) or an object is attached.
+
+        The GT names the held object's pixels; while it is in the hand they are the robot's, as the self-filter
+        already treats the held spheres (T32 H1: masked = not integrated, neither surface nor free space). The
+        held-sphere self-filter leaves part of the object unmasked (SL-GTTO2.impl.md ②: 40–160 px per held frame,
+        thousands while closing), and the TSDF then holds a surface plus its truncation band (60 mm on the coarse
+        tier) where the attached spheres and the hand are checked. A camera whose mask changes gets its host depth
+        (`device_depth=None`), so the GPU fast path cannot integrate the old mask. Nothing else changes: the fused
+        cloud and grounding are as before. Record: `metrics["grounding_source"]["held_target_mask"]`.
+        """
+        from AG3S.ag3s.runtime.oracle_segmentation import CODE_TARGET
+
+        held = self._attached is not None
+        active = held or bool(self._grasp_active)
+        rec: dict[str, Any] = {"active": bool(active), "phase": "held" if held else ("closing" if active else None),
+                               "n_px": {}, "n_px_new": {}}
+        if self._grounding_frame is not None:
+            self._grounding_frame["held_target_mask"] = rec
+        if not active:
+            return cameras
+        labels = dict((self._oracle_pending or {}).get("labels") or {})
+        if not labels:
+            rec["why"] = "no_segmentation"
+            return cameras
+        out = []
+        for cam in cameras:
+            lab = labels.get(cam.name)
+            depth = np.asarray(cam.depth)
+            if lab is None or np.asarray(lab).shape[:2] != depth.shape[:2]:
+                out.append(cam)
+                continue
+            target = np.asarray(lab).reshape(depth.shape[:2]) == CODE_TARGET
+            old = (np.zeros(depth.shape[:2], bool) if cam.robot_mask is None
+                   else np.asarray(cam.robot_mask, bool).reshape(depth.shape[:2]))
+            rec["n_px"][cam.name] = int(target.sum())
+            rec["n_px_new"][cam.name] = int((target & ~old).sum())
+            if rec["n_px_new"][cam.name]:
+                cam = dataclasses.replace(cam, robot_mask=old | target, device_depth=None)
+            out.append(cam)
+        rec["why"] = None
+        return out
+    # --- SL-GTTO2 F2 — end
 
     def _surface_memory_evidence(self, geometry, support_surfaces, ball):
         """T78 A3 (`esdf.surface_keep_last`) — `(OracleVisibleEvidence, record)` from the memory's code-1 samples.
@@ -2598,13 +2715,21 @@ class AG3S:
         self._target_confirm.note_hand(self._hand_for_grounding(robot_state))
         if self._target_confirm.vacancy_release:   # T81: this request's depth for the vacancy rule (off: not called)
             self._target_confirm.note_views(self._vacancy_views(observations, depth, camera_intrinsics, T_base_cam))
+        # --- SL-GTTO — begin: GT grounding input (`clustering.grounding_source == "oracle"`; off: the attention
+        # cloud and the support mask exactly as before, nothing recorded)
+        grounding_cloud, grounding_exclude = attention_cloud, support_mask
+        self._grounding_frame = None
+        if cfg.clustering.grounding_source == "oracle":
+            grounding_cloud, grounding_exclude, self._grounding_frame = self._oracle_grounding_input(
+                attention_cloud, support_mask, fusion)
+        # --- SL-GTTO — end
         with profiler.stage("target_grounding"):
             grounding = ground_target(
-                attention_cloud,
+                grounding_cloud,
                 cfg.clustering,
                 seed_percentile=cfg.attention.seed_percentile,
                 seed_threshold=cfg.attention.seed_threshold,
-                exclude_mask=support_mask,
+                exclude_mask=grounding_exclude,
                 min_radius=cfg.geometry.min_radius,
                 timestamp=ts,
                 confirm=self._target_confirm,
@@ -2612,8 +2737,19 @@ class AG3S:
         if fusion is not None and grounding.target is not None:
             grounding = dataclasses.replace(
                 grounding,
-                target=self._with_camera_provenance(grounding.target, fusion, attention_cloud),
+                target=self._with_camera_provenance(grounding.target, fusion, grounding_cloud),
             )
+        if self._grounding_frame is not None:   # SL-GTTO: what grounding returned on the GT input
+            self._grounding_frame["status"] = getattr(grounding.status, "value", str(grounding.status))
+            self._grounding_frame["n_target_points"] = (
+                0 if grounding.target is None else int(len(grounding.target.point_indices)))
+            # --- SL-GTTO2 F1 — begin: what admissibility would have refused (None = not evaluated this call)
+            if cfg.clustering.oracle_admissible:
+                self._grounding_frame["oracle_admissible"] = True
+                self._grounding_frame["admissibility_would_refuse"] = self._target_confirm.last_would_refuse
+                self._target_confirm.last_would_refuse = None
+                self._grounding_frame["exclusion_gate_would_refuse"] = None
+            # --- SL-GTTO2 F1 — end
         # T20: what the consumers below refer to. `geometry` is this frame's observation when
         # `visible`, the last one when `occluded`; `lost` (or nothing confirmed yet) means none.
         self._manipulated = manipulated = self._target_confirm.manipulated
@@ -2769,6 +2905,10 @@ class AG3S:
                 if getattr(cfg.esdf, "robot_mask", "spheres") == "render":
                     with profiler.stage("robot_render_mask"):
                         cameras, sphere_masks, render_masks = self._apply_render_mask(observations, cameras)
+                # --- SL-GTTO2 F2 — begin: the held GT target's pixels are masked out of the TSDF (off: not called)
+                if cfg.clustering.oracle_held_target:
+                    cameras = self._oracle_held_target_mask(cameras)
+                # --- SL-GTTO2 F2 — end
                 # T46e A13: fold this request's GT segmentation into the episode's samples (every frame,
                 # target or not — the TSDF accumulates every frame too). Off: not called, nothing stored.
                 extent = getattr(cfg.esdf, "target_extent", "estimated")
@@ -2998,6 +3138,8 @@ class AG3S:
             constraint_set, manipulated_geometry, context, robot_state)
         if self.confidence_gate is not None:   # IFG-S2SERVE (off: no key)
             constraint_set.metrics["confidence_gate"] = dict(self._gate_frame or {})
+        if self._grounding_frame is not None:   # SL-GTTO (`grounding_source == "oracle"` only; off: no key)
+            constraint_set.metrics["grounding_source"] = dict(self._grounding_frame)
         profiler.end_frame()
         self.frame_index += 1
         profile = profiler.last_frame_ms()
@@ -3063,6 +3205,14 @@ class AG3S:
                            f"({overlap_now:.2f} of its points)")
         if problem is None:
             return manipulated.geometry, None
+        # --- SL-GTTO2 F1 — begin: the GT target is not refused here either; the refusal is recorded only
+        if cfg.oracle_admissible:
+            if self._grounding_frame is not None:
+                self._grounding_frame["exclusion_gate_would_refuse"] = {
+                    "detail": problem, "manipulated_id": int(manipulated.id),
+                    "destination_overlap_now": overlap_now}
+            return manipulated.geometry, None
+        # --- SL-GTTO2 F1 — end
         record = {
             "detail": (f"exclusion geometry refused for manipulated id={manipulated.id}: {problem}; "
                        "no ball, no target-free layer, no guard, no contact permission this frame"),

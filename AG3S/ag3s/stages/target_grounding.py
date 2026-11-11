@@ -101,6 +101,7 @@ import numpy as np
 from AG3S.ag3s.config import KDTREE_WORKERS, ClusteringConfig
 from AG3S.ag3s.runtime import substage
 from AG3S.ag3s.stages.admissibility import (
+    ADMISSIBLE,
     Admissibility,
     Association,
     DestinationGeometry,
@@ -797,6 +798,12 @@ class TargetConfirm:
         smb = getattr(cfg, "supported_max_bottom", None)
         self.supported_max_bottom: Optional[float] = None if smb is None else float(smb)
         self.supported_min_top = float(getattr(cfg, "supported_min_top", 0.01))
+        # --- SL-GTTO2 F1 — begin (`clustering.oracle_admissible`; off: nothing below runs, nothing is recorded)
+        #: The GT cluster is never refused by admissibility; the refusals it would have had are kept per call.
+        self.oracle_admissible = bool(getattr(cfg, "oracle_admissible", False))
+        #: This call's would-be refusals `[Admissibility.record()]` (None when off).
+        self.last_would_refuse: Optional[list[dict[str, Any]]] = None
+        # --- SL-GTTO2 F1 — end
         #: Support planes `(K, 4)` `[n, offset]` for the next grounding call (`note_support`).
         self._support: Optional[np.ndarray] = None
         #: This frame's per-cluster support evidence (score order), None when the test did not run.
@@ -1757,6 +1764,8 @@ class TargetConfirm:
 
     def _assess_frame(self, clusters, points) -> Optional[list[Admissibility]]:
         """Per-cluster admissibility, destination registration first (T26). None when UNCHECKED."""
+        if self.oracle_admissible:   # SL-GTTO2 F1
+            self.last_would_refuse = []
         if not self.checked:
             self.last_admissibility = None
             return None
@@ -1769,7 +1778,10 @@ class TargetConfirm:
         extents = [c.principal_extents if c.principal_extents is not None
                    else principal_extents(p) for c, p in zip(clusters, cluster_points)]
         grasp = [graspable(e, self.max_opening) for e in extents]
-        self.destinations.observe(clusters, cluster_points, grasp, frame=self._frame)
+        if not self.oracle_admissible:
+            self.destinations.observe(clusters, cluster_points, grasp, frame=self._frame)
+        # SL-GTTO2 F1: every GT cluster is the target, so none is registered as the destination (an injected
+        # destination still applies).
         dest = self.destinations.current
         out = [assess(p, extents=e, max_opening_m=self.max_opening, destination=dest,
                       overlap_distance=self.overlap_distance,
@@ -1777,6 +1789,9 @@ class TargetConfirm:
                for p, e in zip(cluster_points, extents)]
         if self.supported_max_bottom is not None:
             out = self._support_test(out, cluster_points)
+        if self.oracle_admissible:   # SL-GTTO2 F1: computed and recorded, not applied
+            self.last_would_refuse = [dict(a.record(), rank=i) for i, a in enumerate(out) if not a.admissible]
+            out = [a if a.admissible else dataclasses.replace(a, reason=ADMISSIBLE) for a in out]
         self.last_admissibility = out
         return out
 

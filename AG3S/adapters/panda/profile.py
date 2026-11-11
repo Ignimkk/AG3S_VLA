@@ -463,6 +463,51 @@ AG3S_VERSIONS["AG3S-final-panda-v3-e0to-pc-idattn"] = FINAL_CONFIG_V3_E0TO_PC_FL
 AG3S_VERSIONS["AG3S-final-panda-v3-e0to-pc-idboth"] = FINAL_CONFIG_V3_E0TO_PC_FLAGS + ID_WINDOW_FLAGS + ID_ATTENTION_FLAGS
 PC_LATCH_VERSIONS = PC_LATCH_VERSIONS + ("AG3S-final-panda-v3-e0to-pc-idwin", "AG3S-final-panda-v3-e0to-pc-idattn",
                                          "AG3S-final-panda-v3-e0to-pc-idboth")
+# --- SL-GTTO — begin: the common TO with GT perception (task SL-GTTO, lead 2026-11-04; flag table: SL-GTTO.impl.md) ----
+#: The common TO candidate (task §1) = the Panda final flags (:data:`FINAL_CONFIG_FLAGS`) minus every AG3S-perception
+#: flag (attention source / attention split / split-supersedes-anchor / non-target evidence), minus the HSR6 rules (no
+#: probe), minus TrajOpt multi-seed (E0), minus the D1 neighbour allowances; plus the grasp handling of pc판 / P0m
+#: (:data:`P0M_PANDA_FIX_FLAGS`, :data:`P0M_SUBTASK_FLAGS`); plus the GT perception (task §2): the visible-target
+#: oracle extent with the GT identity and the GT grounding input. Every other flag keeps the final version's value
+#: (ambiguous -> base value, task §1).
+GT_REMOVED_FLAGS: dict[str, int] = {      # flag -> number of value tokens
+    # AG3S perception (identity / extent from attention): replaced by the GT perception below
+    "--attention-source": 1, "--attention-split-radius-mm": 1, "--attention-split-ratio-source": 1,
+    "--attention-split-partition": 0, "--split-supersedes-anchor": 0, "--nontarget-evidence": 1,
+    # HSR6 rules (no probe)
+    "--hsr6-attach-assist": 0, "--hsr6-held-gate": 0, "--hsr6-target-exempt": 0, "--hsr6-objective": 0,
+    "--hsr6-objective-scope": 1,
+    # TrajOpt multi-seed (E0: one VLA chunk as the seed)
+    "--to-multi-seed": 1, "--to-gpu-seeds": 1, "--to-gpu-seeds-check": 1,
+    # scene relaxations (D1)
+    "--neighbour-contact-mm": 1, "--neighbour-palm-contact-mm": 1}
+#: GT perception (task §2): the fine target-free layer from the GT code images (T46e, identity = the GT target) and the
+#: grounding input = this request's code-1 points (``clustering.grounding_source = oracle``).
+GT_PERCEPTION_FLAGS: tuple[str, ...] = ("--target-extent", "oracle-visible", "--oracle-extent-identity", "gt",
+                                        "--grounding-source", "oracle")
+COMMONTO_GT_FLAGS: tuple[str, ...] = (_drop_flags(FINAL_CONFIG_FLAGS, GT_REMOVED_FLAGS) + P0M_PANDA_FIX_FLAGS
+                                      + P0M_SUBTASK_FLAGS + GT_PERCEPTION_FLAGS)
+#: Final-configuration base argv, no HSR6 probe, no ``--attention-source`` per run (no ATS in the grounding).
+GT_VERSIONS: tuple[str, ...] = ("AG3S-commonto-gt", "AG3S-commonto-gt-pass")
+AG3S_VERSIONS["AG3S-commonto-gt"] = COMMONTO_GT_FLAGS                              # main version (task §5)
+AG3S_VERSIONS["AG3S-commonto-gt-pass"] = COMMONTO_GT_FLAGS + P0M_PASS_FLAGS        # + pass-through when clear (T88)
+
+
+def version_requires_oracle_segmentation(version: str) -> bool:
+    """SL-GTTO — the version's server needs the client's GT code images (``--target-extent oracle-visible``: the
+    server metadata says ``oracle_segmentation_required``); the launchers then pass ``--oracle-seg
+    --capture-segmentation`` to the client."""
+    flags = list(AG3S_VERSIONS.get(str(version), ()))
+    return any(flags[i] == "--target-extent" and flags[i + 1] == "oracle-visible" for i in range(len(flags) - 1))
+# --- SL-GTTO — end
+# --- SL-GTTO2 — begin: the GT identity / extent reaches the TO (task SL-GTTO2 §1, lead 2026-11-05) ----------------------
+#: F1 ``--oracle-admissible``: the GT cluster is not refused by TargetConfirm admissibility / the exclusion gate
+#: (recorded only); F2 ``--oracle-held-target``: while closing / held, the GT target's pixels are masked out of the TSDF.
+GT2_FLAGS: tuple[str, ...] = ("--oracle-admissible", "--oracle-held-target")
+#: Same base argv and per-run rules as :data:`GT_VERSIONS` (kept apart so their recorded flag keys stay as they were).
+GT2_VERSIONS: tuple[str, ...] = ("AG3S-commonto-gt2",)
+AG3S_VERSIONS["AG3S-commonto-gt2"] = COMMONTO_GT_FLAGS + GT2_FLAGS                   # SL-GTTO2 main version
+# --- SL-GTTO2 — end
 #: SL6-B B4 — the Panda HSR6 probe (5 classes, no retreat; labels approved by the user 2026-10-29), the default
 #: ``--hsr6-probe`` of the final versions, and its SHA-256 (recorded by the server, checked by the test when present).
 #: SL7 (0.7): found under the shared storage root (``AG3S_STORAGE_ROOT``, default the checkout's sibling
@@ -479,7 +524,8 @@ FINAL_RUN_PARAMETERS: tuple[str, ...] = ("hsr6_probe", "attention_source")
 def is_final_version(version: str) -> bool:
     """A version on the final-configuration base argv: the SL6 final versions and (SL7) the P0m versions."""
     return (str(version) in FINAL_CONFIG_VERSIONS or str(version) in P0M_VERSIONS
-            or str(version) in PC_LATCH_VERSIONS or str(version) in PC_NOPROBE_VERSIONS)   # SL7d / SL7e
+            or str(version) in PC_LATCH_VERSIONS or str(version) in PC_NOPROBE_VERSIONS   # SL7d / SL7e
+            or str(version) in GT_VERSIONS or str(version) in GT2_VERSIONS)              # SL-GTTO / SL-GTTO2
 
 
 def version_server_flags(version: str, *, hsr6_probe: Optional[str] = None,
@@ -492,6 +538,11 @@ def version_server_flags(version: str, *, hsr6_probe: Optional[str] = None,
     if not is_final_version(version):
         if hsr6_probe is not None or attention_source is not None:
             raise ValueError(f"{version}: --hsr6-probe / --attention-source apply to {list(FINAL_CONFIG_VERSIONS)} only")
+        return flags
+    if version in GT_VERSIONS or version in GT2_VERSIONS:   # SL-GTTO(2): no HSR6 rule -> no probe; GT grounding -> no cell
+        if hsr6_probe is not None or attention_source is not None:
+            raise ValueError(f"{version}: the GT-perception versions use no HSR6 rule and no ATS grounding, so "
+                             "--hsr6-probe / --attention-source have nothing to feed")
         return flags
     if version in P0M_VERSIONS or version in PC_NOPROBE_VERSIONS:   # SL7 / SL7e: no HSR6 rule -> no probe
         if hsr6_probe is not None:
@@ -546,6 +597,14 @@ def version_flag_values(args: argparse.Namespace) -> dict[str, Any]:
     # record keeps exactly the keys it had
     if any(getattr(args, d, None) != parser.get_default(d) for d in p0m):
         dests = sorted(set(dests) | set(final) | set(p0m))
+    # SL-GTTO: the GT-perception-only options join only when one is set (every earlier version's record unchanged)
+    gt = [d for d in _version_dests(GT_VERSIONS) if d not in set(dests) | set(final) | set(p0m)]
+    if any(getattr(args, d, None) != parser.get_default(d) for d in gt):
+        dests = sorted(set(dests) | set(final) | set(p0m) | set(gt))
+    # SL-GTTO2: the F1 / F2 options join only when one is set (AG3S-commonto-gt keeps its keys)
+    gt2 = [d for d in _version_dests(GT2_VERSIONS) if d not in set(dests) | set(final) | set(p0m) | set(gt)]
+    if any(getattr(args, d, None) != parser.get_default(d) for d in gt2):
+        dests = sorted(set(dests) | set(final) | set(p0m) | set(gt) | set(gt2))
     return {d: _jsonable(getattr(args, d, None)) for d in dests}
 
 
