@@ -1517,6 +1517,12 @@ class TrajectoryOptimizer:
             rec["obstacle_row_priority"] = prio
             if float(orm) <= 0.0:
                 orm = None   # SL-SOTA3: the margin is relaxed -- the plain rows and equal slack weights, as without it
+        # SL-SOTA4 (`sqp.ee_action_gate_rows`, False = off): the rows the pass-through test does not call obstacle-object
+        # rows are held at -passthrough_tolerance (what that test accepts of them), not at 0.
+        relief = 0.0
+        if bool(getattr(getattr(cfg, "sqp", None), "ee_action_gate_rows", False)):
+            relief = float(getattr(cfg.sqp, "passthrough_tolerance", 0.0) or 0.0)
+            rec["gate_rows_relief_m"] = relief
         prog, prog_q = getattr(self, "ee_action_progress", None), None   # SL-SOTA2 (None = off: the cost below as before)
         if prog:
             ob = ((passthrough_record or {}).get("obstacle_rows") or {}) if isinstance(passthrough_record, dict) else {}
@@ -1535,8 +1541,9 @@ class TrajectoryOptimizer:
         it = 0
         for it in range(1, int(self.ee_action_iterations) + 1):
             orow = None
-            if orm is not None:
-                rows, omask = self._linearize_with_obstacle_floor(trajectory, q_now, scene, float(orm), rec)
+            if orm is not None or relief > 0.0:
+                rows, omask = self._linearize_with_obstacle_floor(trajectory, q_now, scene, float(orm or 0.0), rec,
+                                                                  other=-relief)
             else:
                 rows, omask = self.linearizer.linearize(trajectory, q_now, scene, cfg), None
             used = rows.used & np.isfinite(rows.value)
@@ -1568,7 +1575,7 @@ class TrajectoryOptimizer:
             else:
                 P = sp.block_diag([sp.identity(n_x), sp.identity(n) * 1e-6], format="csc")
                 q = np.concatenate([np.zeros(n_x), np.full(n, float(self.ee_action_slack_weight))])
-            if orow is not None and prio != 1.0 and orow.any():   # SL-SOTA1: the obstacle-object rows' slack costs more
+            if orm is not None and orow is not None and prio != 1.0 and orow.any():   # SL-SOTA1: the obstacle-object rows' slack costs more
                 q[n_x:] = q[n_x:] * np.where(orow, prio, 1.0)
             if prog_q is not None:   # SL-SOTA2: prefer the correction that also makes progress
                 q[:n_x] += prog_q
@@ -1638,7 +1645,7 @@ class TrajectoryOptimizer:
         except Exception as exc:   # the solve must not die on the preference
             return None, "error: " + repr(exc)
 
-    def _linearize_with_obstacle_floor(self, trajectory, q_now, scene, margin: float, rec: dict):
+    def _linearize_with_obstacle_floor(self, trajectory, q_now, scene, margin: float, rec: dict, other: float = 0.0):
         """SL-SOTA1 — `linearizer.linearize` with `margin` as the row floor of the obstacle-object rows:
         `(rows, is_obstacle_object (H, n_query) or None)`. The returned values are `clearance − floor`, so the QP row
         `value + grad . Dq + s >= backoff` holds those rows `margin` higher and the row selection sees them that much
@@ -1646,8 +1653,10 @@ class TrajectoryOptimizer:
         cfg = self.config
         try:
             states = self.linearizer.sphere_states(trajectory, q_now)
-            floor, omask = self.linearizer.obstacle_row_floor(np.asarray(states[0], np.float64), scene, margin,
-                                                              **_obstacle_row_kwargs(cfg.sqp))
+            kw = _obstacle_row_kwargs(cfg.sqp)
+            if other:   # SL-SOTA4 (a key only when on, so a linearizer without the keyword is called as before)
+                kw["other"] = float(other)
+            floor, omask = self.linearizer.obstacle_row_floor(np.asarray(states[0], np.float64), scene, margin, **kw)
         except Exception as exc:   # the solve must not die on the classification
             rec.setdefault("obstacle_floor_error", repr(exc))
             return self.linearizer.linearize(trajectory, q_now, scene, cfg), None

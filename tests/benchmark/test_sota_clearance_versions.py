@@ -6,7 +6,8 @@ BASE = "AG3S-commonto-att-termsoff-pass-zr-ee-hdp-loose2-obst4-pts-nocarve-fh-t1
 
 
 def test_names_and_flags():
-    assert len(pf.SOTA_VERSIONS) == 8 + len(pf.SOTA_OM_VERSIONS) + len(pf.SOTA_NTC_VERSIONS) + len(pf.SOTA_STALL_VERSIONS)
+    assert len(pf.SOTA_VERSIONS) == (8 + len(pf.SOTA_OM_VERSIONS) + len(pf.SOTA_NTC_VERSIONS) + len(pf.SOTA_STALL_VERSIONS)
+                                     + len(pf.SOTA_GATE_VERSIONS))
     assert set(pf.SOTA_VERSIONS) <= set(pf.GT15_VERSIONS)
     for b in (BASE + "pe123458", BASE + "pe12345811"):
         base = tuple(pf.AG3S_VERSIONS[b])

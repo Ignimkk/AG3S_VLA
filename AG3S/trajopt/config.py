@@ -976,6 +976,15 @@ class SqpConfig:
     #: an obstacle the policy kept steering into (or of the target / destination read as an obstacle) and ran out of steps.
     #: None = the margin always holds.
     obstacle_row_patience: Optional[int] = None
+    #: SL-SOTA4 (dev-57, 2026-11-11): the action QP enforces what the pass-through test enforces. With
+    #: `passthrough_obstacle_tolerance`, the ESDF rows that are NOT obstacle-object rows (the manipulated / held object, the
+    #: target volume, a support, the destination, a surface outside the scene obstacle set) are held at
+    #: `-passthrough_tolerance` instead of 0 in `ee_action_qp`: the test accepts their model violation up to that tolerance,
+    #: but once an obstacle-object row refused the chunk the QP pulled every one of them back to 0. E1a
+    #: ...-om15p10s40-ntc-tro task 2 init 14: the place was refused for a held row 1.8 mm inside the plate's 15 mm margin,
+    #: the QP then answered a 68 mm model violation of link7 against the held bowl with |Da| 1.5 and the bowl slipped out.
+    #: The candidate / plane rows (self, support planes) keep their floor. False = as before.
+    ee_action_gate_rows: bool = False
     # --- T88 — end ---
 
     def validate(self) -> None:
@@ -1006,6 +1015,10 @@ class SqpConfig:
                 raise TrajOptConfigError(f"sqp.obstacle_row_patience must be None or an int >= 1, got {self.obstacle_row_patience!r}")
             if self.obstacle_row_margin is None:
                 raise TrajOptConfigError("sqp.obstacle_row_patience needs sqp.obstacle_row_margin")
+        if not isinstance(self.ee_action_gate_rows, bool):   # SL-SOTA4
+            raise TrajOptConfigError(f"sqp.ee_action_gate_rows must be a bool, got {self.ee_action_gate_rows!r}")
+        if self.ee_action_gate_rows and self.passthrough_obstacle_tolerance is None:
+            raise TrajOptConfigError("sqp.ee_action_gate_rows needs sqp.passthrough_obstacle_tolerance (the row classification)")
         if not (math.isfinite(float(self.obstacle_row_priority)) and float(self.obstacle_row_priority) >= 1.0):
             raise TrajOptConfigError(f"sqp.obstacle_row_priority must be >= 1, got {self.obstacle_row_priority!r}")
         if isinstance(self.multi_seed, bool) or not isinstance(self.multi_seed, int) or self.multi_seed < 0:
@@ -1586,6 +1599,7 @@ _OMIT_WHEN_DEFAULT.update({("sqp", "passthrough_obstacle_class_tests"): False}) 
 _OMIT_WHEN_DEFAULT.update({("sqp", "obstacle_row_margin"): None, ("sqp", "obstacle_row_priority"): 1.0,
                            ("sqp", "obstacle_object_surface_tolerance"): None})   # SL-SOTA1
 _OMIT_WHEN_DEFAULT.update({("sqp", "obstacle_row_patience"): None})   # SL-SOTA3
+_OMIT_WHEN_DEFAULT.update({("sqp", "ee_action_gate_rows"): False})   # SL-SOTA4
 _OMIT_WHEN_DEFAULT.update({("sqp", "passthrough_obstacle_full_horizon"): False})   # SL-GTTO22   # SL-GTTO16 A'
 # --- T88 — end ---
 #: T72 — the grasp-set reach constraint: without `--grasp-set-to` the config dump keeps the keys it had before.

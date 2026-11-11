@@ -1177,6 +1177,20 @@ for _b in tuple(v for v in SOTA_OM_VERSIONS + SOTA_NTC_VERSIONS if "-om" in v an
         SOTA_STALL_VERSIONS = SOTA_STALL_VERSIONS + (_b + _suffix, _b + _suffix + "-tro")
 del _b, _suffix, _flags
 SOTA_VERSIONS = SOTA_VERSIONS + SOTA_STALL_VERSIONS
+#: SL-SOTA4 (dev-57, 2026-11-11): ``-gr`` = --ee-action-qp-gate-rows (the action QP holds the ESDF rows that are not
+#: obstacle-object rows at -tau, what the pass-through test accepts of them, instead of 0). E1a ...-om15p10s40-ntc-tro:
+#: all 21 failures ran out of steps; in the held phase the chunk was refused for a held row inside the plate's margin and
+#: the QP then pulled back every model violation the test had been accepting (link7 against the held bowl 68 mm -> |Da| 1.5).
+#: Registered on pe123458 / pe12345811 (± -ntc; tau_obs 10 mm as adopted) and on every ``-to0`` SOTA base (with / without
+#: the margin, -ntc, -pt / -pg). Name = <base>[...]-gr[-tro].
+SOTA_GATE_VERSIONS: tuple[str, ...] = ()
+for _b in ((PE_VERSIONS[6], PE_VERSIONS[11], PE_VERSIONS[6] + "-ntc", PE_VERSIONS[11] + "-ntc")
+           + tuple(v for v in SOTA_VERSIONS if "-to0" in v and not v.endswith("-tro"))):
+    AG3S_VERSIONS[_b + "-gr"] = tuple(AG3S_VERSIONS[_b]) + ("--ee-action-qp-gate-rows",)
+    AG3S_VERSIONS[_b + "-gr-tro"] = AG3S_VERSIONS[_b + "-gr"] + ("--ee-action-qp-translation-only",)
+    SOTA_GATE_VERSIONS = SOTA_GATE_VERSIONS + (_b + "-gr", _b + "-gr-tro")
+del _b
+SOTA_VERSIONS = SOTA_VERSIONS + SOTA_GATE_VERSIONS
 GT15_VERSIONS = GT15_VERSIONS + SOTA_VERSIONS
 #: (G88c, 03:5x) the A-alone ablation queued as ``…-obst3`` (gtto23, not started yet) gets the same two fixes, so A alone and
 #: A + B differ only by the held point model: ``…-obst3`` := A'' + no carve + support "under" (``…-obst3-pts`` = B'' keeps

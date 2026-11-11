@@ -735,6 +735,8 @@ PORTED_FINAL_CONFIG_DESTS: tuple[str, ...] = (
     # SL-SOTA2: the action QP prefers the correction that also makes progress (SafePolicy optimizer attribute, set below)
     # SL-SOTA3: the obstacle-row margin's patience (sqp key, same path as the margin)
     'ee_action_qp_progress', 'obstacle_row_patience',
+    # SL-SOTA4: the action QP holds the non-obstacle ESDF rows at -tau (sqp key, same path)
+    'ee_action_qp_gate_rows',
 )
 #: SL-GTTO — the target extents the Panda server runs (``--target-extent``; SL7 attention-surface, SL-GTTO oracle-visible).
 PORTED_TARGET_EXTENTS: tuple[str, ...] = ("estimated", "attention-surface", "oracle-visible")

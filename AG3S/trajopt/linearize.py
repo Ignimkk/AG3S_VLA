@@ -2109,9 +2109,10 @@ class CollisionLinearizer:
         return clear, obst, n_beneath, oop
 
     def obstacle_row_floor(self, centres: np.ndarray, scene: SceneSnapshot, margin: float, beneath: bool = False,
-                           class_tests: bool = False, surface_tol: Optional[float] = None):
+                           class_tests: bool = False, surface_tol: Optional[float] = None, other: float = 0.0):
         """SL-SOTA1 — ``(row_floor (H, width) for :meth:`linearize`, is_obstacle_object (H, n_query))``: ``margin`` on the
-        ESDF rows :meth:`obstacle_object_mask` calls obstacle-object rows, 0 elsewhere (candidate and plane rows too).
+        ESDF rows :meth:`obstacle_object_mask` calls obstacle-object rows, ``other`` (SL-SOTA4; 0 = as before) on the
+        other ESDF rows, 0 on the candidate and plane rows.
         ``(None, None)`` when there is no field / no ESDF row (linearize then runs as without a floor)."""
         got = self.obstacle_object_mask(centres, scene, beneath=beneath, class_tests=class_tests, surface_tol=surface_tol)
         if got is None:
@@ -2120,7 +2121,7 @@ class CollisionLinearizer:
         horizon, n_query = obst.shape
         head = self.n_spheres * (scene.n_slots + scene.n_planes)
         floor = np.zeros((horizon, head + n_query))
-        floor[:, head:] = np.where(obst, float(margin), 0.0)
+        floor[:, head:] = np.where(obst, float(margin), float(other))
         return floor, obst
     # --- SL-GTTO16 (A) — end
 

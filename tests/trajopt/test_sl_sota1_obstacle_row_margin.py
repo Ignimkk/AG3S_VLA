@@ -20,7 +20,8 @@ from AG3S.trajopt.linearize import ESDF_SLOT  # noqa: E402
 def _sqp(**kw):
     base = dict(passthrough_obstacle_tolerance=0.0, passthrough_obstacle_full_horizon=True, passthrough_obstacle_beneath=False,
                 passthrough_obstacle_class_tests=False, obstacle_row_margin=None, obstacle_row_priority=1.0,
-                obstacle_object_surface_tolerance=None, obstacle_row_patience=None)
+                obstacle_object_surface_tolerance=None, obstacle_row_patience=None, ee_action_gate_rows=False,
+                passthrough_tolerance=0.1)
     base.update(kw)
     return types.SimpleNamespace(**base)
 
@@ -163,6 +164,12 @@ def test_row_floor_layout_matches_linearize():
         del type(lin).n_spheres
     assert floor.shape == (2, 2 * (4 + 1) + 3) and np.array_equal(got, mask)       # candidates, planes, then the ESDF rows
     assert np.all(floor[:, :10] == 0.0) and np.allclose(floor[:, 10:], np.where(mask, 0.015, 0.0))
+    try:   # SL-SOTA4: `other` is the floor of the ESDF rows that are not obstacle-object rows (candidates / planes stay 0)
+        type(lin).n_spheres = property(lambda self: 2)
+        floor, _ = lin.obstacle_row_floor(np.zeros((2, 3, 3)), scene, 0.015, other=-0.1)
+    finally:
+        del type(lin).n_spheres
+    assert np.all(floor[:, :10] == 0.0) and np.allclose(floor[:, 10:], np.where(mask, 0.015, -0.1))
     lin.obstacle_object_mask = lambda centres, scene, **kw: None
     assert lin.obstacle_row_floor(np.zeros((2, 3, 3)), scene, 0.015) == (None, None)
 
@@ -397,3 +404,101 @@ def test_relaxed_margin_reaches_the_action_qp():
     assert abs(float(opt.last_ee_action["delta_action"][0, 0])) < 1e-6 and res.metrics["ee_action_qp"]["obstacle_row_margin_m"] == 0.0
     assert opt.linearizer.floors == [None] or all(f is None for f in opt.linearizer.floors)   # the plain rows, no floor
     assert "n_obstacle_rows" not in res.metrics["ee_action_qp"]
+
+
+# --- SL-SOTA4: the action QP enforces what the pass-through test enforces ------------------------------------------------
+class _GateLin(_Lin):
+    """One step, one joint q. Row 0 (an obstacle object): clearance = q - 0.01. Row 1 (not an obstacle-object row, e.g. the
+    held object's remnant): clearance = q - 0.06 -- a 60 mm model violation the pass-through test accepts (tau 100 mm)."""
+
+    def obstacle_row_floor(self, centres, scene, margin, **kw):
+        self.kw = dict(kw)
+        return np.array([[margin, kw.get("other", 0.0)]]), np.array([[True, False]])
+
+    def linearize(self, traj, q_now, scene, cfg, states=None, row_floor=None):
+        q = float(traj[0, 0])
+        value = np.array([[q - 0.01, q - 0.06]])
+        self.floors.append(None if row_floor is None else np.array(row_floor))
+        if row_floor is not None:
+            value = value - np.asarray(row_floor)
+        return types.SimpleNamespace(value=value, gradient=np.array([[[1.0], [1.0]]]), used=np.ones((1, 2), bool),
+                                     slot=np.full((1, 2), ESDF_SLOT), sphere=np.array([[0, 1]]))
+
+    def full_violation(self, traj, q_now, scene):
+        return max(0.0, 0.01 - float(traj[0, 0]))
+
+
+def _gate_solve(**kw):
+    from AG3S.trajopt.sqp import TrajectoryOptimizer
+
+    opt = TrajectoryOptimizer.__new__(TrajectoryOptimizer)
+    opt.config = types.SimpleNamespace(reduction=types.SimpleNamespace(linearization_backoff=0.0),
+                                       safety=types.SimpleNamespace(violation_tolerance=1e-6), sqp=_sqp(**kw))
+    opt.linearizer = _GateLin()
+    opt.ee_action_map = {"M": np.ones((1, 1)), "a_ref": np.zeros((1, 1))}
+    opt._finish = lambda traj, *a, **k: types.SimpleNamespace(trajectory=traj, metrics={})
+    res = opt._solve_ee_action(np.zeros((1, 1)), np.zeros(1), None, None, 0.0, None, [], 0.0, True, None)
+    return float(opt.last_ee_action["delta_action"][0, 0]), res.metrics["ee_action_qp"], opt.linearizer
+
+
+def test_gate_rows_off_the_qp_pulls_every_row_back():
+    da, rec, lin = _gate_solve()
+    assert da == pytest.approx(0.06, abs=2e-4) and "gate_rows_relief_m" not in rec and all(f is None for f in lin.floors)
+
+
+def test_gate_rows_only_the_obstacle_row_moves_the_action():
+    da, rec, lin = _gate_solve(ee_action_gate_rows=True)
+    assert da == pytest.approx(0.01, abs=2e-4) and rec["gate_rows_relief_m"] == pytest.approx(0.1)
+    assert lin.kw["other"] == pytest.approx(-0.1) and np.allclose(lin.floors[0], [[0.0, -0.1]])
+    assert rec["n_obstacle_rows"][0] == 1
+    # with the margin: the obstacle-object row is held 15 mm higher, the other row still does not bind
+    da, rec, lin = _gate_solve(ee_action_gate_rows=True, obstacle_row_margin=0.015, obstacle_row_priority=10.0)
+    assert da == pytest.approx(0.025, abs=2e-4) and np.allclose(lin.floors[0], [[0.015, -0.1]])
+    # a violation beyond tau binds again: tau 40 mm -> the 60 mm row is pulled back to 40 mm
+    da, _, _ = _gate_solve(ee_action_gate_rows=True, passthrough_tolerance=0.04)
+    assert da == pytest.approx(0.02, abs=2e-4)
+
+
+def test_gate_rows_with_the_margin_relaxed_keeps_the_relief():
+    from AG3S.trajopt.sqp import TrajectoryOptimizer
+
+    opt = TrajectoryOptimizer.__new__(TrajectoryOptimizer)
+    opt.config = types.SimpleNamespace(reduction=types.SimpleNamespace(linearization_backoff=0.0),
+                                       safety=types.SimpleNamespace(violation_tolerance=1e-6),
+                                       sqp=_sqp(ee_action_gate_rows=True, obstacle_row_margin=0.015, obstacle_row_priority=10.0,
+                                                obstacle_row_patience=2))
+    opt.linearizer = _GateLin()
+    opt.ee_action_map = {"M": np.ones((1, 1)), "a_ref": np.zeros((1, 1))}
+    opt._finish = lambda traj, *a, **k: types.SimpleNamespace(trajectory=traj, metrics={})
+    opt._obstacle_margin_now = 0.0                           # relaxed by the patience
+    opt._solve_ee_action(np.zeros((1, 1)), np.zeros(1), None, None, 0.0, None, [], 0.0, True, None)
+    assert float(opt.last_ee_action["delta_action"][0, 0]) == pytest.approx(0.01, abs=2e-4)
+    assert np.allclose(opt.linearizer.floors[0], [[0.0, -0.1]])
+
+
+def test_gate_rows_config_flag_and_versions():
+    from AG3S.adapters.panda import profile as pf
+    from AG3S.adapters.panda import server as srv
+    from AG3S.trajopt import serve_safe as ss
+    from AG3S.trajopt.config import SqpConfig, TrajOptConfigError
+    from tests.trajopt.test_t88_passthrough_when_clear import BASE as ARGV
+
+    assert SqpConfig().ee_action_gate_rows is False
+    with pytest.raises(TrajOptConfigError):
+        SqpConfig(ee_action_gate_rows=True).validate()                              # needs the row classification
+    SqpConfig(passthrough_obstacle_tolerance=0.0, ee_action_gate_rows=True).validate()
+    ap = ss.build_parser()
+    assert "ee_action_gate_rows" not in ss.passthrough_overrides(ap.parse_args(ARGV))
+    ok = ["--passthrough-when-clear", "--passthrough-obstacle-tolerance-mm", "0", "--ee-action-qp"]
+    assert ss.passthrough_overrides(ap.parse_args(ARGV + ok + ["--ee-action-qp-gate-rows"]))["ee_action_gate_rows"] is True
+    with pytest.raises(SystemExit):
+        ss.reject_bad_flag_combinations(ap, ap.parse_args(ARGV + ["--ee-action-qp-gate-rows"]))
+    assert "ee_action_qp_gate_rows" in srv.PORTED_FINAL_CONFIG_DESTS
+    base = "AG3S-commonto-att-termsoff-pass-zr-ee-hdp-loose2-obst4-pts-nocarve-fh-t100-"
+    assert len(pf.SOTA_GATE_VERSIONS) == 2 * (4 + 100) and set(pf.SOTA_GATE_VERSIONS) <= set(pf.GT15_VERSIONS)
+    for name in (base + "pe123458-gr-tro", base + "pe12345811-to0-om15p10s40-ntc-gr-tro",
+                 base + "pe12345811-to0-om15p10s40-ntc-pt6-pg4-gr-tro", base + "pe12345811-to0-ntc-gr-tro"):
+        v = tuple(pf.AG3S_VERSIONS[name])
+        assert v[-2:] == ("--ee-action-qp-gate-rows", "--ee-action-qp-translation-only") and pf.version_server_flags(name)
+    assert "ee_action_qp_gate_rows" not in pf.version_flag_values(pf.parse_v11ab_args())
+
