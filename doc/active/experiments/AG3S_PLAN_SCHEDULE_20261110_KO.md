@@ -181,6 +181,7 @@ T5 뒤에 하면 이 서버에서 끝낸다. **이전 시점은 T5 와의 순서
 | 2026-11-11 17:5x | dev-57: **`-qs` 판 다른 suite 점검 1 차 (56 ep) = TSR 24 · CAR 40 · SSR 19** (지금 구성 24 · 31 · 17; > 50 mm 10 → 3; 15:34–17:56, HEAD 4d4cc11d) — §9.16. 충돌은 줄고 TSR 은 그대로 (쥐기 전 QP 교착이 2 → 11 ep). 후보 SL-SOTA10 `-rr` (막힌 동안만 회전 열을 풂) 를 결과 전 기록 (§9.15). 서버 제거 (11-12 08:00) 에 맞춰 오늘 밤 = 후보 거르기 → 합친 판 `pkgFin` 의 E1a 40 · guard · 다른 suite 점검 (05:00 전 종료). |
 | 2026-11-11 22:0x | dev-57: **후보 거르기 — `-hb` 만 통과** (E1a task 2 = 7 / 10, `-qs` 판 5; `-rr` · `-ap` 탈락, §9.17) → 최종 후보 `pkgFin` = `…-hr150-hb-qs-tro`. **`pkgFin` guard 통과: LIBERO 27 = 23, SafeLIBERO 11 = 5 · 9 · 4 (> 50 mm 0), LS 10 = 5 · 위반 0** (20:16–22:04, HEAD 09787344) — §9.18. 다음 = 같은 판 E1a 40 → 다른 suite 점검 init 15 · 16 → init 17 · 18 (05:00 전 종료). |
 | 2026-11-11 23:3x | dev-57: **`pkgFin` (`-hb-qs` 판) E1a 40 = TSR 22 · CAR 34 · SSR 20** (지금 구성 22 · 23 · 15, `-qs` 판 22 · 32 · 18; > 50 mm 1; 22:11–23:34, HEAD 7df3e6c9) — §9.19. 주 기준 통과 (`-qs` 판 대비 SSR +2) + guard 통과 (§9.18) → 동결 후보 = `pkgFin`. 다음 = 다른 suite 점검 init 15 · 16 → 17 · 18. |
+| 2026-11-12 00:1x | dev-57: `pkgFin` E1a 의 남은 실패 20 ep 을 다시 가름 — **grasp latch 고장 1 (t0 e11, opening rule 에 reach sticky 가 닿지 않음) · grasp zone 풀기로 인한 성공 + 충돌 2 (t0 e7 · e13)** 를 찾음 → 후보 SL-SOTA11 `-rs` · SL-SOTA12 `-zr60` (결과 전 기록, §9.20). 남은 GPU 순서를 바꿈: `pkgFin` 다른 suite 점검은 2 cell (16 ep: SSR 5, `-qs` 판 6) 에서 멈추고 새 후보를 먼저 잼 (§9.21). 사용자 지시 (23:4x): 06:00 까지 작업, 못한 것은 계획서에 적고 보고. |
 
 ---
 
@@ -558,3 +559,51 @@ SSR 얻음 9 / 잃음 7 (McNemar p = 0.80). 같은 episode 의 π0.5 28 · 11 ·
 - **[M]** 남은 충돌 6 ep: t0 e7 32.3 · e13 12.1 (성공 + 충돌), t1 e9 1.6 · e10 2.9 · e12 26.2, t3 e9 238.8 (실패 + 충돌).
 - **[해석]** `-hb` 의 이득은 겨냥한 task 2 (놓는 곳) 에 한정되고 다른 task 의 안전 성공은 건드리지 않는다. TSR 은 세 판 모두 22 — 남은 차이는 여전히 성공률 (task 1 2 / 10: 쥔 채 팔 link 교착, task 3: 쥐기 전 교착).
 - **판정 (§9.2):** SSR 20 ≥ `-qs` 판 18 + 1, guard 3 개 통과 (§9.18) → **동결 후보 = `pkgFin`** (`-qs` 판을 대신함). 동결은 다른 suite 합산 SSR (`-qs` 판 19 / 56) 을 본 뒤.
+
+### 9.20 `pkgFin` E1a 의 남은 실패 20 ep 과 후보 SL-SOTA11 `-rs` · SL-SOTA12 `-zr60` (결과 전 기록, 11-12 00:1x)
+
+`pkgFin` E1a 40 의 안전 성공이 아닌 20 ep 을 call 기록 · 재생으로 다시 갈랐다 (CPU, GT 는 채점만). 도구: `outputs/2026-11-11_SOTA_개선/offline/shape.py` (형태), `surface_owner.py` (막은 물체, `owner_pkgFin/summary.json`), `stall.py` (`stall_e1a_pkgFin.json`), `target_truth.py` (인식된 target 의 실제 물체, `target_truth/summary.json`), `latch_rs_replay.py` (latch 재생).
+
+| 형태 [M] | ep | episode | 막은 것 · 원인 [M] |
+|---|---:|---|---|
+| 쥔 채 교착 — 팔 link 행 | 4 | t1 e6 · e8 · e9 · e12 | 실제 장애물 (moka pot · milk · wine bottle) 과 link5 · link6. 놓으러 내려가는 경로에서 팔뚝이 장애물 위를 지남. 같은 episode 를 지금 구성 (`…-pe123458`) 으로 돌리면 23–313 mm 충돌 — 막는 것은 맞고 우회가 없다 |
+| 쥐기 전 교착 — 팔 link 행 | 3 | t3 e6 · e9 · e12 | wine bottle 과 link5 (z 0.41–0.47 m). 같은 성격 |
+| 쥐기 전 교착 — 손 · 손가락 행 | 4 | t0 e11, t1 e14, t3 e11, t3 e14 | **t0 e11 = grasp latch 고장** (아래 SL-SOTA11): 그릇을 쥐고 들었는데 latch 가 CLOSING 에 머물러 손에 든 그릇이 장애물로 읽힘. t1 e14 = target 정체 오류 (인식된 target 이 60 / 60 call 모두 `akita_black_bowl_2`). t3 e11 = 받침 (cabinet 윗면) 17 + yellow book 13. t3 e14 = target 그릇 14 (인식 target 이 bowl_1 · bowl_2 를 오감) |
+| 쥔 채 교착 — 손 · 손가락 · 쥔 물체 행 | 3 | t1 e10, t0 e5, t2 e9 | 다른 그릇 (`akita_black_bowl_2`, t1 e10) · yellow book (t0 e5) · 쥔 그릇 자신의 상과 접시 (t2 e9, §9.17) |
+| 놓은 뒤 미완 | 3 | t1 e5 · e11, t2 e5 | 잘못 놓음 · 놓친 뒤 다시 못 쥠 |
+| 성공 + 충돌 | 2 | t0 e7 (32.3 mm) · e13 (12.1 mm) | **grasp zone 풀기** (아래 SL-SOTA12): 손 (`panda_hand`) 이 target 옆 storage box 에 닿음 |
+| 쥔 채 끝남 (QP 적음) | 1 | t2 e10 | policy 쪽 |
+
+**grasp latch 고장 (t0 e11) [M]:** 닫는 동안 (call 15–18, 개도 0.63 → 0.045) reach 는 52–78 mm 로 통과, 개도가 멈춘 call 19 에는 손이 그릇을 든 채 100 mm 올라가 있고 그 사이 close seed 가 조작 대상을 아래의 ramekin 으로 다시 잡아 reach 128 mm > 120 mm. `settled` 와 `reach` 가 같은 call 에 참이 된 적이 없어 41 call CLOSING. V11AB-pb6 의 `--grasp-reach-sticky` 가 고친 고장인데, `--grasp-opening-rule` (SL14) 이 증거 상태기계를 대신해 그 sticky 가 닿지 않는다. 같은 기록이 다른 suite 에도 있다: `-qs` 판 goal L-I t3 e16 (reach 137 mm, 26 call) · goal L-II t0 e16 (134 mm, 39 call) — 셋 모두 실패. latch 가 reach 하나 때문에 (닫힘 명령 · 정지 · 개도는 참) CLOSING 에 2 call 이상 머문 episode 는 E1a 40 + LIBERO 27 + SafeLIBERO 11 + 다른 suite 56 (134 ep) 중 7 개이고 모두 실패다 (나머지 4 개는 reach 147–272 mm — target 정체 오류 · 떨어뜨린 뒤 다시 쥐기라 이 후보로 풀리지 않음).
+
+**grasp zone 풀기 (t0 e7 · e13) [M]:** 접촉 시점 (obs 60 · 120) 의 실제 접촉점에서 거리장은 0–5 mm (box 표면이 장에 있음), 그 점을 덮는 손 구 (#82, r 19 mm) 의 기록된 여유는 −5 … −13 mm (모델도 침투를 봄). 그런데 `--grasp-zone-release` (SL-GTTO5 F4) 가 LATCHED · CLOSING 동안 조작 대상 centroid 에서 수평 100 mm 안의 손 · 손가락 행을 '가장 가까운 표면이 무엇이든' 푼다 (그 call 의 풀린 행 1313 / 1700). 접촉한 구는 centroid 에서 72 · 93 mm — target 바로 옆 장애물이 zone 안에 들어와 검사에서 빠졌다.
+
+| 후보 | flag · 판 (worktree `wip/sota-om` d25cc332 · 7e2f7064, 기본 꺼짐) | 내용 | 위험 |
+|---|---|---|---|
+| SL-SOTA11 | `--grasp-opening-rule-reach-sticky` · `…-qs-rs-tro` | opening rule 의 attach 검사에서, CLOSING 중 닫힘 명령이 이어지는 동안 한 번 통과한 reach 를 그 시도 끝까지 통과로 둔다 (같은 조작 대상 id; 열림 명령이 실행되면 지움). attach 는 reach 가 통과한 call 의 기하와 그 관측 자세로 한다 (뒤에 다시 잡힌 기하가 아님). 새 숫자 없음 | 빈손 닫힘은 `opening_min` · `moved` 가 그대로 막는다. offline latch 재생 [D]: 144 ep 중 판정이 바뀌는 것은 4 ep (위 3 + 마지막 call 1), 성공 episode 는 0 — 닫힌 고리에서 attach 뒤 쥔 물체 모델이 맞는지는 실측 필요 |
+| SL-SOTA12 | `--grasp-zone-radius-mm 60` · `…-zr60-tro` (새 코드 없음, V11AB-pb5 의 기존 flag) | grasp zone 반경 100 → 60 mm (그릇 반경 63 mm). zone 밖의 손 · 손가락 행은 다른 행과 같은 규칙 (장애물 물체 행은 여유 15 mm, 나머지는 τ 100 mm) | target 옆 물체가 가까운 장면 (LIBERO 의 서랍 · cabinet, task 1 의 ramekin) 에서 쥐기 전 교착이 늘 수 있음 → LIBERO 27 guard 필수 |
+
+**남은 GPU 시간의 순서를 바꾼다 (결과 전, 00:1x).** 돌고 있던 `pkgFin` 다른 suite 점검 (init 15 · 16) 을 goal L-I cell 이 끝난 자리에서 멈추고 (object L-I · goal L-I 16 ep 만 잼), §9.17 의 (4) 'init 17 · 18' 도 미룬다. 새 후보를 먼저 잰다 — 이유: 두 후보가 맞으면 E1a 에서 최대 +3 (t0 e7 · e11 · e13 → SSR 23 / 40 = 57.5 %, 원문 보고값 53.0 % 위) 이고, 다른 suite 점검은 어느 판이 최종 후보인지 정해진 뒤 그 판으로 재야 한다. 05:00 까지 남은 시간이 약 4.7 h 라 둘 다 할 수 없다.
+
+| 순서 | run | 판정 |
+|---|---|---|
+| (a) | 합친 판 `…-hr150-hb-qs-rs-zr60-tro` (TAG `pkgSrz`) E1a task 0 × init 5–14 (22 분) | 기준 = `pkgFin` task 0 (SSR 6: e6 · e8 · e9 · e10 · e12 · e14). 통과 = 안전 성공 ≥ 7 이고 잃은 episode ≤ 1 |
+| (a′) | (a) 가 섞인 결과일 때만: `-rs` 만 (`pkgSrs`) · `-zr60` 만 (`pkgSzr`) 으로 task 0 | 이득이 있는 쪽만 남김 |
+| (b) | 남긴 판 = `pkgFin2` 의 LIBERO 27 (`gtto16_queue.sh MIN27=28`, 37 분) | ≥ 21 |
+| (c) | `pkgFin2` E1a task 1 · 2 · 3 (66 분) → E1a 40 | §9.2: SSR ≥ `pkgFin` 20 + 1 |
+| (d) | `pkgFin2` 다른 suite init 15 · 16 (05:00 전에 끝나는 cell 까지) | `-qs` 판 (19 / 56) · `pkgFin` 의 같은 cell 과 짝 비교 |
+
+(a) 에서 둘 다 이득이 없으면 `pkgFin` 의 다른 suite 점검 나머지 5 cell 을 이어서 잰다. 05:00 을 넘는 run 은 시작하지 않는다. 못 잰 것 (init 17 · 18, SafeLIBERO 11 · LS 10, 남은 cell) 은 §9.23 의 이전 후 계획으로 넘긴다.
+
+### 9.21 `pkgFin` 의 다른 suite 점검 — 2 cell 에서 멈춤 [M] (00:1x)
+
+2026-11-11 23:40 – 11-12 00:14, `sota_ms_queue.sh` TAG `pkgFin`, init 15 · 16 (run-id `ms-pkgFin-*`). object L-I · goal L-I 16 ep 을 잰 뒤 §9.20 의 이유로 멈췄다 (long L-I 는 server 시작 중에 중단 — run 디렉터리 `20261112T001448_…_ms-pkgFin-long-LI-*` 는 episode 없음).
+
+| cell (n · TSR · CAR · SSR) | 지금 구성 | `-qs` 판 | `pkgFin` | `-qs` 판과 다른 episode |
+|---|---|---|---|---|
+| Object L-I | 8 · 5 · 4 · 4 | 8 · 5 · 7 · 5 | 8 · 4 · 7 · 4 | t0 e15 안전 성공 → 실패 (충돌 없음) |
+| Goal L-I | 8 · 3 · 4 · 2 | 8 · 4 · 3 · 1 | 8 · 3 · 3 · 1 | t0 e16 성공 + 충돌 13.0 mm → 실패 + 충돌 13.0 mm |
+| 합 (16 ep) | 8 · 8 · 6 | 9 · 10 · 6 | 7 · 10 · 5 | |
+
+- **[M]** 16 ep 에서는 `-hb` 의 이득이 없고 1 ep 을 잃었다 (object L-I t0 e15). 나머지 14 ep 은 `-qs` 판과 결과가 같다. 표본이 작아 판정하지 않는다 — 최종 후보가 정해진 뒤 그 판으로 7 cell 을 다시 잰다.
+- **기록의 예외:** object L-I cell 은 도는 중 (23:49) 에 다른 세션의 commit 36ce3108 (migration 문서 · `scripts/setup/migration/` 3 파일, run 경로 코드 변화 없음 — `git diff --stat 79979532 36ce3108`) 로 HEAD 가 바뀌어, episode 8 개가 모두 기록된 뒤 launcher 의 마지막 manifest 기록이 `Run belongs to another checkout or commit` 으로 끝났다 (queue 기록 rc=1). `episodes.jsonl` · npz 는 온전해 자료로 쓰되 `run_manifest.json` 의 `executions` 가 비어 있다.
