@@ -2714,6 +2714,11 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--obstacle-row-patience", type=int, default=None, metavar="N",
                     help="SL-SOTA3 — --obstacle-row-margin-mm 와 함께만. policy chunk 가 N call 연속으로 여유 안쪽이면 여유를 내려놓고 "
                          "(floor · 허용치는 그대로) chunk 가 여유 밖으로 나올 때 다시 켠다 (sqp.obstacle_row_patience)")
+    ap.add_argument("--ee-action-qp-gate-rows", action="store_true",
+                    help="SL-SOTA4 — --ee-action-qp · --passthrough-obstacle-tolerance-mm 와 함께만. action QP 에서 장애물 물체 "
+                         "행이 아닌 ESDF 행 (쥔 물체 · target · support · 목적지 · 장애물 집합 밖) 의 floor 를 0 대신 "
+                         "−(pass-through 허용치 τ) 로 둔다: QP 가 통과 판정이 받아들이는 model 위반까지 0 으로 되돌리지 않는다 "
+                         "(sqp.ee_action_gate_rows)")
     # SL-SOTA1 — end
     # SL-GTTO10 — begin (lead self-ruling G53, 2026-11-07; user caution 2)
     ap.add_argument("--oracle-destination", action="store_true",
@@ -4797,6 +4802,9 @@ def reject_bad_flag_combinations(ap: argparse.ArgumentParser, args, *, seed_map_
             ap.error("--ee-action-qp-progress 는 --passthrough-obstacle-tolerance-mm · --ee-action-qp 와 함께만")
         if not (0.0 < float(args.ee_action_qp_progress) <= 1.0):
             ap.error(f"--ee-action-qp-progress 는 0 초과 1 이하 (got {args.ee_action_qp_progress})")
+    if getattr(args, "ee_action_qp_gate_rows", False):   # SL-SOTA4
+        if getattr(args, "passthrough_obstacle_tolerance_mm", None) is None or not getattr(args, "ee_action_qp", False):
+            ap.error("--ee-action-qp-gate-rows 는 --passthrough-obstacle-tolerance-mm · --ee-action-qp 와 함께만")
     if getattr(args, "obstacle_row_patience", None) is not None:   # SL-SOTA3
         if getattr(args, "obstacle_row_margin_mm", None) is None:
             ap.error("--obstacle-row-patience 는 --obstacle-row-margin-mm 와 함께만")
@@ -4984,6 +4992,8 @@ def passthrough_overrides(args) -> dict:
         out["obstacle_object_surface_tolerance"] = float(args.obstacle_surface_tol_mm) / 1000.0
     if getattr(args, "obstacle_row_patience", None) is not None:   # SL-SOTA3
         out["obstacle_row_patience"] = int(args.obstacle_row_patience)
+    if getattr(args, "ee_action_qp_gate_rows", False):   # SL-SOTA4
+        out["ee_action_gate_rows"] = True
     return out
 # --- T88 — end ---
 
