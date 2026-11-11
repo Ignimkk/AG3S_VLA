@@ -5055,7 +5055,7 @@ F8 + (a) `--ee-action-qp-scaled` (행 정규화 + quadratic slack) + (c′) `--g
 | P0m 본판 서버 경로 (§5.7) | noun head 로도 쥐기 전 target 표면의 평균 11 % 만 지움 (L8H2 6 %). memory 의 35 % 는 distractor |
 | GT 없는 판 closed-loop (§21, B5 att LIBERO 27 + SafeLIBERO) | LIBERO 실패 10 중 8 이 identity (task 3 · 4 · 9: 다른 물체를 target 으로 잡아 그것을 지움), 2 는 운반 중 obstacle 거절 (task 7). SafeLIBERO t3 는 모두 다른 물체. offline 예측 (§4 · §16) 과 일치 |
 
-## SL-SOTA1–13 — Tab. 1–3 지표 개선 (2026-11-11 03:5x – 11-12 06:00 KST, 세션 dev-57)
+## SL-SOTA1–14 — Tab. 1–3 지표 개선 (2026-11-11 03:5x – 11-12 06:00 KST, 세션 dev-57)
 
 **사용자 지시 (11-11 03:5x):** 목표는 논문 Tab. 1–3 의 지표 (SafeLIBERO TSR · CAR · SSR, LIBERO) 를 올리는 것이고 후보 · 순서 · 채택은 이 세션이 정한다. **(11-11 16:5x, 전달)** 이 서버는 11-12 08:00 에 제거 — 마지막 GPU run 은 05:00 전에 끝낸다. **(11-11 23:4x)** 06:00 까지 작업하고 못한 것은 계획서에 적어 보고.
 
@@ -5075,9 +5075,10 @@ F8 + (a) `--ee-action-qp-scaled` (행 정규화 + quadratic slack) + (c′) `--g
 | 02:40–03:18 | `pkgFrs` 다른 suite goal L-II · goal L-I (16 ep) | 6 · 7 · 3 (`-qs` 8 · 6 · 3, 지금 구성 6 · 9 · 5). latch 가 걸렸던 goal L-II t0 e16 은 sticky 로 call 19 에 attach 되지만 7 call 뒤 놓침, goal L-I t3 e16 은 그대로 |
 | 03:19–03:35 | SL-SOTA13 `-zp` (`--grasp-zone-keep-palm-obstacles`: grasp zone 안에서도 손바닥의 장애물 물체 행은 풀지 않음) + `-rs`, E1a task 0 | **10 · 10 · 10** (`-rs` 만 9 · 8 · 7) — 성공 + 충돌 2 ep (e7 · e13) 과 쥔 채 교착 e5 가 안전 성공으로 |
 | 03:35–04:50 | 같은 판 E1a task 2 · 3 · 1 (AMRC 의 마지막 GPU run) | **E1a 40 = 19 · 36 · 19**, > 50 mm 충돌 0 (per-task SSR 10 · 2 · 5 · 2; `pkgFin` 6 · 2 · 7 · 5). 얻음 5, 잃음 6 (t2 e7 · e8 · e14, t3 e5 · e8 · e10) → 미채택. `-zr60` 과 같은 모양 — task 0 은 얻고 task 2 · 3 은 잃는다 |
+| 04:53–05:1x | (CPU) `-zp` 가 잃은 6 ep 재생 · SL-SOTA14 `-zp5` (`--grasp-zone-keep-palm-steps 5`) 구현 | task 3 의 막힌 손바닥 최악 행 26 call 중 24 call 이 horizon step 5–9 (실행되지 않는 뒤쪽) 의 실제 장애물 행. `-zp5` = 남긴 행을 실행 step 0–4 로 한정 — 단위 test 통과, **closed loop 미측정** (SDM 에서) |
 
 **결론 (AMRC 마지막 시점):** 동결 후보 = `pkgFrs` `AG3S-commonto-att-termsoff-pass-zr-ee-hdp-loose2-obst4-pts-nocarve-fh-t100-pe12345811-to0-om15p10s40-ntc-pt6-pg4-hr150-hb-qs-rs-tro`. 지금 구성 (`…-pe123458`) 대비 E1a 40 SSR 15 → 21 (37.5 → 52.5 %), CAR 23 → 34, > 50 mm 충돌 9 → 1, TSR 22 → 23, LIBERO 27 22 → 23 (`pkgFin` 값). 원문 보고값 (KNOWS Spatial L-I 63.0 / 67.5 / 53.0) 과는 CAR 가 위, SSR 이 0.5 %p 아래, TSR 이 5.5 %p 아래. 남은 실패의 큰 덩어리는 구조적이다 — 실제 장애물 옆에서 팔 link 가 막히는 교착 (7 ep: 우회 경로가 없다), target 정체 오류, 놓는 자리. grasp zone 에서 손바닥 행을 조이는 두 후보 (`-zr60` · `-zp`) 는 task 0 의 접촉 · 교착을 없애지만 (10 / 10) task 2 · 3 의 접근을 막았다 — 두 판의 안전 성공 합집합은 25 / 40 이라 가르는 조건이 이전 후 첫 일이다. 잃은 task 3 episode 에서 손바닥을 막은 행은 26 call 중 24 call 이 실행되지 않는 horizon step 5–9 의 실제 장애물 행이었다 (CPU 재생, 04:5x) → 남긴 행을 실행 step 으로 한정하는 `-zp5` 가 다음 후보 (§9.23 A-0). 동결 (D6) · 같은 기계 재측정 · 남은 guard · 본 run 은 SDM 에서 한다 (계획 문서 §9.23).
 
 **실제 장면 · 그림:** `AG3S/ag3s/docs/figures/sl-sota-qs-e1a40-libero27-20261111.png` (scaled QP), `sl-sota-qs-ms56-shapes-20261111.png` (다른 suite 실패 형태), `sl-sota-fin-e1a40-libero27-20261111.png` (`pkgFin`), `sl-sota-rs-zr-e1a-20261112.png` (latch · zone, 접촉 장면), `sl-sota-zp-e1a40-20261112.png` (`-zp` 의 E1a 40 · 얻은 장면과 잃은 장면). 각 그림 옆 `.json` 에 쓴 숫자. 영상은 run 디렉터리 `videos/` (AMRC storage; SDM 으로는 npz include list 의 run 만 전체가 옮겨짐).
 
-**commit:** 코드 `81779eda` (SL-SOTA11) · `091b7c70` (SL-SOTA12 판 등록) · `52431cd4` · `25aa7314` (SL-SOTA13) · `2c25ac68` (SL-SOTA10) · `11ed4994` · `4d4cc11d` (SL-SOTA7 확장 · SL-SOTA9 등록) 와 그 앞의 SL-SOTA1–6 commit (계획 문서 §8 의 HEAD 표기), 문서는 계획 문서 §8 갱신 기록의 각 행.
+**commit:** 코드 `81779eda` (SL-SOTA11) · `091b7c70` (SL-SOTA12 판 등록) · `52431cd4` · `25aa7314` (SL-SOTA13) · `8d24a96f` (SL-SOTA14) · `2c25ac68` (SL-SOTA10) · `11ed4994` · `4d4cc11d` (SL-SOTA7 확장 · SL-SOTA9 등록) 와 그 앞의 SL-SOTA1–6 commit (계획 문서 §8 의 HEAD 표기), 문서는 계획 문서 §8 갱신 기록의 각 행.

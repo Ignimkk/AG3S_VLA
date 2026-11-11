@@ -190,6 +190,7 @@ T5 뒤에 하면 이 서버에서 끝낸다. **이전 시점은 T5 와의 순서
 | 2026-11-12 03:1x | dev-57: `pkgFrs` 다른 suite goal L-II · goal L-I 16 ep = TSR 6 · CAR 7 · SSR 3 (`-qs` 판 8 · 6 · 3, 지금 구성 6 · 9 · 5; 02:40–03:18) — latch 가 걸렸던 두 episode 는 풀리지 않음 (goal L-II t0 e16 은 call 19 에 attach 됐지만 7 call 뒤 놓침). zone 에서 풀린 행을 GT 로 가름 → 후보 SL-SOTA13 `-zp` (손바닥의 장애물 물체 행만 남김) 를 결과 전 기록 (§9.22). 다른 suite 점검을 멈추고 `-zp` 를 먼저 잼. |
 | 2026-11-12 03:3x | dev-57: **`-zp` (`…-hr150-hb-qs-rs-zp-tro`) E1a task 0 = TSR 10 · CAR 10 · SSR 10 / 10** (`pkgSrs` 9 · 8 · 7, `pkgFin` 8 · 8 · 6; 03:19–03:35, HEAD 25aa7314) — §9.22. 얻음 e5 · e7 · e13 (성공 + 충돌 2 ep 모두 안전 성공으로), 잃음 없음. 거르기 통과 → 같은 판 E1a task 2 · 3 · 1. |
 | 2026-11-12 04:5x | dev-57: **`-zp` (`…-hr150-hb-qs-rs-zp-tro`) E1a 40 = TSR 19 · CAR 36 · SSR 19** (`pkgFin` 22 · 34 · 20; task 2 · 3 · 1 03:35–04:50, HEAD 7b50e287) — §9.22. task 0 은 10 / 10 이지만 task 2 · 3 에서 6 ep 을 잃음 (얻음 5) → **미채택**. AMRC 의 마지막 GPU run (04:50 종료). 동결 후보 = `pkgFrs` (`…-hb-qs-rs-tro`), 검증이 끝난 판 = `pkgFin`. **§9.23 'SDM 이전 후 작업 계획' 을 씀** (사용자 지시 11-11 23:4x) — 못한 작업 전부. offline 분석 도구는 `experiments/segmentation/sota_offline_20261111/` 로 repo 에 넣음. |
+| 2026-11-12 05:1x | dev-57: `-zp` 가 잃은 6 ep 을 CPU 로 재생 (04:53–04:55) — task 3 의 3 ep 에서 손바닥을 막은 최악 행 26 call 중 24 call 이 실행되지 않는 horizon step 5–9 의 실제 장애물 (mug · yellow book · cookies box) 행 (§9.22). **후보 SL-SOTA14 `-zp5`** (남긴 손바닥 행을 실행 step 0–4 로 한정) 를 결과 전 기록 · 구현 · 등록 (HEAD 8d24a96f, 기본 꺼짐) — **closed loop 미측정**, SDM 에서 §9.23 A-3 으로 잰다. 이 세션의 AMRC 작업은 여기까지. |
 | 2026-11-12 01:4x | dev-4a: SDM 세팅 끝 (사용자 실행, venv 6 개 · GPU 확인). SDM 에서 π0.5 단독 측정 ①–③ 행 추가 (§2). SDM이전방법 확인: 05:30–07:00 delta 는 사용자 PC 로만 · SDM 쓰기는 08:00 뒤 사용자 upload 때 (EXISTING=archive 권고). dev-57 확인: ① 중복 아님, AG3S 쪽 GPU 우선 → block 경계에서 넘김. |
 
 ---
@@ -715,9 +716,9 @@ figure (규칙 A): `AG3S/ag3s/docs/figures/sl-sota-zp-e1a40-20261112.png` (+ `.j
 
 | # | 일 | 메모 |
 |---|---|---|
-| 0-1 | SDM checkout 이 AMRC 의 마지막 commit (code `25aa7314`, 문서는 dev-57 의 `docs(plan): §9.23 …` commit) 을 담고 있는지 (`git log --oneline -3`), `wip/sota-om` 은 더 쓰지 않음 (모두 `feature/panda-benchmark` 에 들어감) | 코드 · 문서는 GitHub 로만 옮겨짐 (runbook §0-2) |
+| 0-1 | SDM checkout 이 AMRC 의 마지막 commit (code `8d24a96f` SL-SOTA14, 문서는 그 뒤 dev-57 의 `docs(plan): …` commit) 을 담고 있는지 (`git log --oneline -3`), `wip/sota-om` 은 더 쓰지 않음 (모두 `feature/panda-benchmark` 에 들어감) | 코드 · 문서는 GitHub 로만 옮겨짐 (runbook §0-2) |
 | 0-2 | **SDM 에서 만드는 run-id 는 모두 `-sdm` 으로 끝낸다** — AMRC 결과가 SDM `results/benchmark/` 에 합쳐지고 queue 의 건너뛰기가 run-id 만 본다. `sota_sub_queue.sh` · `sota_ms_queue.sh` · `gtto16_queue.sh` 는 TAG 로 run-id 를 만드니 TAG 를 `…sdm` 으로 준다 (예: `TAG=pkgFin2sdm`) | SDM이전방법 11-12 01:5x |
-| 0-3 | 판 이름이 registry 에 있는지: `.venv-ag3s/bin/python -m pytest -p no:cacheprovider -q tests/trajopt/test_sl_sota11_opening_rule_reach_sticky.py tests/benchmark/test_sota_clearance_versions.py` (전체 tests/benchmark 를 한 번에 돌리지 않는다 — 9 분 넘음) | |
+| 0-3 | 판 이름이 registry 에 있는지: `.venv-ag3s/bin/python -m pytest -p no:cacheprovider -q tests/trajopt/test_sl_sota11_opening_rule_reach_sticky.py tests/trajopt/test_sl_sota13_zone_keep_palm.py tests/benchmark/test_sota_clearance_versions.py` (전체 tests/benchmark 를 한 번에 돌리지 않는다 — 9 분 넘음) | |
 | 0-4 | GPU 는 dev-4a 의 π0.5 단독 run (SafeLIBERO anchor 320 ep 등, 8–13 h) 과 나눠 쓴다 — TrajOpt closed loop 는 GPU 독점 (`/tmp/ag3s-vla-gpu-validation.lock`, launcher 가 직접 잡음). AG3S 쪽이 우선 (사용자 11-11), 시작 · 경계를 dev-4a 에 알린다 | 11-12 02:0x 조율 |
 | 0-5 | offline 분석 도구 · 결과: `experiments/segmentation/sota_offline_20261111/` (AMRC 의 `outputs/2026-11-11_SOTA_개선/` 사본 — git 에 넣음). 재생 도구는 `.venv-libero` + `LIBERO_CONFIG_PATH=$PWD/.runtime/libero MUJOCO_GL=egl`, CPU job 은 `OMP_NUM_THREADS=MKL_NUM_THREADS=OPENBLAS_NUM_THREADS=1` | |
 
@@ -727,7 +728,7 @@ SDM 은 다른 기계라 AMRC 값과 episode 단위로 같다는 보장이 없�
 
 | # | 일 | 명령 · 판정 | 시간 |
 |---|---|---|---|
-| A-0 | **후보 SL-SOTA14 `-zp5` (결과 전 기록, 11-12 04:5x)** — `-zp` 의 남긴 손바닥 행을 **실행되는 step (horizon 0–4) 으로 한정**한다 (step 5–9 의 손바닥 행은 `pkgFin` 처럼 zone 에서 푼다). 근거 [M]: `-zp` 가 task 3 에서 잃은 3 ep 의 막힌 손바닥 최악 행 26 call 중 24 call 이 step 5–9 (§9.22), 실행 5 step 만 센 `zone_rows.py` 는 안전 성공 0 행 / 성공 + 충돌 48 행. 위험: task 2 에서 잃은 3 ep 은 원인을 모른다 — 그대로 잃을 수 있다; step 4 → 5 경계에서 닿는 접촉은 다음 call 에서야 본다 | `pkgFin` ∪ `-zp` 의 안전 성공 합집합 25 / 40 — 가르는 조건이 맞으면 E1a SSR 최대 +4 (`pkgFrs` 21 → 25, 62.5 %). 구현 상태는 이 표 아래 '`-zp5` 의 상태' | 구현 30 분 (CPU) |
+| A-0 | **후보 SL-SOTA14 `-zp5` (결과 전 기록, 11-12 04:5x)** — `-zp` 의 남긴 손바닥 행을 **실행되는 step (horizon 0–4) 으로 한정**한다 (step 5–9 의 손바닥 행은 `pkgFin` 처럼 zone 에서 푼다). 근거 [M]: `-zp` 가 task 3 에서 잃은 3 ep 의 막힌 손바닥 최악 행 26 call 중 24 call 이 step 5–9 (§9.22), 실행 5 step 만 센 `zone_rows.py` 는 안전 성공 0 행 / 성공 + 충돌 48 행. 위험: task 2 에서 잃은 3 ep 은 원인을 모른다 — 그대로 잃을 수 있다; step 4 → 5 경계에서 닿는 접촉은 다음 call 에서야 본다 | `pkgFin` ∪ `-zp` 의 안전 성공 합집합 25 / 40 — 가르는 조건이 맞으면 E1a SSR 최대 +4 (`pkgFrs` 21 → 25, 62.5 %). 구현 상태는 이 표 아래 '`-zp5` 의 상태' | 구현 끝 (05:0x) |
 | A-1 | `pkgFrs` 의 E1a 40 (동결 후보의 주 기준) | `V=P-hb-qs-rs-tro TAG=pkgFrssdm SUB="0:$I 1:$I 2:$I 3:$I" bash experiments/segmentation/sota_sub_queue.sh` → `tri.py sub-pkgFrssdm`. 기대 SSR 21. 20 아래면 같은 기계의 `pkgFin` (`V=P-hb-qs-tro TAG=pkgFinsdm`) 을 재서 기계 차이와 `-rs` 를 가른다 | 1 h 30 분 |
 | A-2 | `pkgFrs` 의 guard (LIBERO 27 → SafeLIBERO 11 → LS 10) | `V=P-hb-qs-rs-tro TAG=pkgFrssdm OUT=outputs/2026-11-11_SOTA_개선/eval_pkgFrssdm MIN27=21 bash experiments/segmentation/gtto16_queue.sh` → `guard.py pkgFrssdm`. 기준 §9.2: LIBERO 27 ≥ 21, LS 10 ≥ 4 · 위반 0, SafeLIBERO 11 의 > 50 mm 충돌 증가 ≤ 1 | 1 h 50 분 |
 | A-3 | `-zp5` 거르기: E1a task 0 → task 3 → task 2 → task 1 순 (잃은 task 를 먼저 확인), 통과면 A-2 와 같은 guard | `V=P-hb-qs-rs-zp5-tro TAG=pkgSzp5sdm SUB="0:$I 3:$I" …` 통과 = task 0 ≥ 9 이고 task 3 이 `pkgFrs` 보다 줄지 않음. E1a 40 SSR ≥ `pkgFrs` + 1 이면 후보 교체 | 45 분 + 45 분 (+ guard 1 h 50 분) |
@@ -736,7 +737,7 @@ SDM 은 다른 기계라 AMRC 값과 episode 단위로 같다는 보장이 없�
 | A-6 | 동결 판정 (D6, 11-13) — E1a 40 (§9.2 주 기준) + guard + 다른 suite 전체 SSR 로 `pkgFrs` (또는 `-zp5` 를 더한 판) vs `pkgFin` vs 지금 구성을 정하고 §8 · `AG3S_FINAL_CONFIG_KO.md` 에 적는다 | 사용자 지시 (11-11): 판단은 세션이 하고 결과를 보고 | — |
 | A-7 | (Tab. 3 용, 동결 뒤에 해도 됨) 기여 사슬을 같은 기계에서 한 번에: 지금 구성 → `-qs` → `+hb` (`pkgFin`) → `+rs` (`pkgFrs`) 의 E1a 40 · LIBERO 27 | A-1 과 같은 queue, TAG `…sdm` | 판 하나에 2 h |
 
-**`-zp5` 의 상태 (11-12 04:5x):** 설계만 — 구현 전. 구현되면 이 줄을 고친다.
+**`-zp5` 의 상태 (11-12 05:1x):** 구현 · 등록 끝, **closed loop 은 한 번도 재지 않았다** (AMRC GPU 종료 뒤에 씀). flag `--grasp-zone-keep-palm-steps 5` (`--grasp-zone-keep-palm-obstacles` 와 함께만; 5 = client 의 `replan_steps`), 판 `…-qs-zp5-tro` · `…-hb-qs-zp5-tro` · `…-hb-qs-rs-zp5-tro` (`SOTA_ZONEPALM5_VERSIONS`), 기록 `to.grasp_contact.zone_kept_palm_steps`. commit `8d24a96f` (worktree `wip/sota-om` e5b43941). 단위 test `tests/trajopt/test_sl_sota13_zone_keep_palm.py` (step 한정 · flag · 판) 통과. SDM 에서는 A-3 을 A-1 과 한 queue 로 묶어도 된다 (`SUB` 는 판 하나만 받으니 queue 를 두 번 부른다 — 경계마다 commit).
 
 **AMRC 에서 재지 못한 것 (위 A 에 모두 들어 있음):** `pkgFrs` E1a task 1–3 · LIBERO 27 · SafeLIBERO 11 · LS 10; `-zp` 의 guard 전부; `pkgFin` 다른 suite 5 cell (goal L-II · long L-I · long L-II · object L-II · spatial L-II); `pkgFrs` 다른 suite 5 cell (object L-I · object L-II · long L-I · long L-II · spatial L-II); 모든 판의 다른 suite init 17 · 18 과 Spatial L-I init 15–18; `-zp` 가 task 2 에서 잃은 3 ep 의 원인; `-zp5` 의 closed-loop 측정 전부; Goal suite 작은 접촉의 원인 (B-2).
 
