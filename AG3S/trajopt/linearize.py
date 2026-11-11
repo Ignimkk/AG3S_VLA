@@ -1219,6 +1219,14 @@ class CollisionLinearizer:
                             kept = cand & on.reshape(shape)
                     rec["zone_kept_palm_rows"] = int(kept.sum())
                     rel = rel & ~kept
+                    # The kept rows bind at the row's own margin (the 10 mm obstacle floor), not at the obstacle-row
+                    # approach margin on top of it: `row_margin` is taken off here so that the obstacle-row checks
+                    # (`clearance >= row margin`) read `d - r - margin >= 0`. zone_rows.py (pkgFin E1a 40, GT labels):
+                    # at that level the 20 safe successes have no palm row on a non-target object; with 20 mm more,
+                    # 7 of them do (the palm passes 0-20 mm from the obstacle without touching it).
+                    row_margin = float(keep.get("row_margin", 0.0) or 0.0)
+                    if row_margin > 0.0:
+                        margin = np.where(kept, margin - row_margin, margin)
                 margin = np.where(rel, -1.0, margin)
                 rec["zone_release_rows"] = int(rel.sum())
         self._last_grasp_contact = rec

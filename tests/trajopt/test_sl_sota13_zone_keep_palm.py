@@ -25,7 +25,7 @@ class _Esdf:
         return g
 
 
-def _margin(keep, cls_row, oop=((0.2, 0.0, 0.1),), latch="latched"):
+def _margin(keep, cls_row, oop=((0.2, 0.0, 0.1),), latch="latched", row_margin=0.0):
     """Four spheres 50 mm from the centroid (all inside the 100 mm zone): 0 = palm, 1 = palm, 2 = finger, 3 = arm (not
     authorized). Every row is 30 mm from the plane x = 0.2, i.e. its surface point is (0.2, y, 0.1)."""
     lin = types.SimpleNamespace(n_spheres=4, _obstacle_rows=lambda d, flat, scene, d_object: np.asarray([cls_row], np.int8),
@@ -35,7 +35,8 @@ def _margin(keep, cls_row, oop=((0.2, 0.0, 0.1),), latch="latched"):
     gc = {"latch": latch, "authorized": np.array([True, True, True, False]), "held_exempt": False, "zone_allowance": None,
           "zone_radius": 0.10, "centroid": np.array([0.12, 0.0, 0.0]), "zone_release": True}
     if keep:
-        gc["zone_keep_palm_obstacles"] = {"links": np.array([True, True, False, False]), "surface_tol": 0.02}
+        gc["zone_keep_palm_obstacles"] = {"links": np.array([True, True, False, False]), "surface_tol": 0.02,
+                                          "row_margin": row_margin}
     m = CollisionLinearizer._grasp_contact_margin(lin, gc, np.full((1, 4), 0.01), np.full((1, 4), 0.03), flat, scene,
                                                   np.full((1, 4), 0.2), (1, 4), 4)
     return m.reshape(-1).tolist(), dict(lin._last_grasp_contact)
@@ -52,6 +53,12 @@ def test_the_palm_row_on_an_obstacle_object_is_kept():
     # released. sphere 2: finger -> released. sphere 3: arm -> never released.
     assert m == [0.01, -1.0, -1.0, 0.01]
     assert rec["zone_kept_palm_rows"] == 1 and rec["zone_release_rows"] == 2
+
+
+def test_the_kept_row_binds_at_its_own_margin_without_the_approach_margin():
+    m, rec = _margin(True, [_OBSTACLE] * 4, row_margin=0.015)
+    # 0.01 (the row's margin) - 0.015: the obstacle-row check `d - r - m >= 0.015` then reads `d - r - 0.01 >= 0`
+    assert m == pytest.approx([0.01 - 0.015, -1.0, -1.0, 0.01]) and rec["zone_kept_palm_rows"] == 1
 
 
 @pytest.mark.parametrize("cls", [_TARGET, _SUPPORT])
@@ -86,6 +93,11 @@ def test_flag_plumbing_and_versions():
     out = ss.apply_grasp_contact_flags(safe, ap.parse_args(ARGV + ["--grasp-zone-release", "--grasp-zone-keep-palm-obstacles",
                                                                    "--obstacle-surface-tol-mm", "40"]))
     assert safe.grasp_zone_keep_palm_obstacles == pytest.approx(0.04) and out["grasp_zone_keep_palm_obstacles_m"] == pytest.approx(0.04)
+    assert safe.grasp_zone_keep_palm_row_margin == 0.0
+    safe = types.SimpleNamespace()
+    ss.apply_grasp_contact_flags(safe, ap.parse_args(ARGV + ["--grasp-zone-release", "--grasp-zone-keep-palm-obstacles",
+                                                             "--obstacle-row-margin-mm", "15"]))
+    assert safe.grasp_zone_keep_palm_row_margin == pytest.approx(0.015) and safe.grasp_zone_keep_palm_obstacles == pytest.approx(0.02)
     safe = types.SimpleNamespace()
     out = ss.apply_grasp_contact_flags(safe, ap.parse_args(ARGV + ["--grasp-zone-release"]))
     assert not hasattr(safe, "grasp_zone_keep_palm_obstacles") and "grasp_zone_keep_palm_obstacles_m" not in out
@@ -119,6 +131,7 @@ def test_the_policy_passes_the_hold_link_mask():
                                _latch=types.SimpleNamespace(phase=types.SimpleNamespace(value="latched")))
     gc = SafePolicy._grasp_contact(sp, None)
     assert gc["zone_release"] is True and gc["zone_keep_palm_obstacles"]["surface_tol"] == 0.04
+    assert gc["zone_keep_palm_obstacles"]["row_margin"] == 0.0
     assert gc["zone_keep_palm_obstacles"]["links"].tolist() == [False, True, False]
     sp.grasp_zone_keep_palm_obstacles = None
     assert "zone_keep_palm_obstacles" not in SafePolicy._grasp_contact(sp, None)

@@ -4967,7 +4967,10 @@ def apply_grasp_contact_flags(safe, args) -> dict:
     if getattr(args, "grasp_zone_keep_palm_obstacles", False):   # SL-SOTA13 (off: no key, no attribute)
         tol_mm = getattr(args, "obstacle_surface_tol_mm", None)
         safe.grasp_zone_keep_palm_obstacles = (20.0 if tol_mm is None else float(tol_mm)) / 1000.0
+        # the kept rows do not get the obstacle-row approach margin (--obstacle-row-margin-mm) on top of their own margin
+        safe.grasp_zone_keep_palm_row_margin = float(getattr(args, "obstacle_row_margin_mm", None) or 0.0) / 1000.0
         out["grasp_zone_keep_palm_obstacles_m"] = safe.grasp_zone_keep_palm_obstacles
+        out["grasp_zone_keep_palm_row_margin_m"] = safe.grasp_zone_keep_palm_row_margin
     if getattr(args, "held_beneath_hand", False):   # SL-GTTO7 F3b (off: no key)
         safe.held_beneath_hand = True
         out["held_beneath_hand"] = True
