@@ -1,4 +1,4 @@
-# Validated .venv-libero freeze (Python 3.8.20), 2026-11-03 19:28 KST.
+# Validated .venv-libero freeze (Python 3.8.20), 2026-11-11 22:58 KST.
 # Editable sources are this checkout's submodules and are excluded below.
 absl-py==2.1.0
 bddl==1.0.1

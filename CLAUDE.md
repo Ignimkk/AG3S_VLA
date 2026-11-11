@@ -15,6 +15,12 @@ AG3S_VLA-storage/results/benchmark/<날짜_commit_run-id>/에 격리한다. sour
 아래에 남은 과거 진행 기록은 source-manifest와 실제 branch를 기준으로 해석한다.
 Panda adapter와 benchmark rollout 구현·평가는 아직 시작하지 않았다.
 
+**SDM 서버 (2026-11-12~):** 이 checkout은 `doc/active/migration/SDM_FRESH_SETUP_20261111_KO.md`로 새로 세팅·검증했다.
+AMRC 마지막 push는 2026-11-12 07:1x에 합쳤다. 이후 commit 규칙은 같은 문서 §8 · §8.1. 요점: SDM run-id는 `sdm-` 접두어 또는 `-sdm` 접미어
+(AMRC 결과와 같은 run-id면 queue가 run을 건너뜀), push 전 `git pull --rebase`,
+queue 중 pull · rebase · commit 금지 (필요하면 queue 주인 세션에 먼저 요청), 세션 id는 `sdm-` 접두어,
+`profile.py` version과 계획서 · log 표는 맨 끝에 추가만 한다.
+
 # AG3S / trajopt 검토 — 작업 규칙
 
 ## 프로젝트 목적

@@ -1,6 +1,6 @@
 # SDM GPU 서버 새로 세팅하기 — apt · git · venv · weight · 검증
 
-작성: 2026-11-11 17:2x KST (dev-4a) · 상태: **작성만 함, SDM 에서 아직 실행 안 함** · 대상: 새 SDM 컨테이너, checkout `/mnt/dev/AG3S_VLA` (`feature/panda-benchmark`)
+작성: 2026-11-11 17:2x KST (dev-4a) · 상태: **SDM 에서 §1–§7 실행 · 검증 완료 (2026-11-12 01:5x, §9)** · 대상: 새 SDM 컨테이너, checkout `/mnt/dev/AG3S_VLA` (`feature/panda-benchmark`)
 
 AMRC 데이터 전송 (PC 중계, 11-12 08:00 이후 SDM 업로드) 을 기다리지 않고, **GitHub 와 공개 출처만으로** SDM 에서 실험을 바로 시작하기 위한 절차다.
 위에서부터 순서대로 실행한다. 각 단계 끝의 '확인' 이 통과해야 다음 단계로 간다.
@@ -150,6 +150,27 @@ for w in grounding-dino-base grounding-dino-tiny sam-vit-huge sam2.1-hiera-large
 $HFPY -c "from huggingface_hub import snapshot_download as d; d('Qwen/Qwen2.5-VL-7B-Instruct', revision='cc594898137f460bfe9f0759e9844b3ce807cfb5', local_dir='/root/.cache/ag3s_local/Qwen2.5-VL-7B-Instruct')"
 ```
 - 6-2 · 6-3 의 원래 기록 (file 수 · aggregate sha256): `AG3S/ag3s/docs/handoff/BM-SETUP-B.impl.md` 119–121 행. 받은 뒤 같은 형식의 `CHECKSUMS.json` 을 남긴다.
+  - **6-2 는 필수다.** `pi05_libero_safety/CHECKSUMS.json` 이 없으면 `launch_libero_safety_paired.py` 가 `checkpoint not ready … (missing CHECKSUMS.json)` 로 거절한다. 아래로 만들고, 출력이 원래 기록 `29 · 12440507736 · 879fd251…3992` 와 같은지 본다 (SDM 11-12 01:4x 일치):
+    ```bash
+    .venv-ag3s/bin/python -I - "$S/checkpoints/panda/pi05_libero_safety" <<'EOF'
+    import datetime, hashlib, json, sys; from pathlib import Path
+    root = Path(sys.argv[1]); recs = []
+    for p in sorted(root.rglob('*')):
+        rel = p.relative_to(root).as_posix()
+        if p.is_file() and not rel.startswith('.cache/') and rel != 'CHECKSUMS.json':
+            h = hashlib.sha256()
+            with open(p, 'rb') as f:
+                for b in iter(lambda: f.read(1 << 20), b''): h.update(b)
+            recs.append({'path': rel, 'bytes': p.stat().st_size, 'sha256': h.hexdigest()})
+    agg = hashlib.sha256(''.join(f"{r['sha256']}  {r['path']}\n" for r in recs).encode()).hexdigest()
+    out = {'source': 'hf://LIBERO-Safety/pi05_libero_safety@e66d84bfec17770384550593e39975f7e21e3463',
+           'fetched_utc': datetime.datetime.now(datetime.timezone.utc).isoformat(), 'files': len(recs),
+           'total_bytes': sum(r['bytes'] for r in recs), 'aggregate_sha256': agg,
+           'aggregate_rule': "sha256 of concatenated '<sha256>  <path>\\n' lines, records sorted by path", 'records': recs}
+    (root / 'CHECKSUMS.json').write_text(json.dumps(out, indent=1)); print(len(recs), out['total_bytes'], agg)
+    EOF
+    ```
+- 6-3 압축 해제는 NFS 에서 느리다 (SDM 실측 초당 약 330 file, 902,920 항목 → 약 1 h). 세션이 끝나면 함께 죽으므로 `setsid nohup` 으로 띄운다. 중간에 끊기면 처음부터 다시 풀지 말고, zip 항목 중 없거나 크기가 다른 file 만 풀면 된다 (끝난 상태: 새로 푼 file + 건너뛴 file = 885,706, 나머지 17,214 는 directory).
 - LIBERO · SafeLIBERO 평가에는 dataset 이 필요 없다. init state 와 BDDL 은 submodule 안에 있다.
 
 ## 7. 검증
@@ -157,7 +178,11 @@ $HFPY -c "from huggingface_hub import snapshot_download as d; d('Qwen/Qwen2.5-VL
 ```bash
 cd /mnt/dev/AG3S_VLA && source scripts/setup/env.sh
 nvidia-smi --query-compute-apps=pid,process_name --format=csv     # 비어 있어야 함
-.venv-ag3s/bin/python scripts/setup/validate_live_env.py           # OpenPI loading · cuRobo kernel · GPU 연산
+# mode 인자가 필수. .venv-ag3s 는 CPU venv 라 curobo 가 없어 실패한다 → GPU venv 로 돌린다.
+# 이 script 는 lock 을 스스로 잡지 않으므로 flock 으로 감싼다. checkpoint mode 는 RB-Y1 checkpoint (§6 에 없음) 를 읽으므로 뺀다.
+for m in imports gpu curobo; do
+  flock -w 120 /tmp/ag3s-vla-gpu-validation.lock .venv-openpi-live/bin/python scripts/setup/validate_live_env.py $m | tail -3; done
+flock -w 120 /tmp/ag3s-vla-gpu-validation.lock .venv-curobo/bin/python scripts/setup/validate_live_env.py curobo | tail -3
 OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 .venv-ag3s/bin/python -m pytest -q \
   tests/ag3s/test_sl_pe8_held_motion.py tests/ag3s/test_sl_pe9_attention_peak.py tests/ag3s/test_sl_pe11_target_cut.py \
   tests/ag3s/test_sl_pe_wiring.py tests/ag3s/test_sl_pe1_close_seed.py tests/trajopt/test_sl_qe2_translation_only.py
@@ -167,9 +192,14 @@ OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 .venv-ag3s/bin/python
 
 | smoke | 확인하는 것 | 예시 |
 |---|---|---|
-| LIBERO π0.5 단독 1 task | policy server + `.venv-libero` client | `benchmark/runners/launch_libero_paired.py` (지금 구성은 `doc/active/experiments/AG3S_FINAL_CONFIG_KO.md`) |
-| SafeLIBERO baseline 1 block | `.venv-baselines` sidecar + Qwen + weight | `Baseline/paper_baselines/closed_loop/launch_method.py --method aegis --task-suite-name safelibero_spatial --safety-level I --task-ids 0 --episode-ids 15 --seed 7 --run-id sdm-smoke-aegis` |
-| LIBERO-Safety 1 ep | MagickWand · asset · `pi05_libero_safety` | `INITS=19 DRY=1 bash experiments/segmentation/bl_tranche_libero_safety_queue.sh` 로 명령을 확인한 뒤 1 개만 실행 |
+| LIBERO π0.5 단독 1 task | policy server + `.venv-libero` client | `.venv-ag3s/bin/python benchmark/runners/launch_libero_paired.py --task-suite-name libero_spatial --task-ids 0 --episode-ids 0 --seed 7 --run-id sdm-smoke-libero-vla --modes vla_only --conversion C` |
+| SafeLIBERO baseline 1 block | `.venv-baselines` sidecar + Qwen + weight | `source Baseline/paper_baselines/setup/paper_baselines_env.sh; export AG3S_BASELINE_VLM_WEIGHT=/root/.cache/ag3s_local/Qwen2.5-VL-7B-Instruct` 뒤 `.venv-ag3s/bin/python Baseline/paper_baselines/closed_loop/launch_method.py --method aegis --task-suite-name safelibero_spatial --safety-level I --task-ids 0 --episode-ids 0 --seed 7 --run-id sdm-smoke-aegis-vlm` |
+| LIBERO-Safety 1 ep | MagickWand · asset · `pi05_libero_safety` | `.venv-ag3s/bin/python benchmark/runners/launch_libero_safety_paired.py --task-suite-name affordance --level 0 --task-ids 0 --episode-ids 0 --seed 7 --data-split dev --run-id sdm-smoke-ls --modes vla_only --policy-checkpoint pi05_libero_safety --conversion C --violation-termination official` (queue 전체 점검은 `INITS=19 DRY=1 bash experiments/segmentation/bl_tranche_libero_safety_queue.sh` → `dry FAILED` 0 개) |
+
+- **`AG3S_BASELINE_VLM_WEIGHT` 를 빼면 안 된다.** sidecar 는 `HF_HUB_OFFLINE=1` 이라, 이 변수가 없으면 repo 이름으로 Qwen 을 찾다가 `filter` 가 매 call 실패한다. 그래도 run 은 끝까지 돌고 TSR 이 나오므로 실패가 눈에 띄지 않는다 (SDM 1 차 smoke `sdm-smoke-aegis`: SidecarError 42 회). `bl_tranche_queue_{c,d,e,f}.sh` 는 이 변수를 스스로 export 한다. 확인: `server_console.log` 의 `method server stopping: calls=N fallbacks=0` 과 SidecarError 0 개.
+- smoke 는 보고용 test split 을 건드리지 않게 개발 split 의 episode 0 을 쓴다 (SafeLIBERO 의 episode 15 는 기본 split 밖이라 launcher 가 거절한다).
+
+SDM 결과 (2026-11-12 01:2x–01:4x, HEAD `af3cc897`, H200 NVL): pytest 38 통과 · validate `imports` `gpu` `curobo` 통과 (torch · jax 합 140.0, kernel `cuda_core`) · LIBERO success · SafeLIBERO AEGIS TSR 1 · CAR 1 (calls 26 · fallback 0) · LIBERO-Safety success. run 폴더는 `results/benchmark/*sdm-smoke-*`.
 
 ## 8. 그 밖
 
@@ -182,10 +212,26 @@ OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 .venv-ag3s/bin/python
   - 그래서 **SDM 에서 만드는 run-id 는 모두 `-sdm` 을 붙인다.** queue script 는 `SUFFIX=-sdm`, 직접 launch 는 `--run-id …-sdm`. 이유: `bl_tranche_*_queue.sh` 의 `done_run` 은 같은 run-id 의 끝난 run 이 있으면 건너뛰므로, AMRC run 과 run-id 가 같으면 SDM run 이 실행되지 않는다. LIBERO-Safety launcher 처럼 run-id 뒤에 `-<suite>-L<lvl>-…` 를 덧붙이는 경우에는 `-sdm` 이 이름 중간에 온다.
 - **코드 · 문서는 GitHub 로만 옮긴다.** relay upload 는 `EXISTING=archive` → AMRC checkout 은 `/mnt/dev/AG3S_VLA_amrc` (참고용, 그 venv 는 경로 때문에 못 씀). SDM checkout 은 `git pull` 로만 갱신하고, AMRC 에만 있던 commit 은 `git fetch /mnt/dev/AG3S_VLA_amrc <branch>` 로 받을 수 있다.
 
+### 8.1 SDM 세션 commit 규칙 (2026-11-12 01:5x 정함)
+
+AMRC 마지막 push 는 11-12 07:0x 이전에 origin 에 올라왔다 (`feature/panda-benchmark` `2284d9c6`, `wip/stage-track` 갱신, `wip/sota-om` 새로). 위 결과 위치 · GitHub 규칙에 더해:
+
+1. **push 전에 언제나 `git pull --rebase`.** SDM 세션은 `feature/panda-benchmark` 에 commit 한다. run-id 는 `sdm-` 로 시작하거나 `-sdm` 을 붙인다.
+2. **queue 가 도는 동안 pull · rebase · commit 금지.** checkout 과 venv 가 하나라 (venv 가 checkout 안에 있어 worktree 를 쓰기 어렵다) HEAD 가 바뀌면 돌고 있는 실험의 code 와 provenance 기록이 어긋난다. 합쳐야 하면 queue 주인 세션에 먼저 멈춰 달라고 한다 (11-12 07:1x dev-c7 queue 를 멈추고 합친 예).
+3. **양쪽이 함께 고치기 쉬운 file** (11-01 이후 commit 기준):
+
+| file | 규칙 |
+|---|---|
+| `AG3S/adapters/panda/profile.py` (version 등록, 44 회 수정) | 새 version 이름 끝에 `-sdm`. 기존 항목은 고치지 않고 맨 끝에 추가만 |
+| `AG3S_PLAN_SCHEDULE_20261110_KO.md` · `SL_AUTONOMOUS_DECISIONS_*.md` · `AG3S_BENCHMARK_LOG.md` | 표 맨 아래에 추가만. 세션 id 는 `sdm-` 접두어 (AMRC 는 `dev-XX`). 충돌이 나면 양쪽 줄을 다 남긴다 |
+| `serve_safe.py` · `server.py` · `sqp.py` | 새 기능은 기본 꺼진 flag 로 (지금 관례) |
+
 ## 9. 기록
 
 | 시각 (KST) | 내용 |
 |---|---|
 | 2026-11-11 17:2x | 작성 (dev-4a). AMRC 의 실제 경로 · script · revision 을 읽어서 썼다: storage `CHECKSUMS.json`, `weights.py`, Qwen hub ref, `.gitmodules`, manifest `apt_history.txt`. SDM 에서는 아직 실행하지 않았다 |
 | 2026-11-12 01:4x | 사용자가 SDM 에서 §1–§5 실행 완료 (dev-4a 가 출력 확인: HEAD af3cc897 = origin, submodule 5 개 pin, venv 6 개 Python 버전 AMRC 와 같음, jax `CudaDevice(id=0)` · torch `NVIDIA H200 NVL` · osmesa OK). §6 · §7 출력은 받지 않음 |
+| 2026-11-12 01:5x | SDM 에서 §6 · §7 실행 (sdm-setup). §6 전부 받음, 6-3 sha256 일치, `pi05_libero_safety` `CHECKSUMS.json` 생성 (원래 기록과 일치). §7 명령 세 곳 수정: `validate_live_env.py` mode · venv, AEGIS smoke 에 `AG3S_BASELINE_VLM_WEIGHT`, smoke episode 를 dev split 으로. §8.1 AMRC 합치기 규칙 추가 (결과는 `results/old_server/` 로 옮기지 않고 SDM run-id 를 구분하는 쪽으로 바꿈). env script 가 다시 쓴 `validated-freeze.txt` 2 개 (libero: 날짜만, libero-safety: click · markdown-it-py · mdit-py-plugins · sentry-sdk 버전) 를 같이 commit |
 | 2026-11-12 02:0x | §8 결과 위치 수정: `results/old_server/` 대신 같은 `results/benchmark/` 에 합치고 SDM run-id 에 `-sdm` (사용자 결정 11-12 01:5x, SDM이전방법 전달) |
+| 2026-11-12 07:1x | AMRC 마지막 push (`2284d9c6`) 와 SDM local commit 2 개를 `git pull --rebase` 로 합침 (sdm-setup, dev-c7 queue 를 멈추고). 충돌은 이 문서 §8 · §9 뿐: 결과 위치 · GitHub 규칙은 dev-4a 문장을 남기고, sdm-setup 의 §8.1 은 겹치는 항목을 빼고 commit 규칙만 남김 |
