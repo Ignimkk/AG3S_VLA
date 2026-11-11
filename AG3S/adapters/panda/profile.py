@@ -1231,6 +1231,22 @@ for _b in ((PE_VERSIONS[6], PE_VERSIONS[11], PE_VERSIONS[6] + "-ntc", PE_VERSION
     SOTA_SCALED_VERSIONS = SOTA_SCALED_VERSIONS + (_b + "-qs", _b + "-qs-tro")
 del _b
 SOTA_VERSIONS = SOTA_VERSIONS + SOTA_SCALED_VERSIONS
+#: SL-SOTA9 (dev-57, 2026-11-11 14:3x): ``-ap`` = SL-PE9 (--attention-peak-seed 5) on the PE11-based ``...-hr150[-hb]-qs``
+#: SOTA versions. ...-pt6-pg4-hr150-tro records: the first identity is another object in 18 / 40 E1a episodes (task 3 = bowl
+#: on the cabinet: 8 / 10, for 9-19 requests) and 11 / 27 LIBERO guard episodes (t4 / t9 every seed) -- the bowl is one
+#: 15 mm component with the cabinet (`not_graspable`), the identity stays on the first object ("occluded") while 60-80 %
+#: of the attention is within 80 mm of the true bowl from request 5 on; until the chunk carries a close command the true
+#: bowl and its cabinet are obstacle rows inside the margin (QP requests while the identity is elsewhere: 83 E1a, 47 LIBERO)
+#: and the progress preference points to the wrong object. PE9 was dropped at G164 for two large SafeLIBERO t3 collisions
+#: that came from the component-wide target drop (G165) -- PE11 keeps the touching obstacle in the set; the third (e0 wine
+#: bottle) stayed at G173. Name = <base>...-qs-ap[-tro].
+SOTA_PEAK_VERSIONS: tuple[str, ...] = ()
+for _b in tuple(v for v in SOTA_VERSIONS if "pe12345811-" in v and "-hr150" in v and v.endswith("-qs")):
+    AG3S_VERSIONS[_b + "-ap"] = tuple(AG3S_VERSIONS[_b]) + ("--attention-peak-seed", "5")
+    AG3S_VERSIONS[_b + "-ap-tro"] = AG3S_VERSIONS[_b + "-ap"] + ("--ee-action-qp-translation-only",)
+    SOTA_PEAK_VERSIONS = SOTA_PEAK_VERSIONS + (_b + "-ap", _b + "-ap-tro")
+del _b
+SOTA_VERSIONS = SOTA_VERSIONS + SOTA_PEAK_VERSIONS
 GT15_VERSIONS = GT15_VERSIONS + SOTA_VERSIONS
 #: (G88c, 03:5x) the A-alone ablation queued as ``…-obst3`` (gtto23, not started yet) gets the same two fixes, so A alone and
 #: A + B differ only by the held point model: ``…-obst3`` := A'' + no carve + support "under" (``…-obst3-pts`` = B'' keeps

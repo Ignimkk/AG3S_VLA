@@ -8,7 +8,8 @@ BASE = "AG3S-commonto-att-termsoff-pass-zr-ee-hdp-loose2-obst4-pts-nocarve-fh-t1
 def test_names_and_flags():
     assert len(pf.SOTA_VERSIONS) == (8 + len(pf.SOTA_OM_VERSIONS) + len(pf.SOTA_NTC_VERSIONS) + len(pf.SOTA_STALL_VERSIONS)
                                      + len(pf.SOTA_GATE_VERSIONS) + len(pf.SOTA_HELD_VERSIONS)
-                                     + len(pf.SOTA_SCALED_VERSIONS) + len(pf.SOTA_HANDB_VERSIONS))
+                                     + len(pf.SOTA_SCALED_VERSIONS) + len(pf.SOTA_HANDB_VERSIONS)
+                                     + len(pf.SOTA_PEAK_VERSIONS))
     assert set(pf.SOTA_VERSIONS) <= set(pf.GT15_VERSIONS)
     for b in (BASE + "pe123458", BASE + "pe12345811"):
         base = tuple(pf.AG3S_VERSIONS[b])
@@ -69,4 +70,23 @@ def test_scaled_qp_versions():
     args = pf.parse_v11ab_args(argv=pf.version_server_argv(name) + list(pf.AG3S_VERSIONS[name]))
     assert args.ee_action_qp_scaled is True and "ee_action_qp_scaled" in srv.PORTED_FINAL_CONFIG_DESTS
     assert "--ee-action-qp-scaled" not in pf.AG3S_VERSIONS[name.replace("-qs-tro", "-tro")]
+
+
+def test_attention_peak_versions():
+    """SL-SOTA9: ``-ap`` = SL-PE9 (--attention-peak-seed 5) on the PE11-based ...-hr150[-hb]-qs versions."""
+    from AG3S.trajopt import serve_safe as ss
+
+    base = "AG3S-commonto-att-termsoff-pass-zr-ee-hdp-loose2-obst4-pts-nocarve-fh-t100-pe12345811-to0-om15p10s40-ntc-pt6-pg4-hr150"
+    for mid in ("-qs", "-hb-qs"):
+        name = base + mid + "-ap-tro"
+        assert name in pf.SOTA_PEAK_VERSIONS and name in pf.GT15_VERSIONS
+        v = tuple(pf.AG3S_VERSIONS[name])
+        assert v[-3:] == ("--attention-peak-seed", "5", "--ee-action-qp-translation-only")
+        assert v[:-3] == tuple(pf.AG3S_VERSIONS[base + mid])
+        assert "--scene-obstacle-target-cut" in v                      # PE9 only with PE11
+        p = pf.parse_v11ab_args(argv=pf.version_server_argv(name) + list(v))
+        assert ss.t43t_identity_section(p)["attention_peak_seed"] == 5.0
+    assert all("pe12345811-" in n and "-hr150" in n for n in pf.SOTA_PEAK_VERSIONS)
+    for n in pf.SOTA_PEAK_VERSIONS:
+        assert pf.version_server_flags(n)
 
