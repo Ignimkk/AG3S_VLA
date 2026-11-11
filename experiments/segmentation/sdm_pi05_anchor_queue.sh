@@ -33,7 +33,7 @@ log() { echo "$(date +%Y-%m-%dT%H:%M:%S%z) $*" | tee -a "$LOG"; }
 run() { log "start $1"; shift; "$@" >> "$LOG.out" 2>&1; log "done rc=$?"; }
 label() { $PY -c "import sys; from benchmark.runners import suite_registry as r; print(r.split_label(sys.argv[1], None if sys.argv[2] == '-' else sys.argv[2], 'test'))" "$1" "$2"; }
 n_of() { awk -F, '{print NF}' <<< "$1"; }
-done_run() {  # $1 = run-id, $2 = expected episodes -> 0 if a finished run (rc 0, all episodes) exists
+done_run() {  # $1 = run dir stem (run-id + launcher suffix), $2 = expected episodes -> 0 if a finished run (rc 0, all episodes) exists
   local d
   for d in "$STORE"/*_"$1"-vla_only; do
     [ -e "$d/episodes.jsonl" ] || continue
@@ -43,13 +43,14 @@ done_run() {  # $1 = run-id, $2 = expected episodes -> 0 if a finished run (rc 0
   done
   return 1
 }
-block() {  # $1 = label, $2 = run-id, $3 = expected episodes, rest = launcher argv (without --run-id)
-  local lab=$1 rid=$2 exp=$3; shift 3
+block() {  # $1 = label, $2 = run-id, $3 = run dir stem, $4 = expected episodes, rest = launcher argv (without --run-id)
+  # stem: the SafeLIBERO launcher appends -L<level> to the run-id (dir ..._sdm-pi05-sl-spatial-LI-LI-vla_only; fix 2026-11-12 07:2x)
+  local lab=$1 rid=$2 stem=$3 exp=$4; shift 4
   if [ "$DRY" = 1 ]; then
     "$@" --run-id "$rid" --dry-run > /dev/null 2>> "$LOG.dry" && log "dry ok $rid" || log "dry FAILED $rid (see $LOG.dry)"
     return
   fi
-  if done_run "$rid" "$exp"; then log "skip $rid (done)"; return; fi
+  if done_run "$stem" "$exp"; then log "skip $rid (done)"; return; fi
   run "$lab" "$@" --run-id "$rid"
 }
 log "SDM pi0.5 baseline queue: HEAD $(git rev-parse --short HEAD) parts='$PARTS' sl_inits=$SL_INITS lb_inits=$LB_INITS dry=$DRY"
@@ -57,7 +58,7 @@ if [[ " $PARTS " == *" 1 "* ]]; then
   for suite in spatial object goal long; do
     for lvl in I II; do
       split=$(label safelibero_$suite $lvl)
-      block "P1 pi05 safelibero_$suite L$lvl init $SL_INITS" "sdm-pi05-sl-$suite-L$lvl" $((4 * $(n_of $SL_INITS))) \
+      block "P1 pi05 safelibero_$suite L$lvl init $SL_INITS" "sdm-pi05-sl-$suite-L$lvl" "sdm-pi05-sl-$suite-L$lvl-L$lvl" $((4 * $(n_of $SL_INITS))) \
         $PY $LP --task-suite-name safelibero_$suite --safety-level $lvl --task-ids 0,1,2,3 --episode-ids $SL_INITS \
         --seed 7 --data-split "$split" --safelibero-step-budget main_aegis
     done
@@ -67,7 +68,7 @@ fi
 if [[ " $PARTS " == *" 2 "* ]]; then
   for suite in libero_spatial libero_object libero_goal libero_10; do
     split=$(label $suite -)
-    block "P2 pi05 $suite init $LB_INITS" "sdm-pi05-lb-${suite#libero_}" $((10 * $(n_of $LB_INITS))) \
+    block "P2 pi05 $suite init $LB_INITS" "sdm-pi05-lb-${suite#libero_}" "sdm-pi05-lb-${suite#libero_}" $((10 * $(n_of $LB_INITS))) \
       $PY $LP --task-suite-name $suite --task-ids 0,1,2,3,4,5,6,7,8,9 --episode-ids $LB_INITS --seed 7 --data-split "$split"
   done
   log "part 2 end"
