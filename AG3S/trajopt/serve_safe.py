@@ -2736,6 +2736,11 @@ def build_parser() -> argparse.ArgumentParser:
                          "BDDL 목적지 이름을 주면 그 code 의 fused 점을 매 frame 목적지로 주입한다 (T26 주입 경로; 필드 라벨 · "
                          "쥔 물체 행에만 contact.destination_margin, 로봇 link 는 원래 margin) (clustering.oracle_destination, "
                          "기록 metrics.grounding_source.destination)")
+    ap.add_argument("--grasp-opening-rule-reach-sticky", action="store_true",
+                    help="SL-SOTA11 — --grasp-opening-rule · --grasp-reach-sticky 와 함께만. opening rule 의 attach 검사에서, 닫힘 "
+                         "명령이 이어지는 한 닫힘 시도 안에서 한 번 통과한 reach 를 그 시도 끝까지 통과로 둔다 (닫는 동안 통과한 "
+                         "reach 가 '정지' 판정 call 에는 손이 물체를 들고 올라가 한도를 넘는 고장; "
+                         "LatchConfig.opening_rule_reach_sticky, 기록 grasp.evidence.reach_sticky). 기본 꺼짐")
     ap.add_argument("--grasp-opening-rule-moved", type=float, default=None, metavar="OPEN",
                     help="SL-GTTO11 (c') — --grasp-opening-rule 에서만. attach 에 '손가락이 실제로 닫혔다' 검사를 더한다: 마지막 열림 "
                          "명령 때 개도 − 지금 개도 ≥ OPEN (정규화 개도). 닫힘 명령 첫 call 의 '정지' 오판 (F8 LS t0e3) 을 막는다")
@@ -4333,6 +4338,9 @@ def reject_bad_flag_combinations(ap: argparse.ArgumentParser, args, *, seed_map_
     # SL-GTTO2 — the two GT flags act on the GT grounding only
     if getattr(args, "grasp_opening_rule_moved", None) is not None and not getattr(args, "grasp_opening_rule", False):   # SL-GTTO11
         ap.error("--grasp-opening-rule-moved 는 --grasp-opening-rule 의 attach 검사입니다 — 함께 주십시오")
+    if getattr(args, "grasp_opening_rule_reach_sticky", False) and not (   # SL-SOTA11
+            getattr(args, "grasp_opening_rule", False) and getattr(args, "grasp_reach_sticky", False)):
+        ap.error("--grasp-opening-rule-reach-sticky 는 --grasp-opening-rule · --grasp-reach-sticky 와 함께만")
     if getattr(args, "ee_action_qp_translation_only", False) and not getattr(args, "ee_action_qp", False):   # SL-QE2
         ap.error("--ee-action-qp-translation-only 는 --ee-action-qp 의 QP 변수만 줄입니다 — 함께 주십시오")
     if getattr(args, "ee_action_qp_rotation_release", False) and not (   # SL-SOTA10

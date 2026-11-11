@@ -303,6 +303,15 @@ class LatchConfig:
     #: F8 LIBERO-Safety human_safety t0e3: 닫힘 명령 첫 call 에서 개도 0.998 → 0.989 (차 0.009 < settle 0.02) 라 `settled` 가
     #: 참이 되어 손가락이 열린 채 attach → 부착 구가 탁자 속 76–91 mm → 78 call HOLD.
     opening_rule_moved_min: Optional[float] = None
+    #: SL-SOTA11 (dev-57, 2026-11-12; `--grasp-opening-rule-reach-sticky`): **False (기본) = 그대로.** `opening_rule` 은 증거
+    #: 상태기계를 대신하므로 V11AB-pb6 의 `reach_sticky` 가 닿지 않는다 — pb6 가 고친 고장이 그대로 다시 난다: 닫는 동안
+    #: (개도가 아직 줄어드는 call) reach 는 통과했는데 `settled` 가 참이 되는 call 에는 손이 물체를 든 채 올라가 있어, 가려진
+    #: 조작 대상의 마지막 관측 기하까지 reach 가 한도 (120 mm) 를 넘는다 → 끝까지 CLOSING, 손에 든 물체가 장애물로 읽힌다
+    #: (E1a `…-hr150-hb-qs-tro` t0 e11: reach 52–78 → 128 mm 로 41 call CLOSING; 다른 suite goal L-I t3 e16 137 mm · goal L-II
+    #: t0 e16 134 mm). True 면 CLOSING 에서 **닫힘 명령이 이어지는 동안** 한 번 통과한 reach 를 그 시도 끝까지 통과로 둔다
+    #: (`_sticky_reach`, 같은 `manipulated_id`; 열림 명령이 실행되거나 CLOSING 을 벗어나면 지운다). 지금 값은
+    #: `evidence["reach_sticky"]` 에 남고, 호출자는 그것을 `AG3S.attach(reach_sticky=...)` 로 넘긴다 (`reach_sticky` 도 켜야 한다).
+    opening_rule_reach_sticky: bool = False
 
 
 @dataclasses.dataclass(frozen=True)
@@ -653,7 +662,7 @@ class GraspLatch:
 
         opening = signal.opening
         if cfg.opening_rule:
-            return self._observe_opening_rule(signal, ev, reach_m)
+            return self._observe_opening_rule(signal, ev, reach_m, reach_context=reach_context)
         if (cfg.placed_rearm and self.phase is GraspPhase.PLACED and opening is not None
                 and float(opening) >= cfg.gripper_closed_below):
             # SL14 — PLACED is not absorbing: an open hand after the release may grasp again. The target lock is kept (the next
@@ -822,7 +831,8 @@ class GraspLatch:
         return self._last_grasp
 
     # --- SL14 `--grasp-opening-rule` -------------------------------------------------------------------------------
-    def _observe_opening_rule(self, signal: GraspSignal, ev: dict, reach_m: Optional[float]) -> LatchEvent:
+    def _observe_opening_rule(self, signal: GraspSignal, ev: dict, reach_m: Optional[float],
+                              reach_context: Optional[dict] = None) -> LatchEvent:
         """The opening-and-command rule replaces the evidence state machine (see `LatchConfig.opening_rule`). Attach / detach go
         through the same `LatchEvent` as a normal one, so the caller's attach path (and the held object leaving the distance field)
         is unchanged. `ev["opening_rule"]` carries the per-call record."""
@@ -841,6 +851,8 @@ class GraspLatch:
         note = ""
         if self.phase is GraspPhase.LATCHED and signal.closing_steps > 0:
             self.phase = GraspPhase.CLOSING
+            if cfg.opening_rule_reach_sticky:   # SL-SOTA11 — a new closing attempt starts without a pass
+                self._reach_pass = None
             note = f"닫힘 시도: 실행된 닫힘 명령 {signal.closing_steps} 스텝 (feedback seq {signal.feedback_seq})"
         elif (self.phase is GraspPhase.CLOSING and open_cmd and opening is not None
               and opening >= cfg.gripper_closed_below):
@@ -870,6 +882,12 @@ class GraspLatch:
                 ref = 1.0 if self._rule_open_ref is None else float(self._rule_open_ref)
                 checks["moved"] = opening is not None and ref - opening >= float(cfg.opening_rule_moved_min)
                 rec["open_ref"] = ref
+            if cfg.opening_rule_reach_sticky:   # SL-SOTA11 (off: the checks as they were, no key)
+                if self.phase is GraspPhase.CLOSING and closed_cmd:
+                    ev["reach_sticky"] = self._sticky_reach(checks, reach_m, ev.get("manipulated_id"), signal,
+                                                            reach_context)
+                else:   # an executed open command or no closing attempt: the pass does not carry over
+                    self._reach_pass = None
             ev["checks"] = checks
             if all(checks.values()):
                 attach = True
