@@ -1,0 +1,522 @@
+{
+ "arms": [
+  {
+   "label": "pe123458 (base)",
+   "tag": "qe-pe123458",
+   "TSR": 22,
+   "CAR": 23,
+   "SSR": 15,
+   "n": 40,
+   "episodes": {
+    "t0_e5": {
+     "class": "F",
+     "displacement_mm": 0.0
+    },
+    "t0_e6": {
+     "class": "F+C",
+     "displacement_mm": 15.7
+    },
+    "t0_e7": {
+     "class": "F",
+     "displacement_mm": 0.0
+    },
+    "t0_e8": {
+     "class": "S+C",
+     "displacement_mm": 35.8
+    },
+    "t0_e9": {
+     "class": "SS",
+     "displacement_mm": 1.0
+    },
+    "t0_e10": {
+     "class": "S+C",
+     "displacement_mm": 6.5
+    },
+    "t0_e11": {
+     "class": "S+C",
+     "displacement_mm": 43.9
+    },
+    "t0_e12": {
+     "class": "F+C",
+     "displacement_mm": 62.5
+    },
+    "t0_e13": {
+     "class": "F+C",
+     "displacement_mm": 247.9
+    },
+    "t0_e14": {
+     "class": "S+C",
+     "displacement_mm": 4.2
+    },
+    "t1_e5": {
+     "class": "SS",
+     "displacement_mm": 0.0
+    },
+    "t1_e6": {
+     "class": "S+C",
+     "displacement_mm": 312.6
+    },
+    "t1_e7": {
+     "class": "SS",
+     "displacement_mm": 0.0
+    },
+    "t1_e8": {
+     "class": "F+C",
+     "displacement_mm": 22.9
+    },
+    "t1_e9": {
+     "class": "F+C",
+     "displacement_mm": 81.1
+    },
+    "t1_e10": {
+     "class": "S+C",
+     "displacement_mm": 41.3
+    },
+    "t1_e11": {
+     "class": "SS",
+     "displacement_mm": 0.0
+    },
+    "t1_e12": {
+     "class": "F+C",
+     "displacement_mm": 188.8
+    },
+    "t1_e13": {
+     "class": "SS",
+     "displacement_mm": 0.0
+    },
+    "t1_e14": {
+     "class": "F+C",
+     "displacement_mm": 328.9
+    },
+    "t2_e5": {
+     "class": "SS",
+     "displacement_mm": 0.0
+    },
+    "t2_e6": {
+     "class": "SS",
+     "displacement_mm": 0.0
+    },
+    "t2_e7": {
+     "class": "F",
+     "displacement_mm": 0.0
+    },
+    "t2_e8": {
+     "class": "SS",
+     "displacement_mm": 0.0
+    },
+    "t2_e9": {
+     "class": "SS",
+     "displacement_mm": 0.0
+    },
+    "t2_e10": {
+     "class": "F+C",
+     "displacement_mm": 1449.6
+    },
+    "t2_e11": {
+     "class": "SS",
+     "displacement_mm": 0.0
+    },
+    "t2_e12": {
+     "class": "SS",
+     "displacement_mm": 0.0
+    },
+    "t2_e13": {
+     "class": "F",
+     "displacement_mm": 0.0
+    },
+    "t2_e14": {
+     "class": "SS",
+     "displacement_mm": 0.0
+    },
+    "t3_e5": {
+     "class": "SS",
+     "displacement_mm": 0.0
+    },
+    "t3_e6": {
+     "class": "F",
+     "displacement_mm": 0.0
+    },
+    "t3_e7": {
+     "class": "SS",
+     "displacement_mm": 0.0
+    },
+    "t3_e8": {
+     "class": "S+C",
+     "displacement_mm": 2.3
+    },
+    "t3_e9": {
+     "class": "F",
+     "displacement_mm": 0.0
+    },
+    "t3_e10": {
+     "class": "F+C",
+     "displacement_mm": 92.9
+    },
+    "t3_e11": {
+     "class": "F",
+     "displacement_mm": 0.0
+    },
+    "t3_e12": {
+     "class": "F",
+     "displacement_mm": 0.0
+    },
+    "t3_e13": {
+     "class": "F+C",
+     "displacement_mm": 487.3
+    },
+    "t3_e14": {
+     "class": "SS",
+     "displacement_mm": 0.0
+    }
+   }
+  },
+  {
+   "label": "+ om15p10s40-ntc (package)",
+   "tag": "sub-pkgAt0",
+   "TSR": 19,
+   "CAR": 29,
+   "SSR": 17,
+   "n": 40,
+   "episodes": {
+    "t0_e5": {
+     "class": "SS",
+     "displacement_mm": 0.0
+    },
+    "t0_e6": {
+     "class": "SS",
+     "displacement_mm": 0.0
+    },
+    "t0_e7": {
+     "class": "F+C",
+     "displacement_mm": 199.6
+    },
+    "t0_e8": {
+     "class": "SS",
+     "displacement_mm": 0.0
+    },
+    "t0_e9": {
+     "class": "F",
+     "displacement_mm": 0.0
+    },
+    "t0_e10": {
+     "class": "F",
+     "displacement_mm": 0.0
+    },
+    "t0_e11": {
+     "class": "SS",
+     "displacement_mm": 0.0
+    },
+    "t0_e12": {
+     "class": "F",
+     "displacement_mm": 0.0
+    },
+    "t0_e13": {
+     "class": "S+C",
+     "displacement_mm": 12.3
+    },
+    "t0_e14": {
+     "class": "F+C",
+     "displacement_mm": 2.2
+    },
+    "t1_e5": {
+     "class": "F",
+     "displacement_mm": 0.4
+    },
+    "t1_e6": {
+     "class": "F",
+     "displacement_mm": 0.0
+    },
+    "t1_e7": {
+     "class": "SS",
+     "displacement_mm": 0.0
+    },
+    "t1_e8": {
+     "class": "F+C",
+     "displacement_mm": 91.4
+    },
+    "t1_e9": {
+     "class": "S+C",
+     "displacement_mm": 177.1
+    },
+    "t1_e10": {
+     "class": "F",
+     "displacement_mm": 0.3
+    },
+    "t1_e11": {
+     "class": "F+C",
+     "displacement_mm": 38.7
+    },
+    "t1_e12": {
+     "class": "F+C",
+     "displacement_mm": 41.2
+    },
+    "t1_e13": {
+     "class": "SS",
+     "displacement_mm": 0.0
+    },
+    "t1_e14": {
+     "class": "F+C",
+     "displacement_mm": 14.7
+    },
+    "t2_e5": {
+     "class": "F",
+     "displacement_mm": 0.0
+    },
+    "t2_e6": {
+     "class": "SS",
+     "displacement_mm": 0.0
+    },
+    "t2_e7": {
+     "class": "SS",
+     "displacement_mm": 0.0
+    },
+    "t2_e8": {
+     "class": "SS",
+     "displacement_mm": 0.0
+    },
+    "t2_e9": {
+     "class": "SS",
+     "displacement_mm": 0.0
+    },
+    "t2_e10": {
+     "class": "F",
+     "displacement_mm": 0.0
+    },
+    "t2_e11": {
+     "class": "SS",
+     "displacement_mm": 0.0
+    },
+    "t2_e12": {
+     "class": "SS",
+     "displacement_mm": 0.0
+    },
+    "t2_e13": {
+     "class": "SS",
+     "displacement_mm": 0.0
+    },
+    "t2_e14": {
+     "class": "F",
+     "displacement_mm": 0.0
+    },
+    "t3_e5": {
+     "class": "SS",
+     "displacement_mm": 0.0
+    },
+    "t3_e6": {
+     "class": "F",
+     "displacement_mm": 0.0
+    },
+    "t3_e7": {
+     "class": "SS",
+     "displacement_mm": 0.0
+    },
+    "t3_e8": {
+     "class": "SS",
+     "displacement_mm": 0.0
+    },
+    "t3_e9": {
+     "class": "F+C",
+     "displacement_mm": 684.7
+    },
+    "t3_e10": {
+     "class": "F+C",
+     "displacement_mm": 484.5
+    },
+    "t3_e11": {
+     "class": "F",
+     "displacement_mm": 0.0
+    },
+    "t3_e12": {
+     "class": "F+C",
+     "displacement_mm": 219.0
+    },
+    "t3_e13": {
+     "class": "SS",
+     "displacement_mm": 0.0
+    },
+    "t3_e14": {
+     "class": "F",
+     "displacement_mm": 0.0
+    }
+   }
+  },
+  {
+   "label": "+ pt6-pg4-hr150",
+   "tag": "sub-pkgEhr150",
+   "TSR": 23,
+   "CAR": 33,
+   "SSR": 18,
+   "n": 40,
+   "episodes": {
+    "t0_e5": {
+     "class": "SS",
+     "displacement_mm": 0.0
+    },
+    "t0_e6": {
+     "class": "F",
+     "displacement_mm": 0.0
+    },
+    "t0_e7": {
+     "class": "SS",
+     "displacement_mm": 0.0
+    },
+    "t0_e8": {
+     "class": "SS",
+     "displacement_mm": 0.0
+    },
+    "t0_e9": {
+     "class": "SS",
+     "displacement_mm": 0.0
+    },
+    "t0_e10": {
+     "class": "S+C",
+     "displacement_mm": 62.3
+    },
+    "t0_e11": {
+     "class": "SS",
+     "displacement_mm": 0.0
+    },
+    "t0_e12": {
+     "class": "SS",
+     "displacement_mm": 0.0
+    },
+    "t0_e13": {
+     "class": "S+C",
+     "displacement_mm": 1.3
+    },
+    "t0_e14": {
+     "class": "SS",
+     "displacement_mm": 0.0
+    },
+    "t1_e5": {
+     "class": "F",
+     "displacement_mm": 0.0
+    },
+    "t1_e6": {
+     "class": "F",
+     "displacement_mm": 0.0
+    },
+    "t1_e7": {
+     "class": "SS",
+     "displacement_mm": 0.0
+    },
+    "t1_e8": {
+     "class": "F",
+     "displacement_mm": 0.0
+    },
+    "t1_e9": {
+     "class": "S+C",
+     "displacement_mm": 176.3
+    },
+    "t1_e10": {
+     "class": "S+C",
+     "displacement_mm": 2.2
+    },
+    "t1_e11": {
+     "class": "F+C",
+     "displacement_mm": 1.0
+    },
+    "t1_e12": {
+     "class": "F",
+     "displacement_mm": 0.0
+    },
+    "t1_e13": {
+     "class": "SS",
+     "displacement_mm": 0.0
+    },
+    "t1_e14": {
+     "class": "F",
+     "displacement_mm": 0.7
+    },
+    "t2_e5": {
+     "class": "F",
+     "displacement_mm": 0.0
+    },
+    "t2_e6": {
+     "class": "F",
+     "displacement_mm": 0.0
+    },
+    "t2_e7": {
+     "class": "SS",
+     "displacement_mm": 0.0
+    },
+    "t2_e8": {
+     "class": "SS",
+     "displacement_mm": 0.0
+    },
+    "t2_e9": {
+     "class": "SS",
+     "displacement_mm": 0.0
+    },
+    "t2_e10": {
+     "class": "S+C",
+     "displacement_mm": 5.4
+    },
+    "t2_e11": {
+     "class": "SS",
+     "displacement_mm": 0.0
+    },
+    "t2_e12": {
+     "class": "SS",
+     "displacement_mm": 0.0
+    },
+    "t2_e13": {
+     "class": "F",
+     "displacement_mm": 0.0
+    },
+    "t2_e14": {
+     "class": "SS",
+     "displacement_mm": 0.0
+    },
+    "t3_e5": {
+     "class": "SS",
+     "displacement_mm": 0.0
+    },
+    "t3_e6": {
+     "class": "F",
+     "displacement_mm": 0.0
+    },
+    "t3_e7": {
+     "class": "SS",
+     "displacement_mm": 0.0
+    },
+    "t3_e8": {
+     "class": "F",
+     "displacement_mm": 0.0
+    },
+    "t3_e9": {
+     "class": "F+C",
+     "displacement_mm": 4.9
+    },
+    "t3_e10": {
+     "class": "F",
+     "displacement_mm": 0.0
+    },
+    "t3_e11": {
+     "class": "F",
+     "displacement_mm": 0.0
+    },
+    "t3_e12": {
+     "class": "F",
+     "displacement_mm": 0.0
+    },
+    "t3_e13": {
+     "class": "F",
+     "displacement_mm": 0.0
+    },
+    "t3_e14": {
+     "class": "SS",
+     "displacement_mm": 0.0
+    }
+   }
+  }
+ ],
+ "reference": {
+  "KNOWS Spatial L-I reported (TSR, CAR, SSR %)": [
+   63.0,
+   67.5,
+   53.0
+  ]
+ },
+ "source": "results/benchmark/*_<tag>-e1a-spatial-LI-t<k>-*/episodes.jsonl"
+}

@@ -175,6 +175,7 @@ T5 뒤에 하면 이 서버에서 끝낸다. **이전 시점은 T5 와의 순서
 | 2026-11-11 09:0x | dev-57: **묶음 판 `…-pe12345811-to0-om15p10s40-ntc-tro` E1a 40 = TSR 19 · CAR 29 · SSR 17** (지금 구성 22 · 23 · 15; SSR 얻음 8 / 잃음 6, > 50 mm 9 → 6) — §9.7. 충돌은 줄었고 (CAR +6) 대신 step 예산을 넘긴 실패가 늘었다 (충돌 없는 실패 12 ep, 모두 `max_steps`). 주 기준 (SSR ≥ +1) 은 넘지만 guard 전이고, 교착을 풀면 더 오를 여지가 커서 채택 판정은 미룸. 교착 대응 **SL-SOTA2** (`--ee-action-qp-progress`, 판 `-pg4`) · **SL-SOTA3** (`--obstacle-row-patience`, 판 `-pt6` · `-pt3`) 을 commit 9728acbb 로 넣음 (기본 꺼짐). 다음 = `…-ntc-pt6-pg4-tro` E1a task 0 (10 ep) → 나머지 task. |
 | 2026-11-11 09:2x | dev-57: **`…-ntc-pt6-pg4-tro` E1a task 0 (10 ep) = TSR 8 · CAR 8 · SSR 7** (지금 구성 5 · 3 · 1, 묶음 판 5 · 7 · 4; 09:11–09:26, HEAD 4f350f61) — 교착 5 ep 중 4 ep 이 안전 성공으로 바뀜 (§9.8). QP 가 action 을 크게 흔드는 원인 (통과 판정이 받아들이는 model 위반까지 0 으로 되돌림; 묶음 판 QP call 894 중 469 가 반복 한도 · |Da| 중앙값 1.3–1.5) 을 겨냥한 **SL-SOTA4** (`--ee-action-qp-gate-rows`, 판 `-gr`) 를 commit 53177bcf 로 넣음 (기본 꺼짐, 결과 전 기록). 다음 = `-pt6-pg4` 판 task 1–3 으로 E1a 40 을 채움 → `-gr` 판. |
 | 2026-11-11 11:4x | dev-57: **`…-pe12345811-to0-om15p10s40-ntc-pt6-pg4-hr150-tro` E1a 40 = TSR 23 · CAR 33 · SSR 18** (지금 구성 22 · 23 · 15, 묶음 판 19 · 29 · 17; > 50 mm 9 → 2; 10:09–11:36, HEAD 2ca92510) — §9.9. 주 기준 통과 (SSR +3, CAR +10). 그 사이: 인내 한도 bug 수정 (c9fd709c), `-gr` 판 task 0 = 5 · 6 · 4 (쓰지 않음), SL-SOTA5 (`-hr150`, 0df76355) task 0 = 9 · 8 · 7. 실패 17 ep 은 전부 `max_steps` (충돌 없는 실패 15). 다음 = 이 판의 guard (LIBERO 27 · SafeLIBERO 11 · LS 10) → 다른 suite 점검 1 차 (init 15 · 16). |
+| 2026-11-11 13:2x | dev-57: **§9.9 판 guard — LIBERO 27 = 18 (지금 구성 22) → 미달, 그대로는 채택하지 않음** (SafeLIBERO 11 안전 성공 5 · > 50 mm 0, LS 10 = 6 · 위반 0 은 통과; 11:39–13:24, HEAD 8cf759fb) — §9.11. LIBERO 에서 action QP 요청이 68 → 244 (3.6 배). 실패 17 ep 원인과 후보 SL-SOTA6 `-qs` (scaled QP) · SL-SOTA7 `-hb` (쥔 손 아래 표면) 는 §9.10. 다음 = `-qs` 판 LIBERO 27 먼저. |
 
 ---
 
@@ -357,3 +358,47 @@ n · TSR · CAR · SSR. baseline 열은 dev-4a tranche 1 의 같은 기계 · �
 - task 1 (2 / 10) · task 3 (3 / 10) 이 낮다. task 1 의 4 ep 은 기준 판이 크게 충돌하던 곳 (팔 link 가 키 큰 장애물에 닿는 경로) 이라 '충돌을 교착으로 바꾼' 상태 — 돌아가는 속도가 모자란다.
 
 순서 (11:4x): (1) 이 판의 guard — `sota_queue.sh STAGE=guard` (약 85 분). (2) 다른 suite 점검 1 차 (init 15 · 16, 56 ep, 약 1.9 h; 기준 판 24 · 31 · 17 과 짝 비교). (3) 그 사이 CPU 로 실패 17 ep 을 형태별로 분석해 다음 후보를 정한다 — 준비된 것은 진행 선호 gain 0.8 판 `-pt6-pg8` (돌아가는 속도; task 1 · 3 에서 거름).
+
+### 9.10 실패 17 ep 의 원인과 후보 SL-SOTA6 · SL-SOTA7 (결과 전 기록, 12:2x)
+
+§9.9 판의 실패 17 ep 을 막은 실제 물체로 다시 봄 (`outputs/2026-11-11_SOTA_개선/offline/owner_pkgEhr150/`, `surface_owner.py` — GT 는 채점만; README §6):
+
+| 관측 [M] | 수치 · episode | 후보 |
+|---|---|---|
+| **action QP 풀이가 수렴하지 않는다** — OSQP 가 20000 반복 상한에서 멈춘 iterate 를 실행 | 풀이의 91–93 % (지금 구성 1186 / 1271, 묶음 판 2423 / 2674, §9.9 판 1976 / 2188), call 당 0.8–1.3 s | **SL-SOTA6** `-qs` |
+| 놓는 순간 손가락 ↔ **접시** 행이 장애물 여유 안쪽 → 거절 → QP 가 손을 접시 밖으로 밀어 잘못 놓음 | t2 e6 (call 27, \|Da\| 1.64) · e5 (call 30 – 33, 1.45) · e13. task 2 10 ep 중 목적지 등록은 6 ep, e6 은 55 점 (놓는 곳에서 100 mm) | **SL-SOTA7** `-hb` |
+| 팔 link ↔ 실제 장애물 (돌아가야 하는 곳) | t1 e6 · e12 (moka pot, link6), t1 e8 · e14 (우유, link5), t3 e6 · e12 (와인병, link5), t3 e10 (머그), t0 e6 | 진행 선호 (`-pg4` / `-pg8`) — QP 가 수렴한 뒤 다시 봄 |
+| 그릇이 이미 옮겨졌는데 인식된 target 은 옛 자리 (300 – 1300 mm) → 실제 그릇이 장애물로 읽힘 | t3 e8 (쥐었는데 latch 가 `closing` 에 머묾), t3 e13 · t2 e13 (떨어뜨림 · 잘못 놓은 뒤) | 앞의 두 원인의 결과로 보고 먼저 그쪽을 고침 |
+
+| 후보 | flag · 판 suffix | 하는 일 | 위험 [해석] |
+|---|---|---|---|
+| SL-SOTA6 | `--ee-action-qp-scaled` · `-qs` (새 코드 없음 — SL-GTTO11 F9a 를 SOTA 판에 얹는 이름만, worktree bcc1085f) | 충돌 행을 action gradient 크기로 정규화하고 slack 을 2 차 penalty 로 둔 QP. G58 [M]: OSQP 상한 0.89 → 0.22, \|Da\| 중앙값 0.99 → 0.41. 당시에는 opening rule 의 `moved` 검사와 묶여서만 평가됐고 (G59 미채택) `moved` 검사만 뒤에 채택됨 | 최소 norm 해는 여유에 딱 붙는다 → 접촉이 늘 수 있음. 진행 선호 항이 설계대로 (막힌 동안 action +0.4) 작동하기 시작함 |
+| SL-SOTA7 | `--obstacle-hand-beneath` · `-hb` (worktree 7d5c5ecd, 기본 꺼짐) | 쥔 동안 손 (palm · 손가락) 행의 최근접 장애물 집합 점이 쥔 물체의 xy footprint (+ 10 mm) 안이고 쥔 물체 윗면보다 높지 않으면 장애물 물체 행에서 뺀다. 쥔 물체 행은 이미 같은 허용이 있다 (`held_beneath_contact`). 새 숫자 없음 (pad = 2 voxel, 기존 A′ 와 같음) | 쥔 물체 바로 아래의 장애물에 손이 닿는 것을 막지 않는다 (쥔 물체 행의 옆 방향 판정은 그대로) |
+
+순서 (결과 전): guard 가 끝나면 (1) `…-ntc-pt6-pg4-hr150-qs-tro` E1a — task 1 → 2 → 0 → 3 순으로 돌리며 task 마다 §9.9 판과 비교, (2) `-hb` 를 얹은 판, (3) 둘 중 나은 조합으로 다른 suite 점검 1 차. 판정은 §9.2 그대로 (기준 `…-pe123458` 15; §9.9 판 18 과도 같이 적는다).
+
+### 9.11 `-pt6-pg4-hr150` 판의 guard [M] — LIBERO 27 미달 (13:2x)
+
+2026-11-11 11:39–13:24, HEAD 8cf759fb, `…-pe12345811-to0-om15p10s40-ntc-pt6-pg4-hr150-tro`, seed 7 (LIBERO 는 7 · 8 · 9), run-id `gtto-pkgEhr150-*`.
+
+| guard | 지금 구성 (`…-pe123458`) | §9.9 판 | 규칙 (§9.2) | 판정 |
+|---|---:|---:|---|---|
+| LIBERO 27 (Spatial 9 task × seed 7 · 8 · 9) | 22 (7 · 7 · 8) | **18** (7 · 5 · 6) | ≥ 21 | **미달** |
+| SafeLIBERO 11 — 성공 · 충돌 없음 · 안전 성공 | 7 · 7 · 6 | 5 · 10 · 5 | > 50 mm 증가 ≤ 1 | 통과 (> 50 mm 1 → 0, 충돌 4 → 1 [1.0 mm]) |
+| LIBERO-Safety 10 — 성공 · 위반 | 5 · 1 | 6 · 0 | ≥ 4, 위반 0 | 통과 |
+
+LIBERO 27 의 episode 별 차이 [M]: 잃음 s7 t2, s8 t7 · t8, s9 t4 · t9 (5), 얻음 s7 t9 (1); 양쪽 실패 s7 t4, s8 t4 · t9, s9 t1.
+
+| LIBERO 27 의 action QP [M] | 지금 구성 | §9.9 판 |
+|---|---:|---:|
+| 요청 수 | 733 | 860 |
+| action QP 로 고친 요청 | 68 | **244** |
+| 그중 쥔 동안 | 34 | 82 |
+| OSQP 상한 (20000) 도달 | 66 | 237 |
+| task 별 QP 요청 (t2 · t4 · t7 · t9) | 3 · 12 · 2 · 22 | 38 · 88 · 17 · 49 |
+
+- **[M]** 장애물이 없는 LIBERO 에서 QP 로 들어가는 요청이 3.6 배. t4 는 쥐기 전에 44 요청 중 24–32 가 QP (rightfinger · hand 행) 로 끝까지 쥐지 못함; t2 는 쥔 뒤 놓는 곳에서 쥔 물체 행 (`attached`) 이 9–17 요청; s8 t7 · t8 은 쥔 동안 QP (|Da| 0.6–1.35) 뒤에 물체를 놓침.
+- **[해석]** 여유 15 mm + 표면 허용 40 mm (`-om15p10s40`) 가 SafeLIBERO 의 충돌을 줄인 그 규칙이, target 이 아닌 물체 (서랍 · 접시 · stove) 가까이로 가야 하는 LIBERO 에서는 같은 접근을 막는다. 여기에 풀이가 수렴하지 않은 큰 보정 (상한 도달 97 %) 이 겹친다. 어느 쪽이 큰지는 아직 가르지 못함.
+- **판정: §9.9 판은 그대로는 채택하지 않는다** (LIBERO 27 18 < 21). E1a 의 이득 (CAR +10, SSR +3) 은 유지하면서 LIBERO 를 21 이상으로 되돌리는 것이 다음 목표.
+
+순서 (결과 전, 13:3x): (1) `…-hr150-qs-tro` **LIBERO 27 만 먼저** (37 분, `gtto16_queue.sh MIN27=28` — 안전 bench 는 돌지 않음) — 수렴하는 QP 가 LIBERO 를 되돌리는지. 그동안 CPU 로 LIBERO 실패 5 ep 을 막은 물체를 확인. (2) 21 이상이면 같은 판의 E1a (task 1 → 2 → 0 → 3), 아니면 막은 물체에 맞춘 후보 (`-hb` 포함) 를 LIBERO 27 로 먼저 거른 뒤 E1a. (3) 통과한 판의 guard 나머지 + 다른 suite 점검 1 차.
