@@ -691,6 +691,7 @@ PORTED_FINAL_CONFIG_DESTS: tuple[str, ...] = (
     # SL-GTTO11 F9a: the scaled form of the F7 action QP (SafePolicy optimizer attribute, set below)
     'ee_action_qp_scaled',
     'ee_action_qp_translation_only',   # SL-QE2 (dev-e5, 2026-11-09)
+    'ee_action_qp_rotation_release',   # SL-SOTA10 (dev-57, 2026-11-11)
     # SL-GTTO11 (c'): the opening rule's `moved` check (LatchConfig.opening_rule_moved_min, through panda_latch_config)
     'grasp_opening_rule_moved',
     # SL-GTTO14 (G69): the accepted model violation tau (sqp.passthrough_tolerance + safety.violation_tolerance, through
@@ -1118,6 +1119,9 @@ def build_safe_server(policy, args, *, attention_model=None, gpu_warm_up: bool =
         if getattr(args, "ee_action_qp_translation_only", False):   # SL-QE2 (off: every action dim free, as before)
             safe.refiner.optimizer.ee_action_fixed_dims = (3, 4, 5)   # Panda a_ref = [pos 3, rot 3] (action.ee_action_map)
             grasp_contact = {**grasp_contact, "ee_action_qp_translation_only": True}
+            if getattr(args, "ee_action_qp_rotation_release", False):   # SL-SOTA10 (off: the rotation columns stay fixed)
+                safe.refiner.optimizer.ee_action_rotation_release = True
+                grasp_contact = {**grasp_contact, "ee_action_qp_rotation_release": True}
         if getattr(args, "ee_action_qp_progress", None) is not None:   # SL-SOTA2 (off: the min-norm cost as before)
             # Panda a_ref = [pos 3, rot 3]: dims 0-2 = the world-frame step of the OSC position action
             safe.refiner.optimizer.ee_action_progress = {"dims": (0, 1, 2), "gain": float(args.ee_action_qp_progress),

@@ -105,6 +105,13 @@ class TrajectoryOptimizer:
     #: correction bends the policy's position only, as the E1a multi-link CBF does (E1a task 3: the F7 QP moved rx / ry / rz
     #: by ~1.0 on the first intervention, the grasp pose was lost; G110).
     ee_action_fixed_dims = None
+    #: SL-SOTA10 (dev-57, 2026-11-11, `--ee-action-qp-rotation-release`, default off): with `ee_action_fixed_dims` and the
+    #: obstacle-row patience (SL-SOTA3) -- once the patience is used up (the policy chunk stayed inside the obstacle margin
+    #: for more than `obstacle_row_patience` consecutive calls, state "relaxed") the fixed columns are free again until a
+    #: chunk clears the margin. Translation alone cannot move a forearm row off an obstacle the hand has to pass or come
+    #: down next to (E1a ...-hr150-qs-tro task 1 init 6 / 8 / 9 / 12: 30-47 held calls with link5 / link6 40 mm inside the
+    #: milk / moka pot row, the QP cancels the policy's +y / -z step every call and the hand stands still to `max_steps`).
+    ee_action_rotation_release = False
     #: SL-SOTA2 (dev-57, 2026-11-11, `--ee-action-qp-progress GAIN`, default off = None): ``{"dims": (x, y, z action
     #: columns), "gain": float, "full_at_m": float, "link": str, "min_xy_m": float}`` -- while the policy chunk violates an
     #: obstacle-object row (the pass-through record's `obstacle_rows.violation_m` > 0) the action QP's cost becomes
@@ -1508,6 +1515,11 @@ class TrajectoryOptimizer:
         lo_x = (-1.0 - a_ref).reshape(-1)
         hi_x = (1.0 - a_ref).reshape(-1)
         fixed = self.ee_action_fixed_dims   # SL-QE2 (off: None, the box above unchanged)
+        released = None
+        if fixed and getattr(self, "ee_action_rotation_release", False):   # SL-SOTA10 (off: `fixed` as before)
+            released = bool(self._patience_state().get("relaxed"))
+            if released:
+                fixed = None
         if fixed:
             fmask = np.zeros(a_ref.shape, bool)
             fmask[:, list(fixed)] = True
@@ -1519,6 +1531,8 @@ class TrajectoryOptimizer:
         rec = {"iterations": 0, "rows": [], "status": [], "slack_max_m": 0.0}
         if fixed:
             rec["fixed_dims"] = [int(d) for d in fixed]   # SL-QE2
+        if released is not None:
+            rec["rotation_released"] = released   # SL-SOTA10: key only when the switch is on
         # SL-SOTA1 (2026-11-11, `sqp.obstacle_row_margin`, None = off: the loop below as before): the obstacle-object rows
         # (the classification of the pass-through test) are held `margin` above their floor, and their slack costs
         # `obstacle_row_priority` times the other rows' -- the L1 slack otherwise trades one deep obstacle row against many

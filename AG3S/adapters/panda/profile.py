@@ -1247,6 +1247,16 @@ for _b in tuple(v for v in SOTA_VERSIONS if "pe12345811-" in v and "-hr150" in v
     SOTA_PEAK_VERSIONS = SOTA_PEAK_VERSIONS + (_b + "-ap", _b + "-ap-tro")
 del _b
 SOTA_VERSIONS = SOTA_VERSIONS + SOTA_PEAK_VERSIONS
+#: SL-SOTA10 (dev-57, 2026-11-11 16:xx): ``-rr`` = --ee-action-qp-rotation-release on the ``...-pt6-…-hr150[-hb]-qs[-ap]-tro``
+#: versions (needs the patience and the translation-only QP). E1a ...-hr150-qs-tro: task 1 init 6 / 8 / 9 / 12 hold the bowl
+#: 30-47 calls with link5 / link6 against the milk / moka pot (the policy steps +y / -z, the QP cancels it, the hand stands
+#: still), task 3 init 6 / 9 / 12 the same before the grasp (wine bottle). Name = <base>...-qs[-ap]-rr-tro.
+SOTA_ROTREL_VERSIONS: tuple[str, ...] = ()
+for _b in tuple(v for v in SOTA_VERSIONS if "-pt6-" in v and "-hr150" in v and (v.endswith("-qs-tro") or v.endswith("-qs-ap-tro"))):
+    AG3S_VERSIONS[_b[:-len("-tro")] + "-rr-tro"] = tuple(AG3S_VERSIONS[_b]) + ("--ee-action-qp-rotation-release",)
+    SOTA_ROTREL_VERSIONS = SOTA_ROTREL_VERSIONS + (_b[:-len("-tro")] + "-rr-tro",)
+del _b
+SOTA_VERSIONS = SOTA_VERSIONS + SOTA_ROTREL_VERSIONS
 GT15_VERSIONS = GT15_VERSIONS + SOTA_VERSIONS
 #: (G88c, 03:5x) the A-alone ablation queued as ``…-obst3`` (gtto23, not started yet) gets the same two fixes, so A alone and
 #: A + B differ only by the held point model: ``…-obst3`` := A'' + no carve + support "under" (``…-obst3-pts`` = B'' keeps
