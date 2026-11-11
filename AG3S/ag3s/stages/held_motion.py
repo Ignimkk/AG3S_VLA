@@ -47,16 +47,20 @@ class HeldMotionTracker:
     """Per-episode state of SL-PE8. `update(...)` once per request, in request order; `reset()` on episode reset."""
 
     def __init__(self, match_m: float = 0.010, drift_m: float = 0.025, reach_pad_m: float = 0.02,
-                 reach_cap_m: float = 0.15, voxel_m: float = 0.004, max_points: int = 20000):
+                 reach_cap_m: float = 0.15, voxel_m: float = 0.004, max_points: int = 20000, reach_min_m: float = 0.0):
         self.match, self.drift, self.reach_pad, self.reach_cap = float(match_m), float(drift_m), float(reach_pad_m), \
             float(reach_cap_m)
+        #: SL-SOTA5 (dev-57, 2026-11-11): the reach is at least this (0 = the perceived extent + pad alone, as before). The
+        #: perceived target can be a piece of the object (E1a t0 init 6: 31 points, extent 61 mm of a 140 mm bowl -> reach
+        #: 81 mm, the bowl's far wall 62-104 mm from the fingertips stayed an obstacle for 23 calls).
+        self.reach_min = float(reach_min_m)
         self.voxel, self.max_points = float(voxel_m), int(max_points)
         self.reset()
 
     def reset(self) -> None:
         self._snap = np.zeros((0, 3))       # hand frame, reference only
         self._verified = np.zeros((0, 3))   # hand frame, removed
-        self._reach = self.reach_cap
+        self._reach = max(self.reach_cap, self.reach_min)
         self._prev: Optional[tuple] = None  # (H, T, P, held)
         self.last: dict[str, Any] = {}
 
@@ -72,7 +76,7 @@ class HeldMotionTracker:
         if not held:
             if preheld_geometry is not None and len(preheld_geometry):
                 g = np.asarray(preheld_geometry, np.float64).reshape(-1, 3)
-                self._reach = min(float(np.ptp(g, axis=0).max()) + self.reach_pad, self.reach_cap)
+                self._reach = max(min(float(np.ptp(g, axis=0).max()) + self.reach_pad, self.reach_cap), self.reach_min)
                 if tip is not None:
                     g = g[np.linalg.norm(g - tip, axis=1) <= self._reach]
                 self._snap = _to_frame(T, g)

@@ -737,6 +737,8 @@ PORTED_FINAL_CONFIG_DESTS: tuple[str, ...] = (
     'ee_action_qp_progress', 'obstacle_row_patience',
     # SL-SOTA4: the action QP holds the non-obstacle ESDF rows at -tau (sqp key, same path)
     'ee_action_qp_gate_rows',
+    # SL-SOTA5: SL-PE8's reach floor (clustering key, same path as close_seed_attention_ratio)
+    'scene_obstacle_held_reach_mm',
 )
 #: SL-GTTO — the target extents the Panda server runs (``--target-extent``; SL7 attention-surface, SL-GTTO oracle-visible).
 PORTED_TARGET_EXTENTS: tuple[str, ...] = ("estimated", "attention-surface", "oracle-visible")

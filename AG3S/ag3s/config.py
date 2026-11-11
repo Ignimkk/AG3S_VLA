@@ -515,6 +515,11 @@ class ClusteringConfig:
     #: attach snapshot, so SL-PE3's 15 mm test dropped nothing and the hand rows next to the held bowl refused the
     #: pass-through 8-15 calls (LIBERO t9, pe12345). Needs `scene_obstacle_objects`.
     scene_obstacle_held_motion: bool = False
+    #: SL-SOTA5 (dev-57, 2026-11-11) -- SL-PE8's reach (fingertips -> a point that may be the held object) is at least this
+    #: (m). The reach was the perceived target's extent + 20 mm; when the perception holds a piece of the object the rest of
+    #: it stays in the obstacle set while it is carried (E1a t0 init 6, offline replay: 25-40 % of the bowl points next to
+    #: the blocking rows removed at 81 mm, 75-100 % at 150 mm). None (default) = as before. Needs `scene_obstacle_held_motion`.
+    scene_obstacle_held_motion_reach: float | None = None
     #: SL-PE9 -- before the policy's chunk carries a close command (no grasp seed) and before closing / attach, cut the
     #: object under the ATTENTION PEAK (non-support point of maximal raw attention) the same way as the grasp seed and use
     #: it when its mean raw attention is >= this many times the non-support median. On gt24att LIBERO s8 the cut is the
@@ -777,6 +782,12 @@ class ClusteringConfig:
             raise AG3SConfigError("clustering.attention_peak_seed needs clustering.close_seed_grounding")
         if self.scene_obstacle_target_cut and not self.scene_obstacle_objects:   # SL-PE11
             raise AG3SConfigError("clustering.scene_obstacle_target_cut needs clustering.scene_obstacle_objects")
+        hr = self.scene_obstacle_held_motion_reach   # SL-SOTA5
+        if hr is not None and (isinstance(hr, bool) or not isinstance(hr, (int, float)) or not math.isfinite(float(hr))
+                               or not (0.0 < float(hr) <= 0.3)):
+            raise AG3SConfigError(f"clustering.scene_obstacle_held_motion_reach must be in (0, 0.3] m or None, got {hr!r}")
+        if hr is not None and not self.scene_obstacle_held_motion:
+            raise AG3SConfigError("clustering.scene_obstacle_held_motion_reach needs clustering.scene_obstacle_held_motion")
         if self.scene_obstacle_held_motion and not self.scene_obstacle_objects:   # SL-PE8
             raise AG3SConfigError("clustering.scene_obstacle_held_motion needs clustering.scene_obstacle_objects")
         if self.scene_obstacle_held_exclude and not self.scene_obstacle_objects:
