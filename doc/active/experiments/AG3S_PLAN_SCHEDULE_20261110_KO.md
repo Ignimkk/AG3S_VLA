@@ -186,6 +186,7 @@ T5 뒤에 하면 이 서버에서 끝낸다. **이전 시점은 T5 와의 순서
 | 2026-11-12 00:3x | dev-57: **합친 판 `…-hr150-hb-qs-rs-zr60-tro` E1a task 0 = TSR 9 · CAR 10 · SSR 9 / 10** (`pkgFin` 8 · 8 · 6; 00:16–00:31, HEAD 091b7c70) — §9.22. 얻음 e5 · e11 · e13, 잃음 없음 (e7 은 성공 + 충돌 32 mm → 실패, 충돌 없음). 거르기 통과 → `pkgFin2` 로 LIBERO 27 → E1a task 1 · 2 · 3 → 다른 suite. |
 | 2026-11-12 01:1x | dev-57: **`pkgFin2` (`…-hr150-hb-qs-rs-zr60-tro`) LIBERO 27 = 23** (8 · 7 · 8; `pkgFin` 23, 지금 구성 22; 00:33–01:10, HEAD 69efac96) — §9.22. guard 통과 → E1a task 1 · 2 · 3. |
 | 2026-11-12 02:2x | dev-57: **`pkgFin2` (`-rs` + `-zr60`) E1a 40 = TSR 20 · CAR 34 · SSR 20** (`pkgFin` 22 · 34 · 20; 01:11–02:23) — §9.22. 얻음 5 (t0 e5 · e11 · e13, t2 e5 · e9), 잃음 5 (t2 e8 · e12 · e14, t3 e5 · e10) → SSR 같고 TSR −2: **합친 판은 채택하지 않음.** task 0 의 이득 (6 → 9) 을 task 2 · 3 의 손실이 지움 — 두 후보를 나눠 잰다 (`-rs` 만 먼저). |
+| 2026-11-12 02:4x | dev-57: **`-rs` 만 (`…-hr150-hb-qs-rs-tro`) E1a task 0 = SSR 7 / 10** (`pkgFin` 6; 02:25–02:40, HEAD 6460ffa6) — §9.22. 바뀐 것은 e11 하나 (latch 고장 → sticky reach 로 call 19 에 attach, 24 call 에 안전 성공), 나머지 9 ep 은 call 수 · attach call 까지 `pkgFin` 과 같음. → 동결 후보 = `pkgFrs` (`pkgFin` + `-rs`). 남은 시간은 `pkgFrs` 의 다른 suite 점검. |
 | 2026-11-12 01:4x | dev-4a: SDM 세팅 끝 (사용자 실행, venv 6 개 · GPU 확인). SDM 에서 π0.5 단독 측정 ①–③ 행 추가 (§2). SDM이전방법 확인: 05:30–07:00 delta 는 사용자 PC 로만 · SDM 쓰기는 08:00 뒤 사용자 upload 때 (EXISTING=archive 권고). dev-57 확인: ① 중복 아님, AG3S 쪽 GPU 우선 → block 경계에서 넘김. |
 
 ---
@@ -632,3 +633,10 @@ E1a 40 의 episode 별 차이 (`pkgFin` → `pkgFin2`) [M]: 얻음 t0 e5 · e11 
 **다음 (결과 전, 02:2x):** (e) `-rs` 만 (`…-hr150-hb-qs-rs-tro`, TAG `pkgSrs`) E1a task 0 — 기준 `pkgFin` task 0 (SSR 6), 기대 = e11 만 바뀜 (7). (f) 같은 판 goal L-I · L-II init 16 (latch 가 걸렸던 t3 e16 · t0 e16). (g) task 2 · 3 손실의 원인을 CPU 로 확인한 뒤 zone 규칙의 다른 안을 task 0 · 2 · 3 으로 거름. 05:00 을 넘는 run 은 시작하지 않는다.
 
 (이전 계획, 합친 판 통과 가정) **다음 (결과 전):** 합친 판을 `pkgFin2` 로 두고 (b) LIBERO 27 (≥ 21) → (c) E1a task 1 · 2 · 3 → (d) 다른 suite init 15 · 16. SafeLIBERO 11 · LS 10 은 시간이 없어 이전 후로 넘긴다.
+
+**`-rs` 만의 거르기 [M] (02:25–02:40, TAG `pkgSrs`, HEAD 6460ffa6):** `…-hr150-hb-qs-rs-tro` E1a task 0 × init 5–14 = TSR 9 · CAR 8 · **SSR 7** (`pkgFin` 8 · 8 · 6). 바뀐 episode 는 e11 하나 — call 19 에 sticky reach 로 attach (`grasp.evidence.reach_sticky.used`), 24 call 에 안전 성공 (`pkgFin`: 60 call CLOSING, 실패). 나머지 9 ep 은 결과 · call 수 · attach call · 장애물 변위가 `pkgFin` 과 모두 같다 (e7 32.3 mm · e13 12.1 mm 의 성공 + 충돌 포함) — offline 재생의 예측 (§9.20: 판정이 바뀌는 것은 e11 뿐) 그대로다.
+
+- **판정:** `-rs` 는 채택 후보로 올린다. **동결 후보 = `pkgFrs` = `…-pe12345811-to0-om15p10s40-ntc-pt6-pg4-hr150-hb-qs-rs-tro`** (`pkgFin` + `-rs`). E1a 40 은 task 0 만 다시 쟀고 task 1–3 은 `pkgFin` 의 기록에서 `-rs` 가 작동할 call 이 없어 (offline 재생) 같은 결과로 본다 → **TSR 23 · CAR 34 · SSR 21 (task 0 실측 + task 1–3 `pkgFin` 값, 52.5 %)** — 40 ep 전체 실측과 LIBERO 27 은 이전 후 같은 기계 재측정에서 한다 (§9.23 A-1).
+- `-zr60` 은 채택하지 않는다 (위). task 0 의 성공 + 충돌 2 ep (e7 · e13) 은 그대로 남는다 → zone 규칙의 다른 안은 §9.23 B-1.
+
+**다음 (결과 전, 02:4x):** `pkgFrs` 의 다른 suite 점검 init 15 · 16 — cell 순서 goal L-II → goal L-I → spatial L-II → object L-II → long L-I → object L-I (약 115 분, 04:40 무렵 끝; long L-II 는 05:00 을 넘겨 이전 후로). `-qs` 판 · `pkgFin` 의 같은 cell 과 짝 비교. latch 가 걸렸던 goal L-II t0 e16 · goal L-I t3 e16 이 풀리는지 본다.
