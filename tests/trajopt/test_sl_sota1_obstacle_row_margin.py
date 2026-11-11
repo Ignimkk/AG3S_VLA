@@ -495,7 +495,7 @@ def test_gate_rows_config_flag_and_versions():
         ss.reject_bad_flag_combinations(ap, ap.parse_args(ARGV + ["--ee-action-qp-gate-rows"]))
     assert "ee_action_qp_gate_rows" in srv.PORTED_FINAL_CONFIG_DESTS
     base = "AG3S-commonto-att-termsoff-pass-zr-ee-hdp-loose2-obst4-pts-nocarve-fh-t100-"
-    assert len(pf.SOTA_GATE_VERSIONS) == 2 * (4 + 100) and set(pf.SOTA_GATE_VERSIONS) <= set(pf.GT15_VERSIONS)
+    assert len(pf.SOTA_GATE_VERSIONS) == 2 * (4 + 116) and set(pf.SOTA_GATE_VERSIONS) <= set(pf.GT15_VERSIONS)
     for name in (base + "pe123458-gr-tro", base + "pe12345811-to0-om15p10s40-ntc-gr-tro",
                  base + "pe12345811-to0-om15p10s40-ntc-pt6-pg4-gr-tro", base + "pe12345811-to0-ntc-gr-tro"):
         v = tuple(pf.AG3S_VERSIONS[name])
