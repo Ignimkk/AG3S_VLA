@@ -178,10 +178,14 @@ OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 .venv-ag3s/bin/python
   - 그 전에는 새 세션이 `CLAUDE.md` · 이 문서 · `doc/active/experiments/AG3S_PLAN_SCHEDULE_20261110_KO.md` 를 먼저 읽는다.
 - **GPU 공유 규칙 · 단계 commit 규칙:** AMRC 와 같다 (`CLAUDE.md`, 계획서 §2 의 '규칙' 줄).
 - **결과 위치:** 새 run 은 SDM 의 `/mnt/dev/AG3S_VLA-storage/results/benchmark/` 에 쌓인다.
-  - AMRC 결과를 나중에 받으면 run-id 가 같은 새 run 과 섞이지 않게 `results/old_server/` 같은 별도 폴더에 둔다 (handoff §6.3 과 같은 이유).
+  - AMRC 결과는 relay upload 로 **같은 `results/benchmark/` 에 그대로 합쳐진다** (`--delete` 없음). 계획서들이 가리키는 경로가 그대로 유지된다. 별도 `results/old_server/` 는 두지 않는다 (사용자 결정 11-12 01:5x, runbook §0-2).
+  - 그래서 **SDM 에서 만드는 run-id 는 모두 `-sdm` 을 붙인다.** queue script 는 `SUFFIX=-sdm`, 직접 launch 는 `--run-id …-sdm`. 이유: `bl_tranche_*_queue.sh` 의 `done_run` 은 같은 run-id 의 끝난 run 이 있으면 건너뛰므로, AMRC run 과 run-id 가 같으면 SDM run 이 실행되지 않는다. LIBERO-Safety launcher 처럼 run-id 뒤에 `-<suite>-L<lvl>-…` 를 덧붙이는 경우에는 `-sdm` 이 이름 중간에 온다.
+- **코드 · 문서는 GitHub 로만 옮긴다.** relay upload 는 `EXISTING=archive` → AMRC checkout 은 `/mnt/dev/AG3S_VLA_amrc` (참고용, 그 venv 는 경로 때문에 못 씀). SDM checkout 은 `git pull` 로만 갱신하고, AMRC 에만 있던 commit 은 `git fetch /mnt/dev/AG3S_VLA_amrc <branch>` 로 받을 수 있다.
 
 ## 9. 기록
 
 | 시각 (KST) | 내용 |
 |---|---|
 | 2026-11-11 17:2x | 작성 (dev-4a). AMRC 의 실제 경로 · script · revision 을 읽어서 썼다: storage `CHECKSUMS.json`, `weights.py`, Qwen hub ref, `.gitmodules`, manifest `apt_history.txt`. SDM 에서는 아직 실행하지 않았다 |
+| 2026-11-12 01:4x | 사용자가 SDM 에서 §1–§5 실행 완료 (dev-4a 가 출력 확인: HEAD af3cc897 = origin, submodule 5 개 pin, venv 6 개 Python 버전 AMRC 와 같음, jax `CudaDevice(id=0)` · torch `NVIDIA H200 NVL` · osmesa OK). §6 · §7 출력은 받지 않음 |
+| 2026-11-12 02:0x | §8 결과 위치 수정: `results/old_server/` 대신 같은 `results/benchmark/` 에 합치고 SDM run-id 에 `-sdm` (사용자 결정 11-12 01:5x, SDM이전방법 전달) |
