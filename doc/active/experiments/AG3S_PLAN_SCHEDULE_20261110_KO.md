@@ -324,3 +324,10 @@ n · TSR · CAR · SSR. baseline 열은 dev-4a tranche 1 의 같은 기계 · �
 - e10: call 6 은 여유 밖 (18.8 mm) 으로 통과, call 7 의 QP (반복 한도, |Da| 1.74) 창 첫 step 에 접촉.
 
 다음 후보 (결과 전 기록): (a) `…-ntc-pt6-pg4-gr-tro` task 0 — SL-SOTA4 를 얹음. (b) **SL-SOTA5** — 쥔 동안 쥔 물체 점 model 의 현재 위치에서 가까운 장애물 집합 점은 쥔 물체 자신으로 본다 (구현 예정, 기본 꺼짐).
+
+**`-gr` 판 결과 [M]** (`…-ntc-pt6-pg4-gr-tro`, task 0 × init 5–14, 2026-11-11 09:47–10:08, HEAD ef26adc5, run-id `sub-pkgDgr-e1a-spatial-LI-t0`): **TSR 5 · CAR 6 · SSR 4** — `-pt6-pg4` (9 · 8 · 7) 보다 나쁨 → **SL-SOTA4 는 이 형태로는 쓰지 않는다.** 실패 5 ep (e6 · e7 · e8 · e10 · e14) 은 모두 `max_steps`, 그중 3 ep 은 충돌 (e6 193.6 mm · e7 20.0 mm · e10 116.7 mm), e5 는 성공 + 충돌 30.9 mm. 쥐기 전에 통과 call 이 길게 이어지거나 (e8 · e10) link5 행으로 막힌다 (e6 22 call · e8 15 · e14 12). [해석] 장애물 물체 행이 아닌 행을 100 mm 까지 풀면 QP 보정이 target · 받침 쪽으로 팔을 밀 수 있다 — 원인은 확인하지 않았다.
+
+**SL-SOTA5 (commit 1b8f8d42 → 공유 checkout, 기본 꺼짐, 결과 전 기록):** `--scene-obstacle-held-reach-mm 150` (판 `-hr150`) — 쥔 물체 추적 (SL-PE8) 이 '손과 같이 움직인 점' 을 쥔 물체로 보는 손끝 거리에 하한. 근거: `-pt6-pg4` 판 e6 의 막은 표면이 100 % 쥔 그릇 (`offline/surface_owner_pkgCpt6pg4_e6.json`), 인식된 target 은 61 mm 조각이라 거리 한도가 81 mm. offline 재현 (`offline/held_motion_gt_check_*.json`, GT 는 채점만): e6 의 그릇 점 제거 928 → 2876, 장애물 점 0. 묶음 판 40 ep 에서는 그릇 점 증가가 작고 (task 1 몇 ep 20–50 점) 장애물 점 제거가 일부 늘어난다 (task 1 e9 0 → 47 — 병을 민 뒤, task 2 e12 25 → 57, task 2 e8 3 → 22) → CAR 을 같이 본다.
+
+순서 갱신: (1) `…-ntc-pt6-pg4-tro` task 1–3 → E1a 40 으로 첫 채택 판정. (2) `-hr150` 을 얹은 판 task 0.
+
