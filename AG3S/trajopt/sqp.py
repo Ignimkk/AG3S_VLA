@@ -163,6 +163,9 @@ class TrajectoryOptimizer:
                 {"horizon": {"horizon": k, "execution_length": k, "plan_horizon": None,
                              "lookahead": "off"}})
             self.window_optimizer = TrajectoryOptimizer(robot_model, layout, limits, window_cfg)
+            # SL-SOTA3: one patience state per episode -- a request is tested by this optimizer (gate open) or by the
+            # window optimizer (gate closed), and the count of consecutive blocked calls runs over both.
+            self.window_optimizer._obstacle_patience = self._patience_state()
             # AG3S-PRE-CORE-TO E2: the window optimizer runs its multi-seed only when this one hands it a chunk index.
             self.window_optimizer._ms_is_window = True
         #: T43 TA (C) — `a_C` per optimized joint (rad/row²), or None when `limits.servo_accel` is off.
@@ -262,6 +265,7 @@ class TrajectoryOptimizer:
         self.solver.reset()
         self._previous = None
         self.frame_index = 0
+        self._patience_state().update(blocked=0, relaxed=False)   # SL-SOTA3: an episode starts with the full margin
         if self.observer is not None:
             self.observer.reset()
         if self.window_optimizer is not None:
@@ -1405,6 +1409,14 @@ class TrajectoryOptimizer:
                 record["limit_overshoot"] = {k: round(float(v), 6) for k, v in over.items() if v > _LIMIT_TOLERANCE}
         return record["applied"], record
 
+    def _patience_state(self) -> dict:
+        """SL-SOTA3 — `{"blocked": consecutive calls inside the margin, "relaxed": bool}`. One dict per episode: created on
+        first use, shared with the window optimizer (`__init__`), cleared by `reset`."""
+        state = self.__dict__.get("_obstacle_patience")
+        if state is None:
+            state = self.__dict__["_obstacle_patience"] = {"blocked": 0, "relaxed": False}
+        return state
+
     def _obstacle_row_refuses(self, reference, q_now, scene, record) -> bool:
         """SL-GTTO16 (A) — with `sqp.passthrough_obstacle_tolerance` set, the τ of `passthrough_tolerance` does not
         cover an obstacle-object row (`linearizer.obstacle_object_rows`): such a row of the executed window below its
@@ -1427,12 +1439,13 @@ class TrajectoryOptimizer:
         if margin > 0.0 and patience is not None:
             # SL-SOTA3: the margin is a preference with a limit. After `patience` consecutive calls whose policy chunk is
             # inside it the margin is dropped (the floor and its tolerance stay) until a chunk clears the full margin again.
+            state = self._patience_state()
             inside = bool(np.isfinite(worst) and float(worst) < margin)
-            blocked = int(getattr(self, "_obstacle_blocked_calls", 0)) + 1 if inside else 0
-            relaxed = bool(getattr(self, "_obstacle_margin_relaxed", False)) if inside else False
+            blocked = int(state["blocked"]) + 1 if inside else 0
+            relaxed = bool(state["relaxed"]) if inside else False
             if blocked > int(patience):
                 relaxed = True
-            self._obstacle_blocked_calls, self._obstacle_margin_relaxed = blocked, relaxed
+            state.update(blocked=blocked, relaxed=relaxed)
             patience_rec = {"calls": int(patience), "blocked_calls": blocked, "relaxed": relaxed}
             if relaxed:
                 margin = 0.0

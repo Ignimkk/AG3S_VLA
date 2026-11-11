@@ -502,3 +502,27 @@ def test_gate_rows_config_flag_and_versions():
         assert v[-2:] == ("--ee-action-qp-gate-rows", "--ee-action-qp-translation-only") and pf.version_server_flags(name)
     assert "ee_action_qp_gate_rows" not in pf.version_flag_values(pf.parse_v11ab_args())
 
+
+def test_patience_state_is_shared_with_the_window_optimizer_and_cleared_by_reset():
+    """E1a task 0 (HEAD 4f350f61): the count ran per optimizer and across episodes (an episode started at 11 blocked calls,
+    already relaxed). One state per episode, over the optimizer and its window optimizer."""
+    from AG3S.trajopt.sqp import TrajectoryOptimizer
+
+    main, window = TrajectoryOptimizer.__new__(TrajectoryOptimizer), TrajectoryOptimizer.__new__(TrajectoryOptimizer)
+    for opt in (main, window):
+        opt.config = types.SimpleNamespace(sqp=_sqp(obstacle_row_margin=0.015, obstacle_row_patience=2))
+        opt.lookahead_from = 5
+        opt.linearizer = _RowsLin(0.010)
+    window._obstacle_patience = main._patience_state()       # what `__init__` does
+    seen = []
+    for opt in (main, window, main, window):                 # the gate opens and closes between requests
+        record: dict = {}
+        seen.append((opt._obstacle_row_refuses(None, None, None, record), record["obstacle_rows"]["patience"]["blocked_calls"]))
+    assert seen == [(True, 1), (True, 2), (False, 3), (False, 4)]
+    main.solver = types.SimpleNamespace(reset=lambda: None)
+    main.observer, main.window_optimizer = None, None
+    main.reset()
+    assert main._patience_state() == {"blocked": 0, "relaxed": False} and window._patience_state() is main._patience_state()
+    record = {}
+    assert window._obstacle_row_refuses(None, None, None, record) and record["obstacle_rows"]["patience"]["blocked_calls"] == 1
+
