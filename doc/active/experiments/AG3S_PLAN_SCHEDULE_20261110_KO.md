@@ -189,6 +189,7 @@ T5 뒤에 하면 이 서버에서 끝낸다. **이전 시점은 T5 와의 순서
 | 2026-11-12 02:4x | dev-57: **`-rs` 만 (`…-hr150-hb-qs-rs-tro`) E1a task 0 = SSR 7 / 10** (`pkgFin` 6; 02:25–02:40, HEAD 6460ffa6) — §9.22. 바뀐 것은 e11 하나 (latch 고장 → sticky reach 로 call 19 에 attach, 24 call 에 안전 성공), 나머지 9 ep 은 call 수 · attach call 까지 `pkgFin` 과 같음. → 동결 후보 = `pkgFrs` (`pkgFin` + `-rs`). 남은 시간은 `pkgFrs` 의 다른 suite 점검. |
 | 2026-11-12 03:1x | dev-57: `pkgFrs` 다른 suite goal L-II · goal L-I 16 ep = TSR 6 · CAR 7 · SSR 3 (`-qs` 판 8 · 6 · 3, 지금 구성 6 · 9 · 5; 02:40–03:18) — latch 가 걸렸던 두 episode 는 풀리지 않음 (goal L-II t0 e16 은 call 19 에 attach 됐지만 7 call 뒤 놓침). zone 에서 풀린 행을 GT 로 가름 → 후보 SL-SOTA13 `-zp` (손바닥의 장애물 물체 행만 남김) 를 결과 전 기록 (§9.22). 다른 suite 점검을 멈추고 `-zp` 를 먼저 잼. |
 | 2026-11-12 03:3x | dev-57: **`-zp` (`…-hr150-hb-qs-rs-zp-tro`) E1a task 0 = TSR 10 · CAR 10 · SSR 10 / 10** (`pkgSrs` 9 · 8 · 7, `pkgFin` 8 · 8 · 6; 03:19–03:35, HEAD 25aa7314) — §9.22. 얻음 e5 · e7 · e13 (성공 + 충돌 2 ep 모두 안전 성공으로), 잃음 없음. 거르기 통과 → 같은 판 E1a task 2 · 3 · 1. |
+| 2026-11-12 04:5x | dev-57: **`-zp` (`…-hr150-hb-qs-rs-zp-tro`) E1a 40 = TSR 19 · CAR 36 · SSR 19** (`pkgFin` 22 · 34 · 20; task 2 · 3 · 1 03:35–04:50, HEAD 7b50e287) — §9.22. task 0 은 10 / 10 이지만 task 2 · 3 에서 6 ep 을 잃음 (얻음 5) → **미채택**. AMRC 의 마지막 GPU run (04:50 종료). 동결 후보 = `pkgFrs` (`…-hb-qs-rs-tro`), 검증이 끝난 판 = `pkgFin`. **§9.23 'SDM 이전 후 작업 계획' 을 씀** (사용자 지시 11-11 23:4x) — 못한 작업 전부. offline 분석 도구는 `experiments/segmentation/sota_offline_20261111/` 로 repo 에 넣음. |
 | 2026-11-12 01:4x | dev-4a: SDM 세팅 끝 (사용자 실행, venv 6 개 · GPU 확인). SDM 에서 π0.5 단독 측정 ①–③ 행 추가 (§2). SDM이전방법 확인: 05:30–07:00 delta 는 사용자 PC 로만 · SDM 쓰기는 08:00 뒤 사용자 upload 때 (EXISTING=archive 권고). dev-57 확인: ① 중복 아님, AG3S 쪽 GPU 우선 → block 경계에서 넘김. |
 
 ---
@@ -672,3 +673,95 @@ E1a 40 의 episode 별 차이 (`pkgFin` → `pkgFin2`) [M]: 얻음 t0 e5 · e11 
 **순서를 다시 바꾼다 (결과 전, 03:1x):** `pkgFrs` 다른 suite 점검은 goal L-II · goal L-I 16 ep 에서 멈추고 (latch 가 걸렸던 두 episode 가 든 cell), `-zp` 를 먼저 잰다 — 이유: 맞으면 E1a 에서 +2 (t0 e7 · e13 → 23 / 40) 이고 Goal suite 의 작은 접촉 (성공 + 충돌 5 ep, §9.16) 도 같은 원인일 수 있다. (h) `…-hr150-hb-qs-rs-zp-tro` (TAG `pkgSzp`) E1a task 0 — 기준 `pkgSrs` task 0 (SSR 7); 통과 = e7 · e13 중 하나 이상이 안전 성공으로 바뀌고 잃는 안전 성공이 없음. (i) 통과면 같은 판 (TAG `pkgFzp`) E1a task 2 · 3 → task 1 (05:00 전에 끝나는 것까지). 통과하지 못하면 `pkgFrs` 의 남은 cell 을 잇는다.
 
 **`-zp` 의 거르기 [M] (03:19–03:35, TAG `pkgSzp`, HEAD 25aa7314):** `…-hr150-hb-qs-rs-zp-tro` E1a task 0 × init 5–14 = **TSR 10 · CAR 10 · SSR 10** (`pkgSrs` 9 · 8 · 7). 얻음 e7 (성공 + 충돌 32.3 mm → 안전 성공, 25 call) · e13 (12.1 mm → 안전 성공) · e5 (쥔 채 교착 → 44 call 에 안전 성공); 잃음 없음. 남긴 손바닥 행은 쥐기 전 call 당 수십–1000 행 (`to.grasp_contact.zone_kept_palm_rows`) — GT 로 센 것 (침투 예측 48 행) 보다 훨씬 많이 남지만 자기 여유에서만 묶여 접근을 막지 않았다. → 통과. 같은 판으로 E1a task 2 · 3 · 1 을 잰다 (TAG 는 그대로 `pkgSzp`; 03:37 – , 04:48 무렵 끝).
+
+**`-zp` 의 E1a 40 [M] — 미채택 (task 2 · 3 · 1: 03:35–04:50, HEAD 7b50e287; task 0 은 위 run). AMRC 의 마지막 GPU run.**
+
+| 판 (E1a 40, seed 7) | task 0 SSR | task 1 | task 2 | task 3 | TSR · CAR · SSR / 40 | > 50 mm 충돌 |
+|---|---:|---:|---:|---:|---|---:|
+| `pkgFin` `-hb-qs-tro` | 6 | 2 | 7 | 5 | 22 · 34 · **20** | 1 |
+| `pkgFin2` `-hb-qs-rs-zr60-tro` | 9 | 2 | 6 | 3 | 20 · 34 · 20 | 1 |
+| `-hb-qs-rs-zp-tro` (TAG `pkgSzp`) | **10** | 2 | 5 | 2 | 19 · **36** · 19 | **0** |
+| `pkgFrs` `-hb-qs-rs-tro` (task 0 만 실측) | 7 | (2) | (7) | (5) | (23 · 34 · 21) | (1) |
+
+- `pkgFin` 대비 얻음 5 (t0 e5 · e7 · e11 · e13, t2 e9), 잃음 6 (t2 e7 · e8 · e14, t3 e5 · e8 · e10). 두 판의 안전 성공 합집합은 25 / 40. task 1 은 episode 별 결과가 `pkgFin` 과 같다 (충돌 t1 e12 26.2 → 31.2 mm). 충돌은 t1 e9 1.6 · e10 2.9 · e12 31.2 · t3 e9 8.5 mm (`pkgFin` 의 238.8 mm 가 8.5 mm 로).
+- 잃은 6 ep 의 형태 [M] (`scr.py` · `stall.py`): t3 e8 · e10 = 쥐기 전 교착 (attach 없음, latched ↔ closing 왕복 60 call; QP 로 고친 call 27 · 30 의 최악 행은 손 9 · 6 + link5 11 / link7 17), t3 e5 = call 20 에 쥐었다가 15 call 뒤 놓치고 다시 못 쥠 (최악 행 손 12), t2 e7 · e14 = 쥔 채 31–34 call 뒤 놓고 미완, t2 e8 = 쥔 채 끝남 (QP 11). `-zr60` 이 잃은 것 (t2 e8 · e12 · e14, t3 e5 · e10) 과 4 ep 이 겹친다 — task 2 · 3 은 target 옆에서 손바닥 행을 조이면 잃는다.
+- 남긴 손바닥 행은 40 ep 모두에서 나온다 (call 당 최대 39–1114 행, `offline/zp_kept_e1a_pkgSzp.json`) — 남긴 행의 수로는 얻은 episode 와 잃은 episode 가 갈리지 않는다.
+- **잃은 6 ep 에서 막은 것 [M]** (04:53–04:55, CPU 재생 `offline/surface_owner.py` → `offline/owner_pkgSzp/summary.json`; GT 는 채점만): task 3 의 세 episode 에서 QP 가 고친 call 의 최악 행이 손바닥 (`panda_hand`) 인 26 call 중 **24 call 이 horizon step 5–9** (chunk 10 step 중 실행되지 않는 뒤쪽 5 step) 이고, 그 표면은 실제 장애물이다 — t3 e10 red coffee mug (6 call, 여유 중앙값 −26 mm), t3 e8 yellow book (7 call, −33 mm), t3 e5 cookies box (9 call, −20 mm). target · 받침을 장애물로 잘못 읽은 것이 아니다 (결과 전 기록의 위험은 해당 없음). task 2 의 세 episode 는 막힌 call 이 적고 (손바닥 최악 행 1–6 call) 대부분 쥔 물체 행 (milk · 접시 · stove) 이라 `pkgFin` 과 같은 모양 — 갈린 원인은 확인하지 못했다.
+- 해석 [D]: VLA chunk 의 뒤쪽 step 은 실행 전에 다시 계획되는데, `-zp` 는 남긴 손바닥 행을 10 step 전부에 건다. 쥐러 내려가는 chunk 의 끝 (step 8–9) 이 장애물 쪽으로 뻗어 있으면 지금 실행할 5 step 이 깨끗해도 막힌다. 결과 전에 센 표 (위, 실행되는 5 step 만) 에서는 안전 성공 20 ep 의 손바닥 ↔ 장애물 침투 행이 0, 성공 + 충돌 2 ep 이 48 — **남긴 행을 실행되는 step (0–4) 으로 한정하면** 표가 가른 그대로가 된다 → 다음 후보 `-zp5` (§9.23 A-0).
+- **판정 (§9.2):** SSR 19 < `pkgFin` 20 + 1 → `-zp` 는 채택하지 않는다 (flag 는 기본 꺼짐으로 남김). **AMRC 마지막 시점의 동결 후보는 `pkgFrs` = `…-hr150-hb-qs-rs-tro`** (E1a task 1–3 · guard 는 `-rs` 만으로 재지 않았다 — `-zp` run 에서 sticky reach 가 쓰인 것은 t2 e10 · t3 e11 로 `pkgFin` 에서도 실패인 episode). 검증이 끝난 판은 `pkgFin` 이다 (guard + E1a 40).
+
+figure (규칙 A): `AG3S/ag3s/docs/figures/sl-sota-zp-e1a40-20261112.png` (+ `.json`; script `experiments/segmentation/sota_offline_20261111/fig_zp.py`) — (a) task 0 init 7 · task 3 init 10 의 실제 장면 (`pkgFin` / `-zp`), (b) E1a 40 episode 별 결과, (c) task 별 안전 성공.
+
+### 9.23 SDM 이전 후 작업 계획 (dev-57 → 이전 후 세션, 11-12 04:5x 작성)
+
+**사용자 지시 (11-11 23:4x):** 이 세션은 06:00 까지 작업하고, 못한 작업은 계획서에 적는다. GPU 이전 뒤에는 이 절을 기준으로 작업한다. 목표는 그대로 — 논문 Tab. 1–3 의 지표 (§9.1), 채택 규칙 §9.2, 보고 분할 init 19–49 는 조정에 쓰지 않는다.
+
+**지금 상태 (AMRC, 같은 기계 · seed 7) [M]**
+
+판 이름은 모두 `AG3S-commonto-att-termsoff-pass-zr-ee-hdp-loose2-obst4-pts-nocarve-fh-t100-pe12345811-to0-om15p10s40-ntc-pt6-pg4-hr150` + 아래 꼬리 (지금 구성만 `…-fh-t100-pe123458`). 값은 TSR · CAR · SSR (ep 수), '—' 는 재지 않음.
+
+| 판 (꼬리) | TAG | E1a 40 | LIBERO 27 | SafeLIBERO 11 | LS 10 | 다른 suite init 15 · 16 | 상태 |
+|---|---|---|---:|---|---|---|---|
+| 지금 구성 `…-pe123458` | `pe123458` | 22 · 23 · 15 | 22 | 7 · 7 · 6 | 5 · 위반 1 | 56 ep 24 · 31 · 17 | 기준 (`AG3S_FINAL_CONFIG_KO.md`) |
+| `-qs-tro` | `pkgFqs` | 22 · 32 · 18 | 23 | — | — | 56 ep 24 · 40 · 19 | `pkgFin` 으로 대체 |
+| `-hb-qs-tro` | `pkgFin` | 22 · 34 · **20** | 23 | 5 · 9 · 4 (> 50 mm 0) | 5 · 위반 0 | object L-I · goal L-I 16 ep 7 · 10 · 5 (나머지 5 cell —) | **검증이 끝난 판** (guard + E1a 40) |
+| `-hb-qs-rs-tro` | `pkgFrs` (E1a task 0 은 `pkgSrs`) | task 0 만 9 · 8 · 7 → 추정 23 · 34 · 21 | — | — | — | goal L-I · L-II 16 ep 6 · 7 · 3 (나머지 5 cell —) | **동결 후보** (task 1–3 · guard 미측정) |
+| `-hb-qs-rs-zr60-tro` | `pkgFin2` | 20 · 34 · 20 | 23 | — | — | — | 미채택 (§9.22) |
+| `-hb-qs-rs-zp-tro` | `pkgSzp` | 19 · 36 · 19 (task 0 은 10 · 10 · 10) | — | — | — | — | 미채택 (§9.22), 좁힌 판 `-zp5` 는 A-0 · A-3 |
+
+원문 보고값 (Tab. 1 비교 대상): KNOWS Spatial L-I 63.0 / 67.5 / 53.0 %, 4 suite L-I 67.5 / 76.4 / 59.9 %. `pkgFin` E1a 40 은 55.0 / 85.0 / 50.0 %, `pkgFrs` 추정 57.5 / 85.0 / 52.5 % (개발 분할 init 5–14 — 보고 분할 값이 아님).
+
+**이전 직후 확인할 것**
+
+| # | 일 | 메모 |
+|---|---|---|
+| 0-1 | SDM checkout 이 AMRC 의 마지막 commit (code `25aa7314`, 문서는 dev-57 의 `docs(plan): §9.23 …` commit) 을 담고 있는지 (`git log --oneline -3`), `wip/sota-om` 은 더 쓰지 않음 (모두 `feature/panda-benchmark` 에 들어감) | 코드 · 문서는 GitHub 로만 옮겨짐 (runbook §0-2) |
+| 0-2 | **SDM 에서 만드는 run-id 는 모두 `-sdm` 으로 끝낸다** — AMRC 결과가 SDM `results/benchmark/` 에 합쳐지고 queue 의 건너뛰기가 run-id 만 본다. `sota_sub_queue.sh` · `sota_ms_queue.sh` · `gtto16_queue.sh` 는 TAG 로 run-id 를 만드니 TAG 를 `…sdm` 으로 준다 (예: `TAG=pkgFin2sdm`) | SDM이전방법 11-12 01:5x |
+| 0-3 | 판 이름이 registry 에 있는지: `.venv-ag3s/bin/python -m pytest -p no:cacheprovider -q tests/trajopt/test_sl_sota11_opening_rule_reach_sticky.py tests/benchmark/test_sota_clearance_versions.py` (전체 tests/benchmark 를 한 번에 돌리지 않는다 — 9 분 넘음) | |
+| 0-4 | GPU 는 dev-4a 의 π0.5 단독 run (SafeLIBERO anchor 320 ep 등, 8–13 h) 과 나눠 쓴다 — TrajOpt closed loop 는 GPU 독점 (`/tmp/ag3s-vla-gpu-validation.lock`, launcher 가 직접 잡음). AG3S 쪽이 우선 (사용자 11-11), 시작 · 경계를 dev-4a 에 알린다 | 11-12 02:0x 조율 |
+| 0-5 | offline 분석 도구 · 결과: `experiments/segmentation/sota_offline_20261111/` (AMRC 의 `outputs/2026-11-11_SOTA_개선/` 사본 — git 에 넣음). 재생 도구는 `.venv-libero` + `LIBERO_CONFIG_PATH=$PWD/.runtime/libero MUJOCO_GL=egl`, CPU job 은 `OMP_NUM_THREADS=MKL_NUM_THREADS=OPENBLAS_NUM_THREADS=1` | |
+
+**A. 동결 (D6, 11-13) 전에 반드시 — 순서대로**
+
+SDM 은 다른 기계라 AMRC 값과 episode 단위로 같다는 보장이 없다 — 채택 판정 (§9.2) 은 SDM 에서 잰 값끼리 한다. `P` = 위의 긴 판 이름 앞부분, `I=5,6,7,8,9,10,11,12,13,14`. 시간은 AMRC 실측 (E1a task 하나 16–26 분, LIBERO 27 37 분, 다른 suite 56 ep 1 h 50 분).
+
+| # | 일 | 명령 · 판정 | 시간 |
+|---|---|---|---|
+| A-0 | **후보 SL-SOTA14 `-zp5` (결과 전 기록, 11-12 04:5x)** — `-zp` 의 남긴 손바닥 행을 **실행되는 step (horizon 0–4) 으로 한정**한다 (step 5–9 의 손바닥 행은 `pkgFin` 처럼 zone 에서 푼다). 근거 [M]: `-zp` 가 task 3 에서 잃은 3 ep 의 막힌 손바닥 최악 행 26 call 중 24 call 이 step 5–9 (§9.22), 실행 5 step 만 센 `zone_rows.py` 는 안전 성공 0 행 / 성공 + 충돌 48 행. 위험: task 2 에서 잃은 3 ep 은 원인을 모른다 — 그대로 잃을 수 있다; step 4 → 5 경계에서 닿는 접촉은 다음 call 에서야 본다 | `pkgFin` ∪ `-zp` 의 안전 성공 합집합 25 / 40 — 가르는 조건이 맞으면 E1a SSR 최대 +4 (`pkgFrs` 21 → 25, 62.5 %). 구현 상태는 이 표 아래 '`-zp5` 의 상태' | 구현 30 분 (CPU) |
+| A-1 | `pkgFrs` 의 E1a 40 (동결 후보의 주 기준) | `V=P-hb-qs-rs-tro TAG=pkgFrssdm SUB="0:$I 1:$I 2:$I 3:$I" bash experiments/segmentation/sota_sub_queue.sh` → `tri.py sub-pkgFrssdm`. 기대 SSR 21. 20 아래면 같은 기계의 `pkgFin` (`V=P-hb-qs-tro TAG=pkgFinsdm`) 을 재서 기계 차이와 `-rs` 를 가른다 | 1 h 30 분 |
+| A-2 | `pkgFrs` 의 guard (LIBERO 27 → SafeLIBERO 11 → LS 10) | `V=P-hb-qs-rs-tro TAG=pkgFrssdm OUT=outputs/2026-11-11_SOTA_개선/eval_pkgFrssdm MIN27=21 bash experiments/segmentation/gtto16_queue.sh` → `guard.py pkgFrssdm`. 기준 §9.2: LIBERO 27 ≥ 21, LS 10 ≥ 4 · 위반 0, SafeLIBERO 11 의 > 50 mm 충돌 증가 ≤ 1 | 1 h 50 분 |
+| A-3 | `-zp5` 거르기: E1a task 0 → task 3 → task 2 → task 1 순 (잃은 task 를 먼저 확인), 통과면 A-2 와 같은 guard | `V=P-hb-qs-rs-zp5-tro TAG=pkgSzp5sdm SUB="0:$I 3:$I" …` 통과 = task 0 ≥ 9 이고 task 3 이 `pkgFrs` 보다 줄지 않음. E1a 40 SSR ≥ `pkgFrs` + 1 이면 후보 교체 | 45 분 + 45 분 (+ guard 1 h 50 분) |
+| A-4 | 동결 후보의 다른 suite 점검 init 15 · 16 — 7 cell 전부 (AMRC 에서는 `pkgFin` 2 cell · `pkgFrs` 2 cell 만 잼) | `V=<후보> TAG=<후보 TAG>sdm bash experiments/segmentation/sota_ms_queue.sh` (기본 INITS=15,16, 7 cell) → `mscmp.py`. 비교 기준: 지금 구성 56 ep 24 · 31 · 17, `-qs` 24 · 40 · 19 (AMRC). SSR 이 지금 구성보다 낮으면 동결하지 않고 원인을 본다 (Goal suite 는 16 ep 에서 지금 구성 5 > 새 판 3 — B-2) | 1 h 50 분 |
+| A-5 | 다른 suite init 17 · 18 + Spatial L-I init 15–18 (동결 판정 셋의 나머지; §9.2 의 '다른 suite 전체' = init 15–18) | `INITS=17,18` 로 같은 queue (run-id 가 달라짐) + `CELLS="spatial:I" INITS=15,16,17,18` | 1 h 50 분 + 40 분 |
+| A-6 | 동결 판정 (D6, 11-13) — E1a 40 (§9.2 주 기준) + guard + 다른 suite 전체 SSR 로 `pkgFrs` (또는 `-zp5` 를 더한 판) vs `pkgFin` vs 지금 구성을 정하고 §8 · `AG3S_FINAL_CONFIG_KO.md` 에 적는다 | 사용자 지시 (11-11): 판단은 세션이 하고 결과를 보고 | — |
+| A-7 | (Tab. 3 용, 동결 뒤에 해도 됨) 기여 사슬을 같은 기계에서 한 번에: 지금 구성 → `-qs` → `+hb` (`pkgFin`) → `+rs` (`pkgFrs`) 의 E1a 40 · LIBERO 27 | A-1 과 같은 queue, TAG `…sdm` | 판 하나에 2 h |
+
+**`-zp5` 의 상태 (11-12 04:5x):** 설계만 — 구현 전. 구현되면 이 줄을 고친다.
+
+**AMRC 에서 재지 못한 것 (위 A 에 모두 들어 있음):** `pkgFrs` E1a task 1–3 · LIBERO 27 · SafeLIBERO 11 · LS 10; `-zp` 의 guard 전부; `pkgFin` 다른 suite 5 cell (goal L-II · long L-I · long L-II · object L-II · spatial L-II); `pkgFrs` 다른 suite 5 cell (object L-I · object L-II · long L-I · long L-II · spatial L-II); 모든 판의 다른 suite init 17 · 18 과 Spatial L-I init 15–18; `-zp` 가 task 2 에서 잃은 3 ep 의 원인; `-zp5` 의 closed-loop 측정 전부; Goal suite 작은 접촉의 원인 (B-2).
+
+**B. 동결 전에 시간이 남으면 — 후보 (기대 이득 순, 모두 결과 전)**
+
+| # | 후보 · 일 | 근거 [M · D] | 첫 run (거르기) | 위험 |
+|---|---|---|---|---|
+| B-1 | **놓는 자리** — 쥐었다 놓은 뒤 미완 (E1a: t0 e7 · t1 e5 · e11 · t2 e5; 다른 suite 11 ep, §9.16). 놓기 직전 QP 가 action 을 크게 바꾼 call (예: `pkgSrz` t0 e7 call 36, \|Da\| 1.37) 과 목적지 등록 여부를 episode 별로 확인 → `-hb` 의 발자국 띠 밖 접시 rim (§9.17 t2 e9) 과 묶어 목적지 component 단위 규칙을 검토 | `shape.py` 의 '쥐었다 놓은 뒤 미완' + `ep.py` | E1a task 2 · task 1 | 목적지 인식이 틀리면 장애물 위에 놓는다 |
+| B-2 | **Goal suite 의 작은 접촉** — 성공 + 충돌 1.7–42 mm (`-qs` 5 ep, `pkgFrs` 3–4 ep). `first_contact.py` 로 첫 접촉 link 와 그 call 의 `to.grasp_contact` (zone 풀기) · 인내 한도 (`relaxed`) 를 확인. zone 이 원인이면 A-0 의 좁힌 판으로 다시 잼 | §9.16, §9.22 | goal L-I · L-II init 15 · 16 (37 분) | — |
+| B-3 | **인내 한도가 소진된 뒤의 접촉** — `relaxed` 로 여유가 0 이 된 call 에서 link5 · link7 이 닿은 episode (E1a `-qs` 충돌 8 중 4, §9.15; t0 e7 call 19–21). 소진 뒤에도 최소 여유 (예: 5 mm) 를 두는 판 | `first_contact_pkgFqs.json` | E1a task 1 · 3 | 교착이 늘 수 있음 (SL-SOTA3 의 이득과 맞바꿈) |
+| B-4 | **target 정체 오류** — 쥐기 전 인식된 target 이 다른 그릇 (t1 e14: 60 / 60 call `akita_black_bowl_2`; t3 e12 · e14 는 두 그릇을 오감; 다른 suite 는 `target_truth/summary.json`). close seed (SL-PE1) 가 쥐는 순간 바로잡지 못한 경우만 실패로 이어진다 — 그 call 의 `close_seed` 기록 (chunk npz `summary_json`) 을 본다. `-ap` (attention peak seed) 는 두 번 탈락 (§9.17) | `target_truth.py` | E1a task 1 · 3 | 인식 변경은 SafeLIBERO 전체에 영향 — guard 필수 |
+| B-5 | **팔 link 교착** (E1a 7 ep: task 1 쥔 채 4, task 3 쥐기 전 3; 다른 suite 3) — 실제 장애물 (milk · moka pot · wine bottle) 위를 팔뚝이 지나야 하는 배치. action filter 로는 우회가 없다 (`-rr` 회전 풀기는 충돌만 늘림, §9.17). 남은 안: 막힌 동안 손을 올린 뒤 (지금 `-pg4` 의 'held: up') 수평으로 물러나 다시 접근하게 하는 진행 방향, 또는 그대로 두고 논문에서 한계로 적기 | §9.20 표, `owner_pkgFin/summary.json` | E1a task 1 | 이득이 불확실 — 동결 전에는 마지막 순위 |
+| B-6 | `-zr60` 의 다른 반경 (80 mm) 이나 손가락 행까지 남기는 안은 하지 않는다 — `zone_rows.py` 에서 안전 성공의 손가락 행은 target 이 아닌 물체 (ramekin · stove · cabinet) 에 닿아 있다 | §9.22 | — | — |
+
+**C. 동결 뒤**
+
+| # | 일 |
+|---|---|
+| C-1 | 동결 판을 `AG3S_FINAL_CONFIG_KO.md` (전체 구성 + 변경 행) 와 `doc/active/experiments/E1_GTTO_DECISIONS_20261104_KO.md` (G175 – ; 지금 다른 세션의 미 commit 행 G174 가 걸려 있어 이 세션은 쓰지 않았다) 에 적는다 |
+| C-2 | 주말 (11-14 · 15) 본 run: SafeLIBERO 4 suite × L-I · L-II × task 0–3 × init 19–28, seed 7, `main_aegis` (launcher 인자는 `sota_ms_queue.sh` 와 같고 `--episode-ids` 만 다름) + LIBERO + LIBERO-Safety. dev-4a 의 π0.5 anchor 와 같은 episode 로 짝 |
+| C-3 | Tab. 1 은 원문 보고값과 비교 (`paper/evidence/PAPER_REVISION_REPORTED_COMPARISON_20261111_KO.md`), Tab. 2–3 은 같은 기계 값 |
+
+**알아 둘 것 (이 세션에서 확인한 사실) [M]**
+
+- 같은 기계 · 같은 seed 재실행은 대부분 재현된다 (E1a: 판이 같은 task 는 episode 별 결과가 같음, §9.19 · §9.22). 그래서 task 부분 셋으로 후보를 먼저 거르는 것이 통한다 (`sota_sub_queue.sh`).
+- server 가 뜨는 데 cell 마다 약 5 분 (`server_ready_seconds` 290–300) 이 든다 — 짧은 run 을 여러 번 띄우면 그만큼 든다.
+- queue 가 도는 중에 shared checkout 의 HEAD 가 바뀌면 launcher 가 그 cell 의 마지막 기록을 거절한다 (`Run belongs to another checkout or commit`, §9.21). commit 은 queue 경계에서만.
+- 실패 원인 분석은 '형태 (`shape.py`) → 막은 물체 (`surface_owner.py`) → 그 call 의 기록 (`to.grasp_contact` · `grasp.evidence` · chunk npz 의 `clearance`)' 순으로 보면 규칙 수준의 고장 (§9.20 의 두 건) 과 구조적 한계 (팔 link 교착) 가 갈린다.
