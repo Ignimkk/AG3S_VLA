@@ -7,7 +7,8 @@ BASE = "AG3S-commonto-att-termsoff-pass-zr-ee-hdp-loose2-obst4-pts-nocarve-fh-t1
 
 def test_names_and_flags():
     assert len(pf.SOTA_VERSIONS) == (8 + len(pf.SOTA_OM_VERSIONS) + len(pf.SOTA_NTC_VERSIONS) + len(pf.SOTA_STALL_VERSIONS)
-                                     + len(pf.SOTA_GATE_VERSIONS) + len(pf.SOTA_HELD_VERSIONS))
+                                     + len(pf.SOTA_GATE_VERSIONS) + len(pf.SOTA_HELD_VERSIONS)
+                                     + len(pf.SOTA_SCALED_VERSIONS))
     assert set(pf.SOTA_VERSIONS) <= set(pf.GT15_VERSIONS)
     for b in (BASE + "pe123458", BASE + "pe12345811"):
         base = tuple(pf.AG3S_VERSIONS[b])
@@ -51,3 +52,21 @@ def test_stall_versions():
         assert pf.version_server_flags(n)
     fam = pf.version_flag_values(pf.parse_v11ab_args())
     assert "ee_action_qp_progress" not in fam and "obstacle_row_patience" not in fam
+
+
+def test_scaled_qp_versions():
+    """SL-SOTA6: ``-qs`` = the scaled action QP (SL-GTTO11 F9a) on the SOTA versions; flag only, default off."""
+    from AG3S.adapters.panda import server as srv
+    base = "AG3S-commonto-att-termsoff-pass-zr-ee-hdp-loose2-obst4-pts-nocarve-fh-t100-"
+    name = base + "pe12345811-to0-om15p10s40-ntc-pt6-pg4-hr150-qs-tro"
+    assert name in pf.SOTA_SCALED_VERSIONS and set(pf.SOTA_SCALED_VERSIONS) <= set(pf.GT15_VERSIONS)
+    assert tuple(pf.AG3S_VERSIONS[name])[-2:] == ("--ee-action-qp-scaled", "--ee-action-qp-translation-only")
+    assert tuple(pf.AG3S_VERSIONS[name])[:-2] == tuple(pf.AG3S_VERSIONS[name.replace("-qs-tro", "")])
+    for n in (base + "pe123458-qs", base + "pe12345811-to0-om15p10s40-ntc-qs-tro", base + "pe12345811-to0-om15p10s40-ntc-pt6-pg8-hr150-qs-tro"):
+        assert n in pf.SOTA_SCALED_VERSIONS
+    for n in pf.SOTA_SCALED_VERSIONS:
+        assert pf.version_server_flags(n)
+    args = pf.parse_v11ab_args(argv=pf.version_server_argv(name) + list(pf.AG3S_VERSIONS[name]))
+    assert args.ee_action_qp_scaled is True and "ee_action_qp_scaled" in srv.PORTED_FINAL_CONFIG_DESTS
+    assert "--ee-action-qp-scaled" not in pf.AG3S_VERSIONS[name.replace("-qs-tro", "-tro")]
+
