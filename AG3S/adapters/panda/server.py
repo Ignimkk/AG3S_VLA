@@ -78,7 +78,7 @@ def gripper_gap_calibration() -> dict:
 
 
 def panda_latch_config(gap_opening: bool = False, placed_rearm: bool = False, opening_rule: bool = False,
-                       opening_rule_moved: Optional[float] = None):
+                       opening_rule_moved: Optional[float] = None, opening_rule_reach_sticky: bool = False):
     """V11AB ``LatchConfig`` defaults with only ``empty_below`` calibrated for the Panda gripper.
 
     SL11 §5 ``gap_opening``: the latch's opening is the two-finger gap (:func:`gripper_gap_norm`), so the three thresholds that
@@ -89,7 +89,8 @@ def panda_latch_config(gap_opening: bool = False, placed_rearm: bool = False, op
     from AG3S.trajopt.grasp_latch import LatchConfig
 
     extra = {**({"placed_rearm": True} if placed_rearm else {}), **({"opening_rule": True} if opening_rule else {}),
-             **({"opening_rule_moved_min": float(opening_rule_moved)} if opening_rule_moved is not None else {})}   # SL-GTTO11   # SL14 --placed-rearm / --grasp-opening-rule (off: no key, the config as before)
+             **({"opening_rule_moved_min": float(opening_rule_moved)} if opening_rule_moved is not None else {}),
+             **({"opening_rule_reach_sticky": True} if opening_rule_reach_sticky else {})}   # SL-SOTA11   # SL-GTTO11   # SL14 --placed-rearm / --grasp-opening-rule (off: no key, the config as before)
     if not gap_opening:
         return LatchConfig(empty_below=float(gripper_calibration()["panda"]["empty_below"]), **extra)
     c = gripper_gap_calibration()["thresholds"]
@@ -694,6 +695,7 @@ PORTED_FINAL_CONFIG_DESTS: tuple[str, ...] = (
     'ee_action_qp_rotation_release',   # SL-SOTA10 (dev-57, 2026-11-11)
     # SL-GTTO11 (c'): the opening rule's `moved` check (LatchConfig.opening_rule_moved_min, through panda_latch_config)
     'grasp_opening_rule_moved',
+    'grasp_opening_rule_reach_sticky',   # SL-SOTA11 (dev-57, 2026-11-12): LatchConfig.opening_rule_reach_sticky, through panda_latch_config
     # SL-GTTO14 (G69): the accepted model violation tau (sqp.passthrough_tolerance + safety.violation_tolerance, through
     # serve_safe.trajopt_config_from_args, which this server already calls)
     'violation_tolerance_mm',
@@ -1101,7 +1103,7 @@ def build_safe_server(policy, args, *, attention_model=None, gpu_warm_up: bool =
                  **({"hsr6_objective_scope": scope} if scope != "all" else {}),
                  **ss.subtask_from_latch_kwargs(args)}   # SL7 (T92): {} unless --subtask-from-latch
                 if final_options_on(args) else {})
-    safe = SafePolicy(chunk_policy, ag3s=ag3s, to_config=to_config, attention_fn=attention_fn, latch=panda_latch_config(gap_opening=gap_opening, placed_rearm=bool(getattr(args, "placed_rearm", False)), opening_rule=bool(getattr(args, "grasp_opening_rule", False)), opening_rule_moved=getattr(args, "grasp_opening_rule_moved", None)),
+    safe = SafePolicy(chunk_policy, ag3s=ag3s, to_config=to_config, attention_fn=attention_fn, latch=panda_latch_config(gap_opening=gap_opening, placed_rearm=bool(getattr(args, "placed_rearm", False)), opening_rule=bool(getattr(args, "grasp_opening_rule", False)), opening_rule_moved=getattr(args, "grasp_opening_rule_moved", None), opening_rule_reach_sticky=bool(getattr(args, "grasp_opening_rule_reach_sticky", False))),
                       grasp_links=dict(profile.PANDA_GRASP_LINKS), hold_links=dict(profile.PANDA_HOLD_LINKS),
                       static_geometry=None, recorder=recorder, shadow=bool(getattr(args, "shadow", False)),
                       layout=pa.panda_chunk_layout(constraint.joint_names), gripper_columns=GRIPPER_COLUMNS,

@@ -2394,6 +2394,7 @@ class SafePolicy:
             "hand_shift_mm": None,
         }
         reach_context = None
+        q_reach = None
         if manip is not None:
             try:
                 q_reach = q
@@ -2468,6 +2469,16 @@ class SafePolicy:
                if self.hsr5 is not None else {}))
         if self.hsr5 is not None and "closing_release" in (event.evidence or {}):
             self._hsr5_source("closing_release")
+        if cfg.opening_rule_reach_sticky:
+            # SL-SOTA11 — the geometry whose reach passed in this closing attempt, with the pose it was observed with. The
+            # close seed may re-ground the target once the hand lifts (E1a t0 e11: bowl -> ramekin on the next frame), so
+            # the attach that the latch's pass decides snapshots THIS geometry, not the latest one.
+            st = (event.evidence or {}).get("reach_sticky")
+            if st is None:                       # no closing attempt with a closed command: nothing carries over
+                self._rs_pass_geometry = None
+            elif st.get("now") and usable and q_reach is not None:
+                self._rs_pass_geometry = {"geometry": manip.geometry, "state": np.array(q_reach, np.float64),
+                                          "id": int(manip.id), "frame": alignment.get("geometry_frame")}
         oracle_rec = None
         if self.oracle_latch:   # SL14 (off: this block does not exist for the call)
             event, oracle_rec = self._oracle_latch_pre(event, phase_before, signal.opening)
@@ -2497,7 +2508,14 @@ class SafePolicy:
                     carry = {"geometry_state": reach_carry["q_seen"],
                              "reach_centroid": reach_carry["centroid_now"]}
                 # T46g — end
-                self.ag3s.attach(manip.geometry, robot_state=q, parent_link=parent_link,
+                attach_geometry = manip.geometry
+                kept = getattr(self, "_rs_pass_geometry", None) if cfg.opening_rule_reach_sticky else None
+                if (kept is not None and sticky and sticky.get("used") and sticky.get("same_object")
+                        and kept["id"] == int(manip.id)):   # SL-SOTA11 (off / not used: the latest geometry, as before)
+                    attach_geometry = kept["geometry"]
+                    carry = {**carry, "geometry_state": kept["state"]}
+                    event.evidence["reach_sticky"]["attach_geometry_frame"] = kept["frame"]
+                self.ag3s.attach(attach_geometry, robot_state=q, parent_link=parent_link,
                                  allowed_contact_links=allowed, label="manipulated",
                                  reach=cfg.reach,
                                  hold_link=self.hold_links.get(hand, parent_link),

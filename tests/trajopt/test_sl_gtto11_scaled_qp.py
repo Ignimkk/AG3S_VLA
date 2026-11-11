@@ -56,7 +56,7 @@ def test_version_and_flag():
     args = pf.parse_v11ab_args(argv=pf.version_server_argv(V) + list(pf.AG3S_VERSIONS[V]))
     assert args.ee_action_qp_scaled is True and pf.version_flag_values(args)["ee_action_qp_scaled"] is True
     for name, flags in pf.AG3S_VERSIONS.items():
-        if name != V and name not in pf.SOTA_SCALED_VERSIONS + pf.SOTA_PEAK_VERSIONS + pf.SOTA_ROTREL_VERSIONS:   # SL-SOTA6 (2026-11-11): the ``-qs`` SOTA versions
+        if name != V and name not in pf.SOTA_SCALED_VERSIONS + pf.SOTA_PEAK_VERSIONS + pf.SOTA_ROTREL_VERSIONS + pf.SOTA_REACHSTICKY_VERSIONS:   # SL-SOTA6 (2026-11-11): the ``-qs`` SOTA versions
             assert "--ee-action-qp-scaled" not in flags, name
 
 

@@ -1257,6 +1257,15 @@ for _b in tuple(v for v in SOTA_VERSIONS if "-pt6-" in v and "-hr150" in v and (
     SOTA_ROTREL_VERSIONS = SOTA_ROTREL_VERSIONS + (_b[:-len("-tro")] + "-rr-tro",)
 del _b
 SOTA_VERSIONS = SOTA_VERSIONS + SOTA_ROTREL_VERSIONS
+#: SL-SOTA11 (dev-57, 2026-11-12, plan §9.20): ``-rs`` = the opening rule's reach check stays passed within one closing attempt
+#: (``--grasp-opening-rule-reach-sticky``; pb6's sticky reach does not reach the opening rule). On the frozen-candidate family
+#: only (``-pt6-…-hr150[-hb]-qs-tro``): ``<v without -tro>-rs-tro``. Default off everywhere else.
+SOTA_REACHSTICKY_VERSIONS: tuple[str, ...] = ()
+for _b in tuple(v for v in SOTA_VERSIONS if "-pt6-" in v and "-hr150" in v and v.endswith("-qs-tro")):
+    AG3S_VERSIONS[_b[:-len("-tro")] + "-rs-tro"] = tuple(AG3S_VERSIONS[_b]) + ("--grasp-opening-rule-reach-sticky",)
+    SOTA_REACHSTICKY_VERSIONS = SOTA_REACHSTICKY_VERSIONS + (_b[:-len("-tro")] + "-rs-tro",)
+del _b
+SOTA_VERSIONS = SOTA_VERSIONS + SOTA_REACHSTICKY_VERSIONS
 GT15_VERSIONS = GT15_VERSIONS + SOTA_VERSIONS
 #: (G88c, 03:5x) the A-alone ablation queued as ``…-obst3`` (gtto23, not started yet) gets the same two fixes, so A alone and
 #: A + B differ only by the held point model: ``…-obst3`` := A'' + no carve + support "under" (``…-obst3-pts`` = B'' keeps
