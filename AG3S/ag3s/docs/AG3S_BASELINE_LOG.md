@@ -3313,3 +3313,55 @@ LIBERO (장애물 없음) 성공률, spatial / object / goal / 10:
   - 원인은 §4.14 진단과 같다: 공통 perception 의 recall 한계 (R4 로 선언한 대체 detector). GT 판 (exact) 은 −5.8 pt 다.
   - port 결함이 아니므로 수정하지 않는다. Tab. 1 은 원문 보고값과 비교하므로 이 수치는 port 검증 기록으로만 쓴다.
 - KNOWS-GT 는 goal LI-r3 가 들어오면서 5 block 이 됐고 CAR 51.2 다. 판정은 §4.17 · §4.18 대로 계획의 맨 마지막에서 한다.
+
+## BL-15 — SDM π0.5 단독 baseline (보고 분할 init 19–) — 6/8 block 측정 후 사용자 지시로 일시 중단 (2026-11-12 01:5x – 07:19 KST, sdm-c7)
+
+**목적.** AG3S 구성 동결 (S0) 을 기다리지 않고 돌릴 수 있는 baseline 은 π0.5 단독뿐이다 (11-11 결정: Tab. 1 의 AEGIS · multi-link · KNOWS 행은 원문 보고값). 사용자 지시 (11-12) 순서: ① SafeLIBERO anchor → ② LIBERO → ③ LIBERO-Safety tranche C → ④ (선택) queue F 의 multi-link LIBERO libero_10. baseline port 보고 run 은 계획의 맨 마지막 (AG3S 논문 실험 뒤, 사용자 지시가 있을 때) 이라 이 queue 에 넣지 않았다.
+
+**설정 (결과 보기 전 고정).**
+
+| 항목 | 값 |
+|---|---|
+| 기계 | SDM, H200 NVL 70 GB (AMRC 와 다른 기계 → AMRC tranche 1 값과 episode 단위 짝 아님) |
+| queue | `experiments/segmentation/sdm_pi05_anchor_queue.sh` (commit 7e9e858c → rebase 뒤 a6fa3ac0, done_run 수정 6c9b465b) |
+| launcher | `benchmark/runners/launch_libero_paired.py --conversion C --modes vla_only` (server `serve_safe --no-safe`, `pi05_libero`). 주말 AG3S arm (`--modes vla_v11ab`) 과 같은 launcher · client · per-episode `policy_seed` → McNemar 짝 (G108 · G109 의 qe2 방식). tranche 1 의 `launch_method.py --method none` 과 결과가 같은 경로임은 G109 에서 확인 |
+| ① SafeLIBERO | 4 suite × task 0–3 × L-I · L-II × init 19–28, seed 7, `--safelibero-step-budget main_aegis`, 공식 1 mm 충돌, run-id `sdm-pi05-sl-<suite>-L<lvl>` (run dir 은 `…-L<lvl>-L<lvl>-vla_only`) = 320 ep |
+| ② LIBERO | 4 suite × task 0–9 × init 19–23, seed 7, run-id `sdm-pi05-lb-<suite>` = 200 ep |
+| ③ LIBERO-Safety | `bl_tranche_libero_safety_queue.sh` `INITS=19 SUFFIX=-sdm` (공식 `pi05_libero_safety`, 60 ep) |
+| ④ multi-link | `bl_tranche_arms_queue.sh` `SUFFIX=-r2-sdm LIBERO_SUITES=libero_10` (port 검증 init 15–18, 40 ep) |
+
+**실행 기록 (KST).**
+
+| 시각 | 일 |
+|---|---|
+| 01:55 | dry-run 24 block 통과 (①②③), queue commit, dev-e8 (sdm-setup) 에 GPU · HEAD 고정 알림 |
+| 01:56 – 06:16 | ① 6 block 끝 (모두 `client_returncode` 0), block 당 34–53 분 (episode 당 약 1.0–1.3 분) |
+| 06:16 – 06:5x | ① long L-I 37/40 ep 에서 중단 — 사용자 지시 (dev-e8 전달): AMRC 마지막 push (2284d9c6) 를 합치려고 queue 를 멈춤 |
+| 07:1x | dev-e8 rebase → HEAD a6fa3ac0. 들어온 실행 경로 변경은 기본 꺼짐 flag (SL-SOTA13 · 14, `serve_safe` · `safe_policy` · `server.py`) 뿐 → `--no-safe` 경로 불변 |
+| 07:1x | bug 수정: queue 의 done_run 이 SafeLIBERO run dir 의 덧붙은 `-L<lvl>` 을 몰라 끝난 block 을 못 알아봄 → 수정 (6c9b465b), 함수 단독 test 로 6 skip 확인 |
+| 07:16 | 재시작 (6 skip, long L-I 부터) |
+| 07:19 | **사용자 지시 "잠시 중단"** → queue · launcher · server · client 종료, GPU · lock 비움. long L-I (07:16) · long L-II (07:18) 는 episode 0 개로 끊김 |
+
+**결과 [M] (끝난 6 block, 각 40 ep; CI = Wilson 95 %, level 평균 = suite 동일 가중)**
+
+| suite | L-I TSR | L-I CAR | L-I SSR | L-II TSR | L-II CAR | L-II SSR |
+|---|---:|---:|---:|---:|---:|---:|
+| spatial | 67.5 | 10.0 | 10.0 | 60.0 | 10.0 | 10.0 |
+| object | 40.0 | 17.5 | 12.5 | 80.0 | 15.0 | 12.5 |
+| goal | 57.5 | 0.0 | 0.0 | 57.5 | 32.5 | 25.0 |
+| long | — | — | — | — | — | — |
+| **3 suite 평균 (n = 120)** | **55.0** [46.1, 63.6] | **9.2** [5.2, 15.7] | **7.5** [4.0, 13.6] | **65.8** [57.0, 73.7] | **19.2** [13.1, 27.1] | **15.8** [10.4, 23.4] |
+
+![SDM π0.5 anchor](figures/bl-15-sdm-pi05-anchor-20261112.png)
+
+*그림 [M].* suite × level 별 TSR · CAR · SSR (막대 = 40 ep, 오차막대 = Wilson 95 %), 점선 = KNOWS 가 보고한 π0.5 L-I 4 suite 평균 TSR 55.0 · CAR 12.4. long 과 LIBERO 는 아직 안 돌림. 숫자: `figures/bl-15-sdm-pi05-anchor-20261112.json`.
+
+**관찰.**
+- 원문 π0.5 보고값 (L-I 4 suite 평균): KNOWS TSR 55.0 · CAR 12.4 · SSR 11.5, VLSA/AEGIS 57.8 · 17.1. SDM 3 suite L-I 은 55.0 · 9.2 · 7.5 — long 이 빠져 4 suite 평균과 바로 비교할 수 없다. AMRC tranche 1 (init 15–18, L-I · L-II 128 ep) 은 TSR 56.2 · CAR 14.8 · SSR 10.9 (BL-14).
+- goal L-I CAR 0 / 40: 4 task 모두 장애물이 milk 이고, 충돌 시점은 대기 20 step 뒤 (t = 32–131), 변위 대부분 수십–수백 mm → 실제 밀침 (판정 artefact 아님). 1 mm 근처 가벼운 접촉 (1.3 · 1.4 · 2.8 mm) 도 몇 개 있다.
+
+**멈춘 곳 · 다시 시작.**
+- 남은 것: ① long L-I · L-II (80 ep, 약 2 h), ② LIBERO 200 ep, ③ LIBERO-Safety 60 ep, ④ multi-link libero_10 40 ep → 약 7–8 h.
+- 다시 시작: `bash experiments/segmentation/sdm_pi05_anchor_queue.sh` (끝난 6 block 은 건너뜀, long L-I 부터). 끊긴 run dir 3 개 (`20261112T061631_…long-LI…` 37 ep, `20261112T071609_…long-LI…` 0 ep, `20261112T071850_…long-LII…` 0 ep) 는 episode 수 부족으로 done 이 아니며 집계에서도 다시 돈 run 이 쓰인다 (가장 새 dir).
+- 다시 시작 전에 HEAD 가 6c9b465b 에서 바뀌었으면 π0.5 단독 경로 (`launch_libero_paired.py` · `libero_safe_client.py` · `serve_safe.py` `--no-safe`) diff 를 확인한다. AG3S 쪽 GPU 작업 (계획서 §9.23 A) 이 우선이면 그 경계에서 이어 돈다.
+- 집계 · 그림: `outputs/2026-11-12_SDM_pi05_baseline/report.py` (git 제외, `table.md` · `summary.json` · `fig_pi05_sdm.png`), log `outputs/2026-11-12_SDM_pi05_baseline/queue.log`.

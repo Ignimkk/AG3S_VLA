@@ -48,6 +48,7 @@ baseline [`BASELINE_TRANCHE_PLAN_PORT_RATIONALE_20261109_KO.md`](BASELINE_TRANCH
 | **계획의 마지막** (사용자 지시 11-11 00:4x) — **AG3S 논문 실험 뒤로 이동 (사용자 지시 11-11 03:4x; 아래 맨 마지막 행의 일부로 실행)** | dev-4a | **KNOWS 판정 · 남은 tranche 1 · 동결** (F5 적용 · `-r4` 재실행 · KNOWS 보고 run 모두 보류; Tab. 1 KNOWS 행은 원문 보고값, 진단 결과는 port 충실도 근거로만 남김): 진단 (`outputs/2026-11-11_KNOWS_GT_gap/`, 00:1x 시작) 결과로 (a) 원문 근거 R1 수정 → 새 판으로 KNOWS ±GT tranche 1 전체 (SafeLIBERO 16 + LIBERO 4 run, 약 8 h) 또는 (b) 수정 없음 → 남은 11 run (약 5 h) 와 차이 · 원인 공개. 그 뒤 KNOWS port 동결 → KNOWS 보고 run (init 19–49) | Tab. 1 KNOWS 행 | 독점 | baseline 문서 §4.17. **진단 끝 (00:3x): 권고 = F5** (GT 판을 원문 Naive 정의 't = 0 고정, 갱신 없음' 으로 → GT 판 `-r4` 재실행, 약 8 h 중 GT 8 block · 2.7 h), detector 판 수정 없음 (recall 한계) |
 | **11-12 01:4x – (SDM, AG3S 쪽 GPU 시작 전까지)** | dev-4a (사용자가 SDM 에서 실행) | **π0.5 단독 측정 run 3 개 (논문 §4 표의 측정 baseline 행):** ① SafeLIBERO π0.5 anchor 4 suite × 4 task × L-I · L-II × init 19–28 = 320 ep (`T=s1 SUFFIX=-sdm SAFE_ARMS_SEL="none|" … bl_tranche_arms_queue.sh`) → ② LIBERO π0.5 4 suite × 10 task × init 19–23 = 200 ep → ③ LIBERO-Safety π0.5 tranche C init 19 = 60 ep | ① Tab. 1 "π0.5 alone" 행 (AG3S 주말 본 run 과 같은 episode 짝 · McNemar, 원문 π0.5 재현 = 보고값 비교의 근거), ② Tab. 1 LIBERO 열, ③ LIBERO-Safety 표 (원문 π0.5 35.3 / 56.7 / 51.3 대비) | 독점 (π0.5 단독끼리 공유 가능) | SDM 은 사용자가 GitHub fresh clone (af3cc897) 으로 세팅 (`doc/active/migration/SDM_FRESH_SETUP_20261111_KO.md`). AG3S 구성과 무관해 동결 불필요. dev-57 확인 (01:3x): AG3S 본 run 에 π0.5 arm 없음 → ① 중복 아님; SDM GPU 는 08:00 이후 AG3S 쪽이 시작할 때 block 경계에서 넘김. 최종 순서는 사용자 결정 |
 | **계획의 맨 마지막** (사용자 지시 11-11 03:4x: 시간 문제로 뺀 것이므로 취소하지 않고 마지막에 둔다) | dev-4a | **baseline 직접 실행 (port) 보고 run**: 동결 port, AG3S 와 **같은 init · seed · 기계** — AEGIS ±GT · multi-link ±GT (+ π0.5 는 AG3S 실험의 anchor 재사용), KNOWS ±GT 는 판정 (F5 · `-r4`) 뒤 | 같은 episode 짝 비교 (McNemar) — 원문 보고값 비교보다 강한 근거. 마감 전에 끝난 만큼 supplement (또는 Tab. 1 의 "our runs" 행) 에, 나머지는 rebuttal · camera-ready 용 | 독점 | **선행: 주말 AG3S 논문 실험 (11-14–15) 이 모두 끝난 뒤.** 순서 권고: AG3S 가 쓴 init (19–28) 부터 → AEGIS → multi-link → KNOWS. 전체 init 19–49 는 약 210 GPU h [D] 라 마감 (11-17 20:59 KST) 전에는 일부만 가능. Tab. 1 의 본 비교는 원문 보고값 그대로 |
+| 11-12 01:56 – 07:19 (SDM, **일시 중단**) | sdm-c7 | 위 ①–④ 실행 (`sdm_pi05_anchor_queue.sh`, `launch_libero_paired.py --modes vla_only` = AG3S arm 과 같은 launcher · policy_seed) | 49 행의 실행 기록 | 독점 | **① 6/8 block 끝** (spatial · object · goal × L-I · L-II, 240 ep): 3 suite 평균 L-I TSR 55.0 · CAR 9.2 · SSR 7.5, L-II 65.8 · 19.2 · 15.8 [M]. 06:5x AMRC push 합치기로 1 차 중단 (long L-I 37/40 버림), 07:16 재시작, **07:19 사용자 지시로 중단** — 남은 long × 2 · ② · ③ · ④ 약 7–8 h. 재개 = 같은 script (끝난 block 건너뜀). `AG3S_BASELINE_LOG.md` BL-15, §9.24 |
 
 규칙 (모든 세션): GPU 는 `scripts/setup/gpu_lock.py` 로만 (closed-loop = 독점, offline 추출 = 공유), 바깥 flock 금지; queue 가 도는 동안 공유 checkout 의 HEAD 불변; 단계 끝마다 commit 후 다음 단계 (자동 연쇄 금지); CPU 작업은 세션당 2 core 이하 — **`OMP_NUM_THREADS=MKL_NUM_THREADS=OPENBLAS_NUM_THREADS=1`** (11-10 P4 가 다중 thread BLAS 로 dev-4a run 을 3–4 배 느리게 함); E1a init 15–49 는 사용자 승인 없이는 보지 않는다 (G171). **보고 분할 = init 19–49** (11-10 23:1x 사용자 A안: init 15–18 은 baseline port 수정을 결정할 때 본 분할이라 'baseline port 검증 분할' 로 표시, 모든 arm · AG3S headline 에서 뺌).
 
@@ -192,6 +193,7 @@ T5 뒤에 하면 이 서버에서 끝낸다. **이전 시점은 T5 와의 순서
 | 2026-11-12 04:5x | dev-57: **`-zp` (`…-hr150-hb-qs-rs-zp-tro`) E1a 40 = TSR 19 · CAR 36 · SSR 19** (`pkgFin` 22 · 34 · 20; task 2 · 3 · 1 03:35–04:50, HEAD 7b50e287) — §9.22. task 0 은 10 / 10 이지만 task 2 · 3 에서 6 ep 을 잃음 (얻음 5) → **미채택**. AMRC 의 마지막 GPU run (04:50 종료). 동결 후보 = `pkgFrs` (`…-hb-qs-rs-tro`), 검증이 끝난 판 = `pkgFin`. **§9.23 'SDM 이전 후 작업 계획' 을 씀** (사용자 지시 11-11 23:4x) — 못한 작업 전부. offline 분석 도구는 `experiments/segmentation/sota_offline_20261111/` 로 repo 에 넣음. |
 | 2026-11-12 05:1x | dev-57: `-zp` 가 잃은 6 ep 을 CPU 로 재생 (04:53–04:55) — task 3 의 3 ep 에서 손바닥을 막은 최악 행 26 call 중 24 call 이 실행되지 않는 horizon step 5–9 의 실제 장애물 (mug · yellow book · cookies box) 행 (§9.22). **후보 SL-SOTA14 `-zp5`** (남긴 손바닥 행을 실행 step 0–4 로 한정) 를 결과 전 기록 · 구현 · 등록 (HEAD 8d24a96f, 기본 꺼짐) — **closed loop 미측정**, SDM 에서 §9.23 A-3 으로 잰다. 이 세션의 AMRC 작업은 여기까지. |
 | 2026-11-12 01:4x | dev-4a: SDM 세팅 끝 (사용자 실행, venv 6 개 · GPU 확인). SDM 에서 π0.5 단독 측정 ①–③ 행 추가 (§2). SDM이전방법 확인: 05:30–07:00 delta 는 사용자 PC 로만 · SDM 쓰기는 08:00 뒤 사용자 upload 때 (EXISTING=archive 권고). dev-57 확인: ① 중복 아님, AG3S 쪽 GPU 우선 → block 경계에서 넘김. |
+| 2026-11-12 07:2x | sdm-c7: SDM π0.5 단독 queue ① 6/8 block 측정 후 사용자 지시로 07:19 일시 중단 (GPU 비움, HEAD 6c9b465b). §2 끝 행 · §9.24 · BL-15 추가. queue done_run bug (SafeLIBERO run dir 의 덧붙은 `-L<lvl>`) 수정 commit 6c9b465b |
 
 ---
 
@@ -769,3 +771,19 @@ SDM 은 다른 기계라 AMRC 값과 episode 단위로 같다는 보장이 없�
 - queue 가 도는 중에 shared checkout 의 HEAD 가 바뀌면 launcher 가 그 cell 의 마지막 기록을 거절한다 (`Run belongs to another checkout or commit`, §9.21). commit 은 queue 경계에서만.
 - 실패 원인 분석은 '형태 (`shape.py`) → 막은 물체 (`surface_owner.py`) → 그 call 의 기록 (`to.grasp_contact` · `grasp.evidence` · chunk npz 의 `clearance`)' 순으로 보면 규칙 수준의 고장 (§9.20 의 두 건) 과 구조적 한계 (팔 link 교착) 가 갈린다.
 - SL-SOTA14 뒤 (HEAD 8d24a96f, 05:12–05:33) 판 registry 를 훑는 test 51 file 을 돌렸다: 620 passed · 35 skipped · 7 failed. 실패 7 건은 모두 옛 판 `AG3S-final-panda-v3-e0to-pc-*` 의 server build test 가 storage 의 `results/benchmark/20261029T192223_5ea56af44722_sl6b-hsr6-panda-labels/probe/hsr6_panda_kv_L4.npz` 를 못 찾은 것 (`FileNotFoundError`) — 이번 변경과 무관하고, SOTA 판은 이 file 을 쓰지 않는다. 그 run 디렉터리는 11-04 새 GPU 컨테이너로 옮길 때부터 storage 에 없다 (AMRC 의 가장 오래된 run 이 20261103; SDM이전방법 확인 05:35) — **SDM 에서도 같은 7 건이 실패한다. 무시한다.**
+
+### 9.24 SDM π0.5 단독 baseline — 진행 · 멈춘 곳 (sdm-c7, 2026-11-12 07:2x)
+
+사용자 지시 (11-12): S0 동결을 기다리지 않는 π0.5 단독 run ①–④ (§2 의 49 행) 를 사용자가 멈출 때까지 돌린다. 상세 · 그림은 `AG3S/ag3s/docs/AG3S_BASELINE_LOG.md` BL-15.
+
+| # | 실험 | 범위 | 상태 (07:19) |
+|---|---|---|---|
+| ① | SafeLIBERO π0.5 anchor | 4 suite × task 0–3 × L-I · L-II × init 19–28 = 320 ep | **6/8 block 끝 (240 ep)**, long L-I · L-II 남음 |
+| ② | LIBERO π0.5 | 4 suite × task 0–9 × init 19–23 = 200 ep | 시작 전 |
+| ③ | LIBERO-Safety tranche C | init 19, 60 ep, run-id `blt1-none-ls-sdm-*` | 시작 전 |
+| ④ | multi-link LIBERO libero_10 (port 검증) | 40 ep, run-id `…-r2-sdm` | 시작 전 |
+
+결과 [M] (3 suite 평균, 각 suite 40 ep): L-I TSR 55.0 · CAR 9.2 · SSR 7.5, L-II 65.8 · 19.2 · 15.8. 원문 π0.5 L-I 4 suite 평균 (KNOWS) 55.0 · 12.4 · 11.5 — long 이 들어온 뒤에 비교한다.
+
+**멈춘 곳:** 07:19 사용자 지시 "잠시 중단". queue · launcher · server · client 종료, GPU · lock 비움, HEAD 6c9b465b (push 안 함). 그 전 06:5x 에 AMRC push 합치기로 한 번 멈춰 long L-I 37/40 ep 을 버렸다.
+**다시 시작:** `bash experiments/segmentation/sdm_pi05_anchor_queue.sh` → 끝난 6 block 건너뛰고 long L-I 부터, 약 7–8 h. HEAD 가 바뀌었으면 π0.5 단독 실행 경로 diff 를 먼저 본다. §9.23 의 AG3S GPU 작업 (A-1 – A-6, AG3S 쪽 우선) 과 GPU 를 나눠 쓰므로 그 경계에서 이어 돈다.
