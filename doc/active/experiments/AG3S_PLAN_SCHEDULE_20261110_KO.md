@@ -182,6 +182,7 @@ T5 뒤에 하면 이 서버에서 끝낸다. **이전 시점은 T5 와의 순서
 | 2026-11-11 22:0x | dev-57: **후보 거르기 — `-hb` 만 통과** (E1a task 2 = 7 / 10, `-qs` 판 5; `-rr` · `-ap` 탈락, §9.17) → 최종 후보 `pkgFin` = `…-hr150-hb-qs-tro`. **`pkgFin` guard 통과: LIBERO 27 = 23, SafeLIBERO 11 = 5 · 9 · 4 (> 50 mm 0), LS 10 = 5 · 위반 0** (20:16–22:04, HEAD 09787344) — §9.18. 다음 = 같은 판 E1a 40 → 다른 suite 점검 init 15 · 16 → init 17 · 18 (05:00 전 종료). |
 | 2026-11-11 23:3x | dev-57: **`pkgFin` (`-hb-qs` 판) E1a 40 = TSR 22 · CAR 34 · SSR 20** (지금 구성 22 · 23 · 15, `-qs` 판 22 · 32 · 18; > 50 mm 1; 22:11–23:34, HEAD 7df3e6c9) — §9.19. 주 기준 통과 (`-qs` 판 대비 SSR +2) + guard 통과 (§9.18) → 동결 후보 = `pkgFin`. 다음 = 다른 suite 점검 init 15 · 16 → 17 · 18. |
 | 2026-11-12 00:1x | dev-57: `pkgFin` E1a 의 남은 실패 20 ep 을 다시 가름 — **grasp latch 고장 1 (t0 e11, opening rule 에 reach sticky 가 닿지 않음) · grasp zone 풀기로 인한 성공 + 충돌 2 (t0 e7 · e13)** 를 찾음 → 후보 SL-SOTA11 `-rs` · SL-SOTA12 `-zr60` (결과 전 기록, §9.20). 남은 GPU 순서를 바꿈: `pkgFin` 다른 suite 점검은 2 cell (16 ep: SSR 5, `-qs` 판 6) 에서 멈추고 새 후보를 먼저 잼 (§9.21). 사용자 지시 (23:4x): 06:00 까지 작업, 못한 것은 계획서에 적고 보고. |
+| 2026-11-12 00:3x | dev-57: **합친 판 `…-hr150-hb-qs-rs-zr60-tro` E1a task 0 = TSR 9 · CAR 10 · SSR 9 / 10** (`pkgFin` 8 · 8 · 6; 00:16–00:31, HEAD 091b7c70) — §9.22. 얻음 e5 · e11 · e13, 잃음 없음 (e7 은 성공 + 충돌 32 mm → 실패, 충돌 없음). 거르기 통과 → `pkgFin2` 로 LIBERO 27 → E1a task 1 · 2 · 3 → 다른 suite. |
 
 ---
 
@@ -607,3 +608,13 @@ SSR 얻음 9 / 잃음 7 (McNemar p = 0.80). 같은 episode 의 π0.5 28 · 11 ·
 
 - **[M]** 16 ep 에서는 `-hb` 의 이득이 없고 1 ep 을 잃었다 (object L-I t0 e15). 나머지 14 ep 은 `-qs` 판과 결과가 같다. 표본이 작아 판정하지 않는다 — 최종 후보가 정해진 뒤 그 판으로 7 cell 을 다시 잰다.
 - **기록의 예외:** object L-I cell 은 도는 중 (23:49) 에 다른 세션의 commit 36ce3108 (migration 문서 · `scripts/setup/migration/` 3 파일, run 경로 코드 변화 없음 — `git diff --stat 79979532 36ce3108`) 로 HEAD 가 바뀌어, episode 8 개가 모두 기록된 뒤 launcher 의 마지막 manifest 기록이 `Run belongs to another checkout or commit` 으로 끝났다 (queue 기록 rc=1). `episodes.jsonl` · npz 는 온전해 자료로 쓰되 `run_manifest.json` 의 `executions` 가 비어 있다.
+
+### 9.22 새 후보의 거르기와 검증 [M] (00:16 – )
+
+| run (TAG) | 셋 | 결과 | 기준 | 판정 |
+|---|---|---|---|---|
+| 합친 판 `…-hr150-hb-qs-rs-zr60-tro` (`pkgSrz`, 00:16–00:31, HEAD 091b7c70) | E1a task 0 × init 5–14 | **TSR 9 · CAR 10 · SSR 9** | `pkgFin` 8 · 8 · 6 | 통과 (SSR ≥ 7, 잃음 ≤ 1) |
+
+task 0 의 episode 별 [M] (`scratchpad/scr.py`): 얻음 **e5** (쥔 채 교착 → 30 call 에 안전 성공), **e11** (latch 고장 → 17 call 에 안전 성공), **e13** (성공 + 충돌 12.1 mm → 안전 성공). e7 은 성공 + 충돌 32.3 mm → 실패 (충돌 없음; 쥐었다 놓은 뒤 다시 못 쥠) — 충돌은 사라졌고 성공을 잃었다. e6 · e8 · e9 · e10 · e12 · e14 는 안전 성공 그대로. 풀린 zone 행의 중앙값은 call 당 1017–1190 → 529–710. sticky reach 가 실제로 attach 를 정한 것은 e6 (call 12) · e14 (call 31) 이고, e11 은 zone 이 줄어 접근이 달라지면서 sticky 없이 call 12 에 attach 됐다 — 두 후보 각각의 몫은 이 run 만으로 가르지 못한다 (합친 판으로 채택 여부를 본다).
+
+**다음 (결과 전):** 합친 판을 `pkgFin2` 로 두고 (b) LIBERO 27 (≥ 21) → (c) E1a task 1 · 2 · 3 → (d) 다른 suite init 15 · 16. SafeLIBERO 11 · LS 10 은 시간이 없어 이전 후로 넘긴다.
