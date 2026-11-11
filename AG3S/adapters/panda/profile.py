@@ -1287,6 +1287,16 @@ for _b in tuple(v for v in SOTA_VERSIONS if "-pt6-" in v and "-hr150" in v and (
     SOTA_ZONEPALM_VERSIONS = SOTA_ZONEPALM_VERSIONS + (_b[:-len("-tro")] + "-zp-tro",)
 del _b
 SOTA_VERSIONS = SOTA_VERSIONS + SOTA_ZONEPALM_VERSIONS
+#: SL-SOTA14 (dev-57, 2026-11-12, plan §9.22 / §9.23 A-0): ``-zp5`` = ``-zp`` with the kept palm rows limited to the 5 executed
+#: horizon steps (``--grasp-zone-keep-palm-steps 5`` = the client's replan interval). ``-zp`` E1a 40 = 19 / 36 / 19 (pkgFin
+#: 22 / 34 / 20): task 0 10 / 10, but tasks 2 and 3 lost 6 episodes; in the 3 lost task-3 episodes the blocked palm rows sat at
+#: horizon step 5-9 in 24 of 26 calls, on real obstacles. NOT measured closed loop on AMRC (written at 05:0x, GPU over).
+SOTA_ZONEPALM5_VERSIONS: tuple[str, ...] = ()
+for _b in SOTA_ZONEPALM_VERSIONS:
+    AG3S_VERSIONS[_b[:-len("-zp-tro")] + "-zp5-tro"] = tuple(AG3S_VERSIONS[_b]) + ("--grasp-zone-keep-palm-steps", "5")
+    SOTA_ZONEPALM5_VERSIONS = SOTA_ZONEPALM5_VERSIONS + (_b[:-len("-zp-tro")] + "-zp5-tro",)
+del _b
+SOTA_VERSIONS = SOTA_VERSIONS + SOTA_ZONEPALM5_VERSIONS
 GT15_VERSIONS = GT15_VERSIONS + SOTA_VERSIONS
 #: (G88c, 03:5x) the A-alone ablation queued as ``…-obst3`` (gtto23, not started yet) gets the same two fixes, so A alone and
 #: A + B differ only by the held point model: ``…-obst3`` := A'' + no carve + support "under" (``…-obst3-pts`` = B'' keeps

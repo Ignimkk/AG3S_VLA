@@ -3327,6 +3327,10 @@ def build_parser() -> argparse.ArgumentParser:
                     help="SL-SOTA13 — --grasp-zone-release 와 함께만. zone 안에서도 손바닥 (hold link) 행 가운데 가장 가까운 표면이 "
                          "장애물 물체 (장애물 물체 점 집합 위, target · 받침이 아님) 인 행은 풀지 않는다 — 손가락 행은 그대로 푼다. "
                          "target 바로 옆 장애물에 손바닥이 닿는 것을 막는다 (기록 to.grasp_contact.zone_kept_palm_rows). 기본 꺼짐")
+    ap.add_argument("--grasp-zone-keep-palm-steps", type=int, default=None, metavar="N",
+                    help="SL-SOTA14 — --grasp-zone-keep-palm-obstacles 와 함께만. 남기는 손바닥 행을 horizon 의 앞 N step "
+                         "(다음 요청 전에 실행되는 step) 으로 한정한다 — chunk 의 뒤쪽은 다시 계획되므로 zone 에서 그대로 푼다 "
+                         "(기록 to.grasp_contact.zone_kept_palm_steps). 기본 꺼짐 = 모든 step")
     ap.add_argument("--grasp-zone-radius-mm", type=float, default=100.0, metavar="MM",
                     help="V11AB-pb5: horizontal radius of the grasp zone around the manipulated object's centroid")
     ap.add_argument("--grasp-reach-sticky", action="store_true",
@@ -4344,6 +4348,11 @@ def reject_bad_flag_combinations(ap: argparse.ArgumentParser, args, *, seed_map_
         ap.error("--grasp-opening-rule-moved 는 --grasp-opening-rule 의 attach 검사입니다 — 함께 주십시오")
     if getattr(args, "grasp_zone_keep_palm_obstacles", False) and not getattr(args, "grasp_zone_release", False):   # SL-SOTA13
         ap.error("--grasp-zone-keep-palm-obstacles 는 --grasp-zone-release 의 예외입니다 — 함께 주십시오")
+    if getattr(args, "grasp_zone_keep_palm_steps", None) is not None:   # SL-SOTA14
+        if not getattr(args, "grasp_zone_keep_palm_obstacles", False):
+            ap.error("--grasp-zone-keep-palm-steps 는 --grasp-zone-keep-palm-obstacles 의 범위입니다 — 함께 주십시오")
+        if int(args.grasp_zone_keep_palm_steps) < 1:
+            ap.error("--grasp-zone-keep-palm-steps 는 1 이상이어야 합니다")
     if getattr(args, "grasp_opening_rule_reach_sticky", False) and not (   # SL-SOTA11
             getattr(args, "grasp_opening_rule", False) and getattr(args, "grasp_reach_sticky", False)):
         ap.error("--grasp-opening-rule-reach-sticky 는 --grasp-opening-rule · --grasp-reach-sticky 와 함께만")
@@ -4971,6 +4980,9 @@ def apply_grasp_contact_flags(safe, args) -> dict:
         safe.grasp_zone_keep_palm_row_margin = float(getattr(args, "obstacle_row_margin_mm", None) or 0.0) / 1000.0
         out["grasp_zone_keep_palm_obstacles_m"] = safe.grasp_zone_keep_palm_obstacles
         out["grasp_zone_keep_palm_row_margin_m"] = safe.grasp_zone_keep_palm_row_margin
+        if getattr(args, "grasp_zone_keep_palm_steps", None) is not None:   # SL-SOTA14 (off: no key, no attribute)
+            safe.grasp_zone_keep_palm_steps = int(args.grasp_zone_keep_palm_steps)
+            out["grasp_zone_keep_palm_steps"] = safe.grasp_zone_keep_palm_steps
     if getattr(args, "held_beneath_hand", False):   # SL-GTTO7 F3b (off: no key)
         safe.held_beneath_hand = True
         out["held_beneath_hand"] = True
