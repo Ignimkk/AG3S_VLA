@@ -526,3 +526,19 @@ def test_patience_state_is_shared_with_the_window_optimizer_and_cleared_by_reset
     record = {}
     assert window._obstacle_row_refuses(None, None, None, record) and record["obstacle_rows"]["patience"]["blocked_calls"] == 1
 
+
+
+# --------------------------------------------------------------------------- SL-SOTA6: the scaled action QP (F9a) under
+# the margin / priority / progress terms (the ``-qs`` SOTA versions; the F7 form above is untouched)
+def test_scaled_qp_with_margin_priority_and_progress(monkeypatch):
+    from AG3S.trajopt.sqp import TrajectoryOptimizer
+
+    monkeypatch.setattr(TrajectoryOptimizer, "ee_action_scaled", True)
+    da, rec, _ = _solve(obstacle_row_margin=0.03, obstacle_row_priority=10.0)
+    assert da == pytest.approx(0.03, abs=2e-4)               # the obstacle-object row is met, as in the F7 form
+    assert max(rec["osqp_iter"]) < 20000 and all("solved" in s for s in rec["status"])
+    da, rec, _ = _solve(obstacle_row_margin=0.03)             # equal weights: the two rows share the conflict
+    assert da == pytest.approx(0.025, abs=5e-4)
+    dz, rec = _prog_solve(PROG, VIOL, HELD)
+    assert np.allclose(dz[:, 2], 0.4, atol=1e-3) and np.allclose(dz[:, 0], 0.01 / 3, atol=1e-3)
+    assert max(rec["osqp_iter"]) < 20000

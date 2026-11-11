@@ -1206,6 +1206,20 @@ for _b in ((PE_VERSIONS[6], PE_VERSIONS[11], PE_VERSIONS[6] + "-ntc", PE_VERSION
     SOTA_HELD_VERSIONS = SOTA_HELD_VERSIONS + (_b + "-hr150", _b + "-hr150-tro")
 del _b
 SOTA_VERSIONS = SOTA_VERSIONS + SOTA_HELD_VERSIONS
+#: SL-SOTA6 (dev-57, 2026-11-11): ``-qs`` = --ee-action-qp-scaled (SL-GTTO11 F9a, the row-normalised action QP with a
+#: quadratic slack penalty) on the SOTA versions. E1a call records: 91-93 % of the F7 action-QP solves stop on OSQP's
+#: 20000-iteration cap (pe123458 1186 / 1271, ...-ntc-pt6-pg4-hr150-tro 1976 / 2188; 0.8-1.3 s per call) -- the executed
+#: correction is an unconverged iterate, not the min-norm one. F9a was only evaluated bundled with the opening rule's
+#: `moved` check (G58 / G59: cap 0.89 -> 0.22, median |Da| 0.99 -> 0.41), which was adopted later without it.
+#: Registered on pe123458 / pe12345811 (± -ntc) and on the ...-om15p10s40-ntc* SOTA versions. Name = <base>[...]-qs[-tro].
+SOTA_SCALED_VERSIONS: tuple[str, ...] = ()
+for _b in ((PE_VERSIONS[6], PE_VERSIONS[11], PE_VERSIONS[6] + "-ntc", PE_VERSIONS[11] + "-ntc")
+           + tuple(v for v in SOTA_VERSIONS if "-om15p10s40-ntc" in v and not v.endswith("-tro"))):
+    AG3S_VERSIONS[_b + "-qs"] = tuple(AG3S_VERSIONS[_b]) + ("--ee-action-qp-scaled",)
+    AG3S_VERSIONS[_b + "-qs-tro"] = AG3S_VERSIONS[_b + "-qs"] + ("--ee-action-qp-translation-only",)
+    SOTA_SCALED_VERSIONS = SOTA_SCALED_VERSIONS + (_b + "-qs", _b + "-qs-tro")
+del _b
+SOTA_VERSIONS = SOTA_VERSIONS + SOTA_SCALED_VERSIONS
 GT15_VERSIONS = GT15_VERSIONS + SOTA_VERSIONS
 #: (G88c, 03:5x) the A-alone ablation queued as ``…-obst3`` (gtto23, not started yet) gets the same two fixes, so A alone and
 #: A + B differ only by the held point model: ``…-obst3`` := A'' + no carve + support "under" (``…-obst3-pts`` = B'' keeps
