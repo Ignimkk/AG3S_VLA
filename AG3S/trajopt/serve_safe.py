@@ -2725,6 +2725,10 @@ def build_parser() -> argparse.ArgumentParser:
                          "행이 아닌 ESDF 행 (쥔 물체 · target · support · 목적지 · 장애물 집합 밖) 의 floor 를 0 대신 "
                          "−(pass-through 허용치 τ) 로 둔다: QP 가 통과 판정이 받아들이는 model 위반까지 0 으로 되돌리지 않는다 "
                          "(sqp.ee_action_gate_rows)")
+    ap.add_argument("--obstacle-hand-beneath", action="store_true",
+                    help="SL-SOTA7 — --passthrough-obstacle-tolerance-mm 와 함께만 (scene 장애물 집합용). 쥔 동안 손 (palm · 손가락) "
+                         "행의 최근접 장애물 집합 점이 쥔 물체의 xy footprint (+ 2 voxel) 안이고 쥔 물체 윗면보다 높지 않으면 "
+                         "장애물 물체 행으로 보지 않는다 — 쥔 물체 아래는 내려놓는 곳이다 (sqp.obstacle_hand_beneath)")
     # SL-SOTA1 — end
     # SL-GTTO10 — begin (lead self-ruling G53, 2026-11-07; user caution 2)
     ap.add_argument("--oracle-destination", action="store_true",
@@ -4816,6 +4820,9 @@ def reject_bad_flag_combinations(ap: argparse.ArgumentParser, args, *, seed_map_
     if getattr(args, "ee_action_qp_gate_rows", False):   # SL-SOTA4
         if getattr(args, "passthrough_obstacle_tolerance_mm", None) is None or not getattr(args, "ee_action_qp", False):
             ap.error("--ee-action-qp-gate-rows 는 --passthrough-obstacle-tolerance-mm · --ee-action-qp 와 함께만")
+    if getattr(args, "obstacle_hand_beneath", False):   # SL-SOTA7
+        if getattr(args, "passthrough_obstacle_tolerance_mm", None) is None:
+            ap.error("--obstacle-hand-beneath 는 --passthrough-obstacle-tolerance-mm 와 함께만")
     if getattr(args, "obstacle_row_patience", None) is not None:   # SL-SOTA3
         if getattr(args, "obstacle_row_margin_mm", None) is None:
             ap.error("--obstacle-row-patience 는 --obstacle-row-margin-mm 와 함께만")
@@ -5005,6 +5012,8 @@ def passthrough_overrides(args) -> dict:
         out["obstacle_row_patience"] = int(args.obstacle_row_patience)
     if getattr(args, "ee_action_qp_gate_rows", False):   # SL-SOTA4
         out["ee_action_gate_rows"] = True
+    if getattr(args, "obstacle_hand_beneath", False):   # SL-SOTA7
+        out["obstacle_hand_beneath"] = True
     return out
 # --- T88 — end ---
 

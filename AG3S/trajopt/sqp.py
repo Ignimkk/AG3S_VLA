@@ -75,6 +75,8 @@ def _obstacle_row_kwargs(cfg) -> dict:
         kw["class_tests"] = True
     if getattr(cfg, "obstacle_object_surface_tolerance", None) is not None:   # SL-SOTA1
         kw["surface_tol"] = float(cfg.obstacle_object_surface_tolerance)
+    if getattr(cfg, "obstacle_hand_beneath", False):   # SL-SOTA7
+        kw["hand_beneath"] = True
     return kw
 
 

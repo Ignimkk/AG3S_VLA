@@ -1206,6 +1206,17 @@ for _b in ((PE_VERSIONS[6], PE_VERSIONS[11], PE_VERSIONS[6] + "-ntc", PE_VERSION
     SOTA_HELD_VERSIONS = SOTA_HELD_VERSIONS + (_b + "-hr150", _b + "-hr150-tro")
 del _b
 SOTA_VERSIONS = SOTA_VERSIONS + SOTA_HELD_VERSIONS
+#: SL-SOTA7 (dev-57, 2026-11-11): ``-hb`` = --obstacle-hand-beneath (while HELD the hand's rows over the held object's
+#: footprint are not obstacle-object rows). E1a ...-ntc-pt6-pg4-hr150-tro task 2 init 5 / 6 / 13: the place was refused for
+#: a finger row against the plate (the destination was not / partly registered), the QP then moved the hand off the plate
+#: and the bowl was put down beside it. Registered on the ...-om15p10s40-ntc* SOTA versions. Name = <base>[...]-hb[-tro].
+SOTA_HANDB_VERSIONS: tuple[str, ...] = ()
+for _b in tuple(v for v in SOTA_VERSIONS if "-om15p10s40-ntc" in v and not v.endswith("-tro")):
+    AG3S_VERSIONS[_b + "-hb"] = tuple(AG3S_VERSIONS[_b]) + ("--obstacle-hand-beneath",)
+    AG3S_VERSIONS[_b + "-hb-tro"] = AG3S_VERSIONS[_b + "-hb"] + ("--ee-action-qp-translation-only",)
+    SOTA_HANDB_VERSIONS = SOTA_HANDB_VERSIONS + (_b + "-hb", _b + "-hb-tro")
+del _b
+SOTA_VERSIONS = SOTA_VERSIONS + SOTA_HANDB_VERSIONS
 #: SL-SOTA6 (dev-57, 2026-11-11): ``-qs`` = --ee-action-qp-scaled (SL-GTTO11 F9a, the row-normalised action QP with a
 #: quadratic slack penalty) on the SOTA versions. E1a call records: 91-93 % of the F7 action-QP solves stop on OSQP's
 #: 20000-iteration cap (pe123458 1186 / 1271, ...-ntc-pt6-pg4-hr150-tro 1976 / 2188; 0.8-1.3 s per call) -- the executed

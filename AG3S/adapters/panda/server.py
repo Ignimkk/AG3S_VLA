@@ -739,6 +739,8 @@ PORTED_FINAL_CONFIG_DESTS: tuple[str, ...] = (
     'ee_action_qp_gate_rows',
     # SL-SOTA5: SL-PE8's reach floor (clustering key, same path as close_seed_attention_ratio)
     'scene_obstacle_held_reach_mm',
+    # SL-SOTA7: the grasping hand's rows over what the held object is put on (sqp key, same path as the margin)
+    'obstacle_hand_beneath',
 )
 #: SL-GTTO — the target extents the Panda server runs (``--target-extent``; SL7 attention-surface, SL-GTTO oracle-visible).
 PORTED_TARGET_EXTENTS: tuple[str, ...] = ("estimated", "attention-surface", "oracle-visible")

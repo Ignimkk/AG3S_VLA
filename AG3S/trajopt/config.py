@@ -985,6 +985,13 @@ class SqpConfig:
     #: the QP then answered a 68 mm model violation of link7 against the held bowl with |Da| 1.5 and the bowl slipped out.
     #: The candidate / plane rows (self, support planes) keep their floor. False = as before.
     ee_action_gate_rows: bool = False
+    #: SL-SOTA7 (dev-57, 2026-11-11, `--obstacle-hand-beneath`) — with the scene obstacle set: while HELD, a row of the
+    #: grasping hand (palm + fingers) whose nearest obstacle-set point is inside the held object's xy footprint (+ 2 voxels)
+    #: and not above its top is not an obstacle-object row (`linearizer._hand_rows_over_held_footprint`): what is under the
+    #: carried object is where it is being put down. The held rows already have this (`held_beneath_contact`), the hand
+    #: rows did not -- an unregistered / partly registered destination (the plate) then held the fingers at the obstacle
+    #: margin during the place. False = as before.
+    obstacle_hand_beneath: bool = False
     # --- T88 — end ---
 
     def validate(self) -> None:
@@ -1019,6 +1026,10 @@ class SqpConfig:
             raise TrajOptConfigError(f"sqp.ee_action_gate_rows must be a bool, got {self.ee_action_gate_rows!r}")
         if self.ee_action_gate_rows and self.passthrough_obstacle_tolerance is None:
             raise TrajOptConfigError("sqp.ee_action_gate_rows needs sqp.passthrough_obstacle_tolerance (the row classification)")
+        if not isinstance(self.obstacle_hand_beneath, bool):   # SL-SOTA7
+            raise TrajOptConfigError(f"sqp.obstacle_hand_beneath must be a bool, got {self.obstacle_hand_beneath!r}")
+        if self.obstacle_hand_beneath and self.passthrough_obstacle_tolerance is None:
+            raise TrajOptConfigError("sqp.obstacle_hand_beneath needs sqp.passthrough_obstacle_tolerance (the row classification)")
         if not (math.isfinite(float(self.obstacle_row_priority)) and float(self.obstacle_row_priority) >= 1.0):
             raise TrajOptConfigError(f"sqp.obstacle_row_priority must be >= 1, got {self.obstacle_row_priority!r}")
         if isinstance(self.multi_seed, bool) or not isinstance(self.multi_seed, int) or self.multi_seed < 0:
@@ -1600,6 +1611,7 @@ _OMIT_WHEN_DEFAULT.update({("sqp", "obstacle_row_margin"): None, ("sqp", "obstac
                            ("sqp", "obstacle_object_surface_tolerance"): None})   # SL-SOTA1
 _OMIT_WHEN_DEFAULT.update({("sqp", "obstacle_row_patience"): None})   # SL-SOTA3
 _OMIT_WHEN_DEFAULT.update({("sqp", "ee_action_gate_rows"): False})   # SL-SOTA4
+_OMIT_WHEN_DEFAULT.update({("sqp", "obstacle_hand_beneath"): False})   # SL-SOTA7
 _OMIT_WHEN_DEFAULT.update({("sqp", "passthrough_obstacle_full_horizon"): False})   # SL-GTTO22   # SL-GTTO16 A'
 # --- T88 — end ---
 #: T72 — the grasp-set reach constraint: without `--grasp-set-to` the config dump keeps the keys it had before.

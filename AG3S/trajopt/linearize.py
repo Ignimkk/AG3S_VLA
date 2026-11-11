@@ -1957,7 +1957,8 @@ class CollisionLinearizer:
     # --- SL-GTTO16 (A) — begin: the obstacle-object rows of a trajectory (read only by `sqp._clear_passthrough`)
     def obstacle_object_rows(self, trajectory: np.ndarray, q_now: np.ndarray, scene: SceneSnapshot,
                              steps: Optional[int] = None, beneath: bool = False,
-                             class_tests: bool = False, surface_tol: Optional[float] = None) -> tuple[float, Optional[dict]]:
+                             class_tests: bool = False, surface_tol: Optional[float] = None,
+                             hand_beneath: bool = False) -> tuple[float, Optional[dict]]:
         """`(worst clearance over the ESDF rows whose nearest surface is an obstacle object, identity)` — `inf`, `None`
         when there is no such row (or no field).
 
@@ -1973,7 +1974,8 @@ class CollisionLinearizer:
             return float("inf"), None
         states = self.sphere_states(trajectory, q_now)
         centres = np.asarray(states[0], np.float64)
-        got = self.obstacle_object_mask(centres, scene, beneath=beneath, class_tests=class_tests, surface_tol=surface_tol)
+        got = self.obstacle_object_mask(centres, scene, beneath=beneath, class_tests=class_tests, surface_tol=surface_tol,
+                                        **({"hand_beneath": True} if hand_beneath else {}))
         if got is None:
             return float("inf"), None
         clear, obst, n_beneath, oop = got
@@ -1997,7 +1999,7 @@ class CollisionLinearizer:
                        **({} if oop is None else {"n_object_points": int(len(oop))})}
 
     def obstacle_object_mask(self, centres: np.ndarray, scene: SceneSnapshot, beneath: bool = False,
-                             class_tests: bool = False, surface_tol: Optional[float] = None):
+                             class_tests: bool = False, surface_tol: Optional[float] = None, hand_beneath: bool = False):
         """The classification of :meth:`obstacle_object_rows` on given query centres ``(H, n_query, 3)`` (SL-SOTA1,
         2026-11-11: the action QP reads the same mask to give those rows their own floor). ``None`` without a field or
         without ESDF rows; else ``(clearance (H, n_query), is_obstacle_object (H, n_query), n_beneath, object points)``.
@@ -2064,9 +2066,13 @@ class CollisionLinearizer:
             gn = np.linalg.norm(g, axis=1, keepdims=True)
             ok = gn[:, 0] > _EPS
             surf = flat - d.reshape(-1, 1) * np.where(ok[:, None], g / np.maximum(gn, _EPS), 0.0)
+            under_held = None
             if len(oop):
                 from scipy.spatial import cKDTree
-                on = (cKDTree(oop).query(surf)[0] <= (_OBJECT_SURFACE_TOL_M if surface_tol is None else float(surface_tol))) & ok
+                near_d, near_i = cKDTree(oop).query(surf)
+                on = (near_d <= (_OBJECT_SURFACE_TOL_M if surface_tol is None else float(surface_tol))) & ok
+                if hand_beneath:
+                    under_held = self._hand_rows_over_held_footprint(oop[near_i].reshape(*shape, 3), centres, scene, tol)
             else:
                 on = np.zeros(len(flat), bool)
             # SL-PE4 (`class_tests`): the set says "an obstacle object is the nearest surface", the class tests above may
@@ -2074,6 +2080,9 @@ class CollisionLinearizer:
             # alone decides (SL-GTTO19, the GT set).
             obst = (on.reshape(shape) & obst) if class_tests else on.reshape(shape)
             beneath = False
+            if under_held is not None:   # SL-SOTA7: the grasping hand over what the held object is being put on
+                n_beneath = int((under_held & obst).sum())
+                obst &= ~under_held
         if beneath and obst.any():
             # SL-GTTO16 A' (2026-11-08) — what the grasped object rests on is not an obstacle object for the hand: while
             # LATCHED / CLOSING a robot row whose nearest surface point lies under the manipulated object's footprint (the
@@ -2108,13 +2117,47 @@ class CollisionLinearizer:
             obst &= ~under
         return clear, obst, n_beneath, oop
 
+    def _hand_rows_over_held_footprint(self, nearest: np.ndarray, centres: np.ndarray, scene: SceneSnapshot,
+                                       voxel: float) -> Optional[np.ndarray]:
+        """SL-SOTA7 (2026-11-11, `sqp.obstacle_hand_beneath`) — `(H, n_query)` bool or `None`: while HELD, the rows of
+        the grasping hand (`grasp_contact["authorized"]`: palm + fingers) whose nearest obstacle-set point `nearest`
+        `(H, n_query, 3)` lies inside the held object's xy footprint at that step (its query discs + 2 voxels) and not
+        above the held object's top. What is under the carried object is where it is being put down: the perceived
+        destination covers a piece of the plate or none (E1a ...-pt6-pg4-hr150-tro task 2: registered in 6 of 10 episodes,
+        init 6 = 55 points 100 mm from the place), and the place itself -- the policy's chunk runs the fingers into the
+        plate's model surface, the contact stops them -- was refused as an obstacle-object row inside its margin, after
+        which the QP pushed the hand off the plate (init 6 call 27 |Da| 1.64, init 5 call 33 1.45). The test uses the set
+        point, not the field gradient: at a plan step under the surface the gradient is 0 or points down. The held
+        object's own rows and the arm rows are never touched here."""
+        n = int(self.n_spheres)
+        horizon, n_query = centres.shape[:2]
+        gc = getattr(scene, "grasp_contact", None) or {}
+        if n_query <= n or not isinstance(gc, dict) or str(gc.get("latch")) != "held" or gc.get("authorized") is None:
+            return None
+        hand = np.zeros(n, bool)
+        a = np.asarray(gc["authorized"], bool).reshape(-1)[:n]
+        hand[:a.shape[0]] = a
+        cols = np.flatnonzero(hand)
+        if not cols.size:
+            return None
+        hc = np.asarray(centres[:, n:], np.float64)                                   # (H, A, 3) the held rows at each step
+        hr = np.asarray(self.query_radii, np.float64).reshape(-1)[n:n_query]
+        q = np.asarray(nearest, np.float64)[:, cols]                                  # (H, Nh, 3)
+        gap = (np.linalg.norm(q[:, :, None, :2] - hc[:, None, :, :2], axis=3) - hr[None, None, :]).min(axis=2)
+        top = (hc[:, :, 2] + hr[None, :]).max(axis=1)                                 # (H,)
+        out = np.zeros((horizon, n_query), bool)
+        out[:, cols] = (gap <= 2.0 * float(voxel)) & (q[:, :, 2] <= top[:, None])
+        return out
+
     def obstacle_row_floor(self, centres: np.ndarray, scene: SceneSnapshot, margin: float, beneath: bool = False,
-                           class_tests: bool = False, surface_tol: Optional[float] = None, other: float = 0.0):
+                           class_tests: bool = False, surface_tol: Optional[float] = None, other: float = 0.0,
+                           hand_beneath: bool = False):
         """SL-SOTA1 — ``(row_floor (H, width) for :meth:`linearize`, is_obstacle_object (H, n_query))``: ``margin`` on the
         ESDF rows :meth:`obstacle_object_mask` calls obstacle-object rows, ``other`` (SL-SOTA4; 0 = as before) on the
         other ESDF rows, 0 on the candidate and plane rows.
         ``(None, None)`` when there is no field / no ESDF row (linearize then runs as without a floor)."""
-        got = self.obstacle_object_mask(centres, scene, beneath=beneath, class_tests=class_tests, surface_tol=surface_tol)
+        got = self.obstacle_object_mask(centres, scene, beneath=beneath, class_tests=class_tests, surface_tol=surface_tol,
+                                        **({"hand_beneath": True} if hand_beneath else {}))
         if got is None:
             return None, None
         _, obst, _, _ = got
