@@ -215,6 +215,9 @@ class SafePolicy:
     _last_held_beneath: dict = {}
     #: SL-GTTO5 F4 — same reason: the approach-zone release off.
     grasp_zone_release: bool = False
+    #: SL-SOTA13 (`--grasp-zone-keep-palm-obstacles`): None (default) = the zone releases every authorized row; a number (m,
+    #: the obstacle-object surface tolerance) = the hold links' obstacle-object rows are not released (`_grasp_contact`).
+    grasp_zone_keep_palm_obstacles: Optional[float] = None
     #: SL-GTTO6 F5 — same reason: occluded frames stay uncertified for the TO.
     occluded_certify: bool = False
     #: SL6-A — robot injections, class defaults = the RB-Y1 behaviour (test doubles built without `__init__` too):
@@ -2221,6 +2224,11 @@ class SafePolicy:
             out["closing_exempt"] = self.closing_exempt_now()
         if self.grasp_zone_release:   # SL-GTTO5 F4 (off: no key)
             out["zone_release"] = True
+            keep_tol = getattr(self, "grasp_zone_keep_palm_obstacles", None)
+            if keep_tol is not None:   # SL-SOTA13 (off: no key) — the palm = the hold links (the fingers stay released)
+                palms = set(dict(getattr(self, "hold_links", None) or {}).values())
+                out["zone_keep_palm_obstacles"] = {"links": np.asarray([n in palms for n in names], bool),
+                                                   "surface_tol": float(keep_tol)}
         return out
 
     #: V11AB-pb7: the latch checks that together say "the fingers closed and stopped on something".

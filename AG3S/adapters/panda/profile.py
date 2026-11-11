@@ -1277,6 +1277,16 @@ for _b in tuple(v for v in SOTA_VERSIONS if "-pt6-" in v and "-hr150" in v and (
     SOTA_ZONE_VERSIONS = SOTA_ZONE_VERSIONS + (_b[:-len("-tro")] + "-zr60-tro",)
 del _b
 SOTA_VERSIONS = SOTA_VERSIONS + SOTA_ZONE_VERSIONS
+#: SL-SOTA13 (dev-57, 2026-11-12, plan §9.22): ``-zp`` = the zone release keeps the palm's obstacle-object rows
+#: (``--grasp-zone-keep-palm-obstacles``; zone radius unchanged, finger rows still released). Offline (zone_rows.py, pkgFin
+#: E1a 40, GT labels): released palm rows with a predicted penetration lie on a designated obstacle in the 2 success +
+#: collision episodes (48 rows) and in none of the 20 safe successes. On ``…-qs-tro`` and ``…-qs-rs-tro``.
+SOTA_ZONEPALM_VERSIONS: tuple[str, ...] = ()
+for _b in tuple(v for v in SOTA_VERSIONS if "-pt6-" in v and "-hr150" in v and (v.endswith("-qs-tro") or v.endswith("-qs-rs-tro"))):
+    AG3S_VERSIONS[_b[:-len("-tro")] + "-zp-tro"] = tuple(AG3S_VERSIONS[_b]) + ("--grasp-zone-keep-palm-obstacles",)
+    SOTA_ZONEPALM_VERSIONS = SOTA_ZONEPALM_VERSIONS + (_b[:-len("-tro")] + "-zp-tro",)
+del _b
+SOTA_VERSIONS = SOTA_VERSIONS + SOTA_ZONEPALM_VERSIONS
 GT15_VERSIONS = GT15_VERSIONS + SOTA_VERSIONS
 #: (G88c, 03:5x) the A-alone ablation queued as ``…-obst3`` (gtto23, not started yet) gets the same two fixes, so A alone and
 #: A + B differ only by the held point model: ``…-obst3`` := A'' + no carve + support "under" (``…-obst3-pts`` = B'' keeps
