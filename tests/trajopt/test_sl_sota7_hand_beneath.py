@@ -1,5 +1,6 @@
 """SL-SOTA7 (2026-11-11, dev-57) — while HELD, the grasping hand's rows over the held object's footprint are not
-obstacle-object rows (`sqp.obstacle_hand_beneath`, `--obstacle-hand-beneath`, versions ``-hb``).
+obstacle-object rows (`sqp.obstacle_hand_beneath`, `--obstacle-hand-beneath`, versions ``-hb``); the held object's own
+rows are not either when the set point is under its bottom (+ 2 voxels).
 
 E1a ...-ntc-pt6-pg4-hr150-tro task 2 init 5 / 6 / 13: the destination (plate) was not or only partly registered, the place
 was refused for a finger row against the plate inside the obstacle margin, the QP then moved the hand off the plate
@@ -39,7 +40,8 @@ def test_hand_rows_over_the_held_footprint():
     q[1, :, :] = [0.04, 0.0, 0.0]            # step 1: the same point, the footprint now covers x = 0.03 .. 0.11
     got = _under(lin, centres, scene, q)
     assert got.shape == (2, 5) and got[:, :2].all()
-    assert not got[:, 2].any() and not got[:, 3:].any()        # the arm row and the held rows are never touched
+    assert not got[:, 2].any()                                 # the arm row is never touched
+    assert got[:, 3:].all()                                    # the held rows: the point is under their bottom (0.08)
 
 
 def test_outside_the_footprint_or_above_the_top_stays_an_obstacle_row():
@@ -49,8 +51,13 @@ def test_outside_the_footprint_or_above_the_top_stays_an_obstacle_row():
     assert not _under(lin, centres, scene, q).any()
     q[:, :, :] = [0.04, 0.0, 0.13]           # inside the footprint, 10 mm above the held object's top (0.12)
     assert not _under(lin, centres, scene, q).any()
-    q[:, :, :] = [0.04, 0.0, 0.12]           # at the top: still under
-    assert _under(lin, centres, scene, q)[:, :2].all()
+    q[:, :, :] = [0.04, 0.0, 0.12]           # at the top: still under for the hand, not for the held rows
+    got = _under(lin, centres, scene, q)
+    assert got[:, :2].all() and not got[:, 3:].any()
+    q[:, :, :] = [0.04, 0.0, 0.09]           # the held object's bottom (0.08) + 2 voxels (0.01): the band's upper edge
+    assert _under(lin, centres, scene, q)[:, 3:].all()
+    q[:, :, :] = [0.04, 0.0, 0.095]          # an obstacle beside the held object at its own height: stays an obstacle row
+    assert not _under(lin, centres, scene, q)[:, 3:].any()
     q[0, :, :] = [0.11, 0.0, 0.0]            # step 0 footprint ends at x = 0.07 (+ 0.01); step 1 reaches it
     q[1, :, :] = [0.11, 0.0, 0.0]
     got = _under(lin, centres, scene, q)

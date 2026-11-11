@@ -2127,8 +2127,14 @@ class CollisionLinearizer:
         init 6 = 55 points 100 mm from the place), and the place itself -- the policy's chunk runs the fingers into the
         plate's model surface, the contact stops them -- was refused as an obstacle-object row inside its margin, after
         which the QP pushed the hand off the plate (init 6 call 27 |Da| 1.64, init 5 call 33 1.45). The test uses the set
-        point, not the field gradient: at a plan step under the surface the gradient is 0 or points down. The held
-        object's own rows and the arm rows are never touched here."""
+        point, not the field gradient: at a plan step under the surface the gradient is 0 or points down.
+
+        The **held object's own rows** (13:5x, before any `-hb` run): the same footprint, and the set point not above the
+        held object's bottom + 2 voxels -- what it is lowered onto. `_held_rows_class`' beneath test reads the field
+        gradient and left them obstacle rows on a plate (LIBERO guard ...-hr150-tro seed 7 task 2: held rows against
+        `plate_1` at -17 mm for 9 calls, never placed; seed 9 task 2: 9 calls). An obstacle beside the held object is
+        nearest to rows at its own height, above that bottom band, and stays an obstacle row. The arm rows are never
+        touched here."""
         n = int(self.n_spheres)
         horizon, n_query = centres.shape[:2]
         gc = getattr(scene, "grasp_contact", None) or {}
@@ -2146,7 +2152,12 @@ class CollisionLinearizer:
         gap = (np.linalg.norm(q[:, :, None, :2] - hc[:, None, :, :2], axis=3) - hr[None, None, :]).min(axis=2)
         top = (hc[:, :, 2] + hr[None, :]).max(axis=1)                                 # (H,)
         out = np.zeros((horizon, n_query), bool)
-        out[:, cols] = (gap <= 2.0 * float(voxel)) & (q[:, :, 2] <= top[:, None])
+        pad = 2.0 * float(voxel)
+        out[:, cols] = (gap <= pad) & (q[:, :, 2] <= top[:, None])
+        qh = np.asarray(nearest, np.float64)[:, n:n_query]                            # (H, A, 3) the held rows' set points
+        gap_h = (np.linalg.norm(qh[:, :, None, :2] - hc[:, None, :, :2], axis=3) - hr[None, None, :]).min(axis=2)
+        bottom = (hc[:, :, 2] - hr[None, :]).min(axis=1)                              # (H,)
+        out[:, n:n_query] = (gap_h <= pad) & (qh[:, :, 2] <= bottom[:, None] + pad)
         return out
 
     def obstacle_row_floor(self, centres: np.ndarray, scene: SceneSnapshot, margin: float, beneath: bool = False,
