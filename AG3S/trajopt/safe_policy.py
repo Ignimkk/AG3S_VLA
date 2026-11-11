@@ -2228,7 +2228,8 @@ class SafePolicy:
             if keep_tol is not None:   # SL-SOTA13 (off: no key) — the palm = the hold links (the fingers stay released)
                 palms = set(dict(getattr(self, "hold_links", None) or {}).values())
                 out["zone_keep_palm_obstacles"] = {"links": np.asarray([n in palms for n in names], bool),
-                                                   "surface_tol": float(keep_tol)}
+                                                   "surface_tol": float(keep_tol),
+                                                   "row_margin": float(getattr(self, "grasp_zone_keep_palm_row_margin", 0.0) or 0.0)}
         return out
 
     #: V11AB-pb7: the latch checks that together say "the fingers closed and stopped on something".
