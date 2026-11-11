@@ -172,6 +172,7 @@ T5 뒤에 하면 이 서버에서 끝낸다. **이전 시점은 T5 와의 순서
 | 2026-11-11 03:5x | dev-57: 사용자 지시 — 목표 = 논문 Tab. 1–3 지표 최대화, dev-57 이 GPU 우선. dev-4a queue F 03:52 중지 (goal-r2 까지 끝, libero_10-r2 · LS π0.5 60 ep 보류). 채택 규칙을 E1a 40 SSR 주 기준으로 바꿈 (결과 전 고정, §9.2), 다른 suite 점검 셋 (init 15–18) 추가, 순서 변경 (§9.3). T1 E1a 40 시작. |
 | 2026-11-11 05:2x | dev-57: **T1 (PE11 단독 판) E1a 40 = TSR 22 · CAR 23 · SSR 15 — 지금 구성과 같음 → 미채택** (§9.4). 겨냥한 C 6 ep 중 충돌이 없어진 것은 1 (t3 e8, 대신 시간 초과), 새 큰 충돌 1 (t3 e14 252 mm). 40 ep 중 31 ep 은 step 수 · 변위까지 같음 → 같은 기계의 재실행은 재현된다. 다음 = 지금 구성의 다른 suite 점검 1 차 (MS, init 15 · 16). `-to0` 를 `-to5` 보다 먼저 (§9.3). |
 | 2026-11-11 07:1x | dev-57: **다른 suite 점검 1 차 (지금 구성, 56 ep) = TSR 24 · CAR 31 · SSR 17** (42.9 / 55.4 / 30.4 %); 같은 episode 의 π0.5 28 · 11 · 8, AEGIS port 35 · 32 · 21, multi-link port 28 · 32 · 19 (§9.5). CAR 은 baseline 과 같고 **TSR 이 가장 낮다** — 실패 31 ep 중 끝까지 HOLD 가 6 (target 못 찾음 3 · 쥔 물체 가림 3). 충돌 17 ep 의 offline 분석 (§9.6) 에서 나온 후보 **SL-SOTA1** (장애물 물체 행 전용 여유 `-om*`, `-ntc`) 를 commit 5a2460a8 로 넣음 (기본 꺼짐). 다음 = smoke → 묶음 판 `…-pe12345811-to0-om15p10s40-ntc-tro` E1a 40. |
+| 2026-11-11 09:0x | dev-57: **묶음 판 `…-pe12345811-to0-om15p10s40-ntc-tro` E1a 40 = TSR 19 · CAR 29 · SSR 17** (지금 구성 22 · 23 · 15; SSR 얻음 8 / 잃음 6, > 50 mm 9 → 6) — §9.7. 충돌은 줄었고 (CAR +6) 대신 step 예산을 넘긴 실패가 늘었다 (충돌 없는 실패 12 ep, 모두 `max_steps`). 주 기준 (SSR ≥ +1) 은 넘지만 guard 전이고, 교착을 풀면 더 오를 여지가 커서 채택 판정은 미룸. 교착 대응 **SL-SOTA2** (`--ee-action-qp-progress`, 판 `-pg4`) · **SL-SOTA3** (`--obstacle-row-patience`, 판 `-pt6` · `-pt3`) 을 commit 9728acbb 로 넣음 (기본 꺼짐). 다음 = `…-ntc-pt6-pg4-tro` E1a task 0 (10 ep) → 나머지 task. |
 
 ---
 
@@ -268,3 +269,26 @@ n · TSR · CAR · SSR. baseline 열은 dev-4a tranche 1 의 같은 기계 · �
 | a | `…-pe12345811-to0-om15p10s40-ntc-tro`, E1a t0 e7 · e10 (smoke, `sota_sub_queue.sh`) | 새 코드 경로 · 기록 확인 (채택 판정 아님) |
 | b | 같은 판 E1a 40 | 묶음의 효과 |
 | c | b 의 결과에 따라 구성 요소를 나눠 봄 (`-to0-tro`, `-ntc-tro`, `om25`) 또는 guard | |
+
+### 9.7 묶음 판 결과와 교착 대응 후보 SL-SOTA2 · SL-SOTA3 (결과 [M] 09:0x, 후보는 결과 전 기록)
+
+묶음 판 `…-pe12345811-to0-om15p10s40-ntc-tro` (2026-11-11 07:26–08:59, HEAD 5deb0da8, `sota_sub_queue.sh` TAG `pkgAt0`, task 별 init 5–14 한 run 씩; 원본 run-id `sub-pkgAt0-e1a-spatial-LI-t*`):
+
+| 판 | E1a 40 TSR · CAR · SSR | task 0 · 1 · 2 · 3 의 SSR | > 50 mm | 충돌 없는 실패 | 기준 대비 SSR (얻음 / 잃음) |
+|---|---|---|---:|---:|---|
+| `…-pe123458` (기준) | 22 · 23 · 15 | 1 · 4 · 7 · 3 | 9 | 8 | — |
+| 묶음 판 | **19 · 29 · 17** | 4 · 2 · 7 · 4 | 6 | 12 | +8 / −6 (McNemar p = 0.79) |
+
+- 얻음 8: t0 e5 · e6 · e8 · e11, t2 e7 · e13, t3 e8 · e13. 잃음 6: t0 e9, t1 e5 · e11, t2 e5 · e14, t3 e14 — t1 e11 (충돌 38.7 mm) 을 빼면 모두 충돌 없이 `max_steps`.
+- 실패 21 ep 은 전부 `max_steps` 다 (충돌 없는 실패 12 + 실패 + 충돌 9). 기준 판에서 성공 + 충돌이던 t0 e10 · t1 e6 · t1 e10 도 '충돌 없는 실패' 가 됐다 — 충돌은 막았고 일은 못 끝냈다.
+- task 0 의 교착 5 ep 를 call 기록으로 본 결과 (`offline/row_owner.py`): 머그 위에서 π0.5 가 계속 내려가려 함 (e10, 27 call), 쥔 채 link5 가 moka pot 앞에서 멈춤 (e12, 19 call), link5 ↔ 와인병 + 목적지 접시가 장애물로 읽힘 (e9), target 그릇이 장애물로 읽힘 (e7). 공통점 = **min-norm QP 는 접근을 지울 뿐 돌아가는 움직임을 만들지 못한다.**
+- 판정: 주 기준 (SSR 15 → 17) 은 넘는다. guard 는 아직 돌리지 않았고, 교착 12 ep 이 풀리면 SSR 이 더 오를 여지가 크므로 **채택 판정은 아래 후보 뒤로 미룬다** (묶음 판은 후보로 남김).
+
+교착 대응 (commit 9728acbb, 기본 꺼짐, 결과 전 기록):
+
+| 후보 | flag · 판 suffix | 하는 일 | 겨냥 |
+|---|---|---|---|
+| SL-SOTA3 인내 한도 | `--obstacle-row-patience N` · `-pt6` / `-pt3` | N call 연속으로 장애물 행이 여유 안쪽이면 여유를 내려놓고 (기본 floor · τ_obs 0 은 유지) chunk 가 여유 밖으로 나오면 다시 켬 | 여유 15 mm 때문에 생긴 교착 (잘못 읽힌 target · 목적지 포함) — 교착 길이를 N call 로 묶음 |
+| SL-SOTA2 진행 선호 | `--ee-action-qp-progress G` · `-pg4` (G = 0.4) | 막힌 정도에 비례해 QP 목적 함수에 '쥔 동안 위로 · 쥐기 전 target 쪽 수평으로' 항을 더함 | QP 가 멈춤 대신 돌아가는 보정을 고르게 함 (e10 · e12) |
+
+순서: (a) `…-pe12345811-to0-om15p10s40-ntc-pt6-pg4-tro` E1a task 0 (10 ep, 묶음 판 task 0 = 5 · 7 · 4 와 같은 episode 목록) → (b) 교착이 줄면 task 1–3 으로 E1a 40 을 채움, 아니면 `-pt6` / `-pg4` 를 나눠 봄 → (c) 승자의 guard. 위험 [해석]: 여유를 내려놓는 동안 다시 닿을 수 있고 (CAR 하락), 진행 선호가 π0.5 의 쥐기 자세를 흐트러뜨릴 수 있다. 판정은 §9.2 그대로 (기준 = `…-pe123458` SSR 15; 묶음 판 17 과도 같이 적는다).
