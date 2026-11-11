@@ -306,7 +306,8 @@ n · TSR · CAR · SSR. baseline 열은 dev-4a tranche 1 의 같은 기계 · �
 
 - 묶음 판의 교착 5 ep 중 e9 · e12 · e14 가 안전 성공이 됐다 (e12: 60 call → 18 call). e10 은 머그 위 교착은 풀렸으나 (QP 35 call → 4 call) 쥔 뒤 call 10 무렵 (step 53) 에 충돌. e7 은 target 을 쥔 뒤 30 call 을 통과로 보내고도 실패 (target 오인 계열).
 - 진행 선호 기록: QP call 110 개 중 '쥐기 전: target 쪽' 45 · '쥔 동안: 위' 39 (나머지는 closing · target 위). 인내 한도로 여유를 내려놓은 call 은 episode 당 0–11.
-- 10 ep 은 채택 판정 단위가 아니다 → task 1–3 을 같은 queue 형식으로 채워 E1a 40 을 만든다 (판정은 §9.2).
+- **이 run 의 인내 한도는 의도대로 돌지 않았다 [M] (09:3x 발견, 수정 commit c9fd709c).** 연속 call 수를 optimizer 마다 따로 세었고 (요청은 look-ahead gate 에 따라 본 optimizer 또는 window optimizer 가 판정) episode 사이에 비우지 않았다 — 기록의 `patience.blocked_calls` 가 episode 를 넘어 이어져 e6 · e7 은 call 1 · 4 부터 여유가 내려진 채 시작했다. 즉 8 · 8 · 7 은 '진행 선호 + 사실상 자주 꺼진 여유' 의 결과이고 `-pt6` 의 결과가 아니다. e10 의 충돌 (step 53) 도 call 5 에서 여유가 내려진 뒤 통과된 chunk (model 여유 3.4 mm) 에서 났다. task 1–3 queue 는 시작 1 분 뒤 중단했다 (결과 없음).
+- 수정 뒤 같은 판을 task 0 에 다시 돌린다 (TAG `pkgCpt6pg4`). 10 ep 은 채택 판정 단위가 아니다 — 후보를 task 0 에서 거른 뒤 E1a 40 으로 판정한다 (§9.2).
 
 **SL-SOTA4 후보 — action QP 가 통과 판정과 같은 행만 지킨다** (`--ee-action-qp-gate-rows`, 판 suffix `-gr`, commit 53177bcf, 기본 꺼짐):
 
@@ -317,3 +318,9 @@ n · TSR · CAR · SSR. baseline 열은 dev-4a tranche 1 의 같은 기계 · �
 | 예: task 2 init 14 (기준에서는 안전 성공) | 접시에 내려놓는 call 30 에서 쥔 그릇 행이 접시의 15 mm 여유 안 (−1.8 mm) → 통과 거절 → QP 가 link7 ↔ 쥔 그릇 잔상의 68 mm model 위반 (통과 판정은 τ = 100 mm 까지 받아들임) 을 되돌리려 |Da| 1.52, 5 step 에 57 mm 이동 → 그릇을 놓침 |
 
 하는 일: QP 에서 장애물 물체 행이 아닌 ESDF 행 (쥔 물체 · target · support · 목적지 · 장애물 집합 밖) 의 floor 를 0 대신 −τ (통과 허용치) 로 둔다. 새 숫자는 없다 (τ 는 이미 있는 값). self · support plane 행은 그대로. 위험 [해석]: 장애물 집합에서 빠진 실제 장애물 (§9.6 의 첫 줄, PE11 + 표면 허용 40 mm 로 줄인 것) 은 QP 가 더 이상 밀어내지 않는다 → CAR 하락 가능. 순서: `-pt6-pg4` 판의 E1a 40 이 끝난 뒤 `…-ntc-pt6-pg4-gr-tro` 를 task 0 부터.
+
+**수정 뒤 재실행 [M]** (`…-ntc-pt6-pg4-tro`, task 0 × init 5–14, 2026-11-11 09:30–09:45, HEAD c9fd709c, run-id `sub-pkgCpt6pg4-e1a-spatial-LI-t0`): **TSR 9 · CAR 8 · SSR 7** — 안전 성공 e5 · e7 · e8 · e9 · e11 · e12 · e14, 성공 + 충돌 e10 (62.3 mm) · e13 (1.3 mm), 실패 e6 (충돌 없음, `max_steps`). `patience.blocked_calls` 는 episode 마다 0 에서 시작하고 6 을 넘긴 것은 e14 · e6 뿐 → 개선의 대부분은 진행 선호에서 온다.
+- e6 의 교착 (쥔 뒤 call 14–36, QP 23 call 연속, |Da| 1.0–1.9): `offline/row_owner_pkgCpt6pg4_e6.json` — 막은 행 (hand · link6 · link7 · 쥔 물체) 의 최근접 실제 물체는 거의 전부 **쥔 그릇 자신** (±15 mm), moka pot 은 60–330 mm 밖. 쥔 물체가 가려져 (`manipulated occluded`) target 으로 다시 잡히지 않는 동안 그 점들이 scene 장애물 집합에 들어간다.
+- e10: call 6 은 여유 밖 (18.8 mm) 으로 통과, call 7 의 QP (반복 한도, |Da| 1.74) 창 첫 step 에 접촉.
+
+다음 후보 (결과 전 기록): (a) `…-ntc-pt6-pg4-gr-tro` task 0 — SL-SOTA4 를 얹음. (b) **SL-SOTA5** — 쥔 동안 쥔 물체 점 model 의 현재 위치에서 가까운 장애물 집합 점은 쥔 물체 자신으로 본다 (구현 예정, 기본 꺼짐).
