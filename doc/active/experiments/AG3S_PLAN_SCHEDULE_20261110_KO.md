@@ -183,6 +183,7 @@ T5 뒤에 하면 이 서버에서 끝낸다. **이전 시점은 T5 와의 순서
 | 2026-11-11 23:3x | dev-57: **`pkgFin` (`-hb-qs` 판) E1a 40 = TSR 22 · CAR 34 · SSR 20** (지금 구성 22 · 23 · 15, `-qs` 판 22 · 32 · 18; > 50 mm 1; 22:11–23:34, HEAD 7df3e6c9) — §9.19. 주 기준 통과 (`-qs` 판 대비 SSR +2) + guard 통과 (§9.18) → 동결 후보 = `pkgFin`. 다음 = 다른 suite 점검 init 15 · 16 → 17 · 18. |
 | 2026-11-12 00:1x | dev-57: `pkgFin` E1a 의 남은 실패 20 ep 을 다시 가름 — **grasp latch 고장 1 (t0 e11, opening rule 에 reach sticky 가 닿지 않음) · grasp zone 풀기로 인한 성공 + 충돌 2 (t0 e7 · e13)** 를 찾음 → 후보 SL-SOTA11 `-rs` · SL-SOTA12 `-zr60` (결과 전 기록, §9.20). 남은 GPU 순서를 바꿈: `pkgFin` 다른 suite 점검은 2 cell (16 ep: SSR 5, `-qs` 판 6) 에서 멈추고 새 후보를 먼저 잼 (§9.21). 사용자 지시 (23:4x): 06:00 까지 작업, 못한 것은 계획서에 적고 보고. |
 | 2026-11-12 00:3x | dev-57: **합친 판 `…-hr150-hb-qs-rs-zr60-tro` E1a task 0 = TSR 9 · CAR 10 · SSR 9 / 10** (`pkgFin` 8 · 8 · 6; 00:16–00:31, HEAD 091b7c70) — §9.22. 얻음 e5 · e11 · e13, 잃음 없음 (e7 은 성공 + 충돌 32 mm → 실패, 충돌 없음). 거르기 통과 → `pkgFin2` 로 LIBERO 27 → E1a task 1 · 2 · 3 → 다른 suite. |
+| 2026-11-12 01:1x | dev-57: **`pkgFin2` (`…-hr150-hb-qs-rs-zr60-tro`) LIBERO 27 = 23** (8 · 7 · 8; `pkgFin` 23, 지금 구성 22; 00:33–01:10, HEAD 69efac96) — §9.22. guard 통과 → E1a task 1 · 2 · 3. |
 
 ---
 
@@ -614,6 +615,7 @@ SSR 얻음 9 / 잃음 7 (McNemar p = 0.80). 같은 episode 의 π0.5 28 · 11 ·
 | run (TAG) | 셋 | 결과 | 기준 | 판정 |
 |---|---|---|---|---|
 | 합친 판 `…-hr150-hb-qs-rs-zr60-tro` (`pkgSrz`, 00:16–00:31, HEAD 091b7c70) | E1a task 0 × init 5–14 | **TSR 9 · CAR 10 · SSR 9** | `pkgFin` 8 · 8 · 6 | 통과 (SSR ≥ 7, 잃음 ≤ 1) |
+| 같은 판 = `pkgFin2` (`gtto-pkgFin2-libero9s*`, 00:33–01:10, HEAD 69efac96) | LIBERO 27 (seed 7 · 8 · 9) | **23** (8 · 7 · 8); 실패 s7 t4, s8 t4 · t9, s9 t4 | ≥ 21 (`pkgFin` 23, 지금 구성 22) | 통과 |
 
 task 0 의 episode 별 [M] (`scratchpad/scr.py`): 얻음 **e5** (쥔 채 교착 → 30 call 에 안전 성공), **e11** (latch 고장 → 17 call 에 안전 성공), **e13** (성공 + 충돌 12.1 mm → 안전 성공). e7 은 성공 + 충돌 32.3 mm → 실패 (충돌 없음; 쥐었다 놓은 뒤 다시 못 쥠) — 충돌은 사라졌고 성공을 잃었다. e6 · e8 · e9 · e10 · e12 · e14 는 안전 성공 그대로. 풀린 zone 행의 중앙값은 call 당 1017–1190 → 529–710. sticky reach 가 실제로 attach 를 정한 것은 e6 (call 12) · e14 (call 31) 이고, e11 은 zone 이 줄어 접근이 달라지면서 sticky 없이 call 12 에 attach 됐다 — 두 후보 각각의 몫은 이 run 만으로 가르지 못한다 (합친 판으로 채택 여부를 본다).
 
