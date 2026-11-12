@@ -5111,3 +5111,16 @@ F8 + (a) `--ee-action-qp-scaled` (행 정규화 + quadratic slack) + (c′) `--g
 **A-6 동결 판정 (16:3x): `pkgFrs` (`…-hr150-hb-qs-rs-tro`) 를 동결한다.** E1a 40 SSR 21 (`pkgFin` 20, 지금 구성 15), guard 통과, 다른 suite init 15 · 16 SSR 22 (`-qs` 판 19, 지금 구성 17). 지금 구성의 init 17 · 18 은 재지 않았다 (판정이 뒤집히려면 그 56 ep 에서 SSR 30 이상이어야 함). **[해석]** 이 동결은 AG3S 판 사이의 선택이다 — 조정에 쓰지 않은 init 15–18 에서는 충돌 없는 episode 가 가장 많지만 (CAR 85 / 112) 성공이 가장 적어 (TSR 51) SSR 이 AEGIS port · multi-link GT port 보다 2 ep 낮다. 남은 일: D6 (11-13) 전까지 §9.23 B-1 (놓는 자리) 과 Goal L-I 의 원인. 최종 구성 문서 `doc/active/experiments/AG3S_FINAL_CONFIG_KO.md` 와 판정 기록 G175 를 갱신했다.
 
 **실제 장면 · 그림:** `AG3S/ag3s/docs/figures/sl-sota-ms-sdm-init15-18-20261112.png` (+ `.json`) — 네 episode 의 마지막 장면, 112 ep 의 TSR · CAR · SSR, cell 별 안전 성공, 안전 성공이 아닌 episode 의 형태. script `experiments/segmentation/sota_offline_20261111/fig_ms_sdm.py`.
+
+**이어서 — SL-SOTA16 `-dc` 측정: 탈락 (2026-11-12 16:40–19:38 측정, 19:5x 기록, HEAD `4fab0cc8`).** 용어: dead-camera HOLD = 손목 카메라가 그 frame 에 ESDF voxel 을 쓰지 못해 (`esdf_dead_camera`) 서버가 chunk 를 실행하지 않고 팔을 세우는 것. `-dc` = 동결 판 `pkgFrs` + `--esdf-dead-camera-seen-ok`. 숫자는 TSR · CAR · SSR 의 episode 수.
+
+| 시각 | 한 일 | 결과 |
+|---|---|---|
+| 16:3x–16:40 | `pkgFrs` 전체 run 의 HOLD 사유 집계 · 손목 depth 확인 · 판 등록 · 기준 고정 (계획서 §9.26) | HOLD 263 call 전부 `esdf_dead_camera`; 다른 suite init 15–18 에서 11 ep · 7 ep 은 끝까지 HOLD |
+| 16:40–19:13 | 1 단계: HOLD episode 가 든 6 cell-run 56 ep (`ms-pkgFdcsdm-*`) | dead-camera HOLD 227 → **0** call. 합 23 · 44 · 20 → **23 · 42 · 20**, > 50 mm 충돌 5 → **7**. 기준 (SSR ≥ 22, 증가 ≤ 1) 미달 |
+| 19:13–19:38 | 2 단계: E1a task 3 (`sub-pkgFdcsdm-e1a-spatial-LI-t3`) | 5 · 9 · 5 (`pkgFrs` 와 episode 단위로 같음) |
+| 19:38–19:5x | episode 별 비교 (`dc_cmp.py`) · 실패 형태 (`shape.py`) · 그림 | HOLD 가 있던 13 ep 중 성공이 된 것 0. Spatial L-II t1 e17 · e18 장애물 변위 22 → 145 mm, 29 → 318 mm; 충돌 없던 2 ep 에 7 mm · 1.4 mm 접촉 |
+
+**판정: `-dc` 탈락, `pkgFrs` 동결 유지 (guard 는 돌리지 않음).** **[해석]** dead-camera HOLD 는 원인이 아니라 결과다 — 쥔 물체를 내려놓지 못하거나 팔 link 행에 막힌 팔이 탁자 가장자리로 밀려간 뒤에 손목 카메라가 workspace 밖을 본다. HOLD 를 풀면 그 앞의 막힘은 남고 팔이 더 움직여 장애물을 더 민다. 다음 후보는 그 앞의 막힘을 겨눈 SL-SOTA17 `-hf30` (계획서 §9.27; 19:41 E1a task 2 → 1 거르기 시작). 상세 표는 계획서 §9.28.
+
+**실제 장면 · 그림:** `AG3S/ag3s/docs/figures/sl-sota16-dc-sdm-20261112.png` (+ `.json`) — Spatial L-II t1 e18 · Goal L-I t2 e17 의 마지막 장면 (`pkgFrs` 와 `-dc`), HOLD 가 있던 13 ep 의 HOLD call 수와 결과, 1 단계 합과 통과선. script `experiments/segmentation/sota_offline_20261111/fig_dc_sdm.py`.

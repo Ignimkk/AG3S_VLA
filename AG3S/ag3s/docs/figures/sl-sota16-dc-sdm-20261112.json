@@ -1,0 +1,499 @@
+{
+ "figure": "/mnt/dev/AG3S_VLA-wt-hf/AG3S/ag3s/docs/figures/sl-sota16-dc-sdm-20261112.png",
+ "source": "/tmp/claude-0/-mnt-dev/a2a2d792-941a-400f-8ace-60815fa2c777/scratchpad/dc_cmp.json",
+ "set": "stage 1 = 6 cell-runs with a HOLD episode under pkgFrs (Goal L-I init 17,18; Spatial L-I init 15-18; Spatial L-II init 15,16 and 17,18; Long L-I init 15,16; Long L-II init 17,18), task 0-3, seed 7; stage 2 = E1a task 3 init 5-14. In-sample: the candidate was found on these episodes.",
+ "columns": [
+  "n",
+  "TSR",
+  "CAR",
+  "SSR",
+  ">50mm",
+  "hold_calls",
+  "dead_camera_hold_calls",
+  "outside_workspace_notes"
+ ],
+ "stage1_pkgFrs": [
+  56,
+  23,
+  44,
+  20,
+  5,
+  227,
+  227,
+  0
+ ],
+ "stage1_dc": [
+  56,
+  23,
+  42,
+  20,
+  7,
+  5,
+  0,
+  34
+ ],
+ "pass_line_fixed_before_run": {
+  "dead_camera_hold": 0,
+  "ssr_min": 22,
+  "over_50mm_max": 6
+ },
+ "verdict": "rejected (SSR 20 < 22, > 50 mm +2)",
+ "stage2_e1a_task3": {
+  "pkgFrs": [
+   10,
+   5,
+   9,
+   5,
+   1,
+   8,
+   8,
+   0
+  ],
+  "dc": [
+   10,
+   5,
+   9,
+   5,
+   1,
+   0,
+   0,
+   5
+  ]
+ },
+ "per_cell": {
+  "goal-LI-i17_18": {
+   "pkgFrs": [
+    8,
+    2,
+    6,
+    1,
+    1,
+    39,
+    39,
+    0
+   ],
+   "dc": [
+    8,
+    2,
+    6,
+    1,
+    1,
+    5,
+    0,
+    5
+   ]
+  },
+  "spatial-LII-i17_18": {
+   "pkgFrs": [
+    8,
+    3,
+    6,
+    3,
+    0,
+    20,
+    20,
+    0
+   ],
+   "dc": [
+    8,
+    3,
+    6,
+    3,
+    2,
+    0,
+    0,
+    7
+   ]
+  },
+  "long-LII-i17_18": {
+   "pkgFrs": [
+    8,
+    4,
+    8,
+    4,
+    0,
+    47,
+    47,
+    0
+   ],
+   "dc": [
+    8,
+    4,
+    7,
+    4,
+    0,
+    0,
+    0,
+    4
+   ]
+  },
+  "spatial-LI-i15_16_17_18": {
+   "pkgFrs": [
+    16,
+    7,
+    12,
+    5,
+    2,
+    47,
+    47,
+    0
+   ],
+   "dc": [
+    16,
+    7,
+    11,
+    5,
+    2,
+    0,
+    0,
+    17
+   ]
+  },
+  "spatial-LII-i15_16": {
+   "pkgFrs": [
+    8,
+    5,
+    7,
+    5,
+    1,
+    7,
+    7,
+    0
+   ],
+   "dc": [
+    8,
+    5,
+    7,
+    5,
+    1,
+    0,
+    0,
+    1
+   ]
+  },
+  "long-LI-i15_16": {
+   "pkgFrs": [
+    8,
+    2,
+    5,
+    2,
+    1,
+    67,
+    67,
+    0
+   ],
+   "dc": [
+    8,
+    2,
+    5,
+    2,
+    1,
+    0,
+    0,
+    0
+   ]
+  },
+  "e1a-spatial-LI-t3": {
+   "pkgFrs": [
+    10,
+    5,
+    9,
+    5,
+    1,
+    8,
+    8,
+    0
+   ],
+   "dc": [
+    10,
+    5,
+    9,
+    5,
+    1,
+    0,
+    0,
+    5
+   ]
+  }
+ },
+ "hold_episodes": [
+  {
+   "episode": "Goal L-I t2 e17",
+   "pkgFrs": {
+    "label": "F",
+    "d": 0.0,
+    "n": 60,
+    "hold": 18,
+    "tail": 18
+   },
+   "dc": {
+    "label": "F",
+    "d": 0.0,
+    "n": 60,
+    "hold": 2,
+    "tail": 2,
+    "note": 2
+   }
+  },
+  {
+   "episode": "Goal L-I t2 e18",
+   "pkgFrs": {
+    "label": "F",
+    "d": 0.0,
+    "n": 60,
+    "hold": 21,
+    "tail": 21
+   },
+   "dc": {
+    "label": "F",
+    "d": 0.0,
+    "n": 60,
+    "hold": 3,
+    "tail": 3,
+    "note": 3
+   }
+  },
+  {
+   "episode": "Spatial L-II t1 e17",
+   "pkgFrs": {
+    "label": "F+C",
+    "d": 21.8,
+    "n": 60,
+    "hold": 5,
+    "tail": 5
+   },
+   "dc": {
+    "label": "F+C",
+    "d": 144.6,
+    "n": 60,
+    "hold": 0,
+    "tail": 0,
+    "note": 1
+   }
+  },
+  {
+   "episode": "Spatial L-II t1 e18",
+   "pkgFrs": {
+    "label": "F+C",
+    "d": 28.6,
+    "n": 60,
+    "hold": 15,
+    "tail": 15
+   },
+   "dc": {
+    "label": "F+C",
+    "d": 317.6,
+    "n": 60,
+    "hold": 0,
+    "tail": 0,
+    "note": 6
+   }
+  },
+  {
+   "episode": "Long L-II t2 e17",
+   "pkgFrs": {
+    "label": "F",
+    "d": 0.0,
+    "n": 110,
+    "hold": 47,
+    "tail": 47
+   },
+   "dc": {
+    "label": "F+C",
+    "d": 7.3,
+    "n": 110,
+    "hold": 0,
+    "tail": 0,
+    "note": 4
+   }
+  },
+  {
+   "episode": "Spatial L-I t1 e15",
+   "pkgFrs": {
+    "label": "F",
+    "d": 0.0,
+    "n": 60,
+    "hold": 20,
+    "tail": 20
+   },
+   "dc": {
+    "label": "F",
+    "d": 0.0,
+    "n": 60,
+    "hold": 0,
+    "tail": 0,
+    "note": 11
+   }
+  },
+  {
+   "episode": "Spatial L-I t1 e18",
+   "pkgFrs": {
+    "label": "F",
+    "d": 0.0,
+    "n": 60,
+    "hold": 19,
+    "tail": 13
+   },
+   "dc": {
+    "label": "F",
+    "d": 0.0,
+    "n": 60,
+    "hold": 0,
+    "tail": 0,
+    "note": 4
+   }
+  },
+  {
+   "episode": "Spatial L-I t3 e15",
+   "pkgFrs": {
+    "label": "F",
+    "d": 0.4,
+    "n": 60,
+    "hold": 7,
+    "tail": 7
+   },
+   "dc": {
+    "label": "F+C",
+    "d": 1.4,
+    "n": 60,
+    "hold": 0,
+    "tail": 0,
+    "note": 1
+   }
+  },
+  {
+   "episode": "Spatial L-I t3 e18",
+   "pkgFrs": {
+    "label": "F+C",
+    "d": 294.5,
+    "n": 60,
+    "hold": 1,
+    "tail": 1
+   },
+   "dc": {
+    "label": "F+C",
+    "d": 261.7,
+    "n": 60,
+    "hold": 0,
+    "tail": 0,
+    "note": 1
+   }
+  },
+  {
+   "episode": "Spatial L-II t2 e15",
+   "pkgFrs": {
+    "label": "F",
+    "d": 0.0,
+    "n": 60,
+    "hold": 7,
+    "tail": 7
+   },
+   "dc": {
+    "label": "F",
+    "d": 0.0,
+    "n": 60,
+    "hold": 0,
+    "tail": 0,
+    "note": 1
+   }
+  },
+  {
+   "episode": "Long L-I t2 e15",
+   "pkgFrs": {
+    "label": "F",
+    "d": 0.0,
+    "n": 110,
+    "hold": 67,
+    "tail": 67
+   },
+   "dc": {
+    "label": "F",
+    "d": 0.0,
+    "n": 110,
+    "hold": 0,
+    "tail": 0,
+    "note": 0
+   }
+  },
+  {
+   "episode": "E1a t3 e6",
+   "pkgFrs": {
+    "label": "F",
+    "d": 0.6,
+    "n": 60,
+    "hold": 7,
+    "tail": 7
+   },
+   "dc": {
+    "label": "F",
+    "d": 0.6,
+    "n": 60,
+    "hold": 0,
+    "tail": 0,
+    "note": 5
+   }
+  },
+  {
+   "episode": "E1a t3 e9",
+   "pkgFrs": {
+    "label": "F+C",
+    "d": 238.8,
+    "n": 60,
+    "hold": 1,
+    "tail": 0
+   },
+   "dc": {
+    "label": "F+C",
+    "d": 238.8,
+    "n": 60,
+    "hold": 0,
+    "tail": 0,
+    "note": 0
+   }
+  }
+ ],
+ "note": "'note' counts calls whose record carries esdf_camera_outside_workspace; it is a lower bound (the AG3S block is not written on calls with status ok).",
+ "scene_frames": [
+  {
+   "tag": "pkgFrssdm",
+   "cell": "spatial-LII-i17_18",
+   "task": 1,
+   "init": 18,
+   "frames": 300,
+   "result": "F+C",
+   "displacement_mm": 28.6,
+   "hold_calls": 15
+  },
+  {
+   "tag": "pkgFdcsdm",
+   "cell": "spatial-LII-i17_18",
+   "task": 1,
+   "init": 18,
+   "frames": 300,
+   "result": "F+C",
+   "displacement_mm": 317.6,
+   "hold_calls": 0
+  },
+  {
+   "tag": "pkgFrssdm",
+   "cell": "goal-LI-i17_18",
+   "task": 2,
+   "init": 17,
+   "frames": 300,
+   "result": "F",
+   "displacement_mm": 0.0,
+   "hold_calls": 18
+  },
+  {
+   "tag": "pkgFdcsdm",
+   "cell": "goal-LI-i17_18",
+   "task": 2,
+   "init": 17,
+   "frames": 300,
+   "result": "F",
+   "displacement_mm": 0.0,
+   "hold_calls": 2
+  }
+ ],
+ "korean_font": false
+}

@@ -196,6 +196,7 @@ T5 뒤에 하면 이 서버에서 끝낸다. **이전 시점은 T5 와의 순서
 | 2026-11-12 07:2x | sdm-c7: SDM π0.5 단독 queue ① 6/8 block 측정 후 사용자 지시로 07:19 일시 중단 (GPU 비움, HEAD 6c9b465b). §2 끝 행 · §9.24 · BL-15 추가. queue done_run bug (SafeLIBERO run dir 의 덧붙은 `-L<lvl>`) 수정 commit 6c9b465b |
 | 2026-11-12 13:2x | sdm-f6: §9.23 A 를 SDM 에서 실행 (07:33–13:17, HEAD 58d680b6) — §9.25. **A-1 `pkgFrs` E1a 40 = TSR 23 · CAR 34 · SSR 21** (AMRC 추정값과 같음, task 0 은 episode 단위로 AMRC 와 같음). **A-3 `-zp5` 탈락** (task 0 SSR 7 < 9, task 3 SSR 4 < 5). **A-2 guard 통과** (LIBERO 27 = 23, SafeLIBERO 11 = 5 · 9 · 4 · > 50 mm 0, LS 10 = 5 · 위반 0). **A-4 다른 suite init 15 · 16 = 25 · 41 · 22 / 56** (SDM 5 cell + AMRC Goal 2 cell; 지금 구성 24 · 31 · 17, `-qs` 24 · 40 · 19). 사용자 지시 (11:3x): AMRC 가 잰 것은 SDM 에서 다시 재지 않는다 — A-7 취소. 동결 후보 `pkgFrs` 그대로, 다음 A-5 |
 | 2026-11-12 16:3x | sdm-f6: §9.23 A-5 · A-6 (13:18–16:22, HEAD 703ae657) — §9.25. **A-5 `pkgFrs` 다른 suite init 17 · 18 = 56 ep TSR 26 · CAR 44 · SSR 24**, Spatial L-I init 15–18 = 16 ep 7 · 12 · 5. init 15–18 의 112 ep = 51 · 85 · 46 (같은 episode 의 AEGIS port 76 · 68 · 48, multi-link GT port 72 · 76 · 48, π0.5 62 · 18 · 13) — CAR 은 가장 높고 TSR 은 가장 낮음, L-II 는 앞서고 L-I (특히 Goal L-I 2 / 16) 은 뒤짐. **A-6: `pkgFrs` 동결** (E1a 40 SSR 21 > `pkgFin` 20 > 지금 구성 15, guard 통과, 다른 suite init 15 · 16 SSR 22 > 17). `AG3S_FINAL_CONFIG_KO.md` · G175 갱신. 안전 성공이 아닌 64 ep 중 26 이 '쥐었다 놓은 뒤 미완' → 남은 시간은 B-1 부터 |
+| 2026-11-12 19:5x | sdm-f6: §9.26 SL-SOTA16 `-dc` 측정 (16:40–19:38, HEAD 4fab0cc8) — §9.28. **탈락.** 1 단계 56 ep: `esdf_dead_camera` HOLD 227 → 0 call (HOLD 전체 227 → 5), 그러나 TSR · CAR · SSR 23 · 44 · 20 → **23 · 42 · 20**, > 50 mm 충돌 5 → 7 (기준 SSR ≥ 22 · 증가 ≤ 1 둘 다 미달). 2 단계 E1a task 3 = 5 · 9 · 5 (같음). HOLD 가 있던 13 ep 중 성공으로 바뀐 것 0. 3 단계 guard 는 돌리지 않음. **`pkgFrs` 동결 유지.** 같은 경계에서 `wip/sota-hf` (SL-SOTA17 `-hf30`, §9.27) 를 합치고 앞 기록의 시각을 정정 (17:0x → 16:3x, 18:0x → 16:4x; commit de7b0daf). 19:41 `-hf30` 1 단계 (E1a task 2 → 1, TAG `pkgFhfsdm`) 시작 |
 
 ---
 
@@ -958,3 +959,49 @@ GPU 약 4 h 40 분 (1 단계 2 h 30 분, 2 단계 25 분, 3 단계 1 h 40 분).
 | 2 주 기준 | E1a task 0 · 3 을 더해 E1a 40 | §9.2: SSR ≥ 22, 또는 21 이고 CAR ≥ 36 |
 | 3 guard | `gtto16_queue.sh` 전체 | §9.2 (LIBERO 27 ≥ 22, LIBERO-Safety ≥ 4 · 위반 0, SafeLIBERO 11 의 > 50 mm 증가 ≤ 1) |
 | 4 기제 (in-sample) | Goal L-I init 17 · 18, Spatial L-I init 15–18 | 기록만 (채택 조건 아님) |
+
+### 9.28 SL-SOTA16 `-dc` 결과 — 탈락, `pkgFrs` 동결 유지 (sdm-f6, 2026-11-12 16:40–19:38 측정, 19:5x 기록)
+
+용어: HOLD = 서버가 그 call 의 chunk 를 실행하지 않고 팔을 세우는 것. dead-camera HOLD = 사유가 `esdf_dead_camera` (손목 카메라가 그 frame 에 ESDF voxel 을 쓰지 못함) 인 HOLD. 숫자는 TSR · CAR · SSR 의 episode 수, 괄호는 장애물 변위 > 50 mm episode 수. 모두 SDM, seed 7, HEAD `4fab0cc8`, TAG `pkgFdcsdm` (`outputs/2026-11-11_SOTA_개선/eval_pkgFdcsdm/queue.log`).
+
+**1 단계 (기제, 6 cell-run 56 ep — in-sample) [M].**
+
+| cell-run | `pkgFrs` | HOLD call | `-dc` | HOLD call |
+|---|---|---:|---|---:|
+| Goal L-I init 17 · 18 | 2 · 6 · 1 (1) | 39 | 2 · 6 · 1 (1) | 5 |
+| Spatial L-II init 17 · 18 | 3 · 6 · 3 (0) | 20 | 3 · 6 · 3 (**2**) | 0 |
+| Long L-II init 17 · 18 | 4 · 8 · 4 (0) | 47 | 4 · **7** · 4 (0) | 0 |
+| Spatial L-I init 15–18 | 7 · 12 · 5 (2) | 47 | 7 · **11** · 5 (2) | 0 |
+| Spatial L-II init 15 · 16 | 5 · 7 · 5 (1) | 7 | 5 · 7 · 5 (1) | 0 |
+| Long L-I init 15 · 16 | 2 · 5 · 2 (1) | 67 | 2 · 5 · 2 (1) | 0 |
+| **합 56 ep** | **23 · 44 · 20 (5)** | 227 | **23 · 42 · 20 (7)** | 5 |
+
+| 기준 (§9.26, 결과 전 고정) | 결과 | |
+|---|---|---|
+| `esdf_dead_camera` HOLD 가 사라짐 | 227 → 0 call (남은 HOLD 5 call 은 Goal L-I t2 e17 · e18 의 다른 사유 — 팔이 grid 밖으로 나감) | 충족 |
+| SSR 합 ≥ 22 | 20 (같음) | **미달** |
+| > 50 mm 충돌 증가 ≤ 1 | 5 → 7 (+2) | **미달** |
+
+**2 단계 (E1a task 3) [M].** `-dc` 5 · 9 · 5 (1) = `pkgFrs` 5 · 9 · 5 (1). 10 ep 모두 결과 · 변위 · call 수가 같다 (HOLD 8 → 0 call; t3 e6 · e9 는 그대로 실패).
+
+**판정: `-dc` 탈락. 3 단계 guard 는 돌리지 않았다. 동결 판은 `pkgFrs` 그대로다.**
+
+**HOLD 가 있던 episode 에서 일어난 일 [M].** `pkgFrs` 에서 HOLD 가 있던 13 ep (다른 suite 11 + E1a 2) 중 `-dc` 로 성공이 된 것은 없다. HOLD 가 없던 53 ep 은 결과 · 변위 · call 수가 `pkgFrs` 와 같다 (flag 는 dead-camera frame 이 있을 때만 작동).
+
+| episode | `pkgFrs` (HOLD call) | `-dc` | `-dc` 의 실패 형태 (`shape.py`) |
+|---|---|---|---|
+| Goal L-I t2 e17 · e18 | F (18 · 21, 끝까지) | F (2 · 3) | 쥔 채 끝남 — 그릇을 든 채 탁자 밖으로 |
+| Spatial L-II t1 e17 | F+C 22 mm (5) | F+C **145 mm** | 쥔 채 끝남, 팔 link 행 QP 지속 |
+| Spatial L-II t1 e18 | F+C 29 mm (15, 끝까지) | F+C **318 mm** | 쥔 채 끝남, 팔 link 행 QP 지속 |
+| Long L-II t2 e17 | F 0 mm (47, 끝까지) | **F+C 7 mm** | 쥐었다 놓은 뒤 미완 |
+| Spatial L-I t1 e15 · e18 | F (20 · 19, 끝까지) | F | 쥔 채 끝남, 팔 link 행 QP 지속 |
+| Spatial L-I t3 e15 | F 0.4 mm (7) | **F+C 1.4 mm** | 못 쥠 |
+| Spatial L-I t3 e18 | F+C 294 mm (1) | F+C 262 mm | 못 쥠 |
+| Spatial L-II t2 e15 · Long L-I t2 e15 | F (7 · 67, 끝까지) | F | 쥐었다 놓은 뒤 미완 |
+| E1a t3 e6 · e9 | F · F+C 239 mm (7 · 1) | 같음 | 못 쥠 |
+
+**[해석]** dead-camera HOLD 는 실패의 원인이 아니라 결과였다. 쥔 물체를 내려놓지 못하거나 (§9.27 의 '내려놓는 곳에 막힘'), 팔 link 행에 막혀 나아가지 못한 팔이 탁자 가장자리 · 밖으로 밀려간 뒤에야 손목 카메라가 workspace 밖을 본다. HOLD 를 풀어도 그 앞의 막힘은 그대로이고, 풀린 팔이 더 움직이면서 장애물을 더 밀었다 (Spatial L-II t1: 22 → 145 mm, 29 → 318 mm; 충돌 없던 2 ep 에 7 mm · 1.4 mm 접촉). §9.25 의 실패 형태 '끝까지 HOLD 7' 은 독립된 원인이 아니고 '쥔 채 끝남 (팔 link 행 QP 지속)' 3 · '놓은 뒤 미완' 2 · '쥔 채 탁자 밖' 2 (Goal L-I t2 e17 · e18) 가 HOLD 로 가려져 있던 것이다. `--esdf-dead-camera-seen-ok` 는 판에 넣지 않는다 (`…-dc-tro` version 은 `profile.py` 에 남는다 — append-only).
+
+- 그림 (규칙 A): `AG3S/ag3s/docs/figures/sl-sota16-dc-sdm-20261112.png` (+ `.json`) — Spatial L-II t1 e18 · Goal L-I t2 e17 의 마지막 장면 (`pkgFrs` 와 `-dc`), HOLD 가 있던 13 ep 의 HOLD call 수와 결과, 1 단계 합과 통과선. script `experiments/segmentation/sota_offline_20261111/fig_dc_sdm.py`, 입력 `outputs/2026-11-12_SOTA_SDM_동결검증/offline/dc_cmp.json` (`dc_cmp.py`).
+- note `esdf_camera_outside_workspace` 가 call 기록에 남은 것은 34 call 이다. AG3S block 은 status 가 ok 인 call 에는 기록되지 않으므로 이 수는 하한이다.
+- 이어서: §9.27 `-hf30` 은 `-dc` 없이 `…-hb-qs-rs-hf30-tro` 로 잰다 (19:41 1 단계 시작, TAG `pkgFhfsdm`).
