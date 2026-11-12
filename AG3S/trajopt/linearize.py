@@ -2012,7 +2012,7 @@ class CollisionLinearizer:
     def obstacle_object_rows(self, trajectory: np.ndarray, q_now: np.ndarray, scene: SceneSnapshot,
                              steps: Optional[int] = None, beneath: bool = False,
                              class_tests: bool = False, surface_tol: Optional[float] = None,
-                             hand_beneath: bool = False) -> tuple[float, Optional[dict]]:
+                             hand_beneath: bool = False, held_band: Optional[float] = None) -> tuple[float, Optional[dict]]:
         """`(worst clearance over the ESDF rows whose nearest surface is an obstacle object, identity)` — `inf`, `None`
         when there is no such row (or no field).
 
@@ -2029,7 +2029,8 @@ class CollisionLinearizer:
         states = self.sphere_states(trajectory, q_now)
         centres = np.asarray(states[0], np.float64)
         got = self.obstacle_object_mask(centres, scene, beneath=beneath, class_tests=class_tests, surface_tol=surface_tol,
-                                        **({"hand_beneath": True} if hand_beneath else {}))
+                                        **({"hand_beneath": True} if hand_beneath else {}),
+                                        **({"held_band": float(held_band)} if held_band is not None else {}))
         if got is None:
             return float("inf"), None
         clear, obst, n_beneath, oop = got
@@ -2053,7 +2054,8 @@ class CollisionLinearizer:
                        **({} if oop is None else {"n_object_points": int(len(oop))})}
 
     def obstacle_object_mask(self, centres: np.ndarray, scene: SceneSnapshot, beneath: bool = False,
-                             class_tests: bool = False, surface_tol: Optional[float] = None, hand_beneath: bool = False):
+                             class_tests: bool = False, surface_tol: Optional[float] = None, hand_beneath: bool = False,
+                             held_band: Optional[float] = None):
         """The classification of :meth:`obstacle_object_rows` on given query centres ``(H, n_query, 3)`` (SL-SOTA1,
         2026-11-11: the action QP reads the same mask to give those rows their own floor). ``None`` without a field or
         without ESDF rows; else ``(clearance (H, n_query), is_obstacle_object (H, n_query), n_beneath, object points)``.
@@ -2126,7 +2128,9 @@ class CollisionLinearizer:
                 near_d, near_i = cKDTree(oop).query(surf)
                 on = (near_d <= (_OBJECT_SURFACE_TOL_M if surface_tol is None else float(surface_tol))) & ok
                 if hand_beneath:
-                    under_held = self._hand_rows_over_held_footprint(oop[near_i].reshape(*shape, 3), centres, scene, tol)
+                    under_held = self._hand_rows_over_held_footprint(
+                        oop[near_i].reshape(*shape, 3), centres, scene, tol,
+                        **({"held_band": float(held_band)} if held_band is not None else {}))
             else:
                 on = np.zeros(len(flat), bool)
             # SL-PE4 (`class_tests`): the set says "an obstacle object is the nearest surface", the class tests above may
@@ -2172,7 +2176,7 @@ class CollisionLinearizer:
         return clear, obst, n_beneath, oop
 
     def _hand_rows_over_held_footprint(self, nearest: np.ndarray, centres: np.ndarray, scene: SceneSnapshot,
-                                       voxel: float) -> Optional[np.ndarray]:
+                                       voxel: float, held_band: Optional[float] = None) -> Optional[np.ndarray]:
         """SL-SOTA7 (2026-11-11, `sqp.obstacle_hand_beneath`) — `(H, n_query)` bool or `None`: while HELD, the rows of
         the grasping hand (`grasp_contact["authorized"]`: palm + fingers) whose nearest obstacle-set point `nearest`
         `(H, n_query, 3)` lies inside the held object's xy footprint at that step (its query discs + 2 voxels) and not
@@ -2188,7 +2192,14 @@ class CollisionLinearizer:
         gradient and left them obstacle rows on a plate (LIBERO guard ...-hr150-tro seed 7 task 2: held rows against
         `plate_1` at -17 mm for 9 calls, never placed; seed 9 task 2: 9 calls). An obstacle beside the held object is
         nearest to rows at its own height, above that bottom band, and stays an obstacle row. The arm rows are never
-        touched here."""
+        touched here.
+
+        ``held_band`` (m; SL-SOTA17, 2026-11-12 sdm-f6, `sqp.obstacle_held_beneath_band`; None = the 2 voxels above): the
+        width of that band for the held object's own rows, in xy (around its footprint) and in z (above its bottom).
+        pkgFrs other-suite set init 15-18: the held rows were refused against the plate / stove / basket they were being
+        lowered onto in 17 of the 41 episodes that grasped and did not finish -- the plan step lowers the point model more
+        than 10 mm into the surface (clearance -12 .. -37 mm: the set point is then above bottom + 2 voxels), or the set
+        point is the plate rim / basket wall 17-50 mm outside the footprint. The hand rows are not changed."""
         n = int(self.n_spheres)
         horizon, n_query = centres.shape[:2]
         gc = getattr(scene, "grasp_contact", None) or {}
@@ -2211,18 +2222,20 @@ class CollisionLinearizer:
         qh = np.asarray(nearest, np.float64)[:, n:n_query]                            # (H, A, 3) the held rows' set points
         gap_h = (np.linalg.norm(qh[:, :, None, :2] - hc[:, None, :, :2], axis=3) - hr[None, None, :]).min(axis=2)
         bottom = (hc[:, :, 2] - hr[None, :]).min(axis=1)                              # (H,)
-        out[:, n:n_query] = (gap_h <= pad) & (qh[:, :, 2] <= bottom[:, None] + pad)
+        band = pad if held_band is None else float(held_band)                         # SL-SOTA17 (None: as before)
+        out[:, n:n_query] = (gap_h <= band) & (qh[:, :, 2] <= bottom[:, None] + band)
         return out
 
     def obstacle_row_floor(self, centres: np.ndarray, scene: SceneSnapshot, margin: float, beneath: bool = False,
                            class_tests: bool = False, surface_tol: Optional[float] = None, other: float = 0.0,
-                           hand_beneath: bool = False):
+                           hand_beneath: bool = False, held_band: Optional[float] = None):
         """SL-SOTA1 — ``(row_floor (H, width) for :meth:`linearize`, is_obstacle_object (H, n_query))``: ``margin`` on the
         ESDF rows :meth:`obstacle_object_mask` calls obstacle-object rows, ``other`` (SL-SOTA4; 0 = as before) on the
         other ESDF rows, 0 on the candidate and plane rows.
         ``(None, None)`` when there is no field / no ESDF row (linearize then runs as without a floor)."""
         got = self.obstacle_object_mask(centres, scene, beneath=beneath, class_tests=class_tests, surface_tol=surface_tol,
-                                        **({"hand_beneath": True} if hand_beneath else {}))
+                                        **({"hand_beneath": True} if hand_beneath else {}),
+                                        **({"held_band": float(held_band)} if held_band is not None else {}))
         if got is None:
             return None, None
         _, obst, _, _ = got

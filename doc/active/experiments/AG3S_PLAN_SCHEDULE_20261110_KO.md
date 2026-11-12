@@ -932,3 +932,29 @@ figure (규칙 A): `AG3S/ag3s/docs/figures/sl-sota-ms-sdm-init15-18-20261112.png
 | 판정 | 1–3 을 모두 채우면 동결 판을 `-dc` 판으로 바꾼다 (§9.2 '동결 판정': 최종 후보 둘 중 다른 suite 합산 SSR 이 높은 판). 하나라도 못 채우면 `pkgFrs` 그대로 | |
 
 GPU 약 4 h 40 분 (1 단계 2 h 30 분, 2 단계 25 분, 3 단계 1 h 40 분).
+
+### 9.27 후보 SL-SOTA17 `-hf30` — 쥔 물체 행이 내려놓는 곳에 막히는 것 (§9.23 B-1, sdm-f6, 결과 전 기록, 2026-11-12 17:2x)
+
+**발견 [M · D] (offline, `outputs/2026-11-12_SOTA_SDM_동결검증/offline/`).** `pkgFrs` 의 다른 suite init 15–18 + Spatial L-I (SDM 실측 112 ep) 에서 쥐고도 끝내지 못한 41 ep (놓은 뒤 미완 26, 쥔 채 끝남 8, 끝까지 HOLD 7) 을 재생해 (`surface_owner_task.py --only-held`, GT 는 채점용) 쥔 동안 통과가 거절된 call 의 최악 장애물 물체 행이 실제로 어느 물체에 닿아 있는지 봤다.
+
+| 최악 행의 실제 물체 (거절된 held call 수) | 쥔 물체 자신의 행 | 손 행 | 팔 link 행 |
+|---|---:|---:|---:|
+| SafeLIBERO 장애물 | 53 | 37 | 76 |
+| 내려놓는 곳 (plate · stove · basket · cabinet) | **51** | 12 | — |
+| 쥔 물체 자신의 상 · 그 밖 | 28 | 22 | 5 |
+
+- 쥔 물체 자신의 행이 내려놓는 곳에 막힌 episode 는 41 중 17 이다 (예: Spatial L-I t2 e16 — 접시 중심 3.7 cm 위까지 왔다가 call 33 · 36 에 QP 가 손을 밀었고 (\|Da\| 1.32 · 1.16), call 38 에 policy 가 연 자리는 접시 중심에서 6.2 cm → 미완. Goal L-I t2 e17 · e18 — stove 에 내리려는 call 25–33 이 거절된 뒤 policy 가 그릇을 든 채 탁자 밖 1.4 m 까지 나감; §9.26 의 dead-camera HOLD 는 그 결과였다).
+- 그 51 행의 여유는 −37 … +11 mm 다. SL-SOTA7 (`-hb`) 은 쥔 물체 자신의 행을 '최근접 장애물 집합 점이 발자국 + 2 voxel (10 mm) 안이고 쥔 물체 바닥 + 10 mm 보다 높지 않을 때' 만 푼다 (`linearize._hand_rows_over_held_footprint`). policy 의 chunk 는 닿을 때까지 내리므로 계획 step 이 점 모델 (20 mm 껍질) 을 면 안으로 10 mm 넘게 넣으면 그 면의 점이 띠 위로 올라가고, 접시 rim · basket 벽은 발자국 밖이다 — 두 경우 모두 풀리지 않는다. (어느 조건에서 걸렸는지는 기록만으로는 행 단위로 다시 계산하지 못했다 — 서버가 장애물 집합 점을 남기지 않는다. 위 해석은 여유 값과 규칙의 식에서 온 것이다.)
+
+**후보.** `--obstacle-held-beneath-band-mm 30` (`sqp.obstacle_held_beneath_band`, 새 code — `linearize.py` · `sqp.py` · `config.py` · `serve_safe.py` · `panda/server.py`): 쥔 물체 **자신의 행** 에 쓰는 띠를 xy · z 모두 10 → 30 mm 로. 손 행 · 팔 행은 그대로. 판 `…-hb-qs-rs-hf30-tro`, `…-hb-qs-rs-dc-hf30-tro` (`SOTA_HELDBAND_VERSIONS`). 단위 test `tests/trajopt/test_sl_sota7_hand_beneath.py` (띠 안 · 밖, 손 행 불변, None = 비트 동일, flag · 판).
+
+**위험.** 쥔 물체 바닥에서 30 mm 안쪽 높이의 낮은 장애물 (책 · 상자 가장자리) 이 발자국 30 mm 안에 있으면 그 위로 내려놓는 계획이 통과한다. 쥔 물체와 같은 높이의 옆 장애물 (바닥 + 30 mm 위) 과 손 · 팔 행은 그대로 막는다.
+
+**순서 · 판정 (결과 전 고정).** §9.26 `-dc` 가 통과하면 `-dc-hf30`, 아니면 `-hf30` 으로 잰다. 이 후보도 init 15–18 의 실패에서 찾았으므로 채택은 개발 분할 E1a 40 으로 하고 (§9.2), init 15–18 은 기제 확인으로만 적는다.
+
+| 단계 | 셋 | 통과 |
+|---|---|---|
+| 1 거르기 | E1a task 2 → task 1 (기준 판 7 · 2; 놓는 자리 실패가 있는 task) | 두 task 의 SSR 합 ≥ 10 (+1) 이고 > 50 mm 충돌이 늘지 않음 |
+| 2 주 기준 | E1a task 0 · 3 을 더해 E1a 40 | §9.2: SSR ≥ 22, 또는 21 이고 CAR ≥ 36 |
+| 3 guard | `gtto16_queue.sh` 전체 | §9.2 (LIBERO 27 ≥ 22, LIBERO-Safety ≥ 4 · 위반 0, SafeLIBERO 11 의 > 50 mm 증가 ≤ 1) |
+| 4 기제 (in-sample) | Goal L-I init 17 · 18, Spatial L-I init 15–18 | 기록만 (채택 조건 아님) |

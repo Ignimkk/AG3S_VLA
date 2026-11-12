@@ -1309,6 +1309,17 @@ for _b in SOTA_REACHSTICKY_VERSIONS:
     SOTA_DEADCAM_VERSIONS = SOTA_DEADCAM_VERSIONS + (_b[:-len("-tro")] + "-dc-tro",)
 del _b
 SOTA_VERSIONS = SOTA_VERSIONS + SOTA_DEADCAM_VERSIONS
+#: SL-SOTA17 (sdm-f6, 2026-11-12, plan §9.27): ``-hf30`` = ``--obstacle-held-beneath-band-mm 30`` -- the band of the held
+#: object's own rows in SL-SOTA7's footprint rule widened from 2 voxels (10 mm) to 30 mm, in xy and above the held bottom.
+#: pkgFrs other-suite set init 15-18 (surface_owner_task.py --only-held, GT labels): in 17 of the 41 episodes that grasped
+#: and did not finish, a held row was refused against the plate / stove / basket it was being lowered onto (clearance
+#: -37 .. +11 mm). On the frozen version and on its ``-dc`` variant: ``<…-qs-rs[-dc]>-hf30-tro``. Default off elsewhere.
+SOTA_HELDBAND_VERSIONS: tuple[str, ...] = ()
+for _b in tuple(v for v in SOTA_REACHSTICKY_VERSIONS + SOTA_DEADCAM_VERSIONS if "-hb-" in v):
+    AG3S_VERSIONS[_b[:-len("-tro")] + "-hf30-tro"] = tuple(AG3S_VERSIONS[_b]) + ("--obstacle-held-beneath-band-mm", "30")
+    SOTA_HELDBAND_VERSIONS = SOTA_HELDBAND_VERSIONS + (_b[:-len("-tro")] + "-hf30-tro",)
+del _b
+SOTA_VERSIONS = SOTA_VERSIONS + SOTA_HELDBAND_VERSIONS
 GT15_VERSIONS = GT15_VERSIONS + SOTA_VERSIONS
 #: (G88c, 03:5x) the A-alone ablation queued as ``…-obst3`` (gtto23, not started yet) gets the same two fixes, so A alone and
 #: A + B differ only by the held point model: ``…-obst3`` := A'' + no carve + support "under" (``…-obst3-pts`` = B'' keeps

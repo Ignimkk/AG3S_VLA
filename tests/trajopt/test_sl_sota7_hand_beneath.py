@@ -142,3 +142,77 @@ def test_config_flag_and_versions():
     assert "obstacle_hand_beneath" not in pf.version_flag_values(pf.parse_v11ab_args())
     args = pf.parse_v11ab_args(argv=pf.version_server_argv(name) + list(pf.AG3S_VERSIONS[name]))
     assert args.obstacle_hand_beneath is True
+
+
+# ---- SL-SOTA17 (2026-11-12, sdm-f6): `sqp.obstacle_held_beneath_band` / `--obstacle-held-beneath-band-mm`, versions -hf30
+def _band(lin, centres, scene, nearest, band):
+    return CollisionLinearizer._hand_rows_over_held_footprint(lin, nearest, centres, scene, 0.005, held_band=band)
+
+
+def test_held_band_covers_a_plan_step_into_the_surface_and_the_rim_beside_the_footprint():
+    lin, centres, scene = _stub()
+    q = np.zeros((2, 5, 3))
+    q[:, :, :] = [0.04, 0.0, 0.10]           # inside the footprint, 20 mm above the held bottom (0.08): the plan step
+    assert not _under(lin, centres, scene, q)[:, 3:].any()      # lowers the point model 20 mm into the plate
+    assert _band(lin, centres, scene, q, 0.03)[:, 3:].all()
+    q[:, :, :] = [0.04, 0.045, 0.08]         # the plate rim 25 mm outside the held discs, at the held bottom
+    assert not _under(lin, centres, scene, q)[:, 3:].any()
+    assert _band(lin, centres, scene, q, 0.03)[:, 3:].all()
+
+
+def test_held_band_keeps_what_is_beside_or_far_and_never_touches_the_hand_rows():
+    lin, centres, scene = _stub()
+    q = np.zeros((2, 5, 3))
+    q[:, :, :] = [0.04, 0.0, 0.115]          # 35 mm above the held bottom: an obstacle at the held object's own height
+    assert not _band(lin, centres, scene, q, 0.03)[:, 3:].any()
+    q[:, :, :] = [0.04, 0.065, 0.08]         # 45 mm outside the footprint
+    assert not _band(lin, centres, scene, q, 0.03)[:, 3:].any()
+    for point in ([0.04, 0.0, 0.10], [0.04, 0.045, 0.08], [0.04, 0.0, 0.12], [0.04, 0.10, 0.0]):
+        q[:, :, :] = point
+        assert np.array_equal(_band(lin, centres, scene, q, 0.03)[:, :3], _under(lin, centres, scene, q)[:, :3])
+    q[:, :, :] = [0.04, 0.0, 0.09]           # None = the 2-voxel band, bit for bit
+    assert np.array_equal(_band(lin, centres, scene, q, None), _under(lin, centres, scene, q))
+
+
+def test_held_band_config_flag_and_versions():
+    from AG3S.adapters.panda import profile as pf
+    from AG3S.adapters.panda import server as srv
+    from AG3S.trajopt import serve_safe as ss
+    from AG3S.trajopt.config import SqpConfig, TrajOptConfigError
+    from AG3S.trajopt.sqp import _obstacle_row_kwargs
+
+    assert SqpConfig().obstacle_held_beneath_band is None
+    assert "held_band" not in _obstacle_row_kwargs(SqpConfig())
+    assert _obstacle_row_kwargs(types.SimpleNamespace(obstacle_hand_beneath=True,
+                                                      obstacle_held_beneath_band=0.03))["held_band"] == pytest.approx(0.03)
+    for bad in (dict(obstacle_held_beneath_band=0.03), dict(obstacle_hand_beneath=True, obstacle_held_beneath_band=0.0),
+                dict(obstacle_hand_beneath=True, obstacle_held_beneath_band=0.2)):
+        with pytest.raises(TrajOptConfigError):
+            SqpConfig(passthrough_when_clear=True, passthrough_obstacle_tolerance=0.0, **bad).validate()
+    ap = ss.build_parser()
+    common = BASE + ["--passthrough-when-clear", "--passthrough-obstacle-tolerance-mm", "0"]
+    for bad in (["--obstacle-held-beneath-band-mm", "30"], ["--obstacle-hand-beneath", "--obstacle-held-beneath-band-mm", "0"],
+                ["--obstacle-hand-beneath", "--obstacle-held-beneath-band-mm", "150"]):
+        with pytest.raises(SystemExit):
+            ss.reject_bad_flag_combinations(ap, ap.parse_args(common + bad))
+    a = ap.parse_args(common + ["--obstacle-hand-beneath", "--obstacle-held-beneath-band-mm", "30"])
+    ss.reject_bad_flag_combinations(ap, a)
+    assert ss.passthrough_overrides(a)["obstacle_held_beneath_band"] == pytest.approx(0.03)
+    assert "obstacle_held_beneath_band" not in ss.passthrough_overrides(ap.parse_args(common + ["--obstacle-hand-beneath"]))
+    assert ss.trajopt_config_from_args(a).sqp.obstacle_held_beneath_band == pytest.approx(0.03)
+    assert "obstacle_held_beneath_band_mm" in srv.PORTED_FINAL_CONFIG_DESTS
+    frozen = ("AG3S-commonto-att-termsoff-pass-zr-ee-hdp-loose2-obst4-pts-nocarve-fh-t100-pe12345811-to0-om15p10s40-ntc-pt6-pg4"
+              "-hr150-hb-qs-rs")
+    for mid in ("", "-dc"):
+        name = frozen + mid + "-hf30-tro"
+        assert name in pf.SOTA_HELDBAND_VERSIONS and name in pf.SOTA_VERSIONS and name in pf.GT15_VERSIONS
+        v = tuple(pf.AG3S_VERSIONS[name])
+        assert v[-2:] == ("--obstacle-held-beneath-band-mm", "30") and v[:-2] == tuple(pf.AG3S_VERSIONS[frozen + mid + "-tro"])
+        args = pf.parse_v11ab_args(argv=pf.version_server_argv(name) + list(v))
+        assert args.obstacle_held_beneath_band_mm == pytest.approx(30.0) and args.obstacle_hand_beneath is True
+        assert pf.version_server_flags(name)
+    assert all("-hb-" in n for n in pf.SOTA_HELDBAND_VERSIONS)
+    for other, flags in pf.AG3S_VERSIONS.items():
+        if other not in pf.SOTA_HELDBAND_VERSIONS:
+            assert "--obstacle-held-beneath-band-mm" not in flags, other
+    assert "obstacle_held_beneath_band_mm" not in pf.version_flag_values(pf.parse_v11ab_args())

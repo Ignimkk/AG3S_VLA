@@ -2729,6 +2729,10 @@ def build_parser() -> argparse.ArgumentParser:
                     help="SL-SOTA7 — --passthrough-obstacle-tolerance-mm 와 함께만 (scene 장애물 집합용). 쥔 동안 손 (palm · 손가락) "
                          "행의 최근접 장애물 집합 점이 쥔 물체의 xy footprint (+ 2 voxel) 안이고 쥔 물체 윗면보다 높지 않으면 "
                          "장애물 물체 행으로 보지 않는다 — 쥔 물체 아래는 내려놓는 곳이다 (sqp.obstacle_hand_beneath)")
+    ap.add_argument("--obstacle-held-beneath-band-mm", type=float, default=None, metavar="MM",
+                    help="SL-SOTA17 — --obstacle-hand-beneath 와 함께만. 쥔 물체 자신의 행에 쓰는 띠의 폭 (xy: 발자국 둘레, "
+                         "z: 쥔 물체 바닥 위) — 기본 (없음) 은 2 voxel. 계획이 목적지 면 안으로 10 mm 넘게 내려가거나 최근접 "
+                         "집합 점이 접시 rim · basket 벽이면 내려놓기가 거절되던 것 (sqp.obstacle_held_beneath_band)")
     # SL-SOTA1 — end
     # SL-GTTO10 — begin (lead self-ruling G53, 2026-11-07; user caution 2)
     ap.add_argument("--oracle-destination", action="store_true",
@@ -4854,6 +4858,11 @@ def reject_bad_flag_combinations(ap: argparse.ArgumentParser, args, *, seed_map_
     if getattr(args, "obstacle_hand_beneath", False):   # SL-SOTA7
         if getattr(args, "passthrough_obstacle_tolerance_mm", None) is None:
             ap.error("--obstacle-hand-beneath 는 --passthrough-obstacle-tolerance-mm 와 함께만")
+    if getattr(args, "obstacle_held_beneath_band_mm", None) is not None:   # SL-SOTA17
+        if not getattr(args, "obstacle_hand_beneath", False):
+            ap.error("--obstacle-held-beneath-band-mm 는 --obstacle-hand-beneath 와 함께만")
+        if not 0.0 < float(args.obstacle_held_beneath_band_mm) <= 100.0:
+            ap.error(f"--obstacle-held-beneath-band-mm 는 0 초과 100 이하 (got {args.obstacle_held_beneath_band_mm})")
     if getattr(args, "obstacle_row_patience", None) is not None:   # SL-SOTA3
         if getattr(args, "obstacle_row_margin_mm", None) is None:
             ap.error("--obstacle-row-patience 는 --obstacle-row-margin-mm 와 함께만")
@@ -5055,6 +5064,8 @@ def passthrough_overrides(args) -> dict:
         out["ee_action_gate_rows"] = True
     if getattr(args, "obstacle_hand_beneath", False):   # SL-SOTA7
         out["obstacle_hand_beneath"] = True
+    if getattr(args, "obstacle_held_beneath_band_mm", None) is not None:   # SL-SOTA17
+        out["obstacle_held_beneath_band"] = float(args.obstacle_held_beneath_band_mm) / 1000.0
     return out
 # --- T88 — end ---
 

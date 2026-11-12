@@ -77,6 +77,8 @@ def _obstacle_row_kwargs(cfg) -> dict:
         kw["surface_tol"] = float(cfg.obstacle_object_surface_tolerance)
     if getattr(cfg, "obstacle_hand_beneath", False):   # SL-SOTA7
         kw["hand_beneath"] = True
+    if getattr(cfg, "obstacle_held_beneath_band", None) is not None:   # SL-SOTA17
+        kw["held_band"] = float(cfg.obstacle_held_beneath_band)
     return kw
 
 

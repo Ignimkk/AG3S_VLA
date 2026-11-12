@@ -12,7 +12,7 @@ def test_names_and_flags():
                                      + len(pf.SOTA_PEAK_VERSIONS) + len(pf.SOTA_ROTREL_VERSIONS)
                                      + len(pf.SOTA_REACHSTICKY_VERSIONS) + len(pf.SOTA_ZONE_VERSIONS)
                                      + len(pf.SOTA_ZONEPALM_VERSIONS) + len(pf.SOTA_ZONEPALM5_VERSIONS)
-                                     + len(pf.SOTA_DEADCAM_VERSIONS))
+                                     + len(pf.SOTA_DEADCAM_VERSIONS) + len(pf.SOTA_HELDBAND_VERSIONS))
     assert set(pf.SOTA_VERSIONS) <= set(pf.GT15_VERSIONS)
     for b in (BASE + "pe123458", BASE + "pe12345811"):
         base = tuple(pf.AG3S_VERSIONS[b])
@@ -108,6 +108,6 @@ def test_dead_camera_seen_ok_versions():
     assert pf.version_server_flags(name)
     assert "esdf_dead_camera_seen_ok" in srv.PORTED_FINAL_CONFIG_DESTS
     for other, flags in pf.AG3S_VERSIONS.items():
-        if other not in pf.SOTA_DEADCAM_VERSIONS:
+        if other not in pf.SOTA_DEADCAM_VERSIONS and not (other in pf.SOTA_HELDBAND_VERSIONS and "-dc-" in other):
             assert "--esdf-dead-camera-seen-ok" not in flags, other
 
