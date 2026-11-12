@@ -5146,3 +5146,19 @@ F8 + (a) `--ee-action-qp-scaled` (행 정규화 + quadratic slack) + (c′) `--g
 **[해석]** 표 전체의 분포에서 가장 큰 원인은 target 오인식이다 (Long 의 mug task 4 ep 은 mug 가 target 으로 잡히지 않음; 장애물 · 목적지 · 로봇 손끝이 target 으로 잡힘). 상세 표는 계획서 §9.31.
 
 **실제 장면 · 그림:** `AG3S/ag3s/docs/figures/sl-tab10-safelibero-init19-20261112.png` (+ `.json`) — Long L-II task 3 (쥔 mug 를 장애물로 봄) · Long L-I task 2 · Goal L-I task 1 의 장면, episode 별 target 인식 비율과 결과, 막은 물체, suite 별 안전 성공. script `experiments/segmentation/sota_offline_20261111/fig_tab10_sdm.py`.
+
+**이어서 — 1/10 표의 나머지 · LIBERO-Safety 변환 (SL-LS1) · mug 후보 규칙 (SL-SOTA18) (2026-11-12 23:00 – 11-13 02:22 측정, 02:2x 기록).** 용어: 'mug 크기 cluster' = 세 주축 폭이 모두 80–156 mm 인 후보. 상세 표는 계획서 §9.32 · §9.33.
+
+| 시각 | 한 일 | 결과 |
+|---|---|---|
+| 23:00–23:48 | part B: `pkgFrs` LIBERO 20 ep (`tab10sdm-lb-*`) | **14 / 20** (70.0 %). 실패 6: LIBERO-10 task 4 · 6 (옮길 mug 가 손을 막음) · 8 (로봇 자신), Goal 0 · 6, Spatial 4 |
+| 23:50–00:00 | SL-LS1 첫 smoke: AG3S + 공식 `pi05_libero_safety`, TSA L2 2 ep | 두 ep 성공, 통과 chunk 는 π0.5 와 bit 동일. QP 포화 call 이 손을 step 당 62.5 mm 밂 → 내부 단위 (1/16, 1/2) → (1/32, 1/8) |
+| 00:00–00:36 | part D: π0.5 단독 짝 (Long 2 cell, LIBERO 20 ep, LIBERO-Safety 6 ep) | LIBERO **19 / 20**; SafeLIBERO π0.5 단독 L-I · L-II 각 10 · 1 · 1 / 16; LIBERO-Safety AAG 1 / 2 · TSA 2 / 2 · FSHOA 1 / 2 |
+| 00:0x | mug task 의 원인 확인 (기록): mug 크기 cluster 가 쥐기 전 call 의 30–96 건에서 `not_graspable`, 인정 0 | 조작 대상 후보 규칙 (가장 좁은 폭 ≤ 최대 열림 78 mm) 이 mug 를 거름. `--graspable-hand-sized-mm 156` 구현 (사용자 승인) |
+| 00:38–01:23 | 둘째 smoke (새 단위) + part M: `-gh156` mug 6 ep | smoke 두 ep 성공. mug 6 ep task 성공 **0 → 2** (Long L-II task 3 안전 성공, LIBERO-10 task 4 성공), 충돌 0 |
+| 01:27–01:48 | part C: AG3S LIBERO-Safety 나머지 4 ep | AG3S = π0.5 단독 (AAG 1 / 2 · TSA 2 / 2 · FSHOA 1 / 2, episode 단위로 같음). `no_target` call 이 많다 |
+| 01:49–02:22 | part N: `-hf30-gh156` mug 6 ep | task 성공 2 (Long L-II task 2 · 3) — `-gh156` 와 합은 같고 구성이 다름 |
+| 02:23– | part G: `-gh156` 로 나머지 46 ep (2 단계) | 진행 중 |
+| 02:2x | **기록 사고 · 복원:** 덧붙이는 script (`open(p, "w").write(open(p).read() + …)`) 가 이 log (cb1f002b · 9dd9ce13) 와 계획서 (66dd8623) 를 새 절만 남게 잘랐다 | git 이력 (5d6aa7f0 · 9dd9ce13) 에 뒤 절을 다시 붙여 복원 (c52537bd, 삭제 0 줄). push 전이라 밖으로 나간 것은 없다 |
+
+**[해석]** (1) 1/10 표에서 AG3S 는 LIBERO 에서 π0.5 단독보다 25 pt 낮다 — 장애물이 없으므로 전부 우리 개입 탓이고, 막은 것은 옮길 물체 · 목적지 · 로봇 자신이다. (2) LIBERO-Safety 는 변환이 동작하지만 AG3S 가 거의 개입하지 않아 π0.5 단독과 같다 (대상 인식이 공식 checkpoint 에서 약함). (3) mug 는 '쥘 수 없는 물체' 로 걸러지고 있었다 — 규칙 하나로 설명되는 가장 큰 단일 원인 (표 전체 320 ep 중 40 ep 이 mug task).
