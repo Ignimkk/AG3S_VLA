@@ -201,6 +201,7 @@ T5 뒤에 하면 이 서버에서 끝낸다. **이전 시점은 T5 와의 순서
 | 2026-11-12 21:1x | sdm-f6: **사용자 지시 (21:08): 논문 표에 넣을 episode 의 1/10 을 동결 판으로 실행하고, 표 형식으로 보인 뒤 실패 원인을 분석한다** — §9.30 (결과 전 기록). 21:11 part A (SafeLIBERO 32 ep) 시작, TAG `tab10sdm`, HEAD 7e86ca60. 채택 기준 (§9.2) 변경 제안 (128 ep · 짝 차이 +5) 은 이 지시로 보류 |
 | 2026-11-12 23:1x | sdm-f6: §9.30 part A (SafeLIBERO 32 ep, 21:11–22:59, HEAD 7e86ca60) 결과 · 원인 분석 — §9.31. **L-I TSR · SSR · CAR = 8 · 4 · 8 / 16 (50.0 / 25.0 / 50.0 %), L-II = 9 · 8 · 14 / 16 (56.2 / 50.0 / 87.5 %)**; suite 별 안전 성공 Spatial 4 · Object 6 · Goal 1 · Long 1 (각 8 ep). 안전 성공이 아닌 20 ep: target 오인식 10 · 성공 + 충돌 4 · 옮기기 · 놓기 6. 인식된 target 이 task 물체인 call 이 절반 미만인 11 ep 은 안전 성공 1, 절반 이상인 21 ep 은 11. 거절된 529 call 의 51 % 는 task 물체 자신이 막음. 23:00 part B (LIBERO 20 ep) 시작. SL-LS1 (LIBERO-Safety controller 변환, commit 3f702a1d) 은 구현 · 단위 test 끝, 합치기는 사용자 승인 (23:0x) 을 받아 part B 경계에서 |
 | 2026-11-13 02:2x | sdm-f6: §9.30 의 나머지 (part B · D · S · C, 2026-11-12 23:00 – 11-13 01:48) + SL-LS1 · SL-SOTA18 — §9.33. **1/10 표: LIBERO AG3S 14 / 20 (70.0 %) vs π0.5 단독 19 / 20; SafeLIBERO π0.5 단독 L-I · L-II 각 10 · 1 · 1 / 16; LIBERO-Safety L2 (공식 checkpoint) AG3S = π0.5 단독 = AAG 1 / 2 · TSA 2 / 2 · FSHOA 1 / 2.** SL-LS1 (공식 `pi05_libero_safety` 용 controller 변환): 구현 · smoke · 6 ep, 내부 단위 (1/16, 1/2) → (1/32, 1/8). **mug task 의 원인 = 조작 대상 후보 규칙 (가장 좁은 폭 ≤ 78 mm) 이 mug 를 `not_graspable` 로 거름** → SL-SOTA18 `-gh156` (사용자 승인 00:0x): mug 6 ep task 성공 0 → 2, `-hf30-gh156` 도 2. 02:23 2 단계 (나머지 46 ep, `-gh156`) 시작. **기록 사고:** 덧붙이는 script 의 실수로 benchmark log (cb1f002b · 9dd9ce13) 와 계획서 (66dd8623) 가 새 절만 남게 잘렸다 — c52537bd 에서 git 이력으로 복원 (삭제 0 줄), push 전이라 밖으로 나간 것은 없다 |
+| 2026-11-13 04:5x | sdm-f6: §9.32 SL-SOTA18 `-gh156` 2 단계 (part G, 02:23–04:53, HEAD 579ee680) — §9.34. **나머지 46 ep 의 결과가 동결 판과 episode 단위로 같다 (잃은 것 0) → 2 단계 통과.** 1/10 셋 전체 (같은 52 ep): LIBERO 14 → **15** / 20, SafeLIBERO TSR · SSR · CAR 17 · 12 · 22 → **18 · 13 · 24** / 32, > 50 mm 3 → 3. 04:54 복원한 계획서 · log 를 main 에 합침 (aee17c0c). 04:55 채택 gate (guard → E1a 40, TAG `pkgFghsdm`) 시작. 동결 판 교체는 gate 결과 뒤 사용자 판단 |
 
 ---
 
@@ -1239,3 +1240,24 @@ GPU 약 40 분 (1 단계), 약 3 h (2 단계).
 - **판단:** 6 ep 으로는 두 판을 가릴 수 없다. 더 단순한 `-gh156` 로 2 단계 (나머지 46 ep) 를 02:23 에 시작했다. `-hf30-gh156` 는 2 단계 결과 뒤에 다시 본다.
 
 - 도구 · 원자료: `experiments/segmentation/sota_offline_20261111/table10.py`, `outputs/2026-11-12_SOTA_SDM_동결검증/offline/tab10/` (`table10_all.json`, `owner_tab10_lb/`, `gh156/`). queue `experiments/segmentation/sota_table10_queue.sh` (part B · D · S · C · M · N · G), log `outputs/2026-11-11_SOTA_개선/eval_tab10sdm/queue.log`. 그림은 2 단계 결과와 함께 만든다.
+
+### 9.34 SL-SOTA18 `-gh156` 2 단계 결과 — 1/10 셋에서 잃은 episode 0 (sdm-f6, 2026-11-13 02:23–04:53 측정, 04:5x 기록)
+
+**2 단계 (나머지 46 ep, part G) [M].** SafeLIBERO 28 ep (`tab10sdm-gh156r-<suite>-L<lvl>`) + LIBERO 18 ep (`tab10sdm-gh156r-lb-<suite>`), init 19, seed 7, HEAD `579ee680`. 46 ep 모두 동결 판과 결과가 같다 (안전 성공 · 성공 · 실패의 구성이 episode 단위로 일치; 장애물 변위도 Spatial L-I task 1 의 8 → 3 mm 를 빼면 같다).
+
+| 기준 (§9.32, 결과 전 고정) | 결과 | |
+|---|---|---|
+| 나머지에서 안전 성공 · LIBERO 성공이 동결 판보다 2 넘게 줄지 않음 | 줄어든 것 0 | **충족** |
+
+**1/10 셋 전체 — 같은 52 ep [M].**
+
+| | LIBERO 성공 (/ 20) | SafeLIBERO L-I TSR · SSR · CAR (/ 16) | SafeLIBERO L-II (/ 16) | 합 TSR · SSR · CAR (/ 32) | > 50 mm |
+|---|---:|---|---|---|---:|
+| π0.5 alone | 19 | 10 · 1 · 1 | 10 · 1 · 1 | 20 · 2 · 2 | — |
+| 동결 판 `pkgFrs` | 14 | 8 · 4 · 8 | 9 · 8 · 14 | 17 · 12 · 22 | 3 |
+| **`-gh156`** | **15** | 8 · 4 · **10** | **10 · 9** · 14 | **18 · 13 · 24** | 3 |
+
+- 얻은 episode: Long L-II task 3 (F → 안전 성공), LIBERO-10 task 4 (실패 → 성공). 작은 충돌이 사라진 episode: Long L-I task 2 (8 mm → 0) · task 3 (3 mm → 0). 잃은 episode: 없음.
+- **[해석]** flag 는 mug 크기 cluster 가 있을 때만 판정을 바꾼다 — mug 가 없는 46 ep 에서 궤적까지 같았다. 이득이 2 ep 에 그친 것은 mug 를 쥔 뒤의 다음 막힘 때문이다 (쥔 mug 행 대 목적지 접시, §9.33). mug task 는 표 전체 320 ep 중 40 ep 이므로, 이 1/10 의 비율 (4 ep 중 1 ep 안전 성공) 이 유지되면 전체에서 약 +10 ep 이다 — 4 ep 의 값이라 거칠다.
+- **채택 gate (§9.2):** guard (LIBERO 27 · SafeLIBERO 11 · LIBERO-Safety 10) → E1a 40 을 04:55 에 시작 (`V=…-gh156-tro TAG=pkgFghsdm`). 동결 판의 값: LIBERO 27 = 23, SafeLIBERO 11 = 5 · 9 · 4 (> 50 mm 0), LIBERO-Safety 10 = 5 · 위반 0, E1a 40 = 23 · 34 · 21. 기준은 §9.2 그대로 (LIBERO 27 ≥ 22, LIBERO-Safety ≥ 4 · 위반 0, SafeLIBERO 11 의 > 50 mm 증가 ≤ 1); E1a 40 은 후퇴 확인 (SSR ≥ 19) 으로 본다 — mug 가 없는 suite 라 이득을 기대하지 않는다. **동결 판 교체는 gate 결과를 보고 사용자가 정한다.**
+- 그림 (규칙 A): `AG3S/ag3s/docs/figures/sl-sota18-gh156-tab10-20261113.png` (+ `.json`) — Long L-II task 3 · LIBERO-10 task 4 의 마지막 장면 (동결 판과 `-gh156`), mug episode 6 개의 후보 인정 call, 1/10 셋의 episode 수. script `experiments/segmentation/sota_offline_20261111/fig_gh156_sdm.py`, 입력 `outputs/2026-11-12_SOTA_SDM_동결검증/offline/tab10/gh156_stage2.json`.

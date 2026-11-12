@@ -1,0 +1,103 @@
+{
+ "figure": "/mnt/dev/AG3S_VLA-wt-hf/AG3S/ag3s/docs/figures/sl-sota18-gh156-tab10-20261113.png",
+ "source": "/tmp/claude-0/-mnt-dev/a2a2d792-941a-400f-8ace-60815fa2c777/scratchpad/gh156_stage2.json",
+ "set": "1/10 of the paper-table episodes: SafeLIBERO 32 ep + LIBERO 20 ep, init 19, seed 7",
+ "mug_candidate_calls": [
+  {
+   "episode": "Long L-I t2",
+   "frozen": {
+    "pre_grasp_calls": 62,
+    "not_graspable": 53,
+    "admissible": 0
+   },
+   "gh156": {
+    "pre_grasp_calls": 23,
+    "not_graspable": 0,
+    "admissible": 18
+   }
+  },
+  {
+   "episode": "Long L-I t3",
+   "frozen": {
+    "pre_grasp_calls": 45,
+    "not_graspable": 11,
+    "admissible": 0
+   },
+   "gh156": {
+    "pre_grasp_calls": 32,
+    "not_graspable": 0,
+    "admissible": 10
+   }
+  },
+  {
+   "episode": "Long L-II t2",
+   "frozen": {
+    "pre_grasp_calls": 99,
+    "not_graspable": 96,
+    "admissible": 0
+   },
+   "gh156": {
+    "pre_grasp_calls": 27,
+    "not_graspable": 0,
+    "admissible": 24
+   }
+  },
+  {
+   "episode": "Long L-II t3",
+   "frozen": {
+    "pre_grasp_calls": 46,
+    "not_graspable": 41,
+    "admissible": 0
+   },
+   "gh156": {
+    "pre_grasp_calls": 25,
+    "not_graspable": 0,
+    "admissible": 17
+   }
+  },
+  {
+   "episode": "LIBERO-10 t4",
+   "frozen": {
+    "pre_grasp_calls": 50,
+    "not_graspable": 34,
+    "admissible": 0
+   },
+   "gh156": {
+    "pre_grasp_calls": 24,
+    "not_graspable": 0,
+    "admissible": 23
+   }
+  },
+  {
+   "episode": "LIBERO-10 t6",
+   "frozen": {
+    "pre_grasp_calls": 56,
+    "not_graspable": 30,
+    "admissible": 0
+   },
+   "gh156": {
+    "pre_grasp_calls": 51,
+    "not_graspable": 0,
+    "admissible": 9
+   }
+  }
+ ],
+ "libero_success_of_20": {
+  "frozen": 14,
+  "gh156": 15,
+  "pi05": 19
+ },
+ "safelibero_tsr_ssr_car_of_32": {
+  "frozen": [
+   17,
+   12,
+   22
+  ],
+  "gh156": [
+   18,
+   13,
+   24
+  ]
+ },
+ "korean_font": false
+}

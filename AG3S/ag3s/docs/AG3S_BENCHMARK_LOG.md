@@ -5162,3 +5162,15 @@ F8 + (a) `--ee-action-qp-scaled` (행 정규화 + quadratic slack) + (c′) `--g
 | 02:2x | **기록 사고 · 복원:** 덧붙이는 script (`open(p, "w").write(open(p).read() + …)`) 가 이 log (cb1f002b · 9dd9ce13) 와 계획서 (66dd8623) 를 새 절만 남게 잘랐다 | git 이력 (5d6aa7f0 · 9dd9ce13) 에 뒤 절을 다시 붙여 복원 (c52537bd, 삭제 0 줄). push 전이라 밖으로 나간 것은 없다 |
 
 **[해석]** (1) 1/10 표에서 AG3S 는 LIBERO 에서 π0.5 단독보다 25 pt 낮다 — 장애물이 없으므로 전부 우리 개입 탓이고, 막은 것은 옮길 물체 · 목적지 · 로봇 자신이다. (2) LIBERO-Safety 는 변환이 동작하지만 AG3S 가 거의 개입하지 않아 π0.5 단독과 같다 (대상 인식이 공식 checkpoint 에서 약함). (3) mug 는 '쥘 수 없는 물체' 로 걸러지고 있었다 — 규칙 하나로 설명되는 가장 큰 단일 원인 (표 전체 320 ep 중 40 ep 이 mug task).
+
+**이어서 — SL-SOTA18 `-gh156` 2 단계: 통과 (2026-11-13 02:23–04:53 측정, 04:5x 기록, HEAD `579ee680`).**
+
+| 시각 | 한 일 | 결과 |
+|---|---|---|
+| 02:23–04:53 | part G: `-gh156` 로 1/10 셋의 나머지 46 ep (SafeLIBERO 28 + LIBERO 18) | 46 ep 모두 동결 판과 결과가 같다 (잃은 것 0) |
+| 04:54 | 복원한 계획서 · 이 log 를 main checkout 에 합침 (aee17c0c) | 1,241 줄 · 5,164 줄 |
+| 04:55– | 채택 gate: `-gh156` guard → E1a 40 (TAG `pkgFghsdm`) | 진행 중 |
+
+**1/10 셋 전체 (같은 52 ep):** LIBERO 14 → **15** / 20 (π0.5 단독 19), SafeLIBERO TSR · SSR · CAR 17 · 12 · 22 → **18 · 13 · 24** / 32, > 50 mm 3 → 3. 얻은 것 = Long L-II task 3 · LIBERO-10 task 4, 잃은 것 없음. **[해석]** mug 를 '쥘 수 있는 물체' 로 인정하는 것만으로는 2 ep 이다 — 쥔 mug 가 목적지 접시에 막히는 것이 다음 원인. 상세는 계획서 §9.34.
+
+**실제 장면 · 그림:** `AG3S/ag3s/docs/figures/sl-sota18-gh156-tab10-20261113.png` (+ `.json`) — Long L-II task 3 · LIBERO-10 task 4 의 마지막 장면 (동결 판과 `-gh156`), mug 후보 인정 call, 1/10 셋의 episode 수. script `experiments/segmentation/sota_offline_20261111/fig_gh156_sdm.py`.
