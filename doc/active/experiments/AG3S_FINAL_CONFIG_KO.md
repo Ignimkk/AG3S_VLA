@@ -4,7 +4,17 @@
 정본: 판 정의 `AG3S/adapters/panda/profile.py` (`AG3S_VERSIONS`) · flag 정의 `AG3S/trajopt/serve_safe.py` (argparse) · Panda 서버 `AG3S/adapters/panda/server.py` · 판정 근거 `E1_GTTO_DECISIONS_20261104_KO.md`.
 본문의 argv 는 실제 run manifest (`…/20261108T232618_…-pe12345-C/run_manifest.json` `settings.server_argv`) 와 token 단위로 대조했고, 실효 값은 `serve_safe.build_parser()` 로 parse 해 확인했다. `(미확인)` = code 로 끝까지 확인하지 못한 것.
 
-## 0. 판 · 상태 (2026-11-09 05:3x KST)
+## 0. 판 · 상태 (2026-11-12 17:0x KST 동결 — 아래 표 첫 행; 그 아래 2026-11-09 표는 직전 구성 `…-pe123458` 의 기록)
+
+| 항목 | 내용 (2026-11-12 동결, 계획서 `AG3S_PLAN_SCHEDULE_20261110_KO.md` §9.25 A-6, G175) |
+|---|---|
+| **판** | `AG3S-commonto-att-termsoff-pass-zr-ee-hdp-loose2-obst4-pts-nocarve-fh-t100-pe12345811-to0-om15p10s40-ntc-pt6-pg4-hr150-hb-qs-rs-tro` (TAG `pkgFrs`) |
+| 직전 구성과의 차이 | `…-pe123458` + segment `11 · to0 · om15p10s40 · ntc · pt6 · pg4 · hr150 · hb · qs · rs · tro` — flag 는 §3.11, 뜻은 §5 끝 행들. §1–§4 · §6 의 나머지는 그대로 |
+| 인식 | GT 없음 (그대로) |
+| 상태 | SDM (H200 NVL), seed 7, HEAD `58d680b6` / `703ae657`: E1a 40 TSR 23 · CAR 34 · **SSR 21** (57.5 / 85.0 / 52.5 %), LIBERO 27 **23**, SafeLIBERO 11 성공 5 · 충돌 없음 9 · 안전 성공 4 (> 50 mm 충돌 0), LIBERO-Safety 10 **5** (위반 0), 다른 suite init 15–18 112 ep 51 · 85 · 46, Spatial L-I init 15–18 16 ep 7 · 12 · 5 — §8.4 |
+| 남은 한계 | 조정에 쓰지 않은 init 15–18 에서 TSR 이 baseline port 보다 낮다 (51 / 112 vs AEGIS port 76). L-I 4 cell SSR 18 / 64 (AEGIS port 29). 형태: 쥐었다 놓은 뒤 미완 26 / 64 — §8.4 |
+
+### 직전 구성 `…-pe123458` 의 상태 (2026-11-09 05:3x KST)
 
 | 항목 | 내용 |
 |---|---|
@@ -192,6 +202,24 @@ pe12345 run (LIBERO s7 · s8 · s9 t3 · 4 · 7 · 9 + SafeLIBERO t3, 553 call) 
 
 launcher 가 붙이는 것: `--port <자동>`, 평가 queue 의 `--record-constraints <run>/server_constraints --record-constraints-esdf full`, 환경 `AG3S_PANDA_CONVERSION=C` (`launch_libero_paired.py --conversion C`).
 
+### 3.11 2026-11-12 동결에서 더한 flag (직전 구성 `…-pe123458` 의 argv 에 더함)
+
+run manifest `…_ms-pkgFrssdm-object-LI-i17_18-…/run_manifest.json` 과 `…_ms-pe123458-object-LI-i15_16-…` 의 `settings.server_argv` 를 token 단위로 비교한 차이 전부다 (빠진 flag 없음).
+
+| flag | 값 | segment | 하는 일 |
+|---|---|---|---|
+| `--scene-obstacle-target-cut` | 켬 | `11` (SL-PE11) | target 과 한 성분으로 붙은 장애물을 target 쪽에서 잘라 장애물 집합에 남긴다 |
+| `--passthrough-obstacle-tolerance-mm` | 10 → **0** | `to0` | 장애물 물체 행이 통과 판정에서 받던 10 mm 허용을 없앤다 |
+| `--obstacle-row-margin-mm` / `--obstacle-row-priority` / `--obstacle-surface-tol-mm` | 15 / 10 / 40 | `om15p10s40` (SL-SOTA1) | 장애물 물체 행에 15 mm 여유 (그 안이면 통과 거절, action QP 가 그 여유를 지킴), 그 행의 slack 가중 10, 행 ↔ 장애물 집합 대응 거리 40 mm |
+| `--no-target-certify` | 켬 | `ntc` (SL-PE6) | target 을 못 찾은 frame 을 HOLD 하지 않고 모든 표면을 장애물로 보고 검사한다 |
+| `--obstacle-row-patience` | 6 | `pt6` (SL-SOTA2) | 여유 안에 6 call 연속 머물면 여유를 내려놓는다 (chunk 가 다시 여유를 채울 때까지) |
+| `--ee-action-qp-progress` | 0.4 | `pg4` (SL-SOTA3) | 막힌 동안의 보정이 쥔 채면 위로, 쥐기 전이면 target 쪽으로 가는 방향을 선호한다 |
+| `--scene-obstacle-held-reach-mm` | 150 | `hr150` (SL-SOTA5) | 쥔 물체로 보는 범위를 손가락 끝에서 150 mm 이상으로 (쥔 그릇의 먼 벽이 장애물로 남던 것) |
+| `--obstacle-hand-beneath` | 켬 | `hb` (SL-SOTA7) | 쥔 동안 쥔 물체 발자국 위의 손 행은 장애물 물체 행으로 세지 않는다 (접시 위에 놓기) |
+| `--ee-action-qp-scaled` | 켬 | `qs` (SL-SOTA6) | action QP 를 행 정규화 + 2 차 slack 벌점 형태로 푼다 (OSQP 반복 한도에서 멈추던 91–93 % 의 solve) |
+| `--grasp-opening-rule-reach-sticky` | 켬 | `rs` (SL-SOTA11) | opening rule 의 reach 판정이 한 번의 닫기 시도 안에서는 통과로 남는다 (latch 가 걸리지 않던 고장) |
+| `--ee-action-qp-translation-only` | 켬 | `tro` (SL-QE2) | action QP 가 회전 성분을 바꾸지 않고 병진만 고친다 |
+
 ## 4. argv 에 없는 implicit 값
 
 | 무엇 | 값 | 출처 |
@@ -230,6 +258,16 @@ GT 를 쓰는 B5 (`…-gt2-…-obst3-pts-nocarve-fh-t100`) 에서 GT flag 를 �
 | `t100` | `--violation-tolerance-mm 100` | 일반 τ 25 → 100 mm (접촉면 모델 오차만 덮음; 장애물은 τ_obs 10 mm) |
 | `pe12345` | `--close-seed-grounding --destination-after-held --scene-obstacle-held-exclude --passthrough-obstacle-class-tests --destination-held-leader` | SL-PE1–5 (§2) |
 | `8` (`pe123458`) | `--scene-obstacle-held-motion` | SL-PE8 (§2, §3.6) |
+| `11` (`pe12345811`) | `--scene-obstacle-target-cut` | SL-PE11 (§3.11) — 2026-11-12 동결에서 더함 (이 행부터 아래 전부) |
+| `to0` | `--passthrough-obstacle-tolerance-mm 0` | 장애물 물체 행 허용 10 → 0 mm |
+| `om15p10s40` | `--obstacle-row-margin-mm 15 --obstacle-row-priority 10 --obstacle-surface-tol-mm 40` | SL-SOTA1 장애물 물체 행의 여유 |
+| `ntc` | `--no-target-certify` | SL-PE6 target 없는 frame 을 HOLD 대신 검사 |
+| `pt6` · `pg4` | `--obstacle-row-patience 6` · `--ee-action-qp-progress 0.4` | SL-SOTA2 · 3 교착 대응 (인내 한도 · 진행 선호) |
+| `hr150` | `--scene-obstacle-held-reach-mm 150` | SL-SOTA5 쥔 물체 범위 |
+| `hb` | `--obstacle-hand-beneath` | SL-SOTA7 쥔 물체 발자국 위 손 행 |
+| `qs` | `--ee-action-qp-scaled` | SL-SOTA6 행 정규화 action QP |
+| `rs` | `--grasp-opening-rule-reach-sticky` | SL-SOTA11 opening rule reach 고정 |
+| `tro` | `--ee-action-qp-translation-only` | SL-QE2 병진만 고치는 action QP |
 
 이 판은 `GT15_VERSIONS` 계열에 등록돼 `is_gtto_version()` 이 참이고 (HSR6 probe 없음, `--attention-source` 고정), `version_requires_oracle_segmentation()` 은 거짓이라 client 에 `--oracle-seg` 가 붙지 않는다.
 
@@ -298,6 +336,24 @@ GT 를 쓰는 B5 (`…-gt2-…-obst3-pts-nocarve-fh-t100`) 에서 GT flag 를 �
 
 tro 는 큰 충돌을 줄이고 (E1a > 50 mm 9 → 6) 대신 1–8 mm 접촉을 늘림 (장애물 행 허용치 τ_obs 10 mm 안 통과로 추정). 비교 script · 원본: `outputs/2026-11-09_집기놓기_장애물취급/eval_pe123458tro/tro_compare.py` · `tro_compare.json`.
 
+### 8.4 2026-11-12 동결 판 `pkgFrs` (SDM, seed 7; 계획서 §9.25)
+
+TSR · CAR · SSR = 성공 · 충돌 없음 · 안전 성공 episode 수. '지금 구성' 열은 직전 구성 `…-pe123458` 의 AMRC 값 (계획서 §9.5 · §9.23).
+
+| 셋 | 동결 판 `pkgFrs` | 직전 구성 `…-pe123458` | 같은 episode 의 baseline port (AMRC) |
+|---|---|---|---|
+| E1a 40 (Spatial L-I task 0–3 × init 5–14, 개발 분할) | 23 · 34 · **21** (task 별 SSR 7 · 2 · 7 · 5) | 22 · 23 · 15 | — |
+| 평가 LIBERO 27 (seed 7 · 8 · 9) | **23** (9 · 7 · 7) | 22 | — |
+| SafeLIBERO 11 (TSR · CAR · SSR, > 50 mm 충돌) | 5 · 9 · 4, 0 | 7 · 7 · 6 | — |
+| LIBERO-Safety 10 성공 (위반) | 5 (0) | 5 (1) | — |
+| 다른 suite init 15 · 16, 56 ep | 25 · 41 · 22 | 24 · 31 · 17 | π0.5 28 · 11 · 8, AEGIS 35 · 32 · 21, multi-link (GT) 32 · 40 · 23 |
+| 다른 suite init 17 · 18, 56 ep | 26 · 44 · 24 | — (재지 않음) | π0.5 34 · 7 · 5, AEGIS 41 · 36 · 27, multi-link (GT) 40 · 36 · 25 |
+| Spatial L-I init 15–18, 16 ep | 7 · 12 · 5 | — | π0.5 10 · 1 · 1, AEGIS 14 · 8 · 8, multi-link (GT) 11 · 10 · 7 |
+
+init 15–18 은 조정에 쓰지 않았다. 다른 suite 112 ep 합 51 · 85 · 46: CAR 은 baseline port 보다 높고 (AEGIS 68, multi-link GT 76) TSR 은 낮다 (76, 72). L-II 4 cell SSR 33 / 64 (AEGIS 27), L-I 4 cell 18 / 64 (AEGIS 29; Goal L-I 2 vs 11).
+안전 성공이 아닌 64 ep (SDM 실측 112 ep 중) 의 형태: 쥐었다 놓은 뒤 미완 26, 못 쥠 19 (쥐기 전 손 · 손가락 행 QP 10, 팔 link 행 6, QP 적음 3), 쥔 채 끝남 8, 끝까지 HOLD 7, 성공 + 충돌 4. E1a 40 의 19 ep: 팔 link 행 교착 7, 손 · 손가락 행 5, 놓은 뒤 미완 3, 성공 + 충돌 2, 그 밖 2.
+그림: `AG3S/ag3s/docs/figures/sl-sota-ms-sdm-init15-18-20261112.png`, `sl-sota-zp5-sdm-e1a-20261112.png`.
+
 ## 교체 기록 (무엇 → 무엇, 이유)
 
 | 날짜 · 시각 (KST) | 교체 | 이유 (판정) |
@@ -309,3 +365,4 @@ tro 는 큰 충돌을 줄이고 (E1a > 50 mm 9 → 6) 대신 1–8 mm 접촉을 
 | 2026-11-08 22:19 | 목적지 등록: 잡을 수 없는 크기만 → **쥔 동안 손 밖 attention 1 위면 크기 무관** | 접시 (10.7 × 135 × 135 mm) 가 '잡을 수 있음' 으로 분류돼 한 번도 등록 안 됨 → 내려놓을 때 장애물 (G157) |
 | 2026-11-08 22:19 | 자른 점 attention: 모두 1 → **손 닫는 지점에 가까울수록 높게**, 국소 받침면: 그 call 만 → **episode 동안 유지** | 서랍 앞판 조각이 같은 점수로 1 위가 되어 identity 가 흔들림; 손 닫는 지점이 없는 call 에 그릇이 다시 거절됨 (G157) |
 | 2026-11-09 05:3x | 쥔 물체 제외: attach snapshot 15 mm 안 성분만 → **+ 손과 같이 움직인 점 (누적)** (판 `…-pe12345` → `…-pe123458`) | 들어 올린 뒤 보이는 그릇 면이 snapshot 과 26–73 mm 떨어져 쥔 그릇이 장애물로 남아 옮기기 · 놓기를 거절 (12 ep 에 28 call → 3 call), LIBERO 8 / 12 · SafeLIBERO 같음 (G162–G164) |
+| 2026-11-12 17:0x | 판 `…-pe123458` → **`…-pe12345811-to0-om15p10s40-ntc-pt6-pg4-hr150-hb-qs-rs-tro`** (`pkgFrs`): 장애물 물체 행 허용 10 → 0 mm + 15 mm 여유, target 없는 frame 검사, 교착 대응 (인내 한도 6 call · 진행 선호 0.4), 쥔 물체 범위 150 mm · 발자국 위 손 행 해제, 행 정규화 · 병진만 고치는 action QP, latch reach 고정, target 과 붙은 장애물 자르기 | E1a 40 SSR 15 → 21 · CAR 23 → 34, LIBERO 27 22 → 23, LIBERO-Safety 위반 1 → 0, 다른 suite init 15 · 16 SSR 17 → 22 (계획서 §9.6–§9.25, G175). SafeLIBERO 11 안전 성공은 6 → 4 (§9.2: 기록만) |

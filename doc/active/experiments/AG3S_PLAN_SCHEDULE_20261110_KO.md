@@ -195,6 +195,7 @@ T5 뒤에 하면 이 서버에서 끝낸다. **이전 시점은 T5 와의 순서
 | 2026-11-12 01:4x | dev-4a: SDM 세팅 끝 (사용자 실행, venv 6 개 · GPU 확인). SDM 에서 π0.5 단독 측정 ①–③ 행 추가 (§2). SDM이전방법 확인: 05:30–07:00 delta 는 사용자 PC 로만 · SDM 쓰기는 08:00 뒤 사용자 upload 때 (EXISTING=archive 권고). dev-57 확인: ① 중복 아님, AG3S 쪽 GPU 우선 → block 경계에서 넘김. |
 | 2026-11-12 07:2x | sdm-c7: SDM π0.5 단독 queue ① 6/8 block 측정 후 사용자 지시로 07:19 일시 중단 (GPU 비움, HEAD 6c9b465b). §2 끝 행 · §9.24 · BL-15 추가. queue done_run bug (SafeLIBERO run dir 의 덧붙은 `-L<lvl>`) 수정 commit 6c9b465b |
 | 2026-11-12 13:2x | sdm-f6: §9.23 A 를 SDM 에서 실행 (07:33–13:17, HEAD 58d680b6) — §9.25. **A-1 `pkgFrs` E1a 40 = TSR 23 · CAR 34 · SSR 21** (AMRC 추정값과 같음, task 0 은 episode 단위로 AMRC 와 같음). **A-3 `-zp5` 탈락** (task 0 SSR 7 < 9, task 3 SSR 4 < 5). **A-2 guard 통과** (LIBERO 27 = 23, SafeLIBERO 11 = 5 · 9 · 4 · > 50 mm 0, LS 10 = 5 · 위반 0). **A-4 다른 suite init 15 · 16 = 25 · 41 · 22 / 56** (SDM 5 cell + AMRC Goal 2 cell; 지금 구성 24 · 31 · 17, `-qs` 24 · 40 · 19). 사용자 지시 (11:3x): AMRC 가 잰 것은 SDM 에서 다시 재지 않는다 — A-7 취소. 동결 후보 `pkgFrs` 그대로, 다음 A-5 |
+| 2026-11-12 17:0x | sdm-f6: §9.23 A-5 · A-6 (13:18–16:22, HEAD 703ae657) — §9.25. **A-5 `pkgFrs` 다른 suite init 17 · 18 = 56 ep TSR 26 · CAR 44 · SSR 24**, Spatial L-I init 15–18 = 16 ep 7 · 12 · 5. init 15–18 의 112 ep = 51 · 85 · 46 (같은 episode 의 AEGIS port 76 · 68 · 48, multi-link GT port 72 · 76 · 48, π0.5 62 · 18 · 13) — CAR 은 가장 높고 TSR 은 가장 낮음, L-II 는 앞서고 L-I (특히 Goal L-I 2 / 16) 은 뒤짐. **A-6: `pkgFrs` 동결** (E1a 40 SSR 21 > `pkgFin` 20 > 지금 구성 15, guard 통과, 다른 suite init 15 · 16 SSR 22 > 17). `AG3S_FINAL_CONFIG_KO.md` · G175 갱신. 안전 성공이 아닌 64 ep 중 26 이 '쥐었다 놓은 뒤 미완' → 남은 시간은 B-1 부터 |
 
 ---
 
@@ -854,3 +855,49 @@ figure (규칙 A): `AG3S/ag3s/docs/figures/sl-sota-zp5-sdm-e1a-20261112.png` (+ 
 - 오늘 SDM 에서 잰 것 중 AMRC 와 겹친 것은 A-1 의 task 0 (18 분) 하나다. A-4 는 11:28 에 7 cell 로 시작했다가 11:33 에 멈추고 Goal 2 cell 을 뺀 5 cell 로 11:34 에 다시 시작했다 (멈출 때 돌던 Object L-I cell 은 server 시작 중에 종료 — run 디렉터리 `20261112T112837_…_ms-pkgFrssdm-object-LI-*` 는 episode 없음).
 
 **다음 (결과 전, 13:2x):** A-5 — `pkgFrs` 다른 suite init 17 · 18 (7 cell, 어느 서버에서도 재지 않음) → Spatial L-I init 15–18. 끝나면 A-6 동결 판정.
+
+**A-5 `pkgFrs` 다른 suite init 17 · 18 + Spatial L-I init 15–18 [M] (13:18–16:22, `ms-pkgFrssdm-*-i17_18` · `ms-pkgFrssdm-spatial-LI-i15_16_17_18`, HEAD `703ae657`).** TSR · CAR · SSR (ep 수), cell 마다 8 ep (Spatial L-I 은 16 ep). baseline 열은 dev-4a tranche 1 의 같은 episode (`outputs/2026-11-09_baseline_tranche/t1/blocks.csv` 의 run — AMRC, seed 7, `main_aegis`; 13 시 이후 SDM storage 에 올라와 있다). 이 init 은 어느 AG3S 판의 조정에도 쓰지 않았다 (보고 분할 init 19–49 도 아님).
+
+| cell (init 17 · 18) | `pkgFrs` (SDM) | > 50 mm 충돌 | π0.5 단독 | AEGIS port (detector) | multi-link CBF port (detector) | multi-link CBF port (GT) |
+|---|---|---|---|---|---|---|
+| Object L-I | 4 · 7 · 4 | 1 (t2 e17 364 mm) | 3 · 0 · 0 | 8 · 3 · 3 | 7 · 0 · 0 | 5 · 5 · 3 |
+| Object L-II | 8 · 8 · 8 | 0 | 8 · 3 · 3 | 7 · 7 · 7 | 7 · 3 · 3 | 8 · 4 · 4 |
+| Goal L-I | 2 · 6 · 1 | 1 (t1 e18 84 mm) | 6 · 0 · 0 | 6 · 8 · 6 | 7 · 7 · 6 | 7 · 7 · 6 |
+| Goal L-II | 4 · 5 · 3 | 0 | 5 · 1 · 0 | 7 · 3 · 2 | 5 · 3 · 2 | 5 · 5 · 2 |
+| Long L-I | 1 · 4 · 1 | 1 (t3 e18 156 mm) | 4 · 0 · 0 | 5 · 4 · 2 | 5 · 3 · 3 | 6 · 4 · 3 |
+| Long L-II | 4 · 8 · 4 | 0 | 3 · 1 · 1 | 3 · 6 · 3 | 4 · 4 · 2 | 3 · 4 · 1 |
+| Spatial L-II | 3 · 6 · 3 | 0 | 5 · 2 · 1 | 5 · 5 · 4 | 6 · 6 · 5 | 6 · 7 · 6 |
+| **합 (56 ep)** | **26 · 44 · 24** (46.4 / 78.6 / 42.9 %) | 3 | 34 · 7 · 5 | 41 · 36 · 27 | 41 · 26 · 21 | 40 · 36 · 25 |
+| Spatial L-I init 15–18 (16 ep) | **7 · 12 · 5** (task 별 SSR 2 · 0 · 2 · 1) | 2 (t0 e16 57 mm, t3 e18 295 mm) | 10 · 1 · 1 | 14 · 8 · 8 | 12 · 8 · 7 | 11 · 10 · 7 |
+
+init 15–18 전체 (A-4 + A-5; `pkgFrs` 의 Goal init 15 · 16 은 AMRC 값 §9.22, 그 밖은 SDM 실측):
+
+| 셋 | `pkgFrs` | π0.5 단독 | AEGIS port (detector) | multi-link CBF port (detector) | multi-link CBF port (GT) |
+|---|---|---|---|---|---|
+| 다른 suite 7 cell, 112 ep | **51 · 85 · 46** (45.5 / 75.9 / 41.1 %) | 62 · 18 · 13 (55.4 / 16.1 / 11.6 %) | 76 · 68 · 48 (67.9 / 60.7 / 42.9 %) | 69 · 58 · 40 (61.6 / 51.8 / 35.7 %) | 72 · 76 · 48 (64.3 / 67.9 / 42.9 %) |
+| cell 별 SSR / 16 (Object L-I · L-II · Goal L-I · L-II · Long L-I · L-II · Spatial L-II) | 8 · 13 · 2 · 5 · 3 · 7 · 8 | 1 · 5 · 0 · 3 · 1 · 1 · 2 | 6 · 9 · 11 · 4 · 4 · 7 · 7 | 2 · 5 · 9 · 8 · 6 · 3 · 7 | 5 · 6 · 9 · 9 · 6 · 3 · 10 |
+| L-I 4 cell (Object · Goal · Long · Spatial L-I), 64 ep | 23 · 44 · 18 (35.9 / 68.8 / 28.1 %) | 32 · 4 · 3 | 49 · 38 · 29 (76.6 / 59.4 / 45.3 %) | 44 · 31 · 24 | 40 · 44 · 27 |
+| L-II 4 cell, 64 ep | 35 · 53 · 33 (54.7 / 82.8 / 51.6 %) | 40 · 15 · 11 | 41 · 38 · 27 (64.1 / 59.4 / 42.2 %) | 37 · 35 · 23 | 43 · 42 · 28 |
+
+- `pkgFrs` 는 CAR 이 가장 높고 (85 / 112; π0.5 18, AEGIS port 68, multi-link GT 76) TSR 이 가장 낮다 (51; π0.5 62, AEGIS port 76). SSR 46 은 AEGIS port · multi-link GT port (48) 보다 2 ep 낮고 multi-link detector port (40) · π0.5 (13) 보다 높다.
+- 차이는 level 로 갈린다: L-II (장애물이 경로 옆) 는 `pkgFrs` 가 SSR 33 / 64 로 가장 높고, L-I (장애물이 target 가까이) 는 18 / 64 로 AEGIS port (29) 보다 낮다. 가장 큰 차이는 Goal L-I (2 vs 11 / 16).
+- Spatial L-I 의 init 15–18 은 SSR 5 / 16 (31.3 %) 로 개발 분할 E1a 40 (init 5–14) 의 52.5 % 보다 낮다 (n = 16).
+- SDM 에서 잰 112 ep (Goal init 15 · 16 제외, Spatial L-I 포함) 의 episode 짝: `pkgFrs` 실패 · π0.5 단독 성공 29 ep (그중 π0.5 가 충돌 없이 성공한 것은 4), `pkgFrs` 성공 · π0.5 실패 15 ep. `pkgFrs` 만 안전 성공 21 ep, AEGIS port 만 안전 성공 22 ep.
+- 안전 성공이 아닌 64 ep 의 형태 (`shape.py`, `outputs/2026-11-12_SOTA_SDM_동결검증/shape_pkgFrssdm_ms.json`): **쥐었다 놓은 뒤 미완 26** (통과만 이어짐 16, 뒤에 손 · 손가락 행 QP 지속 10), 못 쥠 19 (쥐기 전 손 · 손가락 행 QP 10, 팔 link 행 6, QP 적음 3), 쥔 채 끝남 8, 끝까지 HOLD 7, 성공 + 충돌 4.
+- AMRC `pkgFrs` 의 Goal init 15 · 16 run (`20261112T024045_…`, `…T025916_…`) 과 `sub-pkgSzp-*` 4 run 은 SDM storage 에 디렉터리만 있고 file 이 0 개다 (AMRC 의 02:40 이후 run 이 덜 옮겨짐) — Goal 2 cell 의 > 50 mm 수와 `-zp` task 2 원인 분석은 그 file 이 온 뒤에 한다.
+
+figure (규칙 A): `AG3S/ag3s/docs/figures/sl-sota-ms-sdm-init15-18-20261112.png` (+ `.json`; script `experiments/segmentation/sota_offline_20261111/fig_ms_sdm.py`) — (a) 네 episode 의 마지막 장면 (Object L-II 안전 성공, Long L-I 놓은 뒤 미완, Goal L-I 끝까지 HOLD, Spatial L-I 못 쥠), (b) 112 ep 의 TSR · CAR · SSR, (c) cell 별 안전 성공, (d) 안전 성공이 아닌 episode 의 형태.
+
+**A-6 동결 판정 (2026-11-12 17:0x, sdm-f6) — `pkgFrs` 를 동결한다.** 판 `AG3S-commonto-att-termsoff-pass-zr-ee-hdp-loose2-obst4-pts-nocarve-fh-t100-pe12345811-to0-om15p10s40-ntc-pt6-pg4-hr150-hb-qs-rs-tro`.
+
+| 기준 (§9.2) | `pkgFrs` | `pkgFin` | `-qs` 판 | 지금 구성 `…-pe123458` | 판정 |
+|---|---|---|---|---|---|
+| 주 기준 E1a 40 (TSR · CAR · SSR) | 23 · 34 · **21** (SDM) | 22 · 34 · 20 | 22 · 32 · 18 | 22 · 23 · 15 | `pkgFrs` 가 가장 높음 (지금 구성 + 6) |
+| guard: LIBERO 27 / SafeLIBERO 11 의 > 50 mm / LIBERO-Safety 10 · 위반 | 23 / 0 / 5 · 0 (SDM) | 23 / 0 / 5 · 0 | 23 / — / — | 22 / — / 5 · 1 | 통과 |
+| 다른 suite init 15 · 16, 56 ep | 25 · 41 · **22** | (2 cell 16 ep 7 · 10 · 5 — `pkgFrs` 의 같은 cell 과 같음) | 24 · 40 · 19 | 24 · 31 · 17 | `pkgFrs` 가 가장 높음 (지금 구성 + 5) |
+| 다른 suite init 17 · 18, 56 ep | 26 · 44 · 24 | — | — | — | `pkgFrs` 만 잼 |
+
+- 세 기준에서 `pkgFrs` 가 다른 AG3S 판보다 높거나 같다. `pkgFin` 과는 flag 하나 (`-rs`, latch 의 reach 판정 고정) 차이이고, 둘을 같이 잰 56 ep (E1a 40 + 다른 suite 2 cell) 에서 결과가 다른 episode 는 E1a t0 e11 하나 (`pkgFrs` 가 얻음) 다.
+- 지금 구성 · `pkgFin` 의 init 17 · 18 은 어느 서버에서도 재지 않았고 **더 재지 않는다** — 판정이 뒤집히려면 지금 구성이 그 56 ep 에서 SSR 30 이상 (`pkgFrs` 24 + init 15 · 16 의 차 5 + 1) 이어야 하는데 init 15 · 16 에서 17 이었다 (2 h 30 분을 쓰지 않음).
+- **[해석] 동결은 'AG3S 판 중 가장 나은 것' 을 정한 것이고, 조정에 쓰지 않은 init 15–18 에서 baseline port 를 넘지는 못했다** — 112 ep SSR 46 vs AEGIS port 48 · multi-link GT port 48; Spatial L-I 16 ep 5 vs AEGIS port 8. 이긴 것은 CAR (85 vs 68 · 76) 과 L-II (SSR 33 vs 27 · 28), 진 것은 TSR (51 vs 76 · 72) 과 L-I (SSR 18 vs 29 · 27). 원문 보고값 (KNOWS 4 suite L-I SSR 59.9 %) 과의 차이는 더 크다 (같은 4 cell 의 `pkgFrs` 28.1 %, AEGIS port 45.3 %).
+- D6 (11-13) 까지 남은 시간에 §9.23 B 의 후보가 §9.2 (E1a 40 SSR ≥ 22 또는 같고 CAR ≥ 36, guard 통과) 를 채우면 동결 판을 바꾼다. 순서는 이번 형태 분포를 따라 **B-1 놓는 자리 (놓은 뒤 미완 26 / 64) → Goal L-I (SSR 2 / 16) 의 원인 → B-4 · B-5**. init 15–18 은 원인을 보는 데만 쓰고 후보 채택은 E1a 40 으로 한다.
