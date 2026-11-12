@@ -197,6 +197,7 @@ T5 뒤에 하면 이 서버에서 끝낸다. **이전 시점은 T5 와의 순서
 | 2026-11-12 13:2x | sdm-f6: §9.23 A 를 SDM 에서 실행 (07:33–13:17, HEAD 58d680b6) — §9.25. **A-1 `pkgFrs` E1a 40 = TSR 23 · CAR 34 · SSR 21** (AMRC 추정값과 같음, task 0 은 episode 단위로 AMRC 와 같음). **A-3 `-zp5` 탈락** (task 0 SSR 7 < 9, task 3 SSR 4 < 5). **A-2 guard 통과** (LIBERO 27 = 23, SafeLIBERO 11 = 5 · 9 · 4 · > 50 mm 0, LS 10 = 5 · 위반 0). **A-4 다른 suite init 15 · 16 = 25 · 41 · 22 / 56** (SDM 5 cell + AMRC Goal 2 cell; 지금 구성 24 · 31 · 17, `-qs` 24 · 40 · 19). 사용자 지시 (11:3x): AMRC 가 잰 것은 SDM 에서 다시 재지 않는다 — A-7 취소. 동결 후보 `pkgFrs` 그대로, 다음 A-5 |
 | 2026-11-12 16:3x | sdm-f6: §9.23 A-5 · A-6 (13:18–16:22, HEAD 703ae657) — §9.25. **A-5 `pkgFrs` 다른 suite init 17 · 18 = 56 ep TSR 26 · CAR 44 · SSR 24**, Spatial L-I init 15–18 = 16 ep 7 · 12 · 5. init 15–18 의 112 ep = 51 · 85 · 46 (같은 episode 의 AEGIS port 76 · 68 · 48, multi-link GT port 72 · 76 · 48, π0.5 62 · 18 · 13) — CAR 은 가장 높고 TSR 은 가장 낮음, L-II 는 앞서고 L-I (특히 Goal L-I 2 / 16) 은 뒤짐. **A-6: `pkgFrs` 동결** (E1a 40 SSR 21 > `pkgFin` 20 > 지금 구성 15, guard 통과, 다른 suite init 15 · 16 SSR 22 > 17). `AG3S_FINAL_CONFIG_KO.md` · G175 갱신. 안전 성공이 아닌 64 ep 중 26 이 '쥐었다 놓은 뒤 미완' → 남은 시간은 B-1 부터 |
 | 2026-11-12 19:4x | sdm-f6: §9.26 SL-SOTA16 `-dc` 측정 (16:40–19:38, HEAD 4fab0cc8) — §9.28. **탈락.** 1 단계 56 ep: `esdf_dead_camera` HOLD 227 → 0 call (HOLD 전체 227 → 5), 그러나 TSR · CAR · SSR 23 · 44 · 20 → **23 · 42 · 20**, > 50 mm 충돌 5 → 7 (기준 SSR ≥ 22 · 증가 ≤ 1 둘 다 미달). 2 단계 E1a task 3 = 5 · 9 · 5 (같음). HOLD 가 있던 13 ep 중 성공으로 바뀐 것 0. 3 단계 guard 는 돌리지 않음. **`pkgFrs` 동결 유지.** 같은 경계에서 `wip/sota-hf` (SL-SOTA17 `-hf30`, §9.27) 를 합치고 앞 기록의 시각을 정정 (17:0x → 16:3x, 18:0x → 16:4x; commit de7b0daf). 19:41 `-hf30` 1 단계 (E1a task 2 → 1, TAG `pkgFhfsdm`) 시작 |
+| 2026-11-12 20:3x | sdm-f6: §9.27 SL-SOTA17 `-hf30` 1 단계 (19:41–20:31, HEAD de7b0daf, TAG `pkgFhfsdm`) — §9.29. **탈락.** E1a task 2 = 7 · 10 · 7 (`pkgFrs` 7 · 10 · 7), task 1 = 2 · 6 · **1** (`pkgFrs` 2 · 7 · 2); SSR 합 8 < 기준 10. 2 단계 이후는 돌리지 않음. **`pkgFrs` 동결 유지.** 사용자 지시 (19:5x): 최우선 목표는 SSR, 근거 없는 실험 금지 — 실패를 'π0.5 단독 성공 여부' 로 나눈 표와 놓는 순간의 GT 위치를 §9.29 에 적음. GPU 는 20:31 부터 비어 있음 |
 
 ---
 
@@ -1005,3 +1006,51 @@ GPU 약 4 h 40 분 (1 단계 2 h 30 분, 2 단계 25 분, 3 단계 1 h 40 분).
 - 그림 (규칙 A): `AG3S/ag3s/docs/figures/sl-sota16-dc-sdm-20261112.png` (+ `.json`) — Spatial L-II t1 e18 · Goal L-I t2 e17 의 마지막 장면 (`pkgFrs` 와 `-dc`), HOLD 가 있던 13 ep 의 HOLD call 수와 결과, 1 단계 합과 통과선. script `experiments/segmentation/sota_offline_20261111/fig_dc_sdm.py`, 입력 `outputs/2026-11-12_SOTA_SDM_동결검증/offline/dc_cmp.json` (`dc_cmp.py`).
 - note `esdf_camera_outside_workspace` 가 call 기록에 남은 것은 34 call 이다. AG3S block 은 status 가 ok 인 call 에는 기록되지 않으므로 이 수는 하한이다.
 - 이어서: §9.27 `-hf30` 은 `-dc` 없이 `…-hb-qs-rs-hf30-tro` 로 잰다 (19:41 1 단계 시작, TAG `pkgFhfsdm`).
+
+### 9.29 SL-SOTA17 `-hf30` 결과 — 탈락; 실패를 되찾을 수 있는 것과 아닌 것으로 나눔 (sdm-f6, 2026-11-12 19:41–20:31 측정, 20:3x 기록)
+
+**사용자 지시 (2026-11-12 19:5x):** "최우선 목표는 SSR 을 높이는 것이다. 무작정 실험만 하지 않는다." — 아래 표들은 그 뒤 GPU 없이 기존 기록으로 만든 것이다.
+
+**1 단계 (E1a task 2 → 1, 판 `…-hb-qs-rs-hf30-tro`) [M].** 숫자는 TSR · CAR · SSR 의 episode 수.
+
+| task (init 5–14) | `pkgFrs` | `-hf30` | 달라진 episode |
+|---|---|---|---|
+| 2 | 7 · 10 · 7 | 7 · 10 · 7 | 결과는 10 ep 모두 같음 (e7 · e13 은 더 빨리, e12 · e14 는 더 늦게 성공) |
+| 1 | 2 · 7 · 2 | 2 · 6 · **1** | e7 안전 성공 → 실패, e10 실패 + 충돌 → 성공 + 충돌 (2.9 mm), e5 · e11 실패 → 실패 + 충돌 (44 mm · 1.3 mm) |
+| 합 | 9 · 17 · 9 | 9 · 16 · **8** | 기준 SSR 합 ≥ 10 미달 → **탈락**, task 0 · 3 · guard · 기제 cell 은 돌리지 않음 |
+
+**실패를 'π0.5 단독이 그 task 를 성공하는가' 로 나눔 [M · D].** 같은 episode 의 π0.5 단독 · AEGIS port run (`outputs/2026-11-09_baseline_tranche/t1/blocks.csv`; E1a 는 `e1a-none-spatial-LI` · `e1a-aegis-spatial-LI`, 2026-11-04) 과 맞췄다. SafeLIBERO 의 충돌 지표는 추가된 장애물의 변위만 센다.
+
+| 셋 | `pkgFrs` | π0.5 단독 | AEGIS port | `pkgFrs` 가 안전 성공이 아닌 ep | 그중 π0.5 단독 성공 | 그중 AEGIS port 안전 성공 | 안전 성공 합집합 (`pkgFrs` ∪ AEGIS port) |
+|---|---|---|---|---:|---:|---:|---:|
+| E1a 40 (개발 분할) | 23 · 34 · 21 | 25 · 6 · 6 | 21 · 18 · 17 | 19 | 11 | 4 | 25 |
+| init 15–18, SDM 실측 112 ep (Goal init 15 · 16 제외, Spatial L-I 포함 — in-sample) | 48 SS | — | 49 SS | 64 | 31 | 22 | 70 |
+
+| 실패 형태 (init 15–18 의 64 ep) | π0.5 단독 성공 | π0.5 단독 실패 | AEGIS port 안전 성공 |
+|---|---:|---:|---:|
+| 쥐었다 놓은 뒤 미완 | 16 | 10 | 15 |
+| 쥔 채 끝남 | 5 | 3 | 3 |
+| 끝까지 HOLD (§9.28: 위 두 형태가 가려진 것) | 3 | 4 | 2 |
+| 못 쥠 (QP 지속 · QP 적음) | 5 | 14 | 2 |
+| 성공 + 충돌 | 2 | 2 | 0 |
+| 합 | 31 | 33 | 22 |
+
+- `pkgFrs` 는 CAR 이 가장 높고 TSR 이 가장 낮다 (init 15–18: TSR 45.5 %, π0.5 단독 55.4 %, AEGIS port 67.9 %). SSR 은 TSR 에 묶여 있다 — 올릴 여지는 '우리 filter 가 막아서 잃은 task 성공' 31 ep 에 있고, 그중 24 ep 이 쥔 뒤 옮기고 내려놓는 구간이다.
+- 개발 분할에서는 AEGIS port 보다 높고 (21 vs 17), 조정에 쓰지 않은 init 15–18 에서는 같거나 낮다 (48 vs 49; Spatial L-I init 15–18 은 5 vs 8 / 16). **[해석]** E1a 40 의 +1 차이로 고른 판은 그 40 ep 에 맞춰진 부분이 있다 (40 ep 의 표준오차는 약 3 ep).
+
+**쥔 구간에서 거절된 call 을 막은 물체 (owner 재생 41 ep, `offline/owner_held/`) [M].** 거절 301 call 중 SafeLIBERO 장애물이 166, 그 밖의 물체 (목적지 · 다른 그릇 · cabinet · 쥔 물체 자신의 상) 가 135. π0.5 단독이 성공하는 24 ep 중 13 ep 은 그 밖의 물체가 더 많이 막았다.
+
+**놓는 순간 (E1a, GT 물체 위치 `*_geom.npz`) [M].** LIBERO 의 '위에 놓임' 은 수평 3 cm 안이다.
+
+| episode | 그릇 – 접시 중심 수평 거리 (놓은 뒤) | 놓기 직전 3 call 의 QP | 메모 |
+|---|---|---|---|
+| `pkgFrs` t2 e5 (F) | 3.6–3.8 cm | 없음 (통과) | π0.5 단독 · AEGIS port 도 실패 — policy 한계 |
+| `pkgFrs` t1 e11 (F) | 3.5–3.7 cm | call 31–33 · 35, link5 여유 0–10 mm, 손을 위로 2.5–4.2 (action 단위) | policy 가 여는 call 35 에 QP 가 손을 들어 올림. π0.5 단독 · AEGIS port 는 안전 성공 |
+| `-hf30` t2 e9 (F) | 3.9 cm | call 25 · 29 · 32, 손 · 손가락 행 −7…−34 mm | 내려놓는 중 QP 가 손을 5–7 밀어냄 |
+| `-hf30` t1 e7 (F; `pkgFrs` 는 SS, 3.0 cm) | 5.3 cm | — | 3 cm 문턱 근처에서 갈림 |
+
+- 놓는 call 과 그 앞 2 call 에 QP 가 action 을 바꾼 episode (`rel_gate.py`, 놓는 call 을 찾은 것만): 안전 성공이 아닌 것 16 (E1a 7, init 15–18 9) · 안전 성공 13. QP 없이 놓은 것: 안전 성공이 아닌 것 21 · 안전 성공 29. 놓는 순간의 QP 만으로는 실패가 갈리지 않는다 (실패 비율 55 % vs 42 %).
+
+**[해석]** 남은 실패는 한 가지 기제로 묶이지 않는다. `-dc` · `-hf30` · `-zp5` 가 각각 한 형태를 겨눠 0 – −1 에 그친 것과 맞는다. 내려놓는 위치가 3 cm 문턱 근처라서 filter 가 궤적을 조금만 바꿔도 episode 가 뒤집힌다 (`-hf30` 에서 task 1 · 2 의 20 ep 중 9 ep 이 call 수나 결과가 바뀜). 다음 판단에 필요한 것은 (1) +1 이 아니라 여러 suite 에 걸친 더 큰 개발 셋, (2) 장애물이 아닌 물체에 대한 개입을 줄였을 때의 상한이다 — 사용자에게 보고하고 정한다.
+
+- 도구 · 원자료: `outputs/2026-11-12_SOTA_SDM_동결검증/offline/rel_gate.py` (놓는 call 의 QP), `ms_all.json` (기준 판과의 episode 짝), `owner_held/` (막은 물체). queue log `outputs/2026-11-11_SOTA_개선/eval_pkgFhfsdm/queue.log`.
