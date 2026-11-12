@@ -2197,7 +2197,7 @@ class CollisionLinearizer:
         ``held_band`` (m; SL-SOTA17, 2026-11-12 sdm-f6, `sqp.obstacle_held_beneath_band`; None = the 2 voxels above): the
         width of that band for the held object's own rows, in xy (around its footprint) and in z (above its bottom).
         pkgFrs other-suite set init 15-18: the held rows were refused against the plate / stove / basket they were being
-        lowered onto in 17 of the 41 episodes that grasped and did not finish -- the plan step lowers the point model more
+        lowered onto in 20 of the 41 episodes that grasped and did not finish -- the plan step lowers the point model more
         than 10 mm into the surface (clearance -12 .. -37 mm: the set point is then above bottom + 2 voxels), or the set
         point is the plate rim / basket wall 17-50 mm outside the footprint. The hand rows are not changed."""
         n = int(self.n_spheres)
