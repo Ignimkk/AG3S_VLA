@@ -1341,7 +1341,9 @@ SOTA_VERSIONS = SOTA_VERSIONS + SOTA_LSNATIVE_VERSIONS
 #: ``not_graspable`` on 30-96 pre-grasp calls per episode and never the manipulated object -- Long tasks 2 / 3 are 0 safe
 #: successes of 20 (init 15-19). Registered for the frozen version (and its LIBERO-Safety twin is not: no mug task there).
 SOTA_HANDSIZED_VERSIONS: tuple[str, ...] = ()
-for _b in (FROZEN_20261112,):
+#: + (2026-11-13 01:3x) the same on the ``-hf30`` version (SL-SOTA17): with the mug admitted, the mug episodes that still
+#: fail are blocked while placing -- held-mug rows against the destination plate, clearance -23 ... +3 mm (47 + 25 calls).
+for _b in (FROZEN_20261112, FROZEN_20261112[:-len("-tro")] + "-hf30-tro"):
     AG3S_VERSIONS[_b[:-len("-tro")] + "-gh156-tro"] = tuple(AG3S_VERSIONS[_b]) + ("--graspable-hand-sized-mm", "156")
     SOTA_HANDSIZED_VERSIONS = SOTA_HANDSIZED_VERSIONS + (_b[:-len("-tro")] + "-gh156-tro",)
 del _b

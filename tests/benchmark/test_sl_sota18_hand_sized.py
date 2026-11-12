@@ -71,9 +71,12 @@ def test_config_option_version_and_gate():
         with pytest.raises(AG3SConfigError):
             ClusteringConfig(graspable_hand_sized=bad).validate()
     name = FROZEN[:-len("-tro")] + "-gh156-tro"
-    assert pf.SOTA_HANDSIZED_VERSIONS == (name,) and name in pf.SOTA_VERSIONS
+    name_hf = FROZEN[:-len("-tro")] + "-hf30-gh156-tro"                                 # + SL-SOTA17's held band
+    assert pf.SOTA_HANDSIZED_VERSIONS == (name, name_hf) and name in pf.SOTA_VERSIONS and name_hf in pf.SOTA_VERSIONS
     assert pf.AG3S_VERSIONS[name] == tuple(pf.AG3S_VERSIONS[FROZEN]) + ("--graspable-hand-sized-mm", "156")
-    assert [v for v, f in pf.AG3S_VERSIONS.items() if "--graspable-hand-sized-mm" in f] == [name]
+    assert pf.AG3S_VERSIONS[name_hf] == (tuple(pf.AG3S_VERSIONS[FROZEN]) + ("--obstacle-held-beneath-band-mm", "30")
+                                         + ("--graspable-hand-sized-mm", "156"))
+    assert [v for v, f in pf.AG3S_VERSIONS.items() if "--graspable-hand-sized-mm" in f] == [name, name_hf]
     assert "graspable_hand_sized_mm" in srv.PORTED_FINAL_CONFIG_DESTS
     args = pf.parse_v11ab_args(argv=pf.version_server_argv(name) + list(pf.AG3S_VERSIONS[name]))
     assert args.graspable_hand_sized_mm == 156.0
