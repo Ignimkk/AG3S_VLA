@@ -1297,6 +1297,18 @@ for _b in SOTA_ZONEPALM_VERSIONS:
     SOTA_ZONEPALM5_VERSIONS = SOTA_ZONEPALM5_VERSIONS + (_b[:-len("-zp-tro")] + "-zp5-tro",)
 del _b
 SOTA_VERSIONS = SOTA_VERSIONS + SOTA_ZONEPALM5_VERSIONS
+#: SL-SOTA16 (sdm-f6, 2026-11-12, plan §9.26): ``-dc`` = SL-QE1 ``--esdf-dead-camera-seen-ok`` (G103; implemented 2026-11-08,
+#: never measured closed loop) on the frozen version ``…-hb-qs-rs-tro``. Every HOLD of that version (263 calls over E1a 40,
+#: the guard and the other-suite set init 15-18) is G3 ``esdf_dead_camera``: while the hand carries the object the wrist
+#: camera looks past the table (in-range depth, every point outside the workspace bounds) -> DEGRADED -> uncertified ->
+#: HOLD, and a held robot never moves the camera back -- 7 of the 112 other-suite episodes HOLD to the end.
+#: Name = <…-qs-rs>-dc-tro; default off everywhere else.
+SOTA_DEADCAM_VERSIONS: tuple[str, ...] = ()
+for _b in SOTA_REACHSTICKY_VERSIONS:
+    AG3S_VERSIONS[_b[:-len("-tro")] + "-dc-tro"] = tuple(AG3S_VERSIONS[_b]) + ("--esdf-dead-camera-seen-ok",)
+    SOTA_DEADCAM_VERSIONS = SOTA_DEADCAM_VERSIONS + (_b[:-len("-tro")] + "-dc-tro",)
+del _b
+SOTA_VERSIONS = SOTA_VERSIONS + SOTA_DEADCAM_VERSIONS
 GT15_VERSIONS = GT15_VERSIONS + SOTA_VERSIONS
 #: (G88c, 03:5x) the A-alone ablation queued as ``…-obst3`` (gtto23, not started yet) gets the same two fixes, so A alone and
 #: A + B differ only by the held point model: ``…-obst3`` := A'' + no carve + support "under" (``…-obst3-pts`` = B'' keeps

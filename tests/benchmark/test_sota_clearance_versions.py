@@ -11,7 +11,8 @@ def test_names_and_flags():
                                      + len(pf.SOTA_SCALED_VERSIONS) + len(pf.SOTA_HANDB_VERSIONS)
                                      + len(pf.SOTA_PEAK_VERSIONS) + len(pf.SOTA_ROTREL_VERSIONS)
                                      + len(pf.SOTA_REACHSTICKY_VERSIONS) + len(pf.SOTA_ZONE_VERSIONS)
-                                     + len(pf.SOTA_ZONEPALM_VERSIONS) + len(pf.SOTA_ZONEPALM5_VERSIONS))
+                                     + len(pf.SOTA_ZONEPALM_VERSIONS) + len(pf.SOTA_ZONEPALM5_VERSIONS)
+                                     + len(pf.SOTA_DEADCAM_VERSIONS))
     assert set(pf.SOTA_VERSIONS) <= set(pf.GT15_VERSIONS)
     for b in (BASE + "pe123458", BASE + "pe12345811"):
         base = tuple(pf.AG3S_VERSIONS[b])
@@ -91,4 +92,22 @@ def test_attention_peak_versions():
     assert all("pe12345811-" in n and "-hr150" in n for n in pf.SOTA_PEAK_VERSIONS)
     for n in pf.SOTA_PEAK_VERSIONS:
         assert pf.version_server_flags(n)
+
+
+def test_dead_camera_seen_ok_versions():
+    """SL-SOTA16 `-dc`: the frozen version's argv + SL-QE1 `--esdf-dead-camera-seen-ok`, nothing else; off everywhere else."""
+    from AG3S.adapters.panda import server as srv
+    frozen = BASE + "pe12345811-to0-om15p10s40-ntc-pt6-pg4-hr150-hb-qs-rs-tro"
+    name = frozen[:-len("-tro")] + "-dc-tro"
+    assert name in pf.SOTA_DEADCAM_VERSIONS and name in pf.SOTA_VERSIONS and name in pf.GT15_VERSIONS
+    assert len(pf.SOTA_DEADCAM_VERSIONS) == len(pf.SOTA_REACHSTICKY_VERSIONS)
+    v = tuple(pf.AG3S_VERSIONS[name])
+    assert v[-1] == "--esdf-dead-camera-seen-ok" and v[:-1] == tuple(pf.AG3S_VERSIONS[frozen])
+    args = pf.parse_v11ab_args(argv=pf.version_server_argv(name) + list(v))
+    assert args.esdf_dead_camera_seen_ok is True
+    assert pf.version_server_flags(name)
+    assert "esdf_dead_camera_seen_ok" in srv.PORTED_FINAL_CONFIG_DESTS
+    for other, flags in pf.AG3S_VERSIONS.items():
+        if other not in pf.SOTA_DEADCAM_VERSIONS:
+            assert "--esdf-dead-camera-seen-ok" not in flags, other
 

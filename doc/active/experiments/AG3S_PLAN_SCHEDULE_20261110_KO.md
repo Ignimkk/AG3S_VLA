@@ -901,3 +901,34 @@ figure (규칙 A): `AG3S/ag3s/docs/figures/sl-sota-ms-sdm-init15-18-20261112.png
 - 지금 구성 · `pkgFin` 의 init 17 · 18 은 어느 서버에서도 재지 않았고 **더 재지 않는다** — 판정이 뒤집히려면 지금 구성이 그 56 ep 에서 SSR 30 이상 (`pkgFrs` 24 + init 15 · 16 의 차 5 + 1) 이어야 하는데 init 15 · 16 에서 17 이었다 (2 h 30 분을 쓰지 않음).
 - **[해석] 동결은 'AG3S 판 중 가장 나은 것' 을 정한 것이고, 조정에 쓰지 않은 init 15–18 에서 baseline port 를 넘지는 못했다** — 112 ep SSR 46 vs AEGIS port 48 · multi-link GT port 48; Spatial L-I 16 ep 5 vs AEGIS port 8. 이긴 것은 CAR (85 vs 68 · 76) 과 L-II (SSR 33 vs 27 · 28), 진 것은 TSR (51 vs 76 · 72) 과 L-I (SSR 18 vs 29 · 27). 원문 보고값 (KNOWS 4 suite L-I SSR 59.9 %) 과의 차이는 더 크다 (같은 4 cell 의 `pkgFrs` 28.1 %, AEGIS port 45.3 %).
 - D6 (11-13) 까지 남은 시간에 §9.23 B 의 후보가 §9.2 (E1a 40 SSR ≥ 22 또는 같고 CAR ≥ 36, guard 통과) 를 채우면 동결 판을 바꾼다. 순서는 이번 형태 분포를 따라 **B-1 놓는 자리 (놓은 뒤 미완 26 / 64) → Goal L-I (SSR 2 / 16) 의 원인 → B-4 · B-5**. init 15–18 은 원인을 보는 데만 쓰고 후보 채택은 E1a 40 으로 한다.
+
+### 9.26 후보 SL-SOTA16 `-dc` — 손목 카메라 'dead camera' HOLD 풀기 (sdm-f6, 결과 전 기록, 2026-11-12 18:0x)
+
+**발견 [M · D].** 동결 판 `pkgFrs` 의 HOLD 는 원인이 하나다. SDM 의 `pkgFrs` run 전부 (E1a 40 · guard · 다른 suite init 15–18 + Spatial L-I, 10 631 call) 에서 HOLD 263 call 이 모두 `uncertified` (status = degraded, validity = degraded) 이고 AG3S 사유는 전부 `esdf_dead_camera` — "손목 카메라가 이 frame 에 ESDF voxel 을 하나도 쓰지 못함" (G3, `AG3S/ag3s/runtime/pipeline.py` `_esdf_coverage`) 이다.
+
+| 셋 | call | HOLD call | HOLD 가 있는 episode | 그중 끝까지 HOLD |
+|---|---:|---:|---|---|
+| 다른 suite init 15–18 + Spatial L-I (112 ep) | 6 847 | 227 (held 171, closing 55, latched 1) | 11 | **7** (Long L-I t2 e15, Goal L-I t2 e17 · e18, Long L-II t2 e17, Spatial L-II t1 e18, Spatial L-I t1 e15 · e18) |
+| E1a 40 | 1 696 | 8 | 2 (t3 e6 7 call, t3 e9 1 call) | 0 |
+| guard (LIBERO 27 · SafeLIBERO 11 · LIBERO-Safety 10) | 2 088 | 28 | 3 (SafeLIBERO t3 e0 17 · e3 6, obstacle_avoidance t0 e1 5) | 0 |
+
+- 네 episode 의 손목 depth 를 직접 봤다 (`*_geom.npz` `depth_mm/left_wrist`): HOLD 가 시작된 frame 의 depth 는 전부 유효하고 (65 536 px) 중앙값이 0.74–2.7 m 로 ESDF depth 범위 (0.05–3.0 m) 안이다. 카메라가 고장 난 것이 아니라, 물체를 들고 옮기는 동안 손목 카메라가 탁자 밖 (바닥 · 먼 벽) 을 봐서 점이 모두 workspace bounds 밖에 떨어진 것이다 (Goal L-I t2 e17: 아래를 보며 중앙값 0.74 m — 탁자 가장자리 너머 바닥; Spatial L-I t1 e15 · Long L-II t2 e17: 수평을 보며 2.5–2.7 m).
+- HOLD 하면 팔이 멈추고, 멈추면 카메라 방향이 바뀌지 않아 다음 frame 도 같은 판정이다 — 스스로 풀리지 않는 고리 (G97 이 11-08 에 B5 SafeLIBERO t3 e0 에서 본 것과 같은 고리).
+- 개발 분할 E1a 40 에는 이 고리가 거의 없어서 (8 call, 끝까지 HOLD 0) SOTA 후보를 거르는 동안 드러나지 않았다. 다른 suite 에서는 놓는 곳이 탁자 가장자리 (stove · 접시 · basket) 라 자주 난다.
+
+**후보.** 이미 구현돼 있고 closed loop 으로는 한 번도 재지 않은 SL-QE1 `--esdf-dead-camera-seen-ok` (G103, 2026-11-08; `esdf.dead_camera_seen_ok`): 이 episode 에서 voxel 을 쓴 적 있는 카메라가 범위 안 depth 를 가진 채 `n_updated` 0 이면 DEGRADED 대신 VALID + note `esdf_camera_outside_workspace`. 한 번도 voxel 을 못 쓴 카메라 (extrinsics 오류) · 범위 안 depth 가 없는 카메라는 그대로 DEGRADED → HOLD. 새 code 없음. 판 `…-hr150-hb-qs-rs-dc-tro` (`SOTA_DEADCAM_VERSIONS`, 동결 판 argv + 이 flag 하나), TAG `pkgFdcsdm`.
+
+**위험.** HOLD 가 풀린 뒤의 chunk 는 head 카메라만으로 만든 field 로 검사한다 (그 frame 의 손목 카메라는 어차피 workspace 안을 보지 않는다). 풀린 episode 가 그 뒤 충돌하면 CAR 이 내려간다 — 그래서 > 50 mm 충돌 수를 같이 본다.
+
+**이 후보는 init 15–18 의 실패를 보고 찾았다** — 아래 1 단계는 같은 episode 로 기제를 확인하는 것 (in-sample) 이고, 그 숫자를 '조정에 쓰지 않은 init' 의 값으로 보고하지 않는다. 보고 분할 init 19–49 는 그대로 보지 않는다.
+
+**순서 · 판정 (결과 전 고정).** flag 는 dead-camera frame 이 있을 때만 판정을 바꾼다 (`_esdf_coverage` 의 `dead` 가 비면 같은 code 경로) — `pkgFrs` 에서 HOLD 가 없던 run 은 다시 재지 않고 `pkgFrs` 값을 쓴다 (E1a task 0–2, LIBERO 27 등).
+
+| 단계 | 셋 | 통과 |
+|---|---|---|
+| 1 기제 | HOLD episode 가 든 6 cell-run 56 ep: Goal L-I init 17 · 18, Spatial L-I init 15–18, Spatial L-II init 15 · 16 · init 17 · 18, Long L-I init 15 · 16, Long L-II init 17 · 18 (`pkgFrs` 합 TSR 23 · CAR 44 · SSR 20, > 50 mm 5) | `esdf_dead_camera` HOLD 가 사라지고, SSR 합 ≥ 22 (+2), > 50 mm 충돌 증가 ≤ 1 |
+| 2 주 기준 | E1a task 3 (init 5–14; `pkgFrs` 5 · 9 · 5) — task 0–2 는 `pkgFrs` 값 | task 3 SSR ≥ 5 이고 CAR ≥ 9 (E1a 40 이 21 · 34 아래로 내려가지 않음) |
+| 3 guard | `gtto16_queue.sh` 전체 (LIBERO 27 → SafeLIBERO 11 → LIBERO-Safety 10) | §9.2 그대로 (LIBERO 27 ≥ 22, LIBERO-Safety ≥ 4 · 위반 0, SafeLIBERO 11 의 > 50 mm 증가 ≤ 1) |
+| 판정 | 1–3 을 모두 채우면 동결 판을 `-dc` 판으로 바꾼다 (§9.2 '동결 판정': 최종 후보 둘 중 다른 suite 합산 SSR 이 높은 판). 하나라도 못 채우면 `pkgFrs` 그대로 | |
+
+GPU 약 4 h 40 분 (1 단계 2 h 30 분, 2 단계 25 분, 3 단계 1 h 40 분).
