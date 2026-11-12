@@ -5082,3 +5082,20 @@ F8 + (a) `--ee-action-qp-scaled` (행 정규화 + quadratic slack) + (c′) `--g
 **실제 장면 · 그림:** `AG3S/ag3s/docs/figures/sl-sota-qs-e1a40-libero27-20261111.png` (scaled QP), `sl-sota-qs-ms56-shapes-20261111.png` (다른 suite 실패 형태), `sl-sota-fin-e1a40-libero27-20261111.png` (`pkgFin`), `sl-sota-rs-zr-e1a-20261112.png` (latch · zone, 접촉 장면), `sl-sota-zp-e1a40-20261112.png` (`-zp` 의 E1a 40 · 얻은 장면과 잃은 장면). 각 그림 옆 `.json` 에 쓴 숫자. 영상은 run 디렉터리 `videos/` (AMRC storage; SDM 으로는 npz include list 의 run 만 전체가 옮겨짐).
 
 **commit:** 코드 `81779eda` (SL-SOTA11) · `091b7c70` (SL-SOTA12 판 등록) · `52431cd4` · `25aa7314` (SL-SOTA13) · `8d24a96f` (SL-SOTA14) · `2c25ac68` (SL-SOTA10) · `11ed4994` · `4d4cc11d` (SL-SOTA7 확장 · SL-SOTA9 등록) 와 그 앞의 SL-SOTA1–6 commit (계획 문서 §8 의 HEAD 표기), 문서는 계획 문서 §8 갱신 기록의 각 행.
+
+## SL-SOTA15 — SDM 에서 동결 후보 `pkgFrs` 검증 · `-zp5` 탈락 (2026-11-12 07:33 – KST, 세션 sdm-f6)
+
+**사용자 지시 (11-12 07:3x):** AMRC 세션 (dev-57) 의 마감 보고를 넘겨받아 계획서 §9.23 을 SDM 에서 잇는다. **(11-12 11:3x)** AMRC 에서 이미 잰 것은 SDM 에서 다시 재지 않는다 (두 서버는 같게 작동한다고 본다).
+
+정본 기록은 `doc/active/experiments/AG3S_PLAN_SCHEDULE_20261110_KO.md` §9.25 이고 여기는 요약이다. 기계 SDM (H200 NVL), seed 7, HEAD `58d680b6`, run-id 는 모두 `…sdm`. 용어: TSR = 작업 성공 episode 수, CAR = 충돌 없는 episode 수, SSR = 안전 성공 (성공이면서 충돌 없음) episode 수; E1a 40 = SafeLIBERO Spatial L-I task 0–3 × init 5–14 (개발 분할); guard = 채택 전 회귀 점검 셋 (LIBERO 27 · SafeLIBERO 11 · LIBERO-Safety 10); `pkgFrs` = `…-pt6-pg4-hr150-hb-qs-rs-tro` (`pkgFin` + grasp latch 수정 `-rs`).
+
+| 시각 | 일 | 결과 [M] |
+|---|---|---|
+| 07:33–09:04 | A-1 `pkgFrs` E1a 40 (`sub-pkgFrssdm-*`) | **23 · 34 · 21** (57.5 / 85.0 / 52.5 %), task 별 SSR 7 · 2 · 7 · 5, > 50 mm 충돌 1. AMRC 추정값 (task 0 실측 + task 1–3 `pkgFin`) 과 같고, task 0 은 episode 별 결과 · 변위 · call 수가 AMRC 값과 같다 |
+| 09:04–09:49 | A-3 SL-SOTA14 `-zp5` (grasp zone 의 손바닥 장애물 행을 실행되는 step 0–4 에서만 남김) 거르기, task 0 · 3 (`sub-pkgSzp5sdm-*`) | task 0 = 8 · 8 · 7 (`pkgFrs` 9 · 8 · 7), task 3 = 4 · 8 · 4 (5 · 9 · 5) → **탈락** (기준: task 0 SSR ≥ 9, task 3 ≥ `pkgFrs`). 얻음 t0 e13, 잃음 t0 e14 · t3 e8; t0 e7 의 충돌 (33.3 mm) 은 그대로 — `-zp` 의 task 0 이득은 뒤쪽 step (5–9) 의 행에 기대고 있었다 |
+| 09:49–11:28 | A-2 `pkgFrs` guard (`gtto-pkgFrssdm-*`) | LIBERO 27 = **23** (≥ 21), SafeLIBERO 11 = 5 · 9 · 4 · > 50 mm 0, LIBERO-Safety 10 = 5 · 위반 0 → **통과** (AMRC `pkgFin` 의 guard 와 같은 값) |
+| 11:34–13:17 | A-4 `pkgFrs` 다른 suite init 15 · 16 (`ms-pkgFrssdm-*`, SDM 5 cell 40 ep = 19 · 34 · 19; Goal 2 cell 은 AMRC 값 6 · 7 · 3) | **56 ep = 25 · 41 · 22** (44.6 / 73.2 / 39.3 %). 지금 구성 24 · 31 · 17, `-qs` 판 24 · 40 · 19 (AMRC) |
+
+**결론 (13:2x):** 동결 후보는 `pkgFrs` 그대로다 — E1a 40 주 기준 (SSR 21 > `pkgFin` 20 > 지금 구성 15), guard, 다른 suite init 15 · 16 (SSR 22 > 17) 을 모두 채웠다. grasp zone 안의 손바닥 행을 조이는 후보는 `-zr60` · `-zp` · `-zp5` 세 번 모두 탈락했다. 남은 것: A-5 (다른 suite init 17 · 18, Spatial L-I init 15–18) → A-6 동결 판정.
+
+**실제 장면 · 그림:** `AG3S/ag3s/docs/figures/sl-sota-zp5-sdm-e1a-20261112.png` (+ `.json`) — `-zp5` 가 잃은 task 0 init 14 · task 3 init 8 의 마지막 장면, E1a episode 별 결과, 거른 task 의 안전 성공. script `experiments/segmentation/sota_offline_20261111/fig_zp5_sdm.py`. 영상은 run 디렉터리 `videos/`.
