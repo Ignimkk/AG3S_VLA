@@ -198,6 +198,7 @@ T5 뒤에 하면 이 서버에서 끝낸다. **이전 시점은 T5 와의 순서
 | 2026-11-12 16:3x | sdm-f6: §9.23 A-5 · A-6 (13:18–16:22, HEAD 703ae657) — §9.25. **A-5 `pkgFrs` 다른 suite init 17 · 18 = 56 ep TSR 26 · CAR 44 · SSR 24**, Spatial L-I init 15–18 = 16 ep 7 · 12 · 5. init 15–18 의 112 ep = 51 · 85 · 46 (같은 episode 의 AEGIS port 76 · 68 · 48, multi-link GT port 72 · 76 · 48, π0.5 62 · 18 · 13) — CAR 은 가장 높고 TSR 은 가장 낮음, L-II 는 앞서고 L-I (특히 Goal L-I 2 / 16) 은 뒤짐. **A-6: `pkgFrs` 동결** (E1a 40 SSR 21 > `pkgFin` 20 > 지금 구성 15, guard 통과, 다른 suite init 15 · 16 SSR 22 > 17). `AG3S_FINAL_CONFIG_KO.md` · G175 갱신. 안전 성공이 아닌 64 ep 중 26 이 '쥐었다 놓은 뒤 미완' → 남은 시간은 B-1 부터 |
 | 2026-11-12 19:4x | sdm-f6: §9.26 SL-SOTA16 `-dc` 측정 (16:40–19:38, HEAD 4fab0cc8) — §9.28. **탈락.** 1 단계 56 ep: `esdf_dead_camera` HOLD 227 → 0 call (HOLD 전체 227 → 5), 그러나 TSR · CAR · SSR 23 · 44 · 20 → **23 · 42 · 20**, > 50 mm 충돌 5 → 7 (기준 SSR ≥ 22 · 증가 ≤ 1 둘 다 미달). 2 단계 E1a task 3 = 5 · 9 · 5 (같음). HOLD 가 있던 13 ep 중 성공으로 바뀐 것 0. 3 단계 guard 는 돌리지 않음. **`pkgFrs` 동결 유지.** 같은 경계에서 `wip/sota-hf` (SL-SOTA17 `-hf30`, §9.27) 를 합치고 앞 기록의 시각을 정정 (17:0x → 16:3x, 18:0x → 16:4x; commit de7b0daf). 19:41 `-hf30` 1 단계 (E1a task 2 → 1, TAG `pkgFhfsdm`) 시작 |
 | 2026-11-12 20:3x | sdm-f6: §9.27 SL-SOTA17 `-hf30` 1 단계 (19:41–20:31, HEAD de7b0daf, TAG `pkgFhfsdm`) — §9.29. **탈락.** E1a task 2 = 7 · 10 · 7 (`pkgFrs` 7 · 10 · 7), task 1 = 2 · 5 · **1** (`pkgFrs` 2 · 7 · 2); SSR 합 8 < 기준 10. 2 단계 이후는 돌리지 않음. **`pkgFrs` 동결 유지.** 사용자 지시 (19:5x): 최우선 목표는 SSR, 근거 없는 실험 금지 — 실패를 'π0.5 단독 성공 여부' 로 나눈 표와 놓는 순간의 GT 위치를 §9.29 에 적음. GPU 는 20:31 부터 비어 있음 |
+| 2026-11-12 21:1x | sdm-f6: **사용자 지시 (20:5x): 논문 표에 넣을 episode 의 1/10 을 동결 판으로 실행하고, 표 형식으로 보인 뒤 실패 원인을 분석한다** — §9.30 (결과 전 기록). 21:11 part A (SafeLIBERO 32 ep) 시작, TAG `tab10sdm`, HEAD 7e86ca60. 채택 기준 (§9.2) 변경 제안 (128 ep · 짝 차이 +5) 은 이 지시로 보류 |
 
 ---
 
@@ -1054,3 +1055,25 @@ GPU 약 4 h 40 분 (1 단계 2 h 30 분, 2 단계 25 분, 3 단계 1 h 40 분).
 **[해석]** 남은 실패는 한 가지 기제로 묶이지 않는다. `-dc` · `-hf30` · `-zp5` 가 각각 한 형태를 겨눠 0 – −1 에 그친 것과 맞는다. 내려놓는 위치가 3 cm 문턱 근처라서 filter 가 궤적을 조금만 바꿔도 episode 가 뒤집힌다 (`-hf30` 에서 task 1 · 2 의 20 ep 중 11 ep 이 call 수나 결과가 바뀜). 다음 판단에 필요한 것은 (1) +1 이 아니라 여러 suite 에 걸친 더 큰 개발 셋, (2) 장애물이 아닌 물체에 대한 개입을 줄였을 때의 상한이다 — 사용자에게 보고하고 정한다.
 
 - 도구 · 원자료: `outputs/2026-11-12_SOTA_SDM_동결검증/offline/rel_gate.py` (놓는 call 의 QP), `ms_all.json` (기준 판과의 episode 짝), `owner_held/` (막은 물체). queue log `outputs/2026-11-11_SOTA_개선/eval_pkgFhfsdm/queue.log`.
+
+### 9.30 논문 표 episode 의 1/10 실행 — 동결 판 `pkgFrs` (sdm-f6, 결과 전 기록, 2026-11-12 21:1x)
+
+**사용자 지시 (2026-11-12 20:5x):** "실제 실험 table 에 넣어야 할 지표인 LIBERO, SafeLIBERO, LIBERO-Safety 에서 수행하기로 한 episode 중 1/10 을 실행한다. 결과를 실제 table 에 넣는 것처럼 나타낸 뒤 실패 원인을 제대로 분석한다."
+
+**표에 넣기로 한 episode [P]** (`experiments/segmentation/sdm_pi05_anchor_queue.sh` P1–P3 — AG3S 주말 본 run 과 π0.5 anchor 가 같은 episode) **와 그 1/10.**
+
+| benchmark | 계획 | 1/10 (이번 run) | run-id |
+|---|---|---|---|
+| SafeLIBERO (Tab. 1) | 4 suite × L-I · L-II × task 0–3 × init 19–28 = 320 ep | init 19 만 = **32 ep** (8 cell × 4 task) | `ms-tab10sdm-<suite>-L<lvl>-i19` |
+| LIBERO (Tab. 1 의 LIBERO 열) | 4 suite × task 0–9 × init 19–23 = 200 ep | task 0 · 2 · 4 · 6 · 8 × init 19 = **20 ep** | `tab10sdm-lb-<suite>` |
+| LIBERO-Safety (Tab. 2, 본문 = AAG · TSA · FSHOA 의 L2) | 4 suite × L0–L2 × task 0–4 × init 19 = 60 ep | affordance · obstacle_avoidance · obstacle_avoidance_human × L2 × task 0 · 1 × init 19 = **6 ep** | `tab10sdm-ls-<suite>-L2-pi05_libero` |
+
+- 판: 동결 판 `pkgFrs` (`…-hr150-hb-qs-rs-tro`), seed 7, SafeLIBERO step budget `main_aegis`, queue `experiments/segmentation/sota_table10_queue.sh` (part A → B → C → D).
+- **π0.5 단독 짝 (part D):** SafeLIBERO Spatial · Object · Goal 의 init 19 는 sdm-c7 의 `sdm-pi05-sl-*` 에 있다 (24 ep: 성공 13, 충돌 없음 1, 안전 성공 1). 없는 것 — SafeLIBERO Long 2 cell, LIBERO 20 ep, LIBERO-Safety 6 ep — 을 같은 launcher 의 `--modes vla_only` 로 잰다 (run-id `tab10sdm-pi05-*`; `sdm-pi05-*` 와 겹치지 않게).
+- **LIBERO-Safety 의 조건이 계획과 다르다.** launcher 가 AG3S (`vla_v11ab`) + 공식 checkpoint `pi05_libero_safety` 를 거절한다 (hook H2 — LIBERO-Safety controller 용 Panda 변환 미이식). 그래서 AG3S 는 guard (LS 10) 와 같이 `pi05_libero` checkpoint 로 잰다. π0.5 단독은 두 checkpoint 모두 잰다 (공식 = Tab. 2 의 π0.5 행, `pi05_libero` = AG3S 와 같은 policy 의 짝). **Tab. 2 의 AG3S 행은 지금 code 로는 계획한 조건으로 낼 수 없다** — 이 run 의 LIBERO-Safety 숫자는 그 조건의 값이 아니다.
+- **보고 분할.** init 19 는 보고 분할 (init 19–49) 이다. 이번 지시로 init 19 를 실패 원인 분석에 쓴다 — 이후 init 19 는 '조정에 쓰지 않은 값' 이 아니다. 본 run 의 보고 범위를 init 20–28 (또는 20–29) 로 옮길지는 보고 때 사용자가 정한다 (제안: 옮긴다).
+- Tab. 1 의 'AG3S-VLA GT oracle' 행은 이번에 재지 않는다 (동결 판의 GT 판이 registry 에 없다).
+
+**보일 형식 (결과 전 고정).** Tab. 1: 행 = π0.5 alone · AG3S-VLA, 열 = LIBERO SR | L-I TSR · SSR · CAR | L-II TSR · SSR · CAR (suite 동일 가중 평균, %; 괄호에 episode 수) + suite 별 표. Tab. 2: 열 = AAG · TSA · FSHOA 성공 · CR (위반). 실패 분석: episode 마다 (a) π0.5 단독의 결과, (b) 실패 형태 (`shape.py`), (c) 놓는 순간 · 쥐는 순간의 QP 와 막은 link, (d) GT 물체 위치 — 그리고 그 원인이 몇 episode 를 설명하는지 수로 적는다.
+
+GPU 약 4 h 40 분 (A 1 h 50 분, B 50 분, C 25 분, D 1 h 35 분).
