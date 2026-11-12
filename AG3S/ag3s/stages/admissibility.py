@@ -403,22 +403,31 @@ class Admissibility:
         }
 
 
-def graspable(extents: Optional[np.ndarray], max_opening_m: Optional[float]) -> Optional[bool]:
-    """True/False, or None when either side is unknown."""
+def graspable(extents: Optional[np.ndarray], max_opening_m: Optional[float],
+              hand_sized_m: Optional[float] = None) -> Optional[bool]:
+    """True/False, or None when either side is unknown.
+
+    SL-SOTA18 (`clustering.graspable_hand_sized`, default None = the rule above, bit-identical): with a length given, a
+    cluster whose narrowest extent exceeds the max opening is still graspable when its **largest** principal extent is at
+    or under that length -- a hand-sized object the gripper pinches at a rim or a handle instead of closing around it
+    (a mug measures ~100 x 115 x 135 mm against the Panda's 78 mm). A crate, a basket, a cabinet stay not graspable.
+    """
     if max_opening_m is None or extents is None:
         return None
     ext = np.asarray(extents, np.float64).reshape(-1)
     if not ext.size or not np.all(np.isfinite(ext)):
         return None
-    return bool(float(ext.min()) <= float(max_opening_m))
+    if float(ext.min()) <= float(max_opening_m):
+        return True
+    return bool(hand_sized_m is not None and float(ext.max()) <= float(hand_sized_m))
 
 
 def assess(points: np.ndarray, *, extents: Optional[np.ndarray], max_opening_m: Optional[float],
            destination: Optional[DestinationGeometry], overlap_distance: float,
-           overlap_fraction: float) -> Admissibility:
-    """The admissibility of one cluster (or one observed geometry)."""
+           overlap_fraction: float, hand_sized_m: Optional[float] = None) -> Admissibility:
+    """The admissibility of one cluster (or one observed geometry). `hand_sized_m`: see :func:`graspable` (SL-SOTA18)."""
     ext = principal_extents(points) if extents is None else np.asarray(extents, np.float64)
-    g = graspable(ext, max_opening_m)
+    g = graspable(ext, max_opening_m, hand_sized_m)
     narrow = float(ext.min()) if ext.size and len(np.asarray(points).reshape(-1, 3)) >= 2 else None
     overlap = destination_overlap(points, destination, overlap_distance)
     overlaps = bool(destination is not None and overlap >= float(overlap_fraction))

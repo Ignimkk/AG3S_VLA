@@ -810,6 +810,8 @@ class TargetConfirm:
         # --- SL-GTTO2 F1 — begin (`clustering.oracle_admissible`; off: nothing below runs, nothing is recorded)
         #: The GT cluster is never refused by admissibility; the refusals it would have had are kept per call.
         self.oracle_admissible = bool(getattr(cfg, "oracle_admissible", False))
+        #: SL-SOTA18 (`clustering.graspable_hand_sized`; None: the T26 rule, nothing below changes)
+        self.graspable_hand_sized = getattr(cfg, "graspable_hand_sized", None)
         #: This call's would-be refusals `[Admissibility.record()]` (None when off).
         self.last_would_refuse: Optional[list[dict[str, Any]]] = None
         # --- SL-GTTO2 F1 — end
@@ -1232,7 +1234,8 @@ class TargetConfirm:
             adm = assess(sub, extents=ext, max_opening_m=self.max_opening,
                          destination=self.destinations.current,
                          overlap_distance=self.overlap_distance,
-                         overlap_fraction=self.overlap_fraction)
+                         overlap_fraction=self.overlap_fraction,
+                         hand_sized_m=getattr(self, "graspable_hand_sized", None))
             if not adm.admissible:
                 event["skipped"] = "component_inadmissible"
                 return event
@@ -1806,7 +1809,7 @@ class TargetConfirm:
         cluster_points = [pts[np.asarray(c.point_indices, np.int64)] for c in clusters]
         extents = [c.principal_extents if c.principal_extents is not None
                    else principal_extents(p) for c, p in zip(clusters, cluster_points)]
-        grasp = [graspable(e, self.max_opening) for e in extents]
+        grasp = [graspable(e, self.max_opening, getattr(self, "graspable_hand_sized", None)) for e in extents]
         # SL-PE2: with `destination_after_held`, perception registers / refreshes the destination only while an object
         # is held (frozen, and not the pre-attach closing); off: every frame as before
         if not self.oracle_admissible and (not self.destination_after_held
@@ -1822,7 +1825,8 @@ class TargetConfirm:
         dest = self.destinations.current
         out = [assess(p, extents=e, max_opening_m=self.max_opening, destination=dest,
                       overlap_distance=self.overlap_distance,
-                      overlap_fraction=self.overlap_fraction)
+                      overlap_fraction=self.overlap_fraction,
+                      hand_sized_m=getattr(self, "graspable_hand_sized", None))
                for p, e in zip(cluster_points, extents)]
         if self.supported_max_bottom is not None:
             out = self._support_test(out, cluster_points)

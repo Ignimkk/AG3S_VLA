@@ -687,6 +687,8 @@ PORTED_FINAL_CONFIG_DESTS: tuple[str, ...] = (
     # SL-GTTO2 (task SL-GTTO2 §1): the GT cluster is not refused by admissibility (F1), the held GT target's pixels
     # are masked out of the TSDF (F2) -- both clustering keys through serve_safe.t43t_identity_section
     'oracle_admissible', 'oracle_held_target',
+    # SL-SOTA18 (2026-11-13): hand-sized clusters are graspable (clustering key through serve_safe.t43t_identity_section)
+    'graspable_hand_sized_mm',
     # SL-GTTO10 F8a (lead self-ruling G53, 2026-11-07): the GT destination injection (clustering key, same section) and the
     # held rows' destination margin (AG3S `contact.destination_margin`, through serve_safe.destination_margin_section)
     'oracle_destination', 'destination_margin_mm',

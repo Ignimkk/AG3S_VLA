@@ -1336,6 +1336,16 @@ for _b in (FROZEN_20261112,):
     SOTA_LSNATIVE_VERSIONS = SOTA_LSNATIVE_VERSIONS + (_b + LSNATIVE_SUFFIX,)
 del _b
 SOTA_VERSIONS = SOTA_VERSIONS + SOTA_LSNATIVE_VERSIONS
+#: SL-SOTA18 (sdm-f6, 2026-11-13; user approval 00:1x): ``X-gh156`` = ``X`` + ``--graspable-hand-sized-mm 156`` (2 x the Panda's
+#: 78 mm max opening). 1/10 table run: the mug of the SafeLIBERO Long / LIBERO-10 mug tasks (~100 x 115 x 135 mm) was
+#: ``not_graspable`` on 30-96 pre-grasp calls per episode and never the manipulated object -- Long tasks 2 / 3 are 0 safe
+#: successes of 20 (init 15-19). Registered for the frozen version (and its LIBERO-Safety twin is not: no mug task there).
+SOTA_HANDSIZED_VERSIONS: tuple[str, ...] = ()
+for _b in (FROZEN_20261112,):
+    AG3S_VERSIONS[_b[:-len("-tro")] + "-gh156-tro"] = tuple(AG3S_VERSIONS[_b]) + ("--graspable-hand-sized-mm", "156")
+    SOTA_HANDSIZED_VERSIONS = SOTA_HANDSIZED_VERSIONS + (_b[:-len("-tro")] + "-gh156-tro",)
+del _b
+SOTA_VERSIONS = SOTA_VERSIONS + SOTA_HANDSIZED_VERSIONS
 GT15_VERSIONS = GT15_VERSIONS + SOTA_VERSIONS
 #: (G88c, 03:5x) the A-alone ablation queued as ``…-obst3`` (gtto23, not started yet) gets the same two fixes, so A alone and
 #: A + B differ only by the held point model: ``…-obst3`` := A'' + no carve + support "under" (``…-obst3-pts`` = B'' keeps

@@ -205,6 +205,13 @@ class ClusteringConfig:
     #: tools that have no robot model; the start log and every record say which source was used.
     #: With neither, nothing is graspable and there is no manipulated object (fail-closed).
     gripper_max_opening: float | None = None
+    #: **SL-SOTA18 — hand-sized objects are graspable (m; default None = the T26 rule, bit-identical).** With a length
+    #: set, a cluster whose narrowest principal extent exceeds the max opening may still become the manipulated object
+    #: when its largest extent is at or under this length (`admissibility.graspable`): the gripper pinches a mug at its
+    #: rim, it does not close around it. Measured need (2026-11-12, 1/10 table run): the mug of LIBERO-10 /
+    #: SafeLIBERO Long tasks (~100 x 115 x 135 mm vs the Panda's 78 mm) was `not_graspable` on 30-96 pre-grasp calls
+    #: per episode and never admitted; another body became the target and the mug blocked the hand.
+    graspable_hand_sized: float | None = None
     #: A cluster is "the destination" (and so never the manipulated object) when at least this
     #: fraction of its points lie within `destination_overlap_distance` of the destination's points
     #: (T26). 0.5 = "mostly the destination's surface": a re-observed crate fragment scores ~1, an
@@ -627,6 +634,11 @@ class ClusteringConfig:
             raise AG3SConfigError(
                 f"clustering.gripper_max_opening must be null (from the robot model) or a finite "
                 f"value > 0 in metres, got {mo!r}")
+        hs = self.graspable_hand_sized   # SL-SOTA18
+        if hs is not None and not (isinstance(hs, (int, float)) and not isinstance(hs, bool)
+                                   and math.isfinite(float(hs)) and float(hs) > 0.0):
+            raise AG3SConfigError(
+                f"clustering.graspable_hand_sized must be null (off) or a finite length > 0 in metres, got {hs!r}")
         if not (0.0 < float(self.destination_overlap_fraction) <= 1.0):
             raise AG3SConfigError(
                 f"clustering.destination_overlap_fraction must be in (0, 1], "

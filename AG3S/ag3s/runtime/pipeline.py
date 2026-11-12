@@ -2123,7 +2123,8 @@ class AG3S:
         return assess(np.asarray(points, np.float64).reshape(-1, 3), extents=None,
                       max_opening_m=self._max_opening.value_m if self._max_opening.known else None,
                       destination=self.destination, overlap_distance=self._overlap_distance(),
-                      overlap_fraction=float(cfg.destination_overlap_fraction))
+                      overlap_fraction=float(cfg.destination_overlap_fraction),
+                      hand_sized_m=getattr(cfg, "graspable_hand_sized", None))
 
     # ------------------------------------------------------- explicit grasp state, injected
     @property
@@ -3693,6 +3694,12 @@ class AG3S:
             debug["attention_surface_codes"] = self._surface_codes
         return constraint_set, debug
 
+    def _hand_sized(self, adm) -> bool:
+        """SL-SOTA18 -- the gate's twin of `admissibility.graspable(..., hand_sized_m)`: False unless
+        `clustering.graspable_hand_sized` is set and the object's largest extent is at or under it."""
+        hand = getattr(self.config.clustering, "graspable_hand_sized", None)
+        return bool(hand is not None and len(adm.extents_m) and max(adm.extents_m) <= float(hand) + 1e-12)
+
     # --- T26: the exclusion gate and its record ---------------------------------------------
     def _exclusion_gate(self, manipulated: Optional[ManipulatedIdentity]):
         """`(geometry | None, invariant_violation record | None)` — exclusion only from an
@@ -3718,7 +3725,7 @@ class AG3S:
             problem = f"the manipulated object's last observation was inadmissible ({adm.reason})"
         elif opening is None or adm.narrowest_extent_m is None:
             problem = "the gripper's max opening or the object's extent is unknown"
-        elif adm.narrowest_extent_m > opening + 1e-12:
+        elif adm.narrowest_extent_m > opening + 1e-12 and not self._hand_sized(adm):
             problem = (f"narrowest extent {adm.narrowest_extent_m * 1000.0:.1f} mm exceeds the max "
                        f"opening {opening * 1000.0:.1f} mm")
         else:
