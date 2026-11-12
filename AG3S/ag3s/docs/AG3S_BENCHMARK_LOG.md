@@ -5112,14 +5112,14 @@ F8 + (a) `--ee-action-qp-scaled` (행 정규화 + quadratic slack) + (c′) `--g
 
 **실제 장면 · 그림:** `AG3S/ag3s/docs/figures/sl-sota-ms-sdm-init15-18-20261112.png` (+ `.json`) — 네 episode 의 마지막 장면, 112 ep 의 TSR · CAR · SSR, cell 별 안전 성공, 안전 성공이 아닌 episode 의 형태. script `experiments/segmentation/sota_offline_20261111/fig_ms_sdm.py`.
 
-**이어서 — SL-SOTA16 `-dc` 측정: 탈락 (2026-11-12 16:40–19:38 측정, 19:5x 기록, HEAD `4fab0cc8`).** 용어: dead-camera HOLD = 손목 카메라가 그 frame 에 ESDF voxel 을 쓰지 못해 (`esdf_dead_camera`) 서버가 chunk 를 실행하지 않고 팔을 세우는 것. `-dc` = 동결 판 `pkgFrs` + `--esdf-dead-camera-seen-ok`. 숫자는 TSR · CAR · SSR 의 episode 수.
+**이어서 — SL-SOTA16 `-dc` 측정: 탈락 (2026-11-12 16:40–19:38 측정, 19:4x 기록, HEAD `4fab0cc8`).** 용어: dead-camera HOLD = 손목 카메라가 그 frame 에 ESDF voxel 을 쓰지 못해 (`esdf_dead_camera`) 서버가 chunk 를 실행하지 않고 팔을 세우는 것. `-dc` = 동결 판 `pkgFrs` + `--esdf-dead-camera-seen-ok`. 숫자는 TSR · CAR · SSR 의 episode 수.
 
 | 시각 | 한 일 | 결과 |
 |---|---|---|
 | 16:3x–16:40 | `pkgFrs` 전체 run 의 HOLD 사유 집계 · 손목 depth 확인 · 판 등록 · 기준 고정 (계획서 §9.26) | HOLD 263 call 전부 `esdf_dead_camera`; 다른 suite init 15–18 에서 11 ep · 7 ep 은 끝까지 HOLD |
 | 16:40–19:13 | 1 단계: HOLD episode 가 든 6 cell-run 56 ep (`ms-pkgFdcsdm-*`) | dead-camera HOLD 227 → **0** call. 합 23 · 44 · 20 → **23 · 42 · 20**, > 50 mm 충돌 5 → **7**. 기준 (SSR ≥ 22, 증가 ≤ 1) 미달 |
 | 19:13–19:38 | 2 단계: E1a task 3 (`sub-pkgFdcsdm-e1a-spatial-LI-t3`) | 5 · 9 · 5 (`pkgFrs` 와 episode 단위로 같음) |
-| 19:38–19:5x | episode 별 비교 (`dc_cmp.py`) · 실패 형태 (`shape.py`) · 그림 | HOLD 가 있던 13 ep 중 성공이 된 것 0. Spatial L-II t1 e17 · e18 장애물 변위 22 → 145 mm, 29 → 318 mm; 충돌 없던 2 ep 에 7 mm · 1.4 mm 접촉 |
+| 19:38–19:4x | episode 별 비교 (`dc_cmp.py`) · 실패 형태 (`shape.py`) · 그림 | HOLD 가 있던 13 ep 중 성공이 된 것 0. Spatial L-II t1 e17 · e18 장애물 변위 22 → 145 mm, 29 → 318 mm; 충돌 없던 2 ep 에 7 mm · 1.4 mm 접촉 |
 
 **판정: `-dc` 탈락, `pkgFrs` 동결 유지 (guard 는 돌리지 않음).** **[해석]** dead-camera HOLD 는 원인이 아니라 결과다 — 쥔 물체를 내려놓지 못하거나 팔 link 행에 막힌 팔이 탁자 가장자리로 밀려간 뒤에 손목 카메라가 workspace 밖을 본다. HOLD 를 풀면 그 앞의 막힘은 남고 팔이 더 움직여 장애물을 더 민다. 다음 후보는 그 앞의 막힘을 겨눈 SL-SOTA17 `-hf30` (계획서 §9.27; 19:41 E1a task 2 → 1 거르기 시작). 상세 표는 계획서 §9.28.
 
