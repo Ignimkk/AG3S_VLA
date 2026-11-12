@@ -198,7 +198,7 @@ T5 뒤에 하면 이 서버에서 끝낸다. **이전 시점은 T5 와의 순서
 | 2026-11-12 16:3x | sdm-f6: §9.23 A-5 · A-6 (13:18–16:22, HEAD 703ae657) — §9.25. **A-5 `pkgFrs` 다른 suite init 17 · 18 = 56 ep TSR 26 · CAR 44 · SSR 24**, Spatial L-I init 15–18 = 16 ep 7 · 12 · 5. init 15–18 의 112 ep = 51 · 85 · 46 (같은 episode 의 AEGIS port 76 · 68 · 48, multi-link GT port 72 · 76 · 48, π0.5 62 · 18 · 13) — CAR 은 가장 높고 TSR 은 가장 낮음, L-II 는 앞서고 L-I (특히 Goal L-I 2 / 16) 은 뒤짐. **A-6: `pkgFrs` 동결** (E1a 40 SSR 21 > `pkgFin` 20 > 지금 구성 15, guard 통과, 다른 suite init 15 · 16 SSR 22 > 17). `AG3S_FINAL_CONFIG_KO.md` · G175 갱신. 안전 성공이 아닌 64 ep 중 26 이 '쥐었다 놓은 뒤 미완' → 남은 시간은 B-1 부터 |
 | 2026-11-12 19:4x | sdm-f6: §9.26 SL-SOTA16 `-dc` 측정 (16:40–19:38, HEAD 4fab0cc8) — §9.28. **탈락.** 1 단계 56 ep: `esdf_dead_camera` HOLD 227 → 0 call (HOLD 전체 227 → 5), 그러나 TSR · CAR · SSR 23 · 44 · 20 → **23 · 42 · 20**, > 50 mm 충돌 5 → 7 (기준 SSR ≥ 22 · 증가 ≤ 1 둘 다 미달). 2 단계 E1a task 3 = 5 · 9 · 5 (같음). HOLD 가 있던 13 ep 중 성공으로 바뀐 것 0. 3 단계 guard 는 돌리지 않음. **`pkgFrs` 동결 유지.** 같은 경계에서 `wip/sota-hf` (SL-SOTA17 `-hf30`, §9.27) 를 합치고 앞 기록의 시각을 정정 (17:0x → 16:3x, 18:0x → 16:4x; commit de7b0daf). 19:41 `-hf30` 1 단계 (E1a task 2 → 1, TAG `pkgFhfsdm`) 시작 |
 | 2026-11-12 20:3x | sdm-f6: §9.27 SL-SOTA17 `-hf30` 1 단계 (19:41–20:31, HEAD de7b0daf, TAG `pkgFhfsdm`) — §9.29. **탈락.** E1a task 2 = 7 · 10 · 7 (`pkgFrs` 7 · 10 · 7), task 1 = 2 · 5 · **1** (`pkgFrs` 2 · 7 · 2); SSR 합 8 < 기준 10. 2 단계 이후는 돌리지 않음. **`pkgFrs` 동결 유지.** 사용자 지시 (19:5x): 최우선 목표는 SSR, 근거 없는 실험 금지 — 실패를 'π0.5 단독 성공 여부' 로 나눈 표와 놓는 순간의 GT 위치를 §9.29 에 적음. GPU 는 20:31 부터 비어 있음 |
-| 2026-11-12 21:1x | sdm-f6: **사용자 지시 (20:5x): 논문 표에 넣을 episode 의 1/10 을 동결 판으로 실행하고, 표 형식으로 보인 뒤 실패 원인을 분석한다** — §9.30 (결과 전 기록). 21:11 part A (SafeLIBERO 32 ep) 시작, TAG `tab10sdm`, HEAD 7e86ca60. 채택 기준 (§9.2) 변경 제안 (128 ep · 짝 차이 +5) 은 이 지시로 보류 |
+| 2026-11-12 21:1x | sdm-f6: **사용자 지시 (21:08): 논문 표에 넣을 episode 의 1/10 을 동결 판으로 실행하고, 표 형식으로 보인 뒤 실패 원인을 분석한다** — §9.30 (결과 전 기록). 21:11 part A (SafeLIBERO 32 ep) 시작, TAG `tab10sdm`, HEAD 7e86ca60. 채택 기준 (§9.2) 변경 제안 (128 ep · 짝 차이 +5) 은 이 지시로 보류 |
 
 ---
 
@@ -1058,7 +1058,7 @@ GPU 약 4 h 40 분 (1 단계 2 h 30 분, 2 단계 25 분, 3 단계 1 h 40 분).
 
 ### 9.30 논문 표 episode 의 1/10 실행 — 동결 판 `pkgFrs` (sdm-f6, 결과 전 기록, 2026-11-12 21:1x)
 
-**사용자 지시 (2026-11-12 20:5x):** "실제 실험 table 에 넣어야 할 지표인 LIBERO, SafeLIBERO, LIBERO-Safety 에서 수행하기로 한 episode 중 1/10 을 실행한다. 결과를 실제 table 에 넣는 것처럼 나타낸 뒤 실패 원인을 제대로 분석한다."
+**사용자 지시 (2026-11-12 21:08):** "실제 실험 table 에 넣어야 할 지표인 LIBERO, SafeLIBERO, LIBERO-Safety 에서 수행하기로 한 episode 중 1/10 을 실행한다. 결과를 실제 table 에 넣는 것처럼 나타낸 뒤 실패 원인을 제대로 분석한다."
 
 **표에 넣기로 한 episode [P]** (`experiments/segmentation/sdm_pi05_anchor_queue.sh` P1–P3 — AG3S 주말 본 run 과 π0.5 anchor 가 같은 episode) **와 그 1/10.**
 
