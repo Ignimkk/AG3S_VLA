@@ -5174,3 +5174,13 @@ F8 + (a) `--ee-action-qp-scaled` (행 정규화 + quadratic slack) + (c′) `--g
 **1/10 셋 전체 (같은 52 ep):** LIBERO 14 → **15** / 20 (π0.5 단독 19), SafeLIBERO TSR · SSR · CAR 17 · 12 · 22 → **18 · 13 · 24** / 32, > 50 mm 3 → 3. 얻은 것 = Long L-II task 3 · LIBERO-10 task 4, 잃은 것 없음. **[해석]** mug 를 '쥘 수 있는 물체' 로 인정하는 것만으로는 2 ep 이다 — 쥔 mug 가 목적지 접시에 막히는 것이 다음 원인. 상세는 계획서 §9.34.
 
 **실제 장면 · 그림:** `AG3S/ag3s/docs/figures/sl-sota18-gh156-tab10-20261113.png` (+ `.json`) — Long L-II task 3 · LIBERO-10 task 4 의 마지막 장면 (동결 판과 `-gh156`), mug 후보 인정 call, 1/10 셋의 episode 수. script `experiments/segmentation/sota_offline_20261111/fig_gh156_sdm.py`.
+
+**이어서 — SL-SOTA18 `-gh156` 채택 gate (2026-11-13 04:55–08:07 측정, 08:1x 기록, HEAD `aee17c0c`).**
+
+| 시각 | 한 일 | 결과 |
+|---|---|---|
+| 04:55–06:35 | guard: LIBERO 27 → SafeLIBERO 11 → LIBERO-Safety 10 (`gtto-pkgFghsdm-*`) | 동결 판과 episode 단위로 같다: 23, 5 · 9 · 4 (> 50 mm 0), 5 (위반 0) |
+| 06:35–08:07 | E1a 40 (`sub-pkgFghsdm-e1a-*`) | **24 · 32 · 21** (동결 판 23 · 34 · 21), > 50 mm 1 → **3**. 36 / 40 ep 동일 |
+| 08:1x | 달라진 4 ep 의 target 인식 (`target_truth.py`) | task 0 init 10: mug 모양 장애물 (`red_coffee_mug_obstacle_1`) 이 10 / 10 call 에 target → 안전 성공을 잃고 252 mm 밀림 |
+
+**판정:** §9.2 의 기준은 채우지만, mug 모양 장애물이 조작 대상으로 잡히는 기제가 확인돼 **교체를 권하지 않는다** (동결 판 `pkgFrs` 유지, 사용자 판단에 올림). 측정한 140 ep 합: 안전 성공 · 성공 +3 / −1, > 50 mm 충돌 +2. 상세는 계획서 §9.35.
