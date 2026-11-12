@@ -9,7 +9,7 @@
 # Part D = pi0.5 alone on the same episodes where no SDM run exists yet (SafeLIBERO Long, LIBERO, LIBERO-Safety with both
 # checkpoints); SafeLIBERO Spatial / Object / Goal init 19 are in the sdm-pi05-sl-* runs (sdm-c7).
 # NOTE: init 19 belongs to the reporting split (init 19-49). After this run it has been looked at for failure analysis.
-# usage: [PARTS="A B S C D M N"] bash experiments/segmentation/sota_table10_queue.sh
+# usage: [PARTS="A B S C D M N G"] bash experiments/segmentation/sota_table10_queue.sh
 # The launchers take the GPU lock themselves. Do not change this checkout's HEAD while it runs.
 set -u
 cd /mnt/dev/AG3S_VLA
@@ -92,6 +92,23 @@ if [[ " $PARTS " == *" N "* ]]; then
   run "N hf30-gh156 libero_10 task 4,6 init 19" $PY $LP --modes vla_v11ab --record-constraints full --ag3s-version "$VH" --task-suite-name libero_10 \
     --task-ids 4,6 --episode-ids 19 --seed 7 --data-split "$(label libero_10 -)" --run-id "$TAG-hf30gh156-lb-10"
   log "part N end"
+fi
+# Part G (2026-11-13, plan §9.32 stage 2): the rest of the 1/10 set with -gh156 (part M covered Long task 2,3 and LIBERO-10 task 4,6):
+# SafeLIBERO 28 ep (6 cells x task 0-3, Long x task 0,1) + LIBERO 18 ep (spatial/object/goal x task 0,2,4,6,8, libero_10 x task 0,2,8).
+if [[ " $PARTS " == *" G "* ]]; then
+  VG=${V%-tro}-gh156-tro
+  for cell in spatial:I object:I goal:I long:I spatial:II object:II goal:II long:II; do
+    suite=${cell%%:*}; lvl=${cell#*:}; tasks=0,1,2,3; [ "$suite" = long ] && tasks=0,1
+    run "G gh156 safelibero_$suite L$lvl task $tasks init 19" $PY $LP --modes vla_v11ab --record-constraints full --ag3s-version "$VG" \
+      --task-suite-name safelibero_$suite --safety-level $lvl --task-ids $tasks --episode-ids 19 --seed 7 \
+      --data-split "$(label safelibero_$suite $lvl)" --safelibero-step-budget main_aegis --run-id "$TAG-gh156r-$suite-L$lvl"
+  done
+  for suite in libero_spatial libero_object libero_goal libero_10; do
+    tasks=$LB_TASKS; [ "$suite" = libero_10 ] && tasks=0,2,8
+    run "G gh156 $suite task $tasks init 19" $PY $LP --modes vla_v11ab --record-constraints full --ag3s-version "$VG" --task-suite-name $suite \
+      --task-ids $tasks --episode-ids 19 --seed 7 --data-split "$(label $suite -)" --run-id "$TAG-gh156r-lb-${suite#libero_}"
+  done
+  log "part G end"
 fi
 if [[ " $PARTS " == *" D "* ]]; then
   for lvl in I II; do
