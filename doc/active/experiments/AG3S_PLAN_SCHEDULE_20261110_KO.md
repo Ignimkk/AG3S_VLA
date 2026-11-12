@@ -195,7 +195,7 @@ T5 뒤에 하면 이 서버에서 끝낸다. **이전 시점은 T5 와의 순서
 | 2026-11-12 01:4x | dev-4a: SDM 세팅 끝 (사용자 실행, venv 6 개 · GPU 확인). SDM 에서 π0.5 단독 측정 ①–③ 행 추가 (§2). SDM이전방법 확인: 05:30–07:00 delta 는 사용자 PC 로만 · SDM 쓰기는 08:00 뒤 사용자 upload 때 (EXISTING=archive 권고). dev-57 확인: ① 중복 아님, AG3S 쪽 GPU 우선 → block 경계에서 넘김. |
 | 2026-11-12 07:2x | sdm-c7: SDM π0.5 단독 queue ① 6/8 block 측정 후 사용자 지시로 07:19 일시 중단 (GPU 비움, HEAD 6c9b465b). §2 끝 행 · §9.24 · BL-15 추가. queue done_run bug (SafeLIBERO run dir 의 덧붙은 `-L<lvl>`) 수정 commit 6c9b465b |
 | 2026-11-12 13:2x | sdm-f6: §9.23 A 를 SDM 에서 실행 (07:33–13:17, HEAD 58d680b6) — §9.25. **A-1 `pkgFrs` E1a 40 = TSR 23 · CAR 34 · SSR 21** (AMRC 추정값과 같음, task 0 은 episode 단위로 AMRC 와 같음). **A-3 `-zp5` 탈락** (task 0 SSR 7 < 9, task 3 SSR 4 < 5). **A-2 guard 통과** (LIBERO 27 = 23, SafeLIBERO 11 = 5 · 9 · 4 · > 50 mm 0, LS 10 = 5 · 위반 0). **A-4 다른 suite init 15 · 16 = 25 · 41 · 22 / 56** (SDM 5 cell + AMRC Goal 2 cell; 지금 구성 24 · 31 · 17, `-qs` 24 · 40 · 19). 사용자 지시 (11:3x): AMRC 가 잰 것은 SDM 에서 다시 재지 않는다 — A-7 취소. 동결 후보 `pkgFrs` 그대로, 다음 A-5 |
-| 2026-11-12 17:0x | sdm-f6: §9.23 A-5 · A-6 (13:18–16:22, HEAD 703ae657) — §9.25. **A-5 `pkgFrs` 다른 suite init 17 · 18 = 56 ep TSR 26 · CAR 44 · SSR 24**, Spatial L-I init 15–18 = 16 ep 7 · 12 · 5. init 15–18 의 112 ep = 51 · 85 · 46 (같은 episode 의 AEGIS port 76 · 68 · 48, multi-link GT port 72 · 76 · 48, π0.5 62 · 18 · 13) — CAR 은 가장 높고 TSR 은 가장 낮음, L-II 는 앞서고 L-I (특히 Goal L-I 2 / 16) 은 뒤짐. **A-6: `pkgFrs` 동결** (E1a 40 SSR 21 > `pkgFin` 20 > 지금 구성 15, guard 통과, 다른 suite init 15 · 16 SSR 22 > 17). `AG3S_FINAL_CONFIG_KO.md` · G175 갱신. 안전 성공이 아닌 64 ep 중 26 이 '쥐었다 놓은 뒤 미완' → 남은 시간은 B-1 부터 |
+| 2026-11-12 16:3x | sdm-f6: §9.23 A-5 · A-6 (13:18–16:22, HEAD 703ae657) — §9.25. **A-5 `pkgFrs` 다른 suite init 17 · 18 = 56 ep TSR 26 · CAR 44 · SSR 24**, Spatial L-I init 15–18 = 16 ep 7 · 12 · 5. init 15–18 의 112 ep = 51 · 85 · 46 (같은 episode 의 AEGIS port 76 · 68 · 48, multi-link GT port 72 · 76 · 48, π0.5 62 · 18 · 13) — CAR 은 가장 높고 TSR 은 가장 낮음, L-II 는 앞서고 L-I (특히 Goal L-I 2 / 16) 은 뒤짐. **A-6: `pkgFrs` 동결** (E1a 40 SSR 21 > `pkgFin` 20 > 지금 구성 15, guard 통과, 다른 suite init 15 · 16 SSR 22 > 17). `AG3S_FINAL_CONFIG_KO.md` · G175 갱신. 안전 성공이 아닌 64 ep 중 26 이 '쥐었다 놓은 뒤 미완' → 남은 시간은 B-1 부터 |
 
 ---
 
@@ -888,7 +888,7 @@ init 15–18 전체 (A-4 + A-5; `pkgFrs` 의 Goal init 15 · 16 은 AMRC 값 §9
 
 figure (규칙 A): `AG3S/ag3s/docs/figures/sl-sota-ms-sdm-init15-18-20261112.png` (+ `.json`; script `experiments/segmentation/sota_offline_20261111/fig_ms_sdm.py`) — (a) 네 episode 의 마지막 장면 (Object L-II 안전 성공, Long L-I 놓은 뒤 미완, Goal L-I 끝까지 HOLD, Spatial L-I 못 쥠), (b) 112 ep 의 TSR · CAR · SSR, (c) cell 별 안전 성공, (d) 안전 성공이 아닌 episode 의 형태.
 
-**A-6 동결 판정 (2026-11-12 17:0x, sdm-f6) — `pkgFrs` 를 동결한다.** 판 `AG3S-commonto-att-termsoff-pass-zr-ee-hdp-loose2-obst4-pts-nocarve-fh-t100-pe12345811-to0-om15p10s40-ntc-pt6-pg4-hr150-hb-qs-rs-tro`.
+**A-6 동결 판정 (2026-11-12 16:3x, sdm-f6) — `pkgFrs` 를 동결한다.** 판 `AG3S-commonto-att-termsoff-pass-zr-ee-hdp-loose2-obst4-pts-nocarve-fh-t100-pe12345811-to0-om15p10s40-ntc-pt6-pg4-hr150-hb-qs-rs-tro`.
 
 | 기준 (§9.2) | `pkgFrs` | `pkgFin` | `-qs` 판 | 지금 구성 `…-pe123458` | 판정 |
 |---|---|---|---|---|---|
@@ -902,7 +902,7 @@ figure (규칙 A): `AG3S/ag3s/docs/figures/sl-sota-ms-sdm-init15-18-20261112.png
 - **[해석] 동결은 'AG3S 판 중 가장 나은 것' 을 정한 것이고, 조정에 쓰지 않은 init 15–18 에서 baseline port 를 넘지는 못했다** — 112 ep SSR 46 vs AEGIS port 48 · multi-link GT port 48; Spatial L-I 16 ep 5 vs AEGIS port 8. 이긴 것은 CAR (85 vs 68 · 76) 과 L-II (SSR 33 vs 27 · 28), 진 것은 TSR (51 vs 76 · 72) 과 L-I (SSR 18 vs 29 · 27). 원문 보고값 (KNOWS 4 suite L-I SSR 59.9 %) 과의 차이는 더 크다 (같은 4 cell 의 `pkgFrs` 28.1 %, AEGIS port 45.3 %).
 - D6 (11-13) 까지 남은 시간에 §9.23 B 의 후보가 §9.2 (E1a 40 SSR ≥ 22 또는 같고 CAR ≥ 36, guard 통과) 를 채우면 동결 판을 바꾼다. 순서는 이번 형태 분포를 따라 **B-1 놓는 자리 (놓은 뒤 미완 26 / 64) → Goal L-I (SSR 2 / 16) 의 원인 → B-4 · B-5**. init 15–18 은 원인을 보는 데만 쓰고 후보 채택은 E1a 40 으로 한다.
 
-### 9.26 후보 SL-SOTA16 `-dc` — 손목 카메라 'dead camera' HOLD 풀기 (sdm-f6, 결과 전 기록, 2026-11-12 18:0x)
+### 9.26 후보 SL-SOTA16 `-dc` — 손목 카메라 'dead camera' HOLD 풀기 (sdm-f6, 결과 전 기록, 2026-11-12 16:4x)
 
 **발견 [M · D].** 동결 판 `pkgFrs` 의 HOLD 는 원인이 하나다. SDM 의 `pkgFrs` run 전부 (E1a 40 · guard · 다른 suite init 15–18 + Spatial L-I, 10 631 call) 에서 HOLD 263 call 이 모두 `uncertified` (status = degraded, validity = degraded) 이고 AG3S 사유는 전부 `esdf_dead_camera` — "손목 카메라가 이 frame 에 ESDF voxel 을 하나도 쓰지 못함" (G3, `AG3S/ag3s/runtime/pipeline.py` `_esdf_coverage`) 이다.
 

@@ -4,7 +4,7 @@
 정본: 판 정의 `AG3S/adapters/panda/profile.py` (`AG3S_VERSIONS`) · flag 정의 `AG3S/trajopt/serve_safe.py` (argparse) · Panda 서버 `AG3S/adapters/panda/server.py` · 판정 근거 `E1_GTTO_DECISIONS_20261104_KO.md`.
 본문의 argv 는 실제 run manifest (`…/20261108T232618_…-pe12345-C/run_manifest.json` `settings.server_argv`) 와 token 단위로 대조했고, 실효 값은 `serve_safe.build_parser()` 로 parse 해 확인했다. `(미확인)` = code 로 끝까지 확인하지 못한 것.
 
-## 0. 판 · 상태 (2026-11-12 17:0x KST 동결 — 아래 표 첫 행; 그 아래 2026-11-09 표는 직전 구성 `…-pe123458` 의 기록)
+## 0. 판 · 상태 (2026-11-12 16:3x KST 동결 — 아래 표 첫 행; 그 아래 2026-11-09 표는 직전 구성 `…-pe123458` 의 기록)
 
 | 항목 | 내용 (2026-11-12 동결, 계획서 `AG3S_PLAN_SCHEDULE_20261110_KO.md` §9.25 A-6, G175) |
 |---|---|
@@ -365,4 +365,4 @@ init 15–18 은 조정에 쓰지 않았다. 다른 suite 112 ep 합 51 · 85 ·
 | 2026-11-08 22:19 | 목적지 등록: 잡을 수 없는 크기만 → **쥔 동안 손 밖 attention 1 위면 크기 무관** | 접시 (10.7 × 135 × 135 mm) 가 '잡을 수 있음' 으로 분류돼 한 번도 등록 안 됨 → 내려놓을 때 장애물 (G157) |
 | 2026-11-08 22:19 | 자른 점 attention: 모두 1 → **손 닫는 지점에 가까울수록 높게**, 국소 받침면: 그 call 만 → **episode 동안 유지** | 서랍 앞판 조각이 같은 점수로 1 위가 되어 identity 가 흔들림; 손 닫는 지점이 없는 call 에 그릇이 다시 거절됨 (G157) |
 | 2026-11-09 05:3x | 쥔 물체 제외: attach snapshot 15 mm 안 성분만 → **+ 손과 같이 움직인 점 (누적)** (판 `…-pe12345` → `…-pe123458`) | 들어 올린 뒤 보이는 그릇 면이 snapshot 과 26–73 mm 떨어져 쥔 그릇이 장애물로 남아 옮기기 · 놓기를 거절 (12 ep 에 28 call → 3 call), LIBERO 8 / 12 · SafeLIBERO 같음 (G162–G164) |
-| 2026-11-12 17:0x | 판 `…-pe123458` → **`…-pe12345811-to0-om15p10s40-ntc-pt6-pg4-hr150-hb-qs-rs-tro`** (`pkgFrs`): 장애물 물체 행 허용 10 → 0 mm + 15 mm 여유, target 없는 frame 검사, 교착 대응 (인내 한도 6 call · 진행 선호 0.4), 쥔 물체 범위 150 mm · 발자국 위 손 행 해제, 행 정규화 · 병진만 고치는 action QP, latch reach 고정, target 과 붙은 장애물 자르기 | E1a 40 SSR 15 → 21 · CAR 23 → 34, LIBERO 27 22 → 23, LIBERO-Safety 위반 1 → 0, 다른 suite init 15 · 16 SSR 17 → 22 (계획서 §9.6–§9.25, G175). SafeLIBERO 11 안전 성공은 6 → 4 (§9.2: 기록만) |
+| 2026-11-12 16:3x | 판 `…-pe123458` → **`…-pe12345811-to0-om15p10s40-ntc-pt6-pg4-hr150-hb-qs-rs-tro`** (`pkgFrs`): 장애물 물체 행 허용 10 → 0 mm + 15 mm 여유, target 없는 frame 검사, 교착 대응 (인내 한도 6 call · 진행 선호 0.4), 쥔 물체 범위 150 mm · 발자국 위 손 행 해제, 행 정규화 · 병진만 고치는 action QP, latch reach 고정, target 과 붙은 장애물 자르기 | E1a 40 SSR 15 → 21 · CAR 23 → 34, LIBERO 27 22 → 23, LIBERO-Safety 위반 1 → 0, 다른 suite init 15 · 16 SSR 17 → 22 (계획서 §9.6–§9.25, G175). SafeLIBERO 11 안전 성공은 6 → 4 (§9.2: 기록만) |
