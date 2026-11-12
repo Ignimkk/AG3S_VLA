@@ -1311,7 +1311,7 @@ del _b
 SOTA_VERSIONS = SOTA_VERSIONS + SOTA_DEADCAM_VERSIONS
 #: SL-SOTA17 (sdm-f6, 2026-11-12, plan §9.27): ``-hf30`` = ``--obstacle-held-beneath-band-mm 30`` -- the band of the held
 #: object's own rows in SL-SOTA7's footprint rule widened from 2 voxels (10 mm) to 30 mm, in xy and above the held bottom.
-#: pkgFrs other-suite set init 15-18 (surface_owner_task.py --only-held, GT labels): in 17 of the 41 episodes that grasped
+#: pkgFrs other-suite set init 15-18 (surface_owner_task.py --only-held, GT labels): in 20 of the 41 episodes that grasped
 #: and did not finish, a held row was refused against the plate / stove / basket it was being lowered onto (clearance
 #: -37 .. +11 mm). On the frozen version and on its ``-dc`` variant: ``<…-qs-rs[-dc]>-hf30-tro``. Default off elsewhere.
 SOTA_HELDBAND_VERSIONS: tuple[str, ...] = ()
