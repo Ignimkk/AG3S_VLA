@@ -75,6 +75,12 @@ def load_response_model(path=OSC_RESPONSE_FIT, variant: Optional[str] = None) ->
     if variant is None:
         return {"pos": (float(fit["pos"]["alpha"]), float(fit["pos"]["beta"])),
                 "rot": (float(fit["rot"]["alpha"]), float(fit["rot"]["beta"])), "path": str(path)}
+    if variant == "libero_safety_fork_native":
+        # SL-LS1: the fit's own fork-unit blocks, beta re-expressed for the internal action a_int = a_fork / NATIVE_UNIT
+        # (this module's model is y = alpha y + beta (OSC_*_SCALE a); the fork plant is y = alpha y + beta_fork a_fork)
+        return {"pos": (float(fit["pos"]["alpha"]), float(fit["pos"]["beta"]) * NATIVE_UNIT[0] / OSC_POS_SCALE),
+                "rot": (float(fit["rot"]["alpha"]), float(fit["rot"]["beta"]) * NATIVE_UNIT[1] / OSC_ORI_SCALE),
+                "path": str(path), "variant": variant, "policy_unit": NATIVE_UNIT}
     if variant != "libero_safety_fork" or "libero_scale" not in fit:
         raise ValueError(f"{path}: no response variant {variant!r}")
     ls = fit["libero_scale"]
@@ -83,20 +89,43 @@ def load_response_model(path=OSC_RESPONSE_FIT, variant: Optional[str] = None) ->
 
 
 #: SL11 -- server option ``--response-model``. ``robosuite141`` (default) is the module's ``RESPONSE``.
-RESPONSE_MODELS = ("robosuite141", "libero_safety_fork")
+RESPONSE_MODELS = ("robosuite141", "libero_safety_fork", "libero_safety_fork_native")
 RESPONSE_FORK_FIT = _pathlib.Path(__file__).resolve().parents[3] / "robots/panda/description/osc_response_fit_libero_safety_fork.json"
 #: The client request key that names the env's action adapter; the fork model needs ``libero_to_safety`` (see server).
 ACTION_ADAPTER_KEY = "panda/action_adapter"
 FORK_REQUIRED_ADAPTER = "libero_to_safety"
+#: SL-LS1 (2026-11-12, user: "LIBERO-Safety 의 controller 변환") -- the official ``pi05_libero_safety`` checkpoint emits
+#: fork-unit actions (the fork OSC realises ~1.0 m / rad per unit; the policy's steps are |a| <~ 0.025). The server works in an
+#: internal action ``a_int = a_fork / NATIVE_UNIT`` (:func:`policy_to_internal`) and the LIBERO-Safety client multiplies the
+#: returned rows back (action adapter ``fork_native_unit``). Powers of two, so a chunk the server does not change reaches the
+#: env bit for bit. With it every action-unit quantity of conversion C and of the action QP keeps the magnitude it has on
+#: LIBERO (|a_int| <~ 0.4), and this module's +-1 input clip sits at +-62.5 mm / +-0.5 rad per step, above the policy's steps.
+NATIVE_UNIT = (0.0625, 0.5)
+NATIVE_REQUIRED_ADAPTER = "fork_native_unit"
+#: response model -> the client action adapter its numbers are expressed for (the server refuses any other client)
+REQUIRED_ADAPTER = {"libero_safety_fork": FORK_REQUIRED_ADAPTER, "libero_safety_fork_native": NATIVE_REQUIRED_ADAPTER}
 
 
 def response_for(name: Optional[str]) -> Optional[dict]:
     """``None`` for the default (callers then use ``RESPONSE``: bit-identical to before SL11), else the named model."""
     if name in (None, "robosuite141"):
         return None
-    if name == "libero_safety_fork":
-        return load_response_model(RESPONSE_FORK_FIT, variant="libero_safety_fork")
+    if name in ("libero_safety_fork", "libero_safety_fork_native"):
+        return load_response_model(RESPONSE_FORK_FIT, variant=name)
     raise ValueError(f"response model {name!r} not in {RESPONSE_MODELS}")
+
+
+def policy_to_internal(delta: np.ndarray, response: Optional[dict]) -> np.ndarray:
+    """SL-LS1 -- the policy's chunk in the server's internal action unit. Only a response model with ``policy_unit`` (the
+    native fork model) changes anything: arm columns divided by the unit (exact: powers of two); every other model returns
+    ``delta`` itself (same object, the earlier behaviour)."""
+    unit = None if response is None else response.get("policy_unit")
+    if unit is None:
+        return delta
+    out = np.array(delta, copy=True)
+    out[..., :3] = out[..., :3] / out.dtype.type(unit[0])
+    out[..., 3:6] = out[..., 3:6] / out.dtype.type(unit[1])
+    return out
 
 
 RESPONSE = load_response_model()

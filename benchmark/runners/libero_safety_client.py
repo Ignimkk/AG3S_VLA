@@ -83,7 +83,11 @@ REALISED_GAIN = {"robosuite_1.4.1": {"pos": 0.05 * 0.2494372096817311, "ori": 0.
 #: ``libero_to_safety``: arm rows of a LIBERO-scale policy (pi05_libero) rescaled so that the fork realises the same
 #: steady-state EE step as robosuite 1.4.1 would (pos x0.0125, rot x0.124). The transient differs (fork reaches
 #: steady state in ~2 steps, LIBERO's lag alpha 0.72 / 0.87): an adapter, not the official protocol.
-ACTION_ADAPTERS = ("none", "libero_to_safety")
+#: ``fork_native_unit`` (SL-LS1): the AG3S server returns the official ``pi05_libero_safety`` chunk in its internal unit
+#: ``a_fork / NATIVE_UNIT`` (``AG3S/adapters/panda/action.py``, powers of two); the client multiplies the arm rows back, so a
+#: chunk the server did not change is the policy's own action bit for bit. Not used by the VLA-alone arm (adapter ``none``).
+NATIVE_UNIT = {"pos": 0.0625, "ori": 0.5}
+ACTION_ADAPTERS = ("none", "libero_to_safety", "fork_native_unit")
 
 #: Policy checkpoints this client can be paired with (the server loads them; the client records the choice and
 #: applies the matching image orientation / action adapter defaults).
@@ -320,6 +324,9 @@ def adapt_action(action, adapter):
         src, dst = REALISED_GAIN["robosuite_1.4.1"], REALISED_GAIN["libero_safety_fork"]
         a[:3] *= src["pos"] / dst["pos"]
         a[3:6] *= src["ori"] / dst["ori"]
+    elif adapter == "fork_native_unit":
+        a[:3] *= NATIVE_UNIT["pos"]
+        a[3:6] *= NATIVE_UNIT["ori"]
     elif adapter != "none":
         raise ValueError("unknown action adapter {}".format(adapter))
     return a

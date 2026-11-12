@@ -292,7 +292,7 @@ def test_version_registration():
 
     assert pf.LSFORK_VERSIONS[0] == NEW and all(v.endswith("-lsfork") for v in pf.LSFORK_VERSIONS) and NEW in pf.AG3S_VERSIONS and pf.LSFORK_FLAGS == ("--response-model", "libero_safety_fork")
     assert list(pf.AG3S_VERSIONS[NEW]) == list(pf.AG3S_VERSIONS[PC]) + list(pf.LSFORK_FLAGS)
-    assert not any("--response-model" in f for n, f in pf.AG3S_VERSIONS.items() if n not in pf.LSFORK_VERSIONS)
+    assert not any("--response-model" in f for n, f in pf.AG3S_VERSIONS.items() if n not in pf.LSFORK_VERSIONS + pf.SOTA_LSNATIVE_VERSIONS)
     assert pf.is_final_version(NEW) and pf._lsfork_base(NEW) == PC and pf._lsfork_base(PC) == PC
     assert pf.version_server_argv(NEW) == pf.version_server_argv(PC)
     assert pf.version_server_flags(NEW)[-2:] == ["--hsr6-probe", pf.PANDA_HSR6_PROBE]                # pc: takes the probe

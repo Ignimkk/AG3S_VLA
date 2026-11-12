@@ -2430,12 +2430,15 @@ def build_parser() -> argparse.ArgumentParser:
                          "한다 (Dy 는 EE Jacobian 으로 선형화; 상수는 osc_response_fit.json). 기본 꺼짐 = 서버·기록 그대로. "
                          "RB-Y1 서버는 거절한다. --to-multi-seed · --to-gpu-seeds · look-ahead gate 와 함께 쓸 수 없다. "
                          "기록 to.action_box = {on, n_rows, active_rows, max_pred_abs_action}")
-    ap.add_argument("--response-model", choices=("robosuite141", "libero_safety_fork"), default="robosuite141",
+    ap.add_argument("--response-model", choices=("robosuite141", "libero_safety_fork", "libero_safety_fork_native"), default="robosuite141",
                     help="SL11 — Panda 만. 변환 C (정 · 역) 가 쓰는 컨트롤러 지연 모델 y_t = alpha y_{t-1} + beta x_t. "
                          "robosuite141 (기본) = osc_response_fit.json (LIBERO env), 지금 그대로. libero_safety_fork = "
                          "osc_response_fit_libero_safety_fork.json (LIBERO-Safety fork OSC, VLA 단독 기록에서 맞춤; beta 는 "
                          "client 의 libero_to_safety 축척을 넣은 LIBERO-scale 값). LIBERO-Safety client + action_adapter "
                          "libero_to_safety 에서만 쓴다 (client 요청 panda/action_adapter 가 다르면 서버가 거절). "
+                         "libero_safety_fork_native (SL-LS1) = 같은 fit 의 fork 단위 값, 공식 pi05_libero_safety checkpoint 용: "
+                         "policy action 을 내부 단위 (a / (0.0625, 0.5)) 로 바꿔 계산하고 client 의 action_adapter "
+                         "fork_native_unit 이 되돌린다. "
                          "RB-Y1 서버는 거절한다")
     ap.add_argument("--to-action-box-margin", type=float, default=None, metavar="M",
                     help="SL10 §2.2 — --to-action-box 의 여유 (action 단위, 기본 0.05, 0 <= M < 1). --to-action-box 가 필요하다")

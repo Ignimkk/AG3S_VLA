@@ -139,13 +139,37 @@ def install_hooks(args):
     l0.libero_python = libero_safety_python  # versions(): interpreter record of the client side
 
 
+NATIVE_RESPONSE = "libero_safety_fork_native"
+NATIVE_ADAPTER = "fork_native_unit"
+
+
+def native_fork_version(version: str) -> bool:
+    """SL-LS1 -- does this AG3S version's server argv select the native fork response model?"""
+    from AG3S.adapters.panda import profile
+
+    flags = list(profile.AG3S_VERSIONS.get(version, ()))
+    return any(f == "--response-model" and i + 1 < len(flags) and flags[i + 1] == NATIVE_RESPONSE for i, f in enumerate(flags))
+
+
 def check(args, modes) -> None:
     ck = lsc.POLICY_CHECKPOINTS[args.policy_checkpoint]
     if not openpi_has_config(ck["openpi_config"]):
         raise ValueError(f"openpi has no TrainConfig {ck['openpi_config']!r} (hook H1, BM-SETUP-B.impl.md)")
     if args.policy_checkpoint == "pi05_libero_safety" and "vla_v11ab" in modes and not args.allow_unscaled_v11ab:
-        raise ValueError("vla_v11ab with pi05_libero_safety needs the Panda conversion for the LIBERO-Safety "
-                         "controller (hook H2, BM-SETUP-B.impl.md); refused")
+        # hook H2 -> SL-LS1: the version must carry the native fork response model (server works in a_fork / NATIVE_UNIT),
+        # and the client must multiply the rows back; the VLA-alone arm uses adapter none, so the two modes cannot share a run.
+        if not native_fork_version(args.ag3s_version):
+            raise ValueError("vla_v11ab with pi05_libero_safety needs the Panda conversion for the LIBERO-Safety "
+                             "controller (hook H2, BM-SETUP-B.impl.md): use an AG3S version with --response-model "
+                             f"{NATIVE_RESPONSE} (suffix -lsnative, SL-LS1); refused")
+        if modes != ["vla_v11ab"]:
+            raise ValueError("pi05_libero_safety + vla_v11ab runs alone (--modes vla_v11ab): its client action adapter "
+                             f"{NATIVE_ADAPTER} differs from the VLA-alone arm's 'none'")
+        if args.action_adapter not in (None, NATIVE_ADAPTER):
+            raise ValueError(f"--action-adapter must be {NATIVE_ADAPTER} for this version (got {args.action_adapter})")
+        args.action_adapter = NATIVE_ADAPTER
+    elif native_fork_version(args.ag3s_version) and "vla_v11ab" in modes:
+        raise ValueError(f"--response-model {NATIVE_RESPONSE} versions are for --policy-checkpoint pi05_libero_safety only")
     allowed = SPLITS[args.data_split]
     if any(e not in allowed for e in args.episode_ids):
         raise ValueError(f"{SPLIT_TEXT[args.data_split]}: episode ids {args.episode_ids} outside")

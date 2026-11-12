@@ -1320,6 +1320,22 @@ for _b in tuple(v for v in SOTA_REACHSTICKY_VERSIONS + SOTA_DEADCAM_VERSIONS if 
     SOTA_HELDBAND_VERSIONS = SOTA_HELDBAND_VERSIONS + (_b[:-len("-tro")] + "-hf30-tro",)
 del _b
 SOTA_VERSIONS = SOTA_VERSIONS + SOTA_HELDBAND_VERSIONS
+#: SL-LS1 (sdm-f6, 2026-11-12; user: "LIBERO-Safety 의 controller 변환" -- the AG3S arm of paper Tab. 2 on the official
+#: ``pi05_libero_safety`` checkpoint): ``X-lsnative`` = ``X`` + ``--response-model libero_safety_fork_native``. The checkpoint
+#: emits fork-unit actions; the server divides the policy chunk by ``action.NATIVE_UNIT`` and uses the fork fit's own lag model,
+#: the LIBERO-Safety client multiplies the returned rows back (adapter ``fork_native_unit``; the launcher sets it and refuses
+#: any other pairing). Registered for the frozen version only. Every other version's argv is unchanged.
+LSNATIVE_SUFFIX = "-lsnative"
+LSNATIVE_FLAGS: tuple[str, ...] = ("--response-model", "libero_safety_fork_native")
+SOTA_LSNATIVE_VERSIONS: tuple[str, ...] = ()
+#: the version frozen on 2026-11-12 (G175, ``pkgFrs``)
+FROZEN_20261112 = ("AG3S-commonto-att-termsoff-pass-zr-ee-hdp-loose2-obst4-pts-nocarve-fh-t100-pe12345811-to0-om15p10s40-ntc-pt6-"
+                   "pg4-hr150-hb-qs-rs-tro")
+for _b in (FROZEN_20261112,):
+    AG3S_VERSIONS[_b + LSNATIVE_SUFFIX] = tuple(AG3S_VERSIONS[_b]) + LSNATIVE_FLAGS
+    SOTA_LSNATIVE_VERSIONS = SOTA_LSNATIVE_VERSIONS + (_b + LSNATIVE_SUFFIX,)
+del _b
+SOTA_VERSIONS = SOTA_VERSIONS + SOTA_LSNATIVE_VERSIONS
 GT15_VERSIONS = GT15_VERSIONS + SOTA_VERSIONS
 #: (G88c, 03:5x) the A-alone ablation queued as ``…-obst3`` (gtto23, not started yet) gets the same two fixes, so A alone and
 #: A + B differ only by the held point model: ``…-obst3`` := A'' + no carve + support "under" (``…-obst3-pts`` = B'' keeps

@@ -122,9 +122,10 @@ def check_response_adapter(response_name: str, adapter) -> None:
     if response_name == "robosuite141":
         return
     adapter = None if adapter is None else str(np.asarray(adapter).item() if hasattr(adapter, "shape") else adapter)
-    if adapter != pa.FORK_REQUIRED_ADAPTER:
+    required = pa.REQUIRED_ADAPTER[response_name]   # SL-LS1: per model (fork: libero_to_safety, native: fork_native_unit)
+    if adapter != required:
         raise ValueError(f"--response-model {response_name} needs the LIBERO-Safety client with action_adapter "
-                         f"{pa.FORK_REQUIRED_ADAPTER!r} (request {KEY_ACTION_ADAPTER}={adapter!r}); refusing to convert with a "
+                         f"{required!r} (request {KEY_ACTION_ADAPTER}={adapter!r}); refusing to convert with a "
                          "model that does not describe the env")
 
 
@@ -230,7 +231,7 @@ class ChunkToJointPolicy:
         q_now, _fingers = pm.split_robot_state(panda[KEY_ROBOT_STATE])
         check_response_adapter(self.response_name, panda.get(KEY_ACTION_ADAPTER))
         result = dict(self._policy.infer(obs, **kwargs))
-        delta = np.asarray(result["actions"])
+        delta = pa.policy_to_internal(np.asarray(result["actions"]), self.response)   # SL-LS1: native fork unit -> internal
         prev = panda.get(KEY_PREV_STEP)
         prev = None if prev is None else (np.asarray(prev, np.float64)[:3], np.asarray(prev, np.float64)[3:6])
         self.last = pa.delta_chunk_to_joint_chunk(self.kin, delta, q_now, np.asarray(panda[KEY_T_WORLD_BASE]),
@@ -1170,7 +1171,9 @@ def build_safe_server(policy, args, *, attention_model=None, gpu_warm_up: bool =
     if response_name != "robosuite141":   # SL11 -- key only with the fork model (the earlier servers' dump is unchanged)
         info["response_model"] = {"name": response_name, "pos": chunk_policy.response["pos"],
                                   "rot": chunk_policy.response["rot"], "fit": chunk_policy.response["path"],
-                                  "requires_action_adapter": pa.FORK_REQUIRED_ADAPTER}
+                                  "requires_action_adapter": pa.REQUIRED_ADAPTER[response_name],
+                                  **({"policy_unit": list(chunk_policy.response["policy_unit"])}
+                                     if "policy_unit" in chunk_policy.response else {})}
     if final:   # SL6-A — key only with a final-configuration option on (V11AB / pb config unchanged)
         info["final_config"] = final
     if recorder is not None:  # key only when recording (the panda_server_config.json of other runs is unchanged)
