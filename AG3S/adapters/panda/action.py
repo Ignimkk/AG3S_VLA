@@ -95,12 +95,16 @@ RESPONSE_FORK_FIT = _pathlib.Path(__file__).resolve().parents[3] / "robots/panda
 ACTION_ADAPTER_KEY = "panda/action_adapter"
 FORK_REQUIRED_ADAPTER = "libero_to_safety"
 #: SL-LS1 (2026-11-12, user: "LIBERO-Safety 의 controller 변환") -- the official ``pi05_libero_safety`` checkpoint emits
-#: fork-unit actions (the fork OSC realises ~1.0 m / rad per unit; the policy's steps are |a| <~ 0.025). The server works in an
-#: internal action ``a_int = a_fork / NATIVE_UNIT`` (:func:`policy_to_internal`) and the LIBERO-Safety client multiplies the
-#: returned rows back (action adapter ``fork_native_unit``). Powers of two, so a chunk the server does not change reaches the
-#: env bit for bit. With it every action-unit quantity of conversion C and of the action QP keeps the magnitude it has on
-#: LIBERO (|a_int| <~ 0.4), and this module's +-1 input clip sits at +-62.5 mm / +-0.5 rad per step, above the policy's steps.
-NATIVE_UNIT = (0.0625, 0.5)
+#: fork-unit actions (the fork OSC realises ~1.0 m / rad per unit; the policy's steps are |a| <~ 0.023 m / 0.06 rad -- norm
+#: stats q99 0.022 / 0.057). The server works in an internal action ``a_int = a_fork / NATIVE_UNIT``
+#: (:func:`policy_to_internal`) and the LIBERO-Safety client multiplies the returned rows back (action adapter
+#: ``fork_native_unit``). Powers of two, so a chunk the server does not change reaches the env bit for bit.
+#: The unit also fixes what this module's +-1 input clip means: the fork env itself clips at +-1 m per step, i.e. never, so
+#: the clip is the only bound on a corrected action. (1/32 m, 1/8 rad) puts it just above the policy's own largest step
+#: (|a_int| <~ 0.75 / 0.5), so a saturated correction moves 31 mm / 0.125 rad per step (LIBERO: 12.5 mm / 0.124 rad).
+#: The first closed-loop run used (1/16, 1/2): a saturated action-QP row moved the hand 62.5 mm per step per axis
+#: (smoke 2026-11-12 23:50, TSA L2 task 0 call 15: predicted vs refined 157 mm) -- too large, changed before any table run.
+NATIVE_UNIT = (0.03125, 0.125)
 NATIVE_REQUIRED_ADAPTER = "fork_native_unit"
 #: response model -> the client action adapter its numbers are expressed for (the server refuses any other client)
 REQUIRED_ADAPTER = {"libero_safety_fork": FORK_REQUIRED_ADAPTER, "libero_safety_fork_native": NATIVE_REQUIRED_ADAPTER}

@@ -63,6 +63,10 @@ def test_native_model_is_the_fork_fit_in_internal_units():
     # powers of two, and the client holds the same numbers
     for u in pa.NATIVE_UNIT:
         assert np.log2(u) == int(np.log2(u))
+    # the +-1 clip sits above the checkpoint's own steps (norm stats q99 0.022 m / 0.057 rad, seen 0.0234 / 0.0602) and a
+    # saturated correction stays below 40 mm / 0.15 rad per step (the first unit, 1/16 m, gave 62.5 mm: smoke 2026-11-12)
+    assert 0.0234 / pa.NATIVE_UNIT[0] < 0.8 and 0.0602 / pa.NATIVE_UNIT[1] < 0.5
+    assert pa.NATIVE_UNIT[0] * pa.OSC_INPUT_CLIP < 0.04 and pa.NATIVE_UNIT[1] * pa.OSC_INPUT_CLIP < 0.15
     assert (lsc.NATIVE_UNIT["pos"], lsc.NATIVE_UNIT["ori"]) == pa.NATIVE_UNIT
     assert pa.NATIVE_REQUIRED_ADAPTER in lsc.ACTION_ADAPTERS
 
@@ -77,7 +81,7 @@ def test_round_trip_is_bit_exact_and_other_models_return_the_chunk_itself():
         internal = pa.policy_to_internal(a, pa.response_for(NATIVE))
         assert internal is not a and internal.dtype == a.dtype
         assert np.array_equal(internal[:, 6], a[:, 6])                                    # gripper column untouched
-        assert np.allclose(internal[:, :3], a[:, :3] / 0.0625) and np.allclose(internal[:, 3:6], a[:, 3:6] / 0.5)
+        assert np.allclose(internal[:, :3], a[:, :3] / pa.NATIVE_UNIT[0]) and np.allclose(internal[:, 3:6], a[:, 3:6] / pa.NATIVE_UNIT[1])
         assert np.abs(internal[:, :6]).max() < pa.OSC_INPUT_CLIP                           # the policy's steps stay inside the clip
         for k in range(a.shape[0]):
             back = lsc.adapt_action(internal[k], "fork_native_unit")

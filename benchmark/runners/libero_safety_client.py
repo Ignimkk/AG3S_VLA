@@ -86,7 +86,7 @@ REALISED_GAIN = {"robosuite_1.4.1": {"pos": 0.05 * 0.2494372096817311, "ori": 0.
 #: ``fork_native_unit`` (SL-LS1): the AG3S server returns the official ``pi05_libero_safety`` chunk in its internal unit
 #: ``a_fork / NATIVE_UNIT`` (``AG3S/adapters/panda/action.py``, powers of two); the client multiplies the arm rows back, so a
 #: chunk the server did not change is the policy's own action bit for bit. Not used by the VLA-alone arm (adapter ``none``).
-NATIVE_UNIT = {"pos": 0.0625, "ori": 0.5}
+NATIVE_UNIT = {"pos": 0.03125, "ori": 0.125}
 ACTION_ADAPTERS = ("none", "libero_to_safety", "fork_native_unit")
 
 #: Policy checkpoints this client can be paired with (the server loads them; the client records the choice and

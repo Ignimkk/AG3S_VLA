@@ -2437,7 +2437,7 @@ def build_parser() -> argparse.ArgumentParser:
                          "client 의 libero_to_safety 축척을 넣은 LIBERO-scale 값). LIBERO-Safety client + action_adapter "
                          "libero_to_safety 에서만 쓴다 (client 요청 panda/action_adapter 가 다르면 서버가 거절). "
                          "libero_safety_fork_native (SL-LS1) = 같은 fit 의 fork 단위 값, 공식 pi05_libero_safety checkpoint 용: "
-                         "policy action 을 내부 단위 (a / (0.0625, 0.5)) 로 바꿔 계산하고 client 의 action_adapter "
+                         "policy action 을 내부 단위 (a / (0.03125, 0.125)) 로 바꿔 계산하고 client 의 action_adapter "
                          "fork_native_unit 이 되돌린다. "
                          "RB-Y1 서버는 거절한다")
     ap.add_argument("--to-action-box-margin", type=float, default=None, metavar="M",

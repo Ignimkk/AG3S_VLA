@@ -53,10 +53,12 @@ fi
 # Parts S / C (SL-LS1, 2026-11-12 23:5x): the AG3S arm of LIBERO-Safety on the OFFICIAL pi05_libero_safety checkpoint, version
 # $V-lsnative (--response-model libero_safety_fork_native; the launcher sets the client adapter fork_native_unit).
 # S = the smoke block (obstacle_avoidance = TSA, 2 ep; look at the conversion record before C), C = the other two suites.
+# run-id tab10sdm-lsb: the first smoke (tab10sdm-ls, 2026-11-12 23:50) used the internal unit (1/16 m, 1/2 rad) and is superseded --
+# a saturated action-QP row moved the hand 62.5 mm per step; the unit is now (1/32 m, 1/8 rad) (action.NATIVE_UNIT).
 VN=$V-lsnative
 ls_ag3s() {
   run "$1 AG3S-lsnative (pi05_libero_safety) LIBERO-Safety $2 L2 task 0,1 init 19" $PY $LS --modes vla_v11ab --record-constraints full --ag3s-version "$VN" \
-    --policy-checkpoint pi05_libero_safety --task-suite-name $2 --level 2 --task-ids 0,1 --episode-ids 19 --run-id "$TAG-ls"
+    --policy-checkpoint pi05_libero_safety --task-suite-name $2 --level 2 --task-ids 0,1 --episode-ids 19 --run-id "$TAG-lsb"
 }
 if [[ " $PARTS " == *" S "* ]]; then
   ls_ag3s S obstacle_avoidance

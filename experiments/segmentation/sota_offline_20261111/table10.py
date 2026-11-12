@@ -27,7 +27,7 @@ for arm,pat in (("AG3S-VLA (pkgFrs)", ["2*_ms-tab10sdm-{s}-L{l}-i19-*"]), ("pi0.
             res["safelibero"].setdefault(arm,{})[f"{s} L-{l}"]={t:dict(v,label=lab(v)) for t,v in eps([p.format(s=s,l=l) for p in pat]).items()}
 for arm,pat in (("AG3S-VLA (pkgFrs)","2*_tab10sdm-lb-{s}-*"),("pi0.5 alone","2*_tab10sdm-pi05-lb-{s}-*")):
     for s in LB: res["libero"].setdefault(arm,{})[s]=eps([pat.format(s=s)])
-for arm,pat in (("AG3S-VLA (pkgFrs, pi05_libero)","2*_tab10sdm-ls-{s}-L2-pi05_libero-*"),("pi0.5 alone (pi05_libero)","2*_tab10sdm-pi05-ls-{s}-L2-pi05_libero-*"),("pi0.5 alone (pi05_libero_safety, official)","2*_tab10sdm-pi05-ls-{s}-L2-pi05_libero_safety-*")):
+for arm,pat in (("AG3S-VLA (pkgFrs-lsnative, official ckpt)","2*_tab10sdm-lsb-{s}-L2-pi05_libero_safety-vla_v11ab-*"),("pi0.5 alone (pi05_libero_safety, official)","2*_tab10sdm-pi05-ls-{s}-L2-pi05_libero_safety-*")):
     for s in LS: res["libero_safety"].setdefault(arm,{})[s]=eps([pat.format(s=s)])
 pct=lambda a,b: "  -  " if not b else f"{100*a/b:5.1f}"
 print("== Tab. 1 layout (1/10: SafeLIBERO 32 ep, LIBERO 20 ep; % with episode counts; SafeLIBERO = mean over the 4 suites)")
