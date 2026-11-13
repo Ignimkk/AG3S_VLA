@@ -1564,3 +1564,17 @@ GPU 약 1 h 50 분 (52 ep). dev-8a (sdm-ahs) 의 공유 lock 추출은 이 시�
 - **A 의 팔 link 는 대부분 TO 'optimal' + T88 passthrough `clear`**: 장애물 물체 row 의 위반은 0 이고, 그 밖의 row (장애물로 분류되지 않은 표면) 의 위반은 허용 한도 100 mm 안이라 통과 — 예: spatial t1 e11 의 접촉 (step 134) 직전 call (step 130) 은 그 밖의 row 위반 15.2 mm 로 `clear` [M, 원기록 확인]. 나머지는 'feasible / budget_only'.
 - **해석 (D):** L12H3 가 맞는 대상을 고르면 손이 대상 옆으로 가고, 대상 옆 장애물 표면이 그 call 에서 장애물 물체 집합에 들지 않아 팔 link 의 음수 clearance 가 허용 한도 (100 mm) 안에서 실행된다. '음수 clearance 를 실행하지 않음' 의 상한은 새 충돌 10 중 5–7 ep (막았을 때 task 가 성공하는지는 재지 않음). 지금 거르기 중인 SL-AUD flag 는 이 통과 판정을 바꾸지 않는다 (`-rf` 는 QP 의 기준만 바꿈).
 - 주의: 4 ep 에서 MuJoCo contact 목록은 비었으나 geom 거리는 겹침 (t3 e10 link5 −7.2 mm 등) — 로봇 접촉으로 세면 새 충돌의 A 는 8.
+
+**§9.41 결과 1 (2026-11-14 02:3x, [M]) — 동결 판 1 ep 확인 SAME, 거르기 1 `-rf-lp-mr8-af` FAIL.** HEAD 09dc923b. 동결 판 확인 (`ms-audchksdm-spatial-LI-i15`, 01:09–01:18): call 17 / 17 의 `max_abs_action_change_executed` · `passthrough_clear.reason` 같음, episode 결과 (성공 · 충돌 없음 · 85 step) 같음. 거르기 1 (TAG `aud1sdm`, 01:18–02:37; run 20261114T011817 · 015416 · 021640):
+
+| S32 | 동결 판 TSR · CAR · SSR, > 50 mm | `-rf-lp-mr8-af` |
+|---|---|---|
+| Spatial L-I (16) | 7 · 12 · 5, 2 | 8 · 11 · 7, 2 |
+| Goal L-I (8) | 2 · 6 · 1, 1 | 2 · 6 · 1, 0 |
+| Goal L-II (8) | 4 · 5 · 3, 0 | 4 · 5 · 2, 1 |
+| 합 (32) | 13 · 23 · 9, 3 | **14 · 22 · 10, 3** |
+
+- 기준: SSR ≥ 12 **불통과** (10), > 50 mm ≤ 4 통과 (3), 동결 판 안전 성공 9 중 잃는 것 ≤ 1 **불통과** (4: spatial t3 e16 → F, goal L-I t1 e17 → S+C 15 mm, goal L-II t0 e17 → S+C 33 mm, goal L-II t3 e17 → F). 안전 성공 얻음 5 (spatial t0 e16 · t1 e17 · t2 e18, goal L-I t0 e18, goal L-II t3 e18). 잃은 13 ep 중 돌아온 것 2 (spatial t1 e17, goal L-I t0 e18).
+- 큰 보정 (≥ 1) call 318 → 167 (쥐기 전 58 → 43, 쥔 동안 205 → 107, 놓은 뒤 55 → 17), 포화 성분 합 3735 → 1847, slack > 15 mm call 177 → 57, OSQP 한도 148 → 41. 잃은 13 ep 중 큰 보정 5 call 이상이 남은 ep 9 → 정해 둔 갈림대로 **`-md5` 를 거르기 2 뒤에** (§5 셋째 줄).
+- H1 (D): 큰 보정은 절반으로 줄었으나 잃은 ep 은 2 / 13 만 돌아옴 → '큰 보정이 task 를 깨뜨린다' 는 일부만. H2: CAR 23 → 22, > 50 mm 3 → 3 (spatial t1 e15 · e16 이 0 → 87 · 111 mm, t3 e18 은 294 → 5 mm). H3: Goal L-I t0 e18 은 돌아옴 (F → SS, IK 한도 call 13 → 2) — 예상과 반대; e17 은 F 그대로 (IK 한도 0 → 0).
+- **주의 [M]: `-rf` (SL-AUD1) 는 S32 의 action QP call 608 개 모두에서 `reference_floor = {"why": "no ESDF row"}` — 한 번도 작동하지 않았다.** `sqp._solve_ee_action` 의 `c_ref` (`linearizer._esdf_clearance(sphere_states(reference))`) 가 (H, S) 모양이 아니어서 floor 를 건너뛴 것 (예외 기록 없음). 같은 call 의 QP 장애물 row 는 236 개로 정상이고 chunk 기록에 curobo ESDF 가 있다 → live 경로에서만 생기는 모양 차이로 보이며 원인 미확정. 따라서 거르기 1 이 실제로 잰 것은 `-lp` (통과 9 call) · `-mr8` (QP 에서 뺀 row 합 930 → 30,953) · `-af` 이다. 판정은 사전 기준대로 FAIL.
