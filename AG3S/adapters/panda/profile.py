@@ -1359,6 +1359,25 @@ for _b in tuple(SOTA_HANDSIZED_VERSIONS):
     SOTA_HANDSIZED_ATT_VERSIONS = SOTA_HANDSIZED_ATT_VERSIONS + (_n,)
 del _b, _n
 SOTA_VERSIONS = SOTA_VERSIONS + SOTA_HANDSIZED_ATT_VERSIONS
+#: Tab. 1 row "AG3S-VLA GT oracle" (sdm-f6, 2026-11-13; paper plan §0.0.1: "최종 구성에서 인식만 GT 로 바꾼 판"): ``<frozen>-gto`` =
+#: the frozen version with its perception swapped for the GT path of SL-GTTO23 (B5): the attention perception flags of
+#: SL-GTTO24 (attention split, surface non-target evidence, --scene-obstacle-objects) and the perception-side SL-PE flags
+#: that act on the perceived identity / obstacle set (PE1 close seed, PE2/PE5 destination, PE3/PE8/PE11 + SL-SOTA5 scene
+#: obstacle cuts, PE4 class tests "GT 없는 scene 집합용") are dropped, and B5's GT flags (oracle-visible extent, GT identity,
+#: --grounding-source oracle, oracle admissible / held target / destination / robot mask / obstacle objects, support under)
+#: are added. Everything on the TrajOpt / action side (rows, margins, patience, action QP, hand-beneath, reach-sticky) is
+#: the frozen version's.
+SOTA_GTO_DROP = {"--attention-split-radius-mm": 1, "--attention-split-ratio-source": 1, "--attention-split-partition": 0,
+                 "--split-supersedes-anchor": 0, "--nontarget-evidence": 1, "--scene-obstacle-objects": 0,
+                 "--close-seed-grounding": 0, "--destination-after-held": 0, "--scene-obstacle-held-exclude": 0,
+                 "--passthrough-obstacle-class-tests": 0, "--destination-held-leader": 0, "--scene-obstacle-held-motion": 0,
+                 "--scene-obstacle-target-cut": 0, "--scene-obstacle-held-reach-mm": 1}
+SOTA_GTO_ADD: tuple[str, ...] = ("--target-extent", "oracle-visible", "--oracle-extent-identity", "gt", "--grounding-source", "oracle",
+                                 "--oracle-admissible", "--oracle-held-target", "--oracle-destination", "--oracle-robot-mask",
+                                 "--oracle-obstacle-objects", "--oracle-obstacle-support", "under")
+SOTA_GTO_VERSIONS: tuple[str, ...] = (FROZEN_20261112 + "-gto",)
+AG3S_VERSIONS[FROZEN_20261112 + "-gto"] = _drop_flags(tuple(AG3S_VERSIONS[FROZEN_20261112]), SOTA_GTO_DROP) + SOTA_GTO_ADD
+SOTA_VERSIONS = SOTA_VERSIONS + SOTA_GTO_VERSIONS
 GT15_VERSIONS = GT15_VERSIONS + SOTA_VERSIONS
 #: (G88c, 03:5x) the A-alone ablation queued as ``…-obst3`` (gtto23, not started yet) gets the same two fixes, so A alone and
 #: A + B differ only by the held point model: ``…-obst3`` := A'' + no carve + support "under" (``…-obst3-pts`` = B'' keeps
