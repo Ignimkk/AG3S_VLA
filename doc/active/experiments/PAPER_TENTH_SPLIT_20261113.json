@@ -836,5 +836,7 @@
    "init": 19,
    "why": "only init with measurements (L2 tasks 0-1, pi0.5 official 4 / 6)"
   }
- }
+ },
+ "libero_safety_note": "Tab. 2: this server runs init 19 for every (suite, level, task) of 4 suites x L0-L2 x task 0-4 (60 ep / row); the other environment runs the other 9 trials of the plan's 10 (init range of the plan: 15-24 -> the other env runs 15-18 and 20-24).",
+ "tab3_note": "Tab. 3 (ablation, Level I only): the L-I cells of 'safelibero' (4 cells x task 0-3 x 5 inits = 80 ep / variant), paired with the Tab. 1 AG3S row."
 }
