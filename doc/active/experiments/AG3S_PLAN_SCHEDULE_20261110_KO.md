@@ -1464,3 +1464,15 @@ GPU 약 1 h 50 분 (52 ep). dev-8a (sdm-ahs) 의 공유 lock 추출은 이 시�
 | `-a12h3` L12H3 | **9** | **11** | 14 |
 
 **정정:** §9.38 짝 표의 '충돌 ep 5' 는 합산 잘못 — 셋의 F+C · S+C 를 세면 3 + 1 + 2 = **6** 이다 (기준 '충돌 ep ≤ 5' 는 '동결 판보다 늘지 않음' 을 뜻했다). **판정: 유망 아님** (어느 쪽 값이든 11 > 5, 6). SS ≥ 9 는 채웠다. 해석 (D): L12H3 는 대상을 더 맞히고 (보충 5) task 성공 · SS 를 늘리지만, 새로 맞힌 대상으로 다가가며 옆 장애물과 접촉이 늘어난다 (새 충돌 7 ep 중 6 ep 가 ≤ 16 mm 의 작은 접촉). 다음 근거: 새 충돌 ep 의 접촉 link · 물체 (CPU) — 대상 옆 접근 충돌을 줄일 방법이 있으면 L12H3 와 함께 다시 본다. gate 는 `-gh156a-sw` 단독으로 18:45 시작 (main 3e4cdb7d).
+
+**§9.38 보충 7 (2026-11-13 18:5x) — 충돌 ep 의 첫 접촉 [M, GT 는 채점만]** (`first_contact.py`, SL-ATT1 26 ep 와 동결 판 짝 run; `outputs/2026-11-13_supplement_후보/08_attention_cell/sl-att1_closedloop/first_contact_summary.txt`). 장애물을 처음 건드린 것:
+
+| 첫 접촉 | 동결 판 L8H2 (6 ep) | `-a12h3` L12H3 (11 ep) |
+|---|---:|---:|
+| 팔 link5 · 6 · 7 | 4 | **8** (link5 5 · link7 2 · link6 1) |
+| 손 · 손가락 | 1 | 1 |
+| 쥔 물체 (bowl) | 0 | 1 |
+| 기록 없음 (변위만) | 1 | 1 |
+
+- **보충 5 의 해석 정정:** 새 충돌은 '손이 대상 옆 장애물에 닿음' 이 아니라 대부분 **팔 (link5 · link7) 이 장애물을 스침** 이다 (침투 1–6 mm, e12 만 28 mm). 동결 판의 충돌도 같은 형태가 다수 (4 / 6).
+- 동결 판은 `--links arms` (panda link1–7 + gripper 구) 로 팔도 제약에 넣는다 — 그런데도 팔이 닿는다. 확인할 것 (CPU, 다음): 접촉 직전 call 에서 (a) 그 장애물이 ESDF 에 있었나 (대상 · 지지면으로 빠졌나), (b) 팔 구 row 가 활성이었나, (c) QP 가 translation-only (`-tro`) 라 팔 자세를 바꿀 수 없어 막지 못했나. SL-SOTA10 기록 (profile.py: 'link5 / link6 against the milk / moka pot … the QP cancels it, the hand stands still') 과 같은 계열일 수 있다.
