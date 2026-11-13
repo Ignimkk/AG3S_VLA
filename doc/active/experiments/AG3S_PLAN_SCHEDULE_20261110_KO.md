@@ -1372,3 +1372,43 @@ GPU 약 40 분 (1 단계), 약 3 h (2 단계).
 | 판정 | 1 · 3 통과 → Tab. 1 AG3S 행 · GT oracle 행 · Tab. 2 · 3 을 이 판으로. 아니면 `-gh156a` (mug 이득 2 / 6, 손실 없음) 의 E1a 40 · guard 를 같은 방식으로 재고 나은 쪽 | |
 
 GPU 약 5 h 40 분 (1 단계 1 h 35 분, 2 단계 2 h 30 분, 3 단계 1 h 40 분).
+
+### 9.38 attention 자체가 틀린 call — 카메라 융합이 wrist 에 끌려감 · KNOWS cell L12H3 → SL-ATT1 소량 closed loop (sdm-f6, 결과 전 기록, 2026-11-13 14:4x)
+
+사용자 (14:2x): "어텐션 자체가 틀린 건에 대해서 해결 방법이 있습니까? 혹시 L12H3 으로 소량만 테스트 해볼래?"
+
+**attention 오류가 몰린 곳** (§9.37 의 `attn_vs_target.json`, 쥐기 전 call 421 개 · 과반 episode 19 개): Spatial L-I t1 (ramekin 위의 bowl — attention 이 ramekin), Object L-I t2 (milk — SafeLIBERO 장애물 wine bottle), Goal t3 (bowl → cabinet — plate). 선택 오류 (747) 보다 좁다.
+
+**발견 — 카메라 융합.** `fuse_observations` 는 camera 마다 lift 한 **raw** attention 을 voxel 마다 max 로 합친 뒤 한 번 정규화한다 (F2, RB-Y1 에서 정함). pi0.5 LIBERO 의 L8H2 는 wrist raw 가 head raw 보다 훨씬 크다 — 쥐기 전 3,084 call 에서 wrist / head 최댓값 비 중앙값 748, wrist 우세 97 % (4 suite 모두). 그래서 지금 server 의 attention 은 사실상 'wrist camera 가 보는 것 중 무엇' 이다. L12H3 은 반대로 중앙값 0.196, wrist 우세 33 %, attention 질량은 head 가 wrist 의 3.4 배.
+
+**offline 재추출** (`attn_cells_replay.py`, GPU 13:47–14:06 · 14:20–14:40, Tab. 1 cell 경계; 동결 판 SafeLIBERO 183 ep 의 쥐기 전 3,084 call 을 episode npz 로 요청을 다시 만들어 18 layer × 8 head 전부; 다시 뽑은 L8H2 grid = server 기록, 최대 차 3.0e-8) · **채점** (`attn_cells_score.py`: 기록된 attention 점구름을 head camera 에 투영 → cell 의 head grid 값 → 같은 정규화 → GT 위치 6 cm 안 평균 1 위 물체). 그림 [`sl-att1-l12h3-offline-20261113.png`](../../../AG3S/ag3s/docs/figures/sl-att1-l12h3-offline-20261113.png) (+ `.json`). 주의: 채점의 server 쪽 1 위는 투영 근사라 server 기록 1 위와 58 % 일치 (wrist 쪽 점의 voxel max 를 재현하지 못함) — 아래 'server' 열은 server 기록값 그대로다.
+
+| cell (쥐기 전 call) | Spatial L-I | Spatial L-II | Object L-I | Object L-II | Goal L-I | Goal L-II | Long L-I | Long L-II | 전체 3,084 |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| server (L8H2, head · wrist 융합) — 집을 물체 | 0.72 | 0.82 | 0.65 | 0.93 | 0.46 | 0.73 | 0.29 | 0.15 | **0.510** |
+| L8H2 head 만 | 0.57 | 0.63 | 0.82 | 0.91 | 0.49 | 0.61 | 0.21 | 0.16 | 0.455 |
+| **L12H3 head 만** | **0.94** | 0.87 | 0.81 | 0.96 | **0.62** | 0.74 | 0.29 | 0.17 | **0.596** |
+
+- server 가 틀린 call 중 L12H3 head 가 맞히는 수: Spatial L-I 130 / 159 (잃음 16), Goal L-I 27 / 90, Object L-I 46 / 95 (L8H2 head 도 47 — Object 는 cell 보다 wrist 융합 탓), Long L-I 은 잃음 118 · 얻음 101 (task 물체 기준) 로 득실이 비슷하다.
+- 144 cell 중 '집을 물체' 1 위가 L12H3 (1,838 call) 이다. L12H3 은 KNOWS 논문이 미리 정한 cell 이라 시험한다; 이 grid 에서 다른 cell 을 고르지 않는다 (test 데이터 선택).
+- 'attention 1 위 물체' 는 server 의 최종 대상이 아니다 (cluster · 허용 · identity 기억이 뒤에 있다). 효과는 closed loop 로 잰다.
+
+**SL-ATT1 판** (worktree, 이 절과 같은 commit): `…-rs-a12h3-tro` = 동결 판 + `--attention-source action:last:L12H3` (사용자가 물은 그대로, head · wrist 융합) · `…-rs-a12h3h-tro` = 그 + `--attention-head-only` (새 flag, Panda 만: wrist attention map 을 버리고 기하는 유지; RB-Y1 서버는 거절). test `tests/benchmark/test_sl_att1_head_only.py`.
+
+**소량 closed loop (결과 전 고정)** — `sota_att1_queue.sh`, Tab. 1 π0.5 arm 이 끝난 직후, §9.37 gate 전. 동결 판의 **같은 run 구성** 기존 run 을 짝으로 쓴다 (run 구성 효과 §9.36):
+
+| 셋 | 짝 (동결 판 run) | 동결 판 결과 |
+|---|---|---|
+| Spatial L-I task 1 init 5–14 (10) | `sub-pkgFrssdm-e1a-spatial-LI-t1` | SS 2 · F 5 · F+C 3 |
+| Object L-I task 0–3 init 15 · 16 (8) | `ms-pkgFrssdm-object-LI-i15_16` (20261112T113412) | SS 4 · F 3 · F+C 1 |
+| Goal L-I task 0–3 init 17 · 18 (8) | `ms-pkgFrssdm-goal-LI-i17_18` | SS 1 · S+C 1 · F 5 · F+C 1 |
+| 합 26 ep, 판마다 (`-a12h3h` 먼저, 그다음 `-a12h3`) | | **SS 7, 충돌 ep 5** |
+
+| 판정 (채택 run 아님) | 기준 |
+|---|---|
+| 유망 | 26 ep 안전 성공 ≥ 9 (동결 판 + 2) 이고 충돌 ep ≤ 5 |
+| 기제 | 쥐기 전 '인식된 대상 = 집을 물체' episode 수 (동결 판 대비) — 기록 |
+| 유망하면 | 그 판의 attention 설정을 `-gh156a-sw` 에 더한 판을 §9.37 gate 에 두 번째 후보로 넣는다 (E1a 40 · 기제 셋 · guard 같은 방식). Long L-I 손실 (offline) 은 gate 의 기제 셋이 잰다 |
+| 아니면 | 기록만, 채택 없음 |
+
+GPU 약 1 h 50 분 (52 ep). dev-8a (sdm-ahs) 의 공유 lock 추출은 이 시험 뒤 (사용자가 정한 순서, dev-8a 전달).
