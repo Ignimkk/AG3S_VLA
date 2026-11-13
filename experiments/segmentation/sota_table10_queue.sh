@@ -9,7 +9,7 @@
 # Part D = pi0.5 alone on the same episodes where no SDM run exists yet (SafeLIBERO Long, LIBERO, LIBERO-Safety with both
 # checkpoints); SafeLIBERO Spatial / Object / Goal init 19 are in the sdm-pi05-sl-* runs (sdm-c7).
 # NOTE: init 19 belongs to the reporting split (init 19-49). After this run it has been looked at for failure analysis.
-# usage: [PARTS="A B S C D M N G P"] bash experiments/segmentation/sota_table10_queue.sh
+# usage: [PARTS="A B S C D M N G P F"] bash experiments/segmentation/sota_table10_queue.sh
 # The launchers take the GPU lock themselves. Do not change this checkout's HEAD while it runs.
 set -u
 cd /mnt/dev/AG3S_VLA
@@ -121,6 +121,19 @@ if [[ " $PARTS " == *" P "* ]]; then
   run "P gh156a libero_10 task 4,6 init 19" $PY $LP --modes vla_v11ab --record-constraints full --ag3s-version "$VA" --task-suite-name libero_10 \
     --task-ids 4,6 --episode-ids 19 --seed 7 --data-split "$(label libero_10 -)" --run-id "$TAG-gh156a-lb-10"
   log "part P end"
+fi
+# Part F (2026-11-13 11:0x): the FROZEN version in the run layout of parts M / N / P. An episode's outcome depends on its
+# position in the run (same seed, same scene, different policy output at call 0 when the run holds other episodes before it:
+# E1a task 0 init 10 alone vs inside init 5-14), so the mug-option runs are compared with the frozen version run the same way.
+if [[ " $PARTS " == *" F "* ]]; then
+  for lvl in I II; do
+    run "F frozen safelibero_long L$lvl task 2,3 init 19" $PY $LP --modes vla_v11ab --record-constraints full --ag3s-version "$V" \
+      --task-suite-name safelibero_long --safety-level $lvl --task-ids 2,3 --episode-ids 19 --seed 7 \
+      --data-split "$(label safelibero_long $lvl)" --safelibero-step-budget main_aegis --run-id "$TAG-frz-long-L$lvl"
+  done
+  run "F frozen libero_10 task 4,6 init 19" $PY $LP --modes vla_v11ab --record-constraints full --ag3s-version "$V" --task-suite-name libero_10 \
+    --task-ids 4,6 --episode-ids 19 --seed 7 --data-split "$(label libero_10 -)" --run-id "$TAG-frz-lb-10"
+  log "part F end"
 fi
 if [[ " $PARTS " == *" D "* ]]; then
   for lvl in I II; do
