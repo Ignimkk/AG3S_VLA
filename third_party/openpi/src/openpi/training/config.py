@@ -1182,6 +1182,70 @@ _CONFIGS = [
         log_interval=100,
         save_interval=5_000,
     ),
+    TrainConfig(
+        # Real RB-Y1 (Model A v1.2) master-arm teleop data: red block -> basket, right arm only.
+        # 64 episodes / 13,135 frames at 15 fps, LeRobot v2.1, converted to the same 16-D order as the
+        # 16-D sim config above ([left arm 7, left gripper, right arm 7, right gripper], gripper 0 = closed,
+        # 1 = open). The left arm and left gripper are constant in this data. Launcher and steps:
+        # scripts/rby1/real_red_block.sh. Starts from pi05_base, not from the sim checkpoint.
+        name="pi05_rby1_real_red_block_16d_lora",
+        model=pi0_config.Pi0Config(
+            pi05=True,
+            paligemma_variant="gemma_2b_lora",
+            action_expert_variant="gemma_300m_lora",
+        ),
+        data=LeRobotAlohaDataConfig(
+            repo_id="local/rby1_red_block_16d_v1",
+            adapt_to_pi=False,
+            arm_joint_dim=7,
+            use_delta_joint_actions=True,
+            repack_transforms=_transforms.Group(
+                inputs=[
+                    _transforms.RepackTransform(
+                        {
+                            "images": {
+                                "cam_high": "observation.images.cam_high",
+                                "cam_left_wrist": "observation.images.cam_left_wrist",
+                                "cam_right_wrist": "observation.images.cam_right_wrist",
+                            },
+                            "state": "observation.state",
+                            "actions": "action",
+                            "prompt": "prompt",
+                        }
+                    )
+                ]
+            ),
+            base_config=DataConfig(
+                prompt_from_task=True,
+                # All 64 episodes are for training (no held-out split; evaluation is on the real robot).
+                episodes=tuple(range(64)),
+            ),
+        ),
+        weight_loader=weight_loaders.CheckpointWeightLoader(
+            "gs://openpi-assets/checkpoints/pi05_base/params"
+        ),
+        freeze_filter=pi0_config.Pi0Config(
+            pi05=True,
+            paligemma_variant="gemma_2b_lora",
+            action_expert_variant="gemma_300m_lora",
+        ).get_freeze_filter(),
+        ema_decay=None,
+        # ~410 steps per epoch at batch 32 -> 20k steps ~ 49 epochs. Small data, so fewer steps than the
+        # sim configs; intermediate checkpoints are compared on the robot. Starting point, not validated.
+        lr_schedule=_optimizer.CosineDecaySchedule(
+            warmup_steps=1_000,
+            peak_lr=5e-5,
+            decay_steps=20_000,
+            decay_lr=5e-6,
+        ),
+        num_train_steps=20_000,
+        batch_size=32,
+        log_interval=100,
+        save_interval=2_500,
+        # max_to_keep=1 deletes every checkpoint not on keep_period; keep all 2,500-step checkpoints (~9 GB each).
+        keep_period=2_500,
+        wandb_enabled=False,
+    ),
     # RoboArena & PolaRiS configs.
     *roboarena_config.get_roboarena_configs(),
     *polaris_config.get_polaris_configs(),
