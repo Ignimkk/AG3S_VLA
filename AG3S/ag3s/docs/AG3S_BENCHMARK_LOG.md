@@ -5224,3 +5224,11 @@ F8 + (a) `--ee-action-qp-scaled` (행 정규화 + quadratic slack) + (c′) `--g
 **판정 (§9.38 기준, 결과 전 고정): 유망 아님** — 충돌 ep 가 이미 8 > 5 (남은 goal 8 ep 로 줄지 않는다). gate 에 L12H3 후보를 넣지 않는다. 미리 정한 26 ep 측정은 끝까지 마친다 (goal 8 ep, 기제 기록용). 해석 (D, 확인 전): 대상을 바로 잡으면 (E1a t1: ramekin 대신 bowl) 동결 판이 멈춰 있던 episode 에서 손이 장애물 쪽으로 움직여 작은 충돌이 늘어난다 — attention 만 바꿔서는 안전 성공이 늘지 않는다.
 
 **§9.37 gate 운영 (결과 전, 18:2x).** `experiments/segmentation/sota_gate37_queue.sh` + `gate37_judge.py`. 단계 순서를 1 → 3 → 2 로 바꾼다 (채택 조건인 E1a 40 · guard 를 먼저, 기제 기록 56 ep 는 통과한 판에만). judge 가 §9.2 · §9.37 기준을 기계적으로 적용하고 실패하면 다음 단계로 가지 않는다: E1a — SSR ≥ 22, 또는 21 이고 CAR ≥ 36, > 50 mm ep 증가 ≤ 1 (동결 판 E1a 40: TSR 23 · CAR 34 · SSR 21 · > 50 mm 1); guard — LIBERO 27 ≥ 21, LS 10 성공 ≥ 4 · 위반 0, SafeLIBERO 11 > 50 mm 증가 ≤ 1. 기존 run 으로 judge 확인: 동결 판 E1a FAIL (자기 자신 +1 이 아니므로), mug 후보 `pkgFgh` E1a FAIL (> 50 mm 1 → 3, §9.35 와 같음), guard 둘 다 PASS. 후보 순서 `-gh156a-sw` → (실패 시) `-gh156a`. run-id TAG `g37<판>sdm`. 시작: SL-ATT1 goal 묶음이 끝나고 main 을 fast-forward 한 직후.
+
+### 2026-11-13 18:3x — SL-ATT1 대상 인식 비교 (sdm-f6)
+ `target_truth.py` (쥐기 전 call 마다 server 가 고른 대상이 task 물체인가) 를 SL-ATT1 의 끝난 18 ep 에 돌려 동결 판의 같은 episode 와 짝지었다 (`outputs/2026-11-13_supplement_후보/08_attention_cell/sl-att1_closedloop/compare.txt`).
+
+- 쥐기 전 call 합: **L8H2 275 / 539 = 51.0 % → L12H3 270 / 400 = 67.5 %**.
+- 동결 판에서 인식이 50 % 미만이던 10 ep (인식 실패 scenario): **9 ep 에서 인식이 올랐다** (0 → 100 % 가 3, spatial t1 e8 만 0 → 0). 그러나 결과는 안전 성공 **+2** (object t2 e15 F+C → SS, spatial t1 e10 F+C → SS), **−1** (object t1 e16 SS → F), 그리고 **충돌 없는 실패 → 충돌 3 ep** (spatial t1 e6 · e8 · e14).
+- 반대 방향: object t2 e16 은 인식 90 % → 0 % (L12H3 attention 이 SafeLIBERO 장애물 wine bottle 39 call) → 826 mm 충돌; spatial t1 e11 68 → 26 %.
+- 해석 (D): 인식이 고쳐진 episode 에서 동결 판은 '엉뚱한 대상 앞에서 멈춰 충돌 없이 실패' 하던 것이, 이제 맞는 대상으로 다가가다 그 옆 장애물을 건드린다. 인식 다음 병목은 **대상 바로 옆 장애물에 대한 접근 충돌**이다. 새 충돌 ep 의 막은 link · 충돌 물체 확인 (CPU, `surface_owner.py` 류) 이 다음 근거 — GPU 실험 전에 센다.
