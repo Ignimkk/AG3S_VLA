@@ -547,6 +547,15 @@ class ClusteringConfig:
     #: re-cut at its centre by `split_at_seed` + the band under its base) instead of whole 15 mm components: a component
     #: drop also removed an obstacle touching the bowl (pe12345789 SafeLIBERO t3 e2 / e4). Needs `scene_obstacle_objects`.
     scene_obstacle_target_cut: bool = False
+    #: SL-AUD6 (code audit 2026-11-13) -- `scene_obstacle_objects` is the union of the last 3 requests; the two older
+    #: requests' points carry those requests' exclusions. With this switch a remembered point within 15 mm of what THIS
+    #: request excludes (the manipulated object, its support band, the destination, the held object) is dropped too --
+    #: a destination registered at request N stayed in the obstacle set through N + 2. Needs `scene_obstacle_objects`.
+    scene_obstacle_history_refilter: bool = False
+    #: SL-AUD7 -- `destination_held_leader` looks at the score leader among the clusters more than 60 mm from the hand
+    #: instead of the overall leader (an overall leader near the hand that is graspable reset the 3-frame streak).
+    #: Needs `destination_held_leader`.
+    destination_leader_outside_hand: bool = False
     # --- SL-PE — end
     #: **T43 T 3(b) — release an identity the exclusion gate keeps refusing.** An integer N = when
     #: `AG3S._exclusion_gate` refuses the manipulated object because it overlaps the destination on
@@ -811,6 +820,13 @@ class ClusteringConfig:
             raise AG3SConfigError("clustering.attention_peak_seed needs clustering.close_seed_grounding")
         if self.scene_obstacle_target_cut and not self.scene_obstacle_objects:   # SL-PE11
             raise AG3SConfigError("clustering.scene_obstacle_target_cut needs clustering.scene_obstacle_objects")
+        for _name in ("scene_obstacle_history_refilter", "destination_leader_outside_hand"):   # SL-AUD6 / 7
+            if not isinstance(getattr(self, _name), bool):
+                raise AG3SConfigError(f"clustering.{_name} must be true or false, got {getattr(self, _name)!r}")
+        if self.scene_obstacle_history_refilter and not self.scene_obstacle_objects:
+            raise AG3SConfigError("clustering.scene_obstacle_history_refilter needs clustering.scene_obstacle_objects")
+        if self.destination_leader_outside_hand and not self.destination_held_leader:
+            raise AG3SConfigError("clustering.destination_leader_outside_hand needs clustering.destination_held_leader")
         hr = self.scene_obstacle_held_motion_reach   # SL-SOTA5
         if hr is not None and (isinstance(hr, bool) or not isinstance(hr, (int, float)) or not math.isfinite(float(hr))
                                or not (0.0 < float(hr) <= 0.3)):

@@ -997,6 +997,35 @@ class SqpConfig:
     #: this distance of the held footprint in xy and not more than this above the held object's bottom is what it is
     #: being lowered onto. None = 2 voxels (as before).
     obstacle_held_beneath_band: Optional[float] = None
+    #: SL-AUD1 (code audit 2026-11-13, `--ee-action-qp-reference-floor`) — the action QP holds an ESDF row that is not an
+    #: obstacle-object row at `min(backoff, its clearance on the policy chunk)` instead of at `backoff`: it may not make
+    #: such a row worse than the policy chunk does, and it does not have to repair it. The pass-through test accepts
+    #: those rows down to -tau, the QP pulled them back to +backoff (3 recorded episodes: a 0.9 mm margin shortfall ->
+    #: |Da| 1.04). SL-SOTA4 (`ee_action_gate_rows`) frees them down to -tau and let the correction push the arm into the
+    #: target / support. Exclusive with `ee_action_gate_rows`. False = as before.
+    ee_action_reference_floor: bool = False
+    #: SL-AUD2 (`--ee-action-qp-limit-passthrough`) — with the action map: a chunk the pass-through test refuses ONLY for
+    #: its joint-limit overshoot (reason `limit`: certified, no violation above tau, no obstacle-object row inside its
+    #: floor) is passed through. The action QP has no limit rows; it answered such a chunk with a collision-row
+    #: correction (recorded: obstacle violation 0, |Da| 0.90 / 1.61). False = as before.
+    ee_action_limit_passthrough: bool = False
+    #: SL-AUD3 (`--ee-action-qp-min-reach-mm`, scaled form only) — a row whose gradient norm over the FREE action
+    #: components is below this (m of clearance per unit action) is left out of the action QP, like the rows the scaled
+    #: form already leaves out at 1e-9. On the Panda step 0 is the pose after action row 0 and its rows have a gradient
+    #: of 3.5 mm per unit action (7.0 / 10.6 / 14.0 / 17.3 mm at steps 1-4 for a hand-rigid sphere): a 5 mm backoff at
+    #: step 0 asks for |Da| 1.42, which the box cannot give, and the slack penalty then saturates the action. None = as
+    #: before (1e-9 over every column).
+    ee_action_min_reach: Optional[float] = None
+    #: SL-AUD4 (`--ee-action-qp-audit-fixes`) — two corrections of the action QP: (a) the early exit of the
+    #: re-linearisation loop reads `full_violation` (worst clearance, positive = clear) as a clearance, as every other
+    #: caller does; (b) the obstacle-row margin the QP uses is the one of THIS call's pass-through test (the full margin
+    #: when that test did not run: geometry not certified / a violation above tau), never a value left by an earlier
+    #: call or episode. False = as before.
+    ee_action_audit_fixes: bool = False
+    #: SL-AUD5 (`--ee-action-qp-max-delta`, candidate B of `local_docs/2026-11-13_SDM_handoff_final_plan_KO.md`) — the
+    #: action QP may change one action component by at most this much (the box `|a_ref + Da| <= 1` stays). A correction
+    #: the cap leaves short stays a slack; the final check and the verdict are the ones as before. None = as before.
+    ee_action_max_delta: Optional[float] = None
     # --- T88 — end ---
 
     def validate(self) -> None:
@@ -1041,6 +1070,22 @@ class SqpConfig:
             if not (math.isfinite(float(self.obstacle_held_beneath_band)) and 0.0 < float(self.obstacle_held_beneath_band) <= 0.1):
                 raise TrajOptConfigError(
                     f"sqp.obstacle_held_beneath_band must be in (0, 0.1] m, got {self.obstacle_held_beneath_band!r}")
+        for name in ("ee_action_reference_floor", "ee_action_limit_passthrough", "ee_action_audit_fixes"):   # SL-AUD1 / 2 / 4
+            if not isinstance(getattr(self, name), bool):
+                raise TrajOptConfigError(f"sqp.{name} must be a bool, got {getattr(self, name)!r}")
+        if self.ee_action_reference_floor:   # SL-AUD1
+            if self.passthrough_obstacle_tolerance is None:
+                raise TrajOptConfigError("sqp.ee_action_reference_floor needs sqp.passthrough_obstacle_tolerance (the row classification)")
+            if self.ee_action_gate_rows:
+                raise TrajOptConfigError("sqp.ee_action_reference_floor and sqp.ee_action_gate_rows set the same rows' floor: use one")
+        if self.ee_action_limit_passthrough and not self.passthrough_when_clear:   # SL-AUD2
+            raise TrajOptConfigError("sqp.ee_action_limit_passthrough needs sqp.passthrough_when_clear")
+        if self.ee_action_min_reach is not None:   # SL-AUD3
+            if not (math.isfinite(float(self.ee_action_min_reach)) and 0.0 < float(self.ee_action_min_reach) <= 0.05):
+                raise TrajOptConfigError(f"sqp.ee_action_min_reach must be in (0, 0.05] m, got {self.ee_action_min_reach!r}")
+        if self.ee_action_max_delta is not None:   # SL-AUD5
+            if not (math.isfinite(float(self.ee_action_max_delta)) and 0.0 < float(self.ee_action_max_delta) <= 2.0):
+                raise TrajOptConfigError(f"sqp.ee_action_max_delta must be in (0, 2], got {self.ee_action_max_delta!r}")
         if not (math.isfinite(float(self.obstacle_row_priority)) and float(self.obstacle_row_priority) >= 1.0):
             raise TrajOptConfigError(f"sqp.obstacle_row_priority must be >= 1, got {self.obstacle_row_priority!r}")
         if isinstance(self.multi_seed, bool) or not isinstance(self.multi_seed, int) or self.multi_seed < 0:
@@ -1624,6 +1669,9 @@ _OMIT_WHEN_DEFAULT.update({("sqp", "obstacle_row_patience"): None})   # SL-SOTA3
 _OMIT_WHEN_DEFAULT.update({("sqp", "ee_action_gate_rows"): False})   # SL-SOTA4
 _OMIT_WHEN_DEFAULT.update({("sqp", "obstacle_hand_beneath"): False})   # SL-SOTA7
 _OMIT_WHEN_DEFAULT.update({("sqp", "obstacle_held_beneath_band"): None})   # SL-SOTA17
+_OMIT_WHEN_DEFAULT.update({("sqp", "ee_action_reference_floor"): False, ("sqp", "ee_action_limit_passthrough"): False,
+                           ("sqp", "ee_action_min_reach"): None, ("sqp", "ee_action_audit_fixes"): False,
+                           ("sqp", "ee_action_max_delta"): None})   # SL-AUD1-5
 _OMIT_WHEN_DEFAULT.update({("sqp", "passthrough_obstacle_full_horizon"): False})   # SL-GTTO22   # SL-GTTO16 A'
 # --- T88 — end ---
 #: T72 — the grasp-set reach constraint: without `--grasp-set-to` the config dump keeps the keys it had before.

@@ -490,6 +490,10 @@ class GraspLatch:
         self._rule_command: Optional[float] = None
         #: SL-GTTO11: the opening at the last executed **open** command (`opening_rule_moved_min`; None until one is seen).
         self._rule_open_ref: Optional[float] = None
+        #: SL-AUD8 (record only for the latch itself): the opening rule detached and no closing attempt has started since.
+        #: The rule's detach goes to LATCHED (there is no PLACED on this path); a reader that must tell "before the
+        #: grasp" from "after the release" reads this (`SafePolicy._grasp_contact`, only with its switch on).
+        self._rule_released: bool = False
         self._reset_grasp()
 
     # --- 조회 --------------------------------------------------------------------------
@@ -851,6 +855,7 @@ class GraspLatch:
         note = ""
         if self.phase is GraspPhase.LATCHED and signal.closing_steps > 0:
             self.phase = GraspPhase.CLOSING
+            self._rule_released = False          # SL-AUD8: a new closing attempt -- "before the grasp" again
             if cfg.opening_rule_reach_sticky:   # SL-SOTA11 — a new closing attempt starts without a pass
                 self._reach_pass = None
             note = f"닫힘 시도: 실행된 닫힘 명령 {signal.closing_steps} 스텝 (feedback seq {signal.feedback_seq})"
@@ -871,6 +876,7 @@ class GraspLatch:
                        else f"개도 {opening:.3f} < {cfg.opening_rule_empty_below:g} (빈손)")
                 note = f"opening_rule detach — {why} (feedback seq {signal.feedback_seq}) — detach(), LATCHED 로"
                 self.phase = GraspPhase.LATCHED
+                self._rule_released = True       # SL-AUD8: released (or lost) what was held
                 self._reset_grasp(keep_opening=True)
         elif (self.phase in (GraspPhase.CLOSING, GraspPhase.LATCHED, GraspPhase.PLACED)
               or (self.phase is GraspPhase.SEARCHING and self._manipulated.locked is not None)):
@@ -1169,6 +1175,7 @@ class GraspLatch:
         self._open_streak = 0
         self._rule_command = None
         self._rule_open_ref = None
+        self._rule_released = False
         self._reset_grasp()
 
 

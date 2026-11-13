@@ -2223,6 +2223,8 @@ class SafePolicy:
                "zone_radius": float(self.grasp_zone_radius), "centroid": centroid}
         if self.closing_hand_exempt:
             out["closing_exempt"] = self.closing_exempt_now()
+        if getattr(self, "progress_release_off", False) and getattr(self._latch, "_rule_released", False):
+            out["released"] = True   # SL-AUD8 (off: no key): the opening rule released and nothing is being grasped again
         if self.grasp_zone_release:   # SL-GTTO5 F4 (off: no key)
             out["zone_release"] = True
             keep_tol = getattr(self, "grasp_zone_keep_palm_obstacles", None)

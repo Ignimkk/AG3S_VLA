@@ -1177,7 +1177,7 @@ class AG3S:
         return m
 
     def _scene_obstacle_points(self, cloud, support_mask, target_points, destination_points, held_points=None,
-                               held_motion=None, target_cut=False):
+                               held_motion=None, target_cut=False, history_refilter=False):
         """SL-GTTO20 (`clustering.scene_obstacle_objects`) — `(points (K, 3) or None, record)`: the obstacle-object surface
         from AG3S's own perception (no GT). Connected components of the self-filtered, non-support cloud on a 15 mm grid;
         excluded: components within 15 mm of the manipulated object's points (the last observed geometry while occluded /
@@ -1192,6 +1192,7 @@ class AG3S:
             pts = pts[~np.asarray(support_mask, bool).reshape(-1)]
         rec: dict[str, Any] = {"source": "scene", "n_points": 0}
         sel = np.zeros((0, 3))
+        excluded = None   # SL-AUD6: the cloud points this request does not call an obstacle object
         if len(pts):
             lo = pts.min(axis=0)
             ijk = np.floor((pts - lo) / v).astype(np.int64)
@@ -1245,6 +1246,8 @@ class AG3S:
                     if hm is not None:
                         rec["held_motion"]["n_removed_total"] = int((keep & hm).sum())
                         keep &= ~hm
+                if history_refilter:
+                    excluded = pts[~keep]
                 sel = pts[keep]
                 if len(sel):
                     key = np.floor(sel / v).astype(np.int64)
@@ -1258,7 +1261,24 @@ class AG3S:
                            has_destination=destination_points is not None)
             else:
                 rec["why"] = "grid too large"
-        hist = list(getattr(self, "_obstacle_history", []))[-2:] + [sel]
+        older = list(getattr(self, "_obstacle_history", []))[-2:]
+        if history_refilter:
+            # SL-AUD6: the two remembered requests carry their own exclusions. What this request excludes (the manipulated
+            # object and its support band, the destination, the held object) is excluded from them too, by points: a
+            # remembered point within one 15 mm cell of an excluded cloud point goes. Kept filtered for the next request.
+            n_removed = 0
+            if excluded is not None and len(excluded) and any(len(h) for h in older):
+                tree_x = cKDTree(excluded)
+                kept = []
+                for h in older:
+                    if len(h):
+                        far = tree_x.query(h)[0] > v
+                        n_removed += int((~far).sum())
+                        h = h[far]
+                    kept.append(h)
+                older = kept
+            rec["history_refilter"] = {"n_removed": n_removed, "n_excluded_now": 0 if excluded is None else int(len(excluded))}
+        hist = older + [sel]
         self._obstacle_history = hist
         allp = [h for h in hist if len(h)]
         out = np.concatenate(allp) if allp else None
@@ -3297,7 +3317,9 @@ class AG3S:
                                     "preheld_geometry": None if manipulated_geometry is None
                                     else getattr(manipulated_geometry, "points", None)}}
                    if getattr(cfg.clustering, "scene_obstacle_held_motion", False) else {}),
-                **({"target_cut": True} if getattr(cfg.clustering, "scene_obstacle_target_cut", False) else {}))   # SL-PE11
+                **({"target_cut": True} if getattr(cfg.clustering, "scene_obstacle_target_cut", False) else {}),   # SL-PE11
+                **({"history_refilter": True}   # SL-AUD6 (off: the call is unchanged)
+                   if getattr(cfg.clustering, "scene_obstacle_history_refilter", False) else {}))
         if self._target_confirm.destinations.last_event == "registered":
             notes.append(
                 f"destination registered from perception: id={destination.id}, "

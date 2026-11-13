@@ -1095,6 +1095,9 @@ class TrajectoryOptimizer:
             self.path.begin(q_now, scene, servo_state)
         # --- T88 — begin ---
         passthrough_record = None
+        if getattr(cfg.sqp, "ee_action_audit_fixes", False):
+            # SL-AUD4 (b): the margin the action QP reads is the one of this call's pass-through test (off: untouched)
+            self.__dict__.pop("_obstacle_margin_now", None)
         if getattr(cfg.sqp, "passthrough_when_clear", False) and initial_iterate is None:
             passed, passthrough_record = self._clear_passthrough(
                 reference, q_now, scene, reference_violation, envelope, geometry_certified)
@@ -1102,6 +1105,17 @@ class TrajectoryOptimizer:
                 return self._finish_passthrough(
                     reference, q_now, scene, template, reference_violation, previous_chunk, notes, started,
                     geometry_certified, envelope, passthrough_record)
+            if (getattr(cfg.sqp, "ee_action_limit_passthrough", False) and passthrough_record.get("reason") == "limit"
+                    and self.ee_action_map is not None
+                    and np.shape(self.ee_action_map["M"])[0] == reference.size):
+                # SL-AUD2: refused only for the joint-limit overshoot (every earlier test of `_clear_passthrough` passed)
+                # and the solve below would be the action QP, which has no limit rows -- pass the policy chunk through
+                passthrough_record.update(applied=True, limit_passthrough=True)
+                return self._finish_passthrough(
+                    reference, q_now, scene, template, reference_violation, previous_chunk, notes, started,
+                    geometry_certified, envelope, passthrough_record,
+                    note="SL-AUD2: the policy chunk was refused only for its joint-limit overshoot and the action QP has "
+                         "no limit rows; passed through unchanged")
         # --- T88 — end ---
         # --- SL-GTTO9 (F7) — begin: the action-space QP instead of the joint-space SQP (adapter-supplied map) ---
         self.last_ee_action = None
@@ -1474,13 +1488,14 @@ class TrajectoryOptimizer:
 
 
     def _finish_passthrough(self, reference, q_now, scene, template, reference_violation, previous_chunk, notes,
-                            started, geometry_certified, envelope, record) -> TrajOptResult:
+                            started, geometry_certified, envelope, record, note=None) -> TrajOptResult:
         """T88 — `_finish` on the reference with zero iterations: the measured numbers and the metrics keys of an
         optimized chunk (the trajectory is the reference itself, so `reference_deviation` is 0), `_previous` and
         `frame_index` as after a solve."""
         result = self._finish(
             np.array(reference, np.float64), reference, q_now, scene, template, 0, 0.0, reference_violation, previous_chunk,
-            notes + ["T88: the policy chunk has no violation and is inside the limits; passed through unchanged"],
+            notes + ["T88: the policy chunk has no violation and is inside the limits; passed through unchanged"
+                     if note is None else str(note)],   # SL-AUD2 gives its own note (None = as before)
             started, geometry_certified)
         if envelope is not None:
             result.metrics["rest_start"] = self._rest_start_record(reference, reference, q_now, envelope)
@@ -1516,6 +1531,11 @@ class TrajectoryOptimizer:
             raise ValueError(f"ee_action_map M {M.shape} does not match the chunk ({H * nq}, {n_x})")
         lo_x = (-1.0 - a_ref).reshape(-1)
         hi_x = (1.0 - a_ref).reshape(-1)
+        max_delta = getattr(getattr(cfg, "sqp", None), "ee_action_max_delta", None)   # SL-AUD5 (None = off: the box above)
+        if max_delta is not None:
+            # the correction of one action component is at most `max_delta` (the +-1 box of `a_ref + Da` stays)
+            lo_x = np.maximum(lo_x, -float(max_delta))
+            hi_x = np.minimum(hi_x, float(max_delta))
         fixed = self.ee_action_fixed_dims   # SL-QE2 (off: None, the box above unchanged)
         released = None
         if fixed and getattr(self, "ee_action_rotation_release", False):   # SL-SOTA10 (off: `fixed` as before)
@@ -1531,6 +1551,8 @@ class TrajectoryOptimizer:
         backoff = float(cfg.reduction.linearization_backoff)
         trajectory = np.array(reference, np.float64)
         rec = {"iterations": 0, "rows": [], "status": [], "slack_max_m": 0.0}
+        if max_delta is not None:
+            rec["max_delta_cap"] = float(max_delta)   # SL-AUD5: key only when on
         if fixed:
             rec["fixed_dims"] = [int(d) for d in fixed]   # SL-QE2
         if released is not None:
@@ -1554,6 +1576,24 @@ class TrajectoryOptimizer:
         if bool(getattr(getattr(cfg, "sqp", None), "ee_action_gate_rows", False)):
             relief = float(getattr(cfg.sqp, "passthrough_tolerance", 0.0) or 0.0)
             rec["gate_rows_relief_m"] = relief
+        # SL-AUD1 (`sqp.ee_action_reference_floor`, False = off): an ESDF row that is not an obstacle-object row is held at
+        # min(backoff, its clearance on the policy chunk) -- floor = min(0, c_ref - backoff) -- not at backoff.
+        ref_floor = None
+        if bool(getattr(getattr(cfg, "sqp", None), "ee_action_reference_floor", False)):
+            try:
+                c_ref = np.asarray(self.linearizer._esdf_clearance(
+                    np.asarray(self.linearizer.sphere_states(reference, q_now)[0], np.float64), scene), np.float64)
+                if c_ref.ndim == 2 and c_ref.shape[0] == H and c_ref.shape[1] > 0:
+                    ref_floor = np.minimum(0.0, c_ref - backoff)
+                    ref_floor[~np.isfinite(ref_floor)] = 0.0
+                    rec["reference_floor"] = {"n_rows_below_backoff": int((c_ref < backoff).sum()),
+                                              "min_floor_m": float(ref_floor.min(initial=0.0))}
+                else:
+                    rec["reference_floor"] = {"why": "no ESDF row"}
+            except Exception as exc:   # the solve must not die on the floor: the plain rows, recorded
+                rec["reference_floor"] = {"error": repr(exc)}
+        min_reach = getattr(getattr(cfg, "sqp", None), "ee_action_min_reach", None)   # SL-AUD3 (None = off)
+        audit_fixes = bool(getattr(getattr(cfg, "sqp", None), "ee_action_audit_fixes", False))   # SL-AUD4 (False = off)
         prog, prog_q = getattr(self, "ee_action_progress", None), None   # SL-SOTA2 (None = off: the cost below as before)
         if prog:
             ob = ((passthrough_record or {}).get("obstacle_rows") or {}) if isinstance(passthrough_record, dict) else {}
@@ -1572,9 +1612,10 @@ class TrajectoryOptimizer:
         it = 0
         for it in range(1, int(self.ee_action_iterations) + 1):
             orow = None
-            if orm is not None or relief > 0.0:
+            if orm is not None or relief > 0.0 or ref_floor is not None:
                 rows, omask = self._linearize_with_obstacle_floor(trajectory, q_now, scene, float(orm or 0.0), rec,
-                                                                  other=-relief)
+                                                                  other=-relief,
+                                                                  **({} if ref_floor is None else {"ref_floor": ref_floor}))
             else:
                 rows, omask = self.linearizer.linearize(trajectory, q_now, scene, cfg), None
             used = rows.used & np.isfinite(rows.value)
@@ -1592,6 +1633,11 @@ class TrajectoryOptimizer:
             if self.ee_action_scaled:   # SL-GTTO11 F9a (off: the F7 form below, unchanged)
                 gn = np.linalg.norm(G, axis=1)
                 reach = gn > 1e-9
+                if min_reach is not None:
+                    # SL-AUD3: what the FREE action components can do for the row (m per unit action); a row below
+                    # `ee_action_min_reach` is left out like the ~0 ones (the final check still sees it)
+                    reach = reach & (np.linalg.norm(G[:, hi_x > lo_x], axis=1) >= float(min_reach))
+                    rec["min_reach_m"] = float(min_reach)
                 rec.setdefault("n_rows_unreachable", []).append(int((~reach).sum()))
                 G, b = G[reach] / gn[reach, None], b[reach] / gn[reach]
                 if orow is not None:
@@ -1631,14 +1677,18 @@ class TrajectoryOptimizer:
             else:
                 rec["slack_max_m"] = float(max(0.0, np.max(res.x[n_x:], initial=0.0)))
             trajectory = np.array(reference, np.float64) + (M @ x).reshape(H, nq).T
-            if rec["slack_max_m"] <= 1e-6 and it >= 2 and self.linearizer.full_violation(
-                    trajectory, q_now, scene) <= cfg.safety.violation_tolerance:
-                break
+            if rec["slack_max_m"] <= 1e-6 and it >= 2:
+                worst = self.linearizer.full_violation(trajectory, q_now, scene)   # worst clearance, positive = clear
+                # SL-AUD4 (a): compare the violation (off: the clearance itself, as before)
+                if (max(0.0, -float(worst)) if audit_fixes else worst) <= cfg.safety.violation_tolerance:
+                    break
         rec["iterations"] = it
         da = x.reshape(a_ref.shape)
         rec["max_abs_delta_action"] = float(np.max(np.abs(da), initial=0.0))
         rec["saturated_components"] = int(np.sum(np.isclose(np.abs(a_ref + da), 1.0, atol=1e-9)
                                                  & (np.abs(da) > 1e-9)))
+        if max_delta is not None:   # SL-AUD5: the components the cap (not the +-1 box) stopped
+            rec["capped_components"] = int(np.sum(np.isclose(np.abs(da), float(max_delta), atol=1e-9)))
         notes.append(f"F7 action QP: {it} linearization(s), max |Da| {rec['max_abs_delta_action']:.3f}")
         result = self._finish(trajectory, reference, q_now, scene, template, it, rec["slack_max_m"],
                               reference_violation, previous_chunk, notes, started, geometry_certified)
@@ -1660,6 +1710,10 @@ class TrajectoryOptimizer:
                 return np.array([0.0, 0.0, 1.0]), "held: up"
             if latch == "closing":
                 return None, "closing"
+            if gc.get("released"):
+                # SL-AUD8 (the key exists only with `SafePolicy.progress_release_off`): the object was put down and the
+                # grounded target is still its pre-grasp geometry -- "toward the target" would pull back to the pick place
+                return None, "after the release"
             target = getattr(scene, "manipulated_points", None)
             if target is None or not len(target):
                 return None, "no target"
@@ -1676,7 +1730,8 @@ class TrajectoryOptimizer:
         except Exception as exc:   # the solve must not die on the preference
             return None, "error: " + repr(exc)
 
-    def _linearize_with_obstacle_floor(self, trajectory, q_now, scene, margin: float, rec: dict, other: float = 0.0):
+    def _linearize_with_obstacle_floor(self, trajectory, q_now, scene, margin: float, rec: dict, other: float = 0.0,
+                                       ref_floor=None):
         """SL-SOTA1 — `linearizer.linearize` with `margin` as the row floor of the obstacle-object rows:
         `(rows, is_obstacle_object (H, n_query) or None)`. The returned values are `clearance − floor`, so the QP row
         `value + grad . Dq + s >= backoff` holds those rows `margin` higher and the row selection sees them that much
@@ -1693,6 +1748,16 @@ class TrajectoryOptimizer:
             return self.linearizer.linearize(trajectory, q_now, scene, cfg), None
         if floor is None:
             return self.linearizer.linearize(trajectory, q_now, scene, cfg), None
+        if ref_floor is not None:
+            # SL-AUD1: the ESDF rows that are not obstacle-object rows sit at their own floor (the ESDF block is the last
+            # `n_query` columns of the row floor, `linearizer.obstacle_row_floor`)
+            om = np.asarray(omask, bool)
+            if np.shape(ref_floor) == om.shape:
+                floor = np.array(floor, np.float64)
+                head = floor.shape[1] - om.shape[1]
+                floor[:, head:] = np.where(om, floor[:, head:], np.asarray(ref_floor, np.float64))
+            else:
+                rec.setdefault("reference_floor", {})["shape_mismatch"] = [list(np.shape(ref_floor)), list(om.shape)]
         return self.linearizer.linearize(trajectory, q_now, scene, cfg, states=states, row_floor=floor), omask
 
     def _seed_is_aligned(self, continuity) -> bool:
