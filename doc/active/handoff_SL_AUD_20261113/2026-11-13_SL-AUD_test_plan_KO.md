@@ -54,23 +54,23 @@ Tab. 1 AG3S arm 의 시작이 밀리는 시간은 약 2 시간 50 분 (두 거�
 
 ## 3. 보낸 것 과 넣는 방법
 
-branch `audit/sl-aud` 로 보냈다 (origin). `origin/feature/panda-benchmark` 의 `e5f0254d` 위에 commit 세 개다.
+branch `audit/sl-aud` 로 보냈다 (origin). `origin/feature/panda-benchmark` 의 `e5f0254d` 위에 code commit 둘과 문서 commit 이다.
 
 | commit | 내용 |
 |---|---|
 | `282e22d9` | code + 동작 test. action QP: `AG3S/trajopt/sqp.py` · `config.py` · `serve_safe.py`. 놓는 구간: `AG3S/ag3s/runtime/pipeline.py` · `stages/target_grounding.py` · `stages/admissibility.py` · `ag3s/config.py`, `AG3S/trajopt/grasp_latch.py` · `safe_policy.py`. 공통: `AG3S/adapters/panda/server.py` (`PORTED_FINAL_CONFIG_DESTS`). 새 test `tests/trajopt/test_sl_aud_action_qp.py` · `tests/ag3s/test_sl_aud_place_phase.py` |
 | `ac62c2bc` | 판 등록. `AG3S/adapters/panda/profile.py` (`SOTA_AUDIT_VERSIONS` 26 개), 새 test `tests/benchmark/test_sl_aud_versions.py`, 판 목록을 고정한 기존 test 세 줄 |
-| 셋째 commit | 문서만: `doc/active/handoff_SL_AUD_20261113/` (이 계획서, 점검 문서, 전달 문서, `scripts_20261113/audit_qp_demo.py`) |
+| 그 뒤의 commit | 문서만: `doc/active/handoff_SL_AUD_20261113/` (이 계획서, 점검 문서, 전달 문서, `scripts_20261113/audit_qp_demo.py`) |
 
 `e5f0254d` 까지의 변경 (`-gh156a-sw`, `-a12h3`) 과는 이미 합쳐 두었다. SDM 에 아직 push 하지 않은 commit (FWDATT merge `656a98f6`, `-fwd` 판 등록) 과만 맞추면 된다.
 
 ```bash
 # queue 경계에서 (queue 중 working tree 를 바꾸지 않는다). 먼저 worktree 에서 해 보려면 git worktree add ../aud-check HEAD
 cd /mnt/dev/AG3S_VLA
-git fetch origin audit/sl-aud
+git fetch origin audit/sl-aud:refs/remotes/origin/audit/sl-aud   # single-branch clone 에서도 origin/audit/sl-aud 가 생긴다
 git cherry-pick 282e22d9            # code: 다른 block 과 겹치지 않는다
 git cherry-pick ac62c2bc            # 판 등록: 겹치면 아래대로
-git cherry-pick origin/audit/sl-aud # 문서 (원하지 않으면 생략. git show origin/audit/sl-aud:doc/active/handoff_SL_AUD_20261113/<파일> 로 읽을 수 있다)
+git checkout origin/audit/sl-aud -- doc/active/handoff_SL_AUD_20261113   # 문서 폴더만 가져온다 (원하지 않으면 생략)
 source scripts/setup/env.sh
 .venv-ag3s/bin/python -m pytest -q tests/trajopt/test_sl_aud_action_qp.py tests/ag3s/test_sl_aud_place_phase.py \
     tests/benchmark/test_sl_aud_versions.py tests/ag3s/test_sl_pe_wiring.py tests/ag3s/test_admissibility.py \
