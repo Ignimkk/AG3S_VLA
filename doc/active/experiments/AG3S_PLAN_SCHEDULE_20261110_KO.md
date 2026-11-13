@@ -203,6 +203,7 @@ T5 뒤에 하면 이 서버에서 끝낸다. **이전 시점은 T5 와의 순서
 | 2026-11-13 02:2x | sdm-f6: §9.30 의 나머지 (part B · D · S · C, 2026-11-12 23:00 – 11-13 01:48) + SL-LS1 · SL-SOTA18 — §9.33. **1/10 표: LIBERO AG3S 14 / 20 (70.0 %) vs π0.5 단독 19 / 20; SafeLIBERO π0.5 단독 L-I · L-II 각 10 · 1 · 1 / 16; LIBERO-Safety L2 (공식 checkpoint) AG3S = π0.5 단독 = AAG 1 / 2 · TSA 2 / 2 · FSHOA 1 / 2.** SL-LS1 (공식 `pi05_libero_safety` 용 controller 변환): 구현 · smoke · 6 ep, 내부 단위 (1/16, 1/2) → (1/32, 1/8). **mug task 의 원인 = 조작 대상 후보 규칙 (가장 좁은 폭 ≤ 78 mm) 이 mug 를 `not_graspable` 로 거름** → SL-SOTA18 `-gh156` (사용자 승인 00:0x): mug 6 ep task 성공 0 → 2, `-hf30-gh156` 도 2. 02:23 2 단계 (나머지 46 ep, `-gh156`) 시작. **기록 사고:** 덧붙이는 script 의 실수로 benchmark log (cb1f002b · 9dd9ce13) 와 계획서 (66dd8623) 가 새 절만 남게 잘렸다 — c52537bd 에서 git 이력으로 복원 (삭제 0 줄), push 전이라 밖으로 나간 것은 없다 |
 | 2026-11-13 04:5x | sdm-f6: §9.32 SL-SOTA18 `-gh156` 2 단계 (part G, 02:23–04:53, HEAD 579ee680) — §9.34. **나머지 46 ep 의 결과가 동결 판과 episode 단위로 같다 (잃은 것 0) → 2 단계 통과.** 1/10 셋 전체 (같은 52 ep): LIBERO 14 → **15** / 20, SafeLIBERO TSR · SSR · CAR 17 · 12 · 22 → **18 · 13 · 24** / 32, > 50 mm 3 → 3. 04:54 복원한 계획서 · log 를 main 에 합침 (aee17c0c). 04:55 채택 gate (guard → E1a 40, TAG `pkgFghsdm`) 시작. 동결 판 교체는 gate 결과 뒤 사용자 판단 |
 | 2026-11-13 08:1x | sdm-f6: `-gh156` 채택 gate (04:55–08:07, HEAD aee17c0c, TAG `pkgFghsdm`) — §9.35. **guard 는 동결 판과 같다** (LIBERO 27 = 23, SafeLIBERO 11 = 5 · 9 · 4 · > 50 mm 0, LIBERO-Safety 10 = 5). **E1a 40 = 24 · 32 · 21** (동결 판 23 · 34 · 21): 안전 성공은 같고 > 50 mm 충돌이 1 → 3. 원인 확인: t0 e10 에서 mug 모양 장애물 (`red_coffee_mug_obstacle_1`) 이 쥐기 전 10 / 10 call 에 target 으로 인식돼 회피 대상에서 빠짐 (안전 성공 → 실패 + 충돌 252 mm) — §9.32 에 적은 위험이 실제로 남. §9.2 의 기준은 글자 그대로는 채우지만 **교체를 권하지 않고 사용자 판단에 올림** |
+| 2026-11-13 11:0x | sdm-f6: **사용자 지시 (10:5x): 논문 실험 = 원문과 같은 SafeLIBERO 1,600 ep / 방법; 이 서버는 그 1/10 을 Tab. 1 → 2 → 3 순서로, 성공이 가장 높게 나올 init 을 골라서; 나머지 9/10 은 다른 환경.** (11-11 계획서의 'init 19–28, 320 ep' 는 확정된 적 없는 권고였다.) §9.36: 고른 init (`PAPER_TENTH_SPLIT_20261113.json`), Tab. 1 · 2 queue, GT oracle 판 `<frozen>-gto`. **발견: episode 결과는 run 안의 위치에 따라 달라진다** (같은 seed · 장면에서 call 0 의 policy 출력이 다름) — 판 비교는 같은 run 구성끼리만. SL-SOTA18b `-gh156a` (손 크기 후보는 attention 1 위일 때만) 구현 · 확인 중. 11:03 queue: 동결 판 재측정 (구성 맞춤) → Tab. 1 π0.5 단독 행 |
 
 ---
 
@@ -1291,3 +1292,39 @@ GPU 약 40 분 (1 단계), 약 3 h (2 단계).
 - **판정 [D].** §9.2 의 기준 (guard, E1a 후퇴 확인 SSR ≥ 19) 은 글자 그대로는 채운다. 측정한 140 ep (1/10 셋 52 + guard 48 + E1a 40) 의 합: 안전 성공 · 성공 +3 (Long L-II task 3, LIBERO-10 task 4, E1a task 1 init 11), −1 (E1a task 0 init 10); > 50 mm 충돌 +2. **안전 지표가 나빠지는 기제가 확인됐으므로 이 판으로의 교체를 권하지 않는다.** 동결 판은 `pkgFrs` 그대로 두고 사용자 판단에 올린다.
 - **고칠 방향 [P]:** 손 크기 cluster 의 인정을 좁힌다 — 예: 쥘 수 있는 (가장 좁은 폭 ≤ 78 mm) 후보가 attention 을 받고 있으면 손 크기 후보는 그것을 밀어내지 못한다; 또는 손 크기 후보는 gripper 가 닫히는 증거 (close seed) 가 있을 때만 대상이 된다. 어느 쪽이든 red mug 장애물 episode (E1a task 0 init 10) 와 mug task 6 ep 을 같이 확인해야 한다. 구현 · 측정은 하지 않았다.
 - 도구 · 원자료: `experiments/segmentation/sota_offline_20261111/guard.py pkgFrssdm pkgFghsdm`, `outputs/2026-11-12_SOTA_SDM_동결검증/offline/tab10/gh156_e1a/` (target 인식 log), queue log `outputs/2026-11-11_SOTA_개선/eval_pkgFghsdm/queue.log`. 이 단계는 새 그림을 만들지 않았다 (표; 장면은 `sub-pkgFghsdm-e1a-spatial-LI-t0-*/videos/` 의 init 10).
+
+### 9.36 논문 표 실험 — 이 서버의 1/10 (사용자 지시 2026-11-13 10:5x) · run 구성 효과 · SL-SOTA18b (sdm-f6, 결과 전 기록, 11:0x)
+
+**사용자 지시 (2026-11-13).** 08:3x "권장안 (mug 규칙을 좁히기) 으로 수행, 최대한 SSR 을 높이기". 10:5x "내가 말한 것은 전체 1600 에피소드 중 1/10 을 수행하는 것", "table 1~3 순서대로", "성공률이 제일 높게 나올 것 같은 init 을 선택해서 수행", "다른 환경에서 나머지 9/10 을 수행", "supplement 에 사용할 만한 자료는 미리 저장".
+
+**규모 [P].** 원문 baseline (VLSA · KNOWS · multi-link) 과 같은 SafeLIBERO 1,600 ep / 방법 (4 suite × 4 task × L-I · L-II × init 0–49). 같은 비율로 LIBERO 2,000 (40 task × 50) · LIBERO-Safety 600 (4 suite × L0–L2 × 5 task × 10 trial). 이 서버 = 각 1/10: SafeLIBERO 160, LIBERO 200, LIBERO-Safety 60 ep / 행, Tab. 3 = Tab. 1 의 L-I 80 ep / 변형.
+
+**고른 init [D]** (`experiments/segmentation/sota_offline_20261111/select_inits.py`, `doc/active/experiments/PAPER_TENTH_SPLIT_20261113.json` — 나머지 9/10 의 목록 `complement_inits` 포함). cell 마다 init 5–49 중 안전 성공 기대값의 합 (task 0–3) 이 가장 큰 5 개: 동결 판으로 잰 episode 는 0.98 (안전 성공) / 0.02, 아니면 그 task 의 기대값에 π0.5 단독 결과의 우도비 (성공 1.15 · 실패 0.78; 184 짝에서 맞춤). launcher 의 test 분할이 init 5–49 라 init 0–4 는 다른 환경 몫. LIBERO 는 suite 마다 같은 방식 (task 0–9). LIBERO-Safety 는 잰 것이 init 19 뿐이라 init 19.
+
+| cell | 고른 init | 안전 성공 기대 | 그중 동결 판이 이미 안전 성공한 episode |
+|---|---|---:|---:|
+| spatial L-I | 7, 8, 13, 23, 25 | 13.1 / 20 | 9 |
+| spatial L-II | 7, 9, 16, 19, 24 | 13.2 / 20 | 6 |
+| object L-I | 7, 16, 19, 29, 30 | 12.4 / 20 | 6 |
+| object L-II | 6, 10, 15, 17, 18 | 18.3 / 20 | 12 |
+| goal L-I | 6, 8, 11, 12, 13 | 5.4 / 20 | 0 |
+| goal L-II | 6, 8, 11, 12, 17 | 9.3 / 20 | 2 |
+| long L-I | 21, 25, 26, 27, 28 | 5.5 / 20 | 0 |
+| long L-II | 5, 6, 16, 17, 18 | 9.4 / 20 | 6 |
+| LIBERO spatial | 15, 16, 17, 18, 19 | 43.4 / 50 | |
+| LIBERO object | 15, 16, 17, 18, 19 | 44.4 / 50 | |
+| LIBERO goal | 5, 15, 16, 17, 18 | 42.6 / 50 | |
+| LIBERO 10 | 5, 15, 16, 17, 18 | 42.6 / 50 | |
+
+- SafeLIBERO 160 ep 의 기대 안전 성공 약 87 (54 %) — init 19 하나로 잡은 §9.31 표본은 38 %.
+- **이 1/10 은 성공이 잘 나올 init 을 고른 부분이라 단독으로 보고하지 않는다.** 논문 수치는 다른 환경의 9/10 과 합친 1,600 ep 이다 (같은 판 · seed · code 여야 합칠 수 있다 — 다른 환경은 push 된 commit 을 써야 한다).
+
+**발견 — episode 결과는 run 안의 위치에 따라 달라진다 [M].** E1a task 0 init 10: 동결 판과 `-gh156` 은 init 5–14 를 한 run 으로 돌려 call 0 의 policy action 이 같았다 (차이 0, 10 ep 모두). init 10 하나만 돈 `-gh156a` run 은 장면 (sim state) 이 같고 policy seed (700010) 도 같게 적용됐는데 call 0 의 policy action 이 0.092 다르다. 원인은 확인하지 않았다 (후보: 같은 client 에서 앞 episode 가 남긴 renderer · env 상태, 또는 server 쪽 상태). 결과:
+- 판 A 대 판 B 비교는 **같은 run 구성** (같은 task · init 목록, 같은 순서) 끼리만 짝이다. §9.32–9.35 의 mug episode 비교 (동결 판 = task 0–3 한 run, mug 판 = task 2 · 3 run) 는 구성이 달랐다 → part F 로 동결 판을 같은 구성으로 다시 잰다.
+- 이미 잰 episode 의 결과는 새 구성에서 그대로 되풀이되지 않는다 — 위 '기대값' 은 확률이다. Tab. 1 의 세 행은 같은 구성으로 돌린다.
+
+**SL-SOTA18b `-gh156a` [M · D].** `-gh156` 이 잃은 E1a task 0 init 10 의 기제: 대상을 정하는 첫 call 에서 빨간 mug 장애물 cluster 가 grounding 점수 1 위 (모양 · peak 근접 항) 였고 그릇이 2 위였다 (그릇 주변 평균 attention 0.33, mug 0.07). 동결 판은 1 위가 '쥘 수 없음' 이라 2 위를 골랐다. 규칙: 손 크기로만 인정되는 후보는 그 frame 의 인정된 후보 중 **평균 attention 1 위** 일 때만 인정 (`--graspable-hand-sized-attention-top`, 판 `…-gh156a-tro`, commit bb4fdb9c, test 포함 161 passed). 기록상 mug task 6 ep 에서 진짜 mug 는 초기 call 51 개 중 49 개에서 평균 attention 1 위. 확인 run: E1a t0 e10 단독 = 실패 + 충돌 108 mm (gate 는 동작 — 첫 call 에 mug 가 `hand_sized_outranked`, 그릇이 대상) — 그러나 이 run 은 구성이 달라 비교할 수 없다 (위). mug 6 ep 은 Long L-II task 3 안전 성공 유지. 판 결정은 part F (동결 판, 같은 구성) 뒤.
+
+**Tab. 1 · 2 queue [P].** `experiments/segmentation/paper_tab1_tenth_queue.sh` (행 = AG3S · π0.5 단독 · GT oracle; run-id `tab1sdm-<arm>-sl-<suite>-L<lvl>` · `tab1sdm-<arm>-lb-<suite>`), `paper_tab2_tenth_queue.sh` (`tab2sdm-<arm>`). GT oracle 판 `<frozen>-gto` = 동결 판에서 인식 flag (attention split · surface 증거 · scene 장애물 물체 · PE1/2/3/4/5/8/11 · SL-SOTA5) 를 빼고 SL-GTTO23 의 GT flag 를 넣은 것, TrajOpt · action 쪽은 그대로 (commit a9c511be, parse · flag 검사 통과, launcher 가 client 에 GT segmentation 을 요청). GPU 거친 추정: Tab. 1 약 26 h, Tab. 2 약 5 h, Tab. 3 약 24 h (변형 구현 필요 — 조사 중).
+
+**supplement 후보 [P].** `outputs/2026-11-13_supplement_후보/` (README 색인 · 그림 · episode 별 표 · 원인 분석 원자료 · 대표 영상). 앞으로 나오는 자료도 만들 때마다 여기 더한다.
