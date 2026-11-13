@@ -1328,3 +1328,47 @@ GPU 약 40 분 (1 단계), 약 3 h (2 단계).
 **Tab. 1 · 2 queue [P].** `experiments/segmentation/paper_tab1_tenth_queue.sh` (행 = AG3S · π0.5 단독 · GT oracle; run-id `tab1sdm-<arm>-sl-<suite>-L<lvl>` · `tab1sdm-<arm>-lb-<suite>`), `paper_tab2_tenth_queue.sh` (`tab2sdm-<arm>`). GT oracle 판 `<frozen>-gto` = 동결 판에서 인식 flag (attention split · surface 증거 · scene 장애물 물체 · PE1/2/3/4/5/8/11 · SL-SOTA5) 를 빼고 SL-GTTO23 의 GT flag 를 넣은 것, TrajOpt · action 쪽은 그대로 (commit a9c511be, parse · flag 검사 통과, launcher 가 client 에 GT segmentation 을 요청). GPU 거친 추정: Tab. 1 약 26 h, Tab. 2 약 5 h, Tab. 3 약 24 h (변형 구현 필요 — 조사 중).
 
 **supplement 후보 [P].** `outputs/2026-11-13_supplement_후보/` (README 색인 · 그림 · episode 별 표 · 원인 분석 원자료 · 대표 영상). 앞으로 나오는 자료도 만들 때마다 여기 더한다.
+
+### 9.37 여러 scenario 에 공통인 실패 원인 → SL-SOTA19 `-gh156a-sw` (sdm-f6, 결과 전 기록, 2026-11-13 12:1x)
+
+**사용자 지시 (2026-11-13 11:0x):** "특정 에피소드에서 발생하는 문제를 고치는 것보다는 여러 시나리오에서 공통적으로 실패하는 부분의 원인을 찾아 개선하는 것이 SSR 을 높이는 데 도움."
+
+**같은 구성 재측정 (part F, 11:03–11:46) [M].** mug 6 ep (Long task 2 · 3 × L-I · L-II, LIBERO-10 task 4 · 6; init 19), 같은 run 구성: 동결 판 task 성공 **0 / 6** (충돌 8 · 3 mm), `-gh156` 2, `-hf30-gh156` 2, `-gh156a` 2 (충돌 0). mug 규칙의 이득은 run 구성 효과가 아니다. E1a task 0 init 10 단독 run: 동결 판 = `-gh156a` = 실패 + 충돌 108 mm (60 call 의 action 이 같다) — 앞서 본 108 mm 는 판이 아니라 run 구성 탓.
+
+**공통 원인 집계 [M · D]** (`common_causes.py`; 동결 판 SafeLIBERO 184 ep = 다른 suite + Spatial L-I init 15–19, E1a 40; 안전 성공이 아닌 103 ep):
+
+| 주원인 (순서대로 하나) | ep | scenario | suite |
+|---|---:|---:|---:|
+| 충돌 (장애물 > 1 mm) | 38 | 19 | 4 |
+| 대상 오인식 (쥐기 전 call 의 과반에서 task 물체가 아닌 것을 대상으로) | 33 | 15 | 4 |
+| SafeLIBERO 장애물에 막혀 끝내지 못함 | 17 | 12 | 3 |
+| task 물체 (대상 · 목적지) 에 막힘 | 9 | 4 | 3 |
+| 그 밖의 물체에 막힘 | 5 | 5 | 3 |
+| policy (거절 < 5 call) | 1 | 1 | 1 |
+
+- 대상 오인식은 충돌 episode 의 절반 (19 / 38) 에도 있다 — 둘을 합치면 **52 / 103, 4 suite 18 scenario**. 인식 비율이 25 % 미만인 episode 45 개 중 안전 성공 6 (13 %), 50 % 이상 108 개 중 57 (53 %).
+- **attention 오류인가 선택 오류인가** (`attn_vs_target.py`, 쥐기 전 call 마다 'GT 근처 평균 attention 1 위 물체' 대 'server 의 대상'): attention 이 task 물체를 가리키는데 server 가 다른 것을 고른 call 747, attention 자체가 다른 물체를 가리킨 call 421. 과반이 선택 오류인 episode 35 (안전 성공 14), attention 오류 22 (3).
+- **선택 오류의 이유** (`grounding_replay.py`, 980 call): task 물체가 **쥘 수 없는 (모든 방향 > 78 mm) 덩어리 안에만** 있음 627 (64 %; 이웃과 붙은 110 × 120 × 256 mm 류, 또는 mug 자체), 쥘 수 있는 task 후보가 있었으나 안 고름 258, 어느 후보에도 없음 95. T31b attention split 은 '가장 좁은 폭 ≤ 78 mm < 가장 긴 폭' 인 덩어리만 쪼갠다 — 붙은 덩어리는 쪼개지지 않고 통째로 후보에서 빠진다.
+- **offline 재생 — frame 마다 새로 고를 때 (identity 기억 없음, 3,130 call)** (`grounding_replay2.py`; 순위 가중치를 attention 만으로 바꾸면 66.9 → 67.8 % 로 거의 같음 — 가중치 문제가 아님):
+
+| 규칙 | task 물체를 고른 call | attention 이 맞는 call 중 | 새로 맞힘 / 잃음 (R0 대비) | 얻은 cell |
+|---|---:|---:|---|---|
+| R0 동결 판 | 45.5 % | 54.5 % | — | |
+| R1 + 넓은 덩어리도 쪼갬 (재군집만) | 55.6 % | 64.7 % | +338 / −21 | Spatial L-I · L-II, Long L-I · L-II |
+| R2 + 손 크기 후보 (= `-gh156a`) | 62.9 % | 75.6 % | +555 / −9 | Long L-II · L-I, Spatial |
+| **R3 = R1 + R2** | **72.8 %** | **85.6 %** | **+880 / −23** | Spatial L-I · L-II, Long L-I · L-II |
+
+  Object · Goal 은 바뀌지 않는다 (원인이 attention 오류 또는 후보 없음).
+
+**후보 SL-SOTA19.** `--attention-split-wide` (`clustering.attention_split_wide`, commit 84752ecb): T31b split 을 모든 방향으로 넓은 덩어리에도 적용하되 **재군집만** (attention partition 없음 — 한 덩어리인 넓은 물체는 하나의 성분으로 남는다). 판 `…-hb-qs-rs-gh156a-sw-tro`. test 239 passed (새 test: 붙은 두 물체는 갈라지고 attention 쪽이 대상, 넓은 한 물체는 그대로 · partition 없음, 좁은 trigger 동작은 그대로).
+
+**순서 · 판정 (결과 전 고정)** — Tab. 1 π0.5 행이 끝난 뒤 (19:00 무렵), Tab. 1 AG3S 행 전에:
+
+| 단계 | 셋 (판 = `-gh156a-sw`, 동결 판과 같은 run 구성) | 통과 |
+|---|---|---|
+| 1 주 기준 | E1a 40 (`sota_sub_queue.sh`, task 0–3 × init 5–14) | §9.2: SSR ≥ 22 (동결 판 21 + 1), 또는 21 이고 CAR ≥ 36; > 50 mm 증가 ≤ 1 |
+| 2 기제 (in-sample) | Spatial L-I init 15–18, Spatial L-II · Long L-I · Long L-II init 15 · 16 과 17 · 18 (`sota_ms_queue.sh`, 동결 판과 같은 INITS 묶음) — 56 ep (동결 판 SSR 18) | 기록 (채택 조건 아님) — SSR 합과 대상 인식 비율 |
+| 3 guard | `gtto16_queue.sh` | §9.2 |
+| 판정 | 1 · 3 통과 → Tab. 1 AG3S 행 · GT oracle 행 · Tab. 2 · 3 을 이 판으로. 아니면 `-gh156a` (mug 이득 2 / 6, 손실 없음) 의 E1a 40 · guard 를 같은 방식으로 재고 나은 쪽 | |
+
+GPU 약 5 h 40 분 (1 단계 1 h 35 분, 2 단계 2 h 30 분, 3 단계 1 h 40 분).
