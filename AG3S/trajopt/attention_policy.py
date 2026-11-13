@@ -33,6 +33,12 @@ pre-T57 path unchanged — the extended path (`_infer_extended`) is a separate b
 backend for the hidden h_4 feature of the same noun prefix pass (`want_hsr5`; gemma `return_hidden` is turned on for
 that pass only, `attention_source.llm_with_hidden`) -> `result["hsr5"] = {"p", "argmax", "probe", "ms"}`. Without it
 the backend call has no `want_hsr5` kwarg and the result has no key.
+
+**FWDATT (default off).** `inpass=True` (`--attention-inpass`) takes the action **and** the attention from one sampling
+(`AG3S/trajopt/inpass_attention.py`): no second model, no fixed-seed noise -- step 0 of the sample that is served. The
+cell is the default one (`_LAYER` / `_HEAD` / `_AGG`, denoise 0) or an ``action:`` `attention_source`; `result["attention"]`
+keeps the default format. Everything that needs another prefix read (noun / hidden-probe source, task probe, subtask /
+HSR6 / HSR5 probes, prefix feature) is refused at construction. Off (the default): `infer` is the path above, unchanged.
 """
 
 from __future__ import annotations
@@ -77,8 +83,16 @@ class AttentionPolicy:
                  subtask_probe: Any = "default", attention_source: Any = None,
                  noun_tokens: Any = None, task_probe: Any = None, sampler: Any = None,
                  backend: Any = None, default_prompt: Optional[str] = None,
-                 prefix_feature: bool = False, hsr6_probe: Any = None, hsr5_probe: Any = None):
+                 prefix_feature: bool = False, hsr6_probe: Any = None, hsr5_probe: Any = None,
+                 inpass: bool = False, model_config: Any = None):
         self._policy = policy
+        # FWDATT — begin: refused combinations before anything is loaded (off: nothing here runs)
+        if inpass:
+            _check_inpass_args(attention_source=attention_source, task_probe=task_probe, sampler=sampler,
+                               backend=backend, prefix_feature=prefix_feature, hsr6_probe=hsr6_probe,
+                               hsr5_probe=hsr5_probe, subtask_probe=subtask_probe)
+            sampler = False   # no second model
+        # FWDATT — end
         if sampler is None:
             from AG3S.ag3s.experiments.sources.pi05_attention import AttentionSampler
 
@@ -119,7 +133,7 @@ class AttentionPolicy:
         #: — the noun is read from the prompt that went into the policy.
         self._default_prompt = default_prompt
         self._backend = backend
-        if self._extended and self._backend is None:
+        if self._extended and self._backend is None and not inpass:   # FWDATT: in-pass has no prefix backend
             from AG3S.trajopt.attention_source import JaxPrefixBackend
 
             self._backend = JaxPrefixBackend(self._sampler, noise_seed=self._noise_seed)
@@ -133,6 +147,11 @@ class AttentionPolicy:
                 self._backend.set_hidden_probe(self._hidden_probe)
         # --- T90 — end
         # T57-A — end
+        # FWDATT — begin: the in-pass sampler (None = off, `infer` takes the paths above unchanged)
+        self._inpass = None
+        if inpass:
+            self._inpass = _build_inpass(policy, model_config, self._source)
+        # FWDATT — end
 
     @property
     def metadata(self) -> dict[str, Any]:
@@ -194,7 +213,14 @@ class AttentionPolicy:
         """The `NounProbe` in use, or None (no `result["task_probe"]`)."""
         return self._task_probe
 
+    @property
+    def inpass(self):
+        """FWDATT — the `InpassSampler` in use, or None (off: the attention comes from the second model)."""
+        return self._inpass
+
     def infer(self, obs: dict[str, Any], **kwargs) -> dict[str, Any]:
+        if self._inpass is not None:   # FWDATT (off: never taken)
+            return self._infer_inpass(obs, **kwargs)
         result = self._policy.infer(obs, **kwargs)
         if self._extended:
             return self._infer_extended(obs, result)
@@ -207,6 +233,24 @@ class AttentionPolicy:
             return result
         if feature is not None:
             self._label_feature(result, feature)
+        return result
+
+    # --- FWDATT: action and attention from one sampling (only with `inpass=True`) ----------
+    def _infer_inpass(self, obs: dict[str, Any], **kwargs) -> dict[str, Any]:
+        """`Policy.infer`'s result (same RNG advance) + `result["attention"]` of step 0 of that sample. The action
+        failing fails the call (as `Policy.infer` would); the attention read-out failing leaves the key out."""
+        result, block = self._inpass.infer(obs, **kwargs)
+        try:
+            from AG3S.ag3s.experiments.sources.pi05_attention import AGGREGATIONS
+            from AG3S.trajopt.attention_source import cell_maps
+
+            agg = _AGG if self._source is None else self._source.agg
+            result["attention"] = cell_maps(np.asarray(AGGREGATIONS[agg](block)))  # [768] -> {camera: [16, 16]}
+        except Exception:  # noqa: BLE001 — attention failing must not fail the policy call
+            logging.warning("attention extraction failed (in-pass):\n%s", traceback.format_exc())
+            return result
+        if self._source is not None:   # = the extended path's record for an action source
+            result["attention_source"] = {**self._source.record(), "attention": "ok"}
         return result
 
     # --- T57-A: attention source · task probe (only with a flag) ----------------------------
@@ -365,6 +409,37 @@ class AttentionPolicy:
             lo, hi = CAMERA_BINDINGS[camera][2]
             out[camera] = cell[lo:hi].reshape(ATTENTION_GRID, ATTENTION_GRID)
         return out, feature
+
+
+# --- FWDATT — begin
+def _check_inpass_args(*, attention_source, task_probe, sampler, backend, prefix_feature, hsr6_probe, hsr5_probe,
+                       subtask_probe) -> None:
+    """`inpass=True` covers the action-query cell only; anything that reads another pass is refused, not ignored."""
+    from AG3S.trajopt.attention_source import AttentionSource, parse_attention_source
+
+    bad = [name for name, on in (("task_probe", task_probe is not None), ("sampler", sampler is not None),
+                                 ("backend", backend is not None), ("prefix_feature", bool(prefix_feature)),
+                                 ("hsr6_probe", hsr6_probe is not None), ("hsr5_probe", hsr5_probe is not None),
+                                 ("subtask_probe", subtask_probe not in (None, False))) if on]
+    if attention_source is not None:
+        src = attention_source
+        if isinstance(src, str):
+            src = parse_attention_source(src)
+        if not isinstance(src, AttentionSource) or src.query != "action":
+            bad.append(f"attention_source {getattr(src, 'label', src)!r} (only action:<agg>:L<l>H<h>)")
+    if bad:
+        raise ValueError("AttentionPolicy(inpass=True) reads the step-0 action-query cell of the served sampling only; "
+                         "not supported with: " + ", ".join(bad))
+
+
+def _build_inpass(policy, model_config, source):
+    if model_config is None:
+        raise ValueError("AttentionPolicy(inpass=True) needs model_config (the policy's Pi0Config)")
+    from AG3S.trajopt.inpass_attention import InpassSampler
+
+    layer, head = (_LAYER, _HEAD) if source is None else (int(source.layer), int(source.head))
+    return InpassSampler(policy, model_config, layer=layer, head=head)
+# --- FWDATT — end
 
 
 def _load_probe(spec: Any):

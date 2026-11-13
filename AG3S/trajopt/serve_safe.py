@@ -2643,6 +2643,11 @@ def build_parser() -> argparse.ArgumentParser:
                     help="SL-ATT1 (--robot panda 만) — attention 을 agent view (head) camera 에서만 받는다. wrist camera 의 attention "
                          "map 은 버리고 (그 camera 의 기하는 그대로), 점별 max 융합에 head 값만 들어간다. 이유: pi0.5 LIBERO 에서 wrist "
                          "raw attention 이 head 의 약 200 배 (중앙값) 라 융합 attention 이 wrist 시야에 끌려간다 (2026-11-13). 기본 off")
+    ap.add_argument("--attention-inpass", action="store_true",
+                    help="FWDATT (--robot panda 만) — attention 을 서빙 action 을 만드는 바로 그 sampling 의 step 0 에서 읽는다 "
+                         "(AG3S/trajopt/inpass_attention.py): checkpoint 두 번째 사본을 올리지 않고, noise_seed=0 고정 noise "
+                         "대신 실행된 sample 의 noise 다. cell 은 기본 (L8H2 last) 또는 --attention-source action:<agg>:L<l>H<h>. "
+                         "noun · hidden-probe source, HSR6 와는 함께 쓸 수 없다 (거절). 기본 off")
     ap.add_argument("--attention-split-wide", action="store_true",
                     help="SL-SOTA19 — T31b attention split 을 모든 방향으로 gripper 최대 열림보다 넓은 cluster 에도 적용 (재군집만, "
                          "attention partition 없음): 대상이 이웃과 붙어 한 덩어리가 된 것을 떼어 낸다 (clustering.attention_split_wide)")
@@ -4201,6 +4206,9 @@ def reject_panda_only_flags(ap: argparse.ArgumentParser, args) -> None:
                  "거절합니다")
     if getattr(args, "attention_head_only", False):   # SL-ATT1
         ap.error("--attention-head-only 은 Panda 서버의 attention camera 선택입니다 (--robot panda 만). RB-Y1 서버는 거절합니다")
+    if getattr(args, "attention_inpass", False):   # FWDATT
+        ap.error("--attention-inpass 는 Panda 서버의 attention 경로입니다 (--robot panda 만). RB-Y1 서버의 AttentionPolicy 는 "
+                 "kv_L4 subtask label 을 항상 싣는데 in-pass 는 그것을 내지 않으므로 거절합니다")
     if getattr(args, "oracle_target_volume", False):   # SL13
         ap.error("--oracle-target-volume 은 Panda LIBERO client 의 정답 segmentation 진단입니다 (--robot panda 만). RB-Y1 서버는 "
                  "거절합니다")
