@@ -1103,6 +1103,8 @@ def t43t_identity_section(args) -> dict:
     out.update(identity_rules_section(args))   # SL8b (off: {})
     if getattr(args, "graspable_hand_sized_mm", None) is not None:
         out["graspable_hand_sized"] = float(args.graspable_hand_sized_mm) / 1000.0   # SL-SOTA18 (off: no key)
+    if getattr(args, "graspable_hand_sized_attention_top", False):
+        out["graspable_hand_sized_attention_top"] = True   # SL-SOTA18b (off: no key)
     if getattr(args, "grounding_source", "attention") not in (None, "attention"):
         out["grounding_source"] = str(args.grounding_source)   # SL-GTTO (default attention: no key)
     for name in ("oracle_admissible", "oracle_held_target", "oracle_destination", "oracle_robot_mask",
@@ -2635,6 +2637,10 @@ def build_parser() -> argparse.ArgumentParser:
                     help="SL-SOTA18 — 가장 좁은 폭이 gripper 최대 열림을 넘는 cluster 도 가장 긴 폭이 MM 이하이면 조작 대상 후보로 "
                          "인정한다 (mug 처럼 테두리 · 손잡이를 집는 손 크기 물체; 기본: 꺼짐 = T26 규칙 그대로). crate · basket · "
                          "cabinet 은 계속 탈락 (clustering.graspable_hand_sized)")
+    ap.add_argument("--graspable-hand-sized-attention-top", action="store_true",
+                    help="SL-SOTA18b — --graspable-hand-sized-mm 와 함께만. 손 크기로만 인정되는 후보는 그 frame 의 인정된 후보 중 "
+                         "attention 평균이 가장 높을 때만 조작 대상이 될 수 있다 (모양 점수로는 이기지 못함; "
+                         "clustering.graspable_hand_sized_attention_top)")
     ap.add_argument("--oracle-admissible", action="store_true",
                     help="SL-GTTO2 F1 — --grounding-source oracle 에서만. GT cluster 를 TargetConfirm admissibility "
                          "(개도 · destination · T43 T 3(c) 지지면) 와 _exclusion_gate 재검사에서 거절하지 않는다 — 검사 결과는 "
@@ -4377,6 +4383,8 @@ def reject_bad_flag_combinations(ap: argparse.ArgumentParser, args, *, seed_map_
     if getattr(args, "graspable_hand_sized_mm", None) is not None and not (   # SL-SOTA18
             0.0 < float(args.graspable_hand_sized_mm) <= 500.0):
         ap.error("--graspable-hand-sized-mm 은 0 초과 500 이하의 길이 (mm) 입니다")
+    if getattr(args, "graspable_hand_sized_attention_top", False) and getattr(args, "graspable_hand_sized_mm", None) is None:
+        ap.error("--graspable-hand-sized-attention-top 은 --graspable-hand-sized-mm 와 함께만")   # SL-SOTA18b
     if getattr(args, "ee_action_qp_scaled", False) and not getattr(args, "ee_action_qp", False):   # SL-GTTO11
         ap.error("--ee-action-qp-scaled 는 --ee-action-qp 의 QP 형태만 바꿉니다 — 함께 주십시오")
     for flag in ("oracle_admissible", "oracle_held_target", "oracle_destination", "oracle_robot_mask",

@@ -212,6 +212,11 @@ class ClusteringConfig:
     #: SafeLIBERO Long tasks (~100 x 115 x 135 mm vs the Panda's 78 mm) was `not_graspable` on 30-96 pre-grasp calls
     #: per episode and never admitted; another body became the target and the mug blocked the hand.
     graspable_hand_sized: float | None = None
+    #: **SL-SOTA18b — a hand-sized cluster must lead on attention** (default False). With `graspable_hand_sized` set, a
+    #: cluster admissible only as hand-sized stays admissible only when its mean attention is the highest of the frame's
+    #: admissible clusters (`TargetConfirm._hand_sized_attention_gate`): a mug-shaped obstacle next to the attended
+    #: target cannot win on the geometry term of the grounding score.
+    graspable_hand_sized_attention_top: bool = False
     #: A cluster is "the destination" (and so never the manipulated object) when at least this
     #: fraction of its points lie within `destination_overlap_distance` of the destination's points
     #: (T26). 0.5 = "mostly the destination's surface": a re-observed crate fragment scores ~1, an
@@ -634,6 +639,10 @@ class ClusteringConfig:
             raise AG3SConfigError(
                 f"clustering.gripper_max_opening must be null (from the robot model) or a finite "
                 f"value > 0 in metres, got {mo!r}")
+        if not isinstance(self.graspable_hand_sized_attention_top, bool):   # SL-SOTA18b
+            raise AG3SConfigError("clustering.graspable_hand_sized_attention_top must be true or false")
+        if self.graspable_hand_sized_attention_top and self.graspable_hand_sized is None:
+            raise AG3SConfigError("clustering.graspable_hand_sized_attention_top needs clustering.graspable_hand_sized")
         hs = self.graspable_hand_sized   # SL-SOTA18
         if hs is not None and not (isinstance(hs, (int, float)) and not isinstance(hs, bool)
                                    and math.isfinite(float(hs)) and float(hs) > 0.0):

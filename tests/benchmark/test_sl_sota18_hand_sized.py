@@ -76,7 +76,8 @@ def test_config_option_version_and_gate():
     assert pf.AG3S_VERSIONS[name] == tuple(pf.AG3S_VERSIONS[FROZEN]) + ("--graspable-hand-sized-mm", "156")
     assert pf.AG3S_VERSIONS[name_hf] == (tuple(pf.AG3S_VERSIONS[FROZEN]) + ("--obstacle-held-beneath-band-mm", "30")
                                          + ("--graspable-hand-sized-mm", "156"))
-    assert [v for v, f in pf.AG3S_VERSIONS.items() if "--graspable-hand-sized-mm" in f] == [name, name_hf]
+    assert [v for v, f in pf.AG3S_VERSIONS.items() if "--graspable-hand-sized-mm" in f] == [
+        name, name_hf, name[:-len("-gh156-tro")] + "-gh156a-tro", name_hf[:-len("-gh156-tro")] + "-gh156a-tro"]
     assert "graspable_hand_sized_mm" in srv.PORTED_FINAL_CONFIG_DESTS
     args = pf.parse_v11ab_args(argv=pf.version_server_argv(name) + list(pf.AG3S_VERSIONS[name]))
     assert args.graspable_hand_sized_mm == 156.0
@@ -99,3 +100,50 @@ def test_config_option_version_and_gate():
         adm = ad.assess(_box(ext), extents=np.array(ext), max_opening_m=OPEN, destination=None, overlap_distance=0.01,
                         overlap_fraction=0.5, hand_sized_m=hand)
         assert Pipeline._hand_sized(s, adm) is want
+
+
+def test_attention_gate_sl_sota18b():
+    """SL-SOTA18b: a hand-sized-only cluster stays admissible only when it leads on mean attention."""
+    import dataclasses as dc
+    from AG3S.ag3s.config import AG3SConfigError, ClusteringConfig
+    from AG3S.ag3s.stages import admissibility as ad
+    from AG3S.ag3s.stages.target_grounding import TargetConfirm
+    from AG3S.adapters.panda import profile as pf
+    from AG3S.trajopt import serve_safe
+
+    kw = dict(max_opening_m=OPEN, destination=None, overlap_distance=0.01, overlap_fraction=0.5, hand_sized_m=HAND)
+    mug = ad.assess(_box(MUG), extents=np.array(MUG), **kw)
+    bowl = ad.assess(_box(BOWL), extents=np.array(BOWL), **kw)
+    crate = ad.assess(_box(CRATE), extents=np.array(CRATE), **kw)
+    assert mug.admissible and bowl.admissible and not crate.admissible
+
+    @dc.dataclass
+    class C:
+        mean_attention: float
+
+    tc = TargetConfirm.__new__(TargetConfirm)
+    tc.max_opening = OPEN
+    # E1a t0 e10: the red-mug obstacle leads the score but not the attention -> outranked; the bowl is untouched
+    out = tc._hand_sized_attention_gate([mug, bowl], [C(0.07), C(0.33)])
+    assert out[0].reason == ad.HAND_SIZED_OUTRANKED and not out[0].admissible and out[1] is bowl
+    # the task's mug leads on attention -> admissible
+    out = tc._hand_sized_attention_gate([mug, bowl], [C(0.40), C(0.10)])
+    assert out[0] is mug and out[0].admissible
+    # an inadmissible rival does not count; two mugs: the less attended one is outranked
+    assert tc._hand_sized_attention_gate([mug, crate], [C(0.05), C(0.9)])[0] is mug
+    out = tc._hand_sized_attention_gate([mug, mug], [C(0.2), C(0.3)])
+    assert out[0].reason == ad.HAND_SIZED_OUTRANKED and out[1] is mug
+    # no attention on the cluster record: unchanged
+    assert tc._hand_sized_attention_gate([mug, bowl], [object(), C(0.3)])[0] is mug
+    # config / option / version plumbing
+    ClusteringConfig(graspable_hand_sized=HAND, graspable_hand_sized_attention_top=True).validate()
+    with pytest.raises(AG3SConfigError):
+        ClusteringConfig(graspable_hand_sized_attention_top=True).validate()
+    name = FROZEN[:-len("-tro")] + "-gh156a-tro"
+    assert name in pf.SOTA_HANDSIZED_ATT_VERSIONS and name in pf.SOTA_VERSIONS
+    args = pf.parse_v11ab_args(argv=pf.version_server_argv(name) + list(pf.AG3S_VERSIONS[name]))
+    sec = serve_safe.t43t_identity_section(args)
+    assert sec["graspable_hand_sized_attention_top"] is True and sec["graspable_hand_sized"] == pytest.approx(HAND)
+    base = pf.parse_v11ab_args(argv=pf.version_server_argv(FROZEN[:-len("-tro")] + "-gh156-tro")
+                               + list(pf.AG3S_VERSIONS[FROZEN[:-len("-tro")] + "-gh156-tro"]))
+    assert "graspable_hand_sized_attention_top" not in serve_safe.t43t_identity_section(base)

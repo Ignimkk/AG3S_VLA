@@ -106,6 +106,7 @@ from AG3S.ag3s.stages.admissibility import (
     Association,
     DestinationGeometry,
     DestinationRegistry,
+    HAND_SIZED_OUTRANKED,
     NOT_SUPPORTED,
     HandSpheres,
     anchor_cover,
@@ -812,6 +813,8 @@ class TargetConfirm:
         self.oracle_admissible = bool(getattr(cfg, "oracle_admissible", False))
         #: SL-SOTA18 (`clustering.graspable_hand_sized`; None: the T26 rule, nothing below changes)
         self.graspable_hand_sized = getattr(cfg, "graspable_hand_sized", None)
+        #: SL-SOTA18b (`clustering.graspable_hand_sized_attention_top`; False: every hand-sized cluster is admissible)
+        self.hand_sized_attention_top = bool(getattr(cfg, "graspable_hand_sized_attention_top", False))
         #: This call's would-be refusals `[Admissibility.record()]` (None when off).
         self.last_would_refuse: Optional[list[dict[str, Any]]] = None
         # --- SL-GTTO2 F1 — end
@@ -1830,10 +1833,32 @@ class TargetConfirm:
                for p, e in zip(cluster_points, extents)]
         if self.supported_max_bottom is not None:
             out = self._support_test(out, cluster_points)
+        if getattr(self, "hand_sized_attention_top", False):   # SL-SOTA18b
+            out = self._hand_sized_attention_gate(out, clusters)
         if self.oracle_admissible:   # SL-GTTO2 F1: computed and recorded, not applied
             self.last_would_refuse = [dict(a.record(), rank=i) for i, a in enumerate(out) if not a.admissible]
             out = [a if a.admissible else dataclasses.replace(a, reason=ADMISSIBLE) for a in out]
         self.last_admissibility = out
+        return out
+
+    def _hand_sized_attention_gate(self, adm: list, clusters) -> list:
+        """SL-SOTA18b -- a cluster admissible **only** as a hand-sized object (narrowest extent over the max opening) stays
+        admissible only when its mean attention is the highest of all admissible clusters this frame; otherwise its reason
+        becomes `hand_sized_outranked`. Why (2026-11-13, E1a task 0 init 10 with `-gh156`): the red-mug obstacle cluster
+        led the grounding score on geometry (compact, near the attention peak) at the adoption call while the bowl next to
+        it held 4-5x its mean attention; admitted as hand-sized it became the target and was pushed 252 mm. On the six mug
+        episodes the task's mug had the top mean attention in 49 of 51 early pre-grasp calls (GT-proxy, offline)."""
+        if self.max_opening is None:
+            return adm
+        opening = float(self.max_opening)
+        att = [getattr(c, "mean_attention", None) for c in clusters]
+        out = list(adm)
+        for i, a in enumerate(adm):
+            if not a.admissible or a.narrowest_extent_m is None or a.narrowest_extent_m <= opening or att[i] is None:
+                continue
+            rivals = [float(att[j]) for j, b in enumerate(adm) if j != i and b.admissible and att[j] is not None]
+            if rivals and float(att[i]) < max(rivals):
+                out[i] = dataclasses.replace(a, reason=HAND_SIZED_OUTRANKED)
         return out
 
     def _support_test(self, adm: list, cluster_points: list) -> list:

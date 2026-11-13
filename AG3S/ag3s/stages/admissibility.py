@@ -53,6 +53,9 @@ INJECTED, REGISTERED = "injected", "registered"
 #: `Admissibility.reason` vocabulary. `admissible` is the only one that admits.
 ADMISSIBLE = "admissible"
 NOT_GRASPABLE = "not_graspable"
+#: SL-SOTA18b: graspable only as a hand-sized object, but another admissible cluster has the higher mean attention
+#: (`clustering.graspable_hand_sized_attention_top`).
+HAND_SIZED_OUTRANKED = "hand_sized_outranked"
 MAX_OPENING_UNKNOWN = "max_opening_unknown"
 NO_EXTENT = "no_extent"
 DESTINATION_OVERLAP = "destination_overlap"

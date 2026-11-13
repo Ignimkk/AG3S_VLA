@@ -9,7 +9,7 @@
 # Part D = pi0.5 alone on the same episodes where no SDM run exists yet (SafeLIBERO Long, LIBERO, LIBERO-Safety with both
 # checkpoints); SafeLIBERO Spatial / Object / Goal init 19 are in the sdm-pi05-sl-* runs (sdm-c7).
 # NOTE: init 19 belongs to the reporting split (init 19-49). After this run it has been looked at for failure analysis.
-# usage: [PARTS="A B S C D M N G"] bash experiments/segmentation/sota_table10_queue.sh
+# usage: [PARTS="A B S C D M N G P"] bash experiments/segmentation/sota_table10_queue.sh
 # The launchers take the GPU lock themselves. Do not change this checkout's HEAD while it runs.
 set -u
 cd /mnt/dev/AG3S_VLA
@@ -109,6 +109,18 @@ if [[ " $PARTS " == *" G "* ]]; then
       --task-ids $tasks --episode-ids 19 --seed 7 --data-split "$(label $suite -)" --run-id "$TAG-gh156r-lb-${suite#libero_}"
   done
   log "part G end"
+fi
+# Part P (2026-11-13, SL-SOTA18b): part M's six mug episodes with -gh156a (hand-sized clusters must also lead on attention).
+if [[ " $PARTS " == *" P "* ]]; then
+  VA=${V%-tro}-gh156a-tro
+  for lvl in I II; do
+    run "P gh156a safelibero_long L$lvl task 2,3 init 19" $PY $LP --modes vla_v11ab --record-constraints full --ag3s-version "$VA" \
+      --task-suite-name safelibero_long --safety-level $lvl --task-ids 2,3 --episode-ids 19 --seed 7 \
+      --data-split "$(label safelibero_long $lvl)" --safelibero-step-budget main_aegis --run-id "$TAG-gh156a-long-L$lvl"
+  done
+  run "P gh156a libero_10 task 4,6 init 19" $PY $LP --modes vla_v11ab --record-constraints full --ag3s-version "$VA" --task-suite-name libero_10 \
+    --task-ids 4,6 --episode-ids 19 --seed 7 --data-split "$(label libero_10 -)" --run-id "$TAG-gh156a-lb-10"
+  log "part P end"
 fi
 if [[ " $PARTS " == *" D "* ]]; then
   for lvl in I II; do

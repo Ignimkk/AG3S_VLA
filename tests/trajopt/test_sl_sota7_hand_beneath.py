@@ -213,6 +213,6 @@ def test_held_band_config_flag_and_versions():
         assert pf.version_server_flags(name)
     assert all("-hb-" in n for n in pf.SOTA_HELDBAND_VERSIONS)
     for other, flags in pf.AG3S_VERSIONS.items():
-        if other not in pf.SOTA_HELDBAND_VERSIONS + tuple(v for v in pf.SOTA_HANDSIZED_VERSIONS if "-hf30-" in v):
+        if other not in pf.SOTA_HELDBAND_VERSIONS + tuple(v for v in pf.SOTA_HANDSIZED_VERSIONS + pf.SOTA_HANDSIZED_ATT_VERSIONS if "-hf30-" in v):
             assert "--obstacle-held-beneath-band-mm" not in flags, other
     assert "obstacle_held_beneath_band_mm" not in pf.version_flag_values(pf.parse_v11ab_args())

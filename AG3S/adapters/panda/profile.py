@@ -1348,6 +1348,17 @@ for _b in (FROZEN_20261112, FROZEN_20261112[:-len("-tro")] + "-hf30-tro"):
     SOTA_HANDSIZED_VERSIONS = SOTA_HANDSIZED_VERSIONS + (_b[:-len("-tro")] + "-gh156-tro",)
 del _b
 SOTA_VERSIONS = SOTA_VERSIONS + SOTA_HANDSIZED_VERSIONS
+#: SL-SOTA18b (sdm-f6, 2026-11-13 08:3x; user: "권장안으로 수행"): ``…-gh156a-tro`` = ``-gh156`` + ``--graspable-hand-sized-attention-top``.
+#: The ``-gh156`` gate lost E1a task 0 init 10: the red-mug OBSTACLE cluster led the grounding score on geometry at the
+#: adoption call (mean attention 0.07 vs 0.33 on the bowl) and became the target (pushed 252 mm). With the gate a hand-sized
+#: cluster must also lead on mean attention; the task's mug does in 49 / 51 early calls of the six mug episodes (offline).
+SOTA_HANDSIZED_ATT_VERSIONS: tuple[str, ...] = ()
+for _b in tuple(SOTA_HANDSIZED_VERSIONS):
+    _n = _b[:-len("-gh156-tro")] + "-gh156a-tro"
+    AG3S_VERSIONS[_n] = tuple(AG3S_VERSIONS[_b]) + ("--graspable-hand-sized-attention-top",)
+    SOTA_HANDSIZED_ATT_VERSIONS = SOTA_HANDSIZED_ATT_VERSIONS + (_n,)
+del _b, _n
+SOTA_VERSIONS = SOTA_VERSIONS + SOTA_HANDSIZED_ATT_VERSIONS
 GT15_VERSIONS = GT15_VERSIONS + SOTA_VERSIONS
 #: (G88c, 03:5x) the A-alone ablation queued as ``…-obst3`` (gtto23, not started yet) gets the same two fixes, so A alone and
 #: A + B differ only by the held point model: ``…-obst3`` := A'' + no carve + support "under" (``…-obst3-pts`` = B'' keeps
