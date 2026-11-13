@@ -16,12 +16,13 @@ def test_audit_versions():
     gh = stem + "-gh156a-tro"                                             # SL-SOTA18b, the version at the gate
     suffixes = ("-gr", "-rf", "-lp", "-mr8", "-mr12", "-af", "-md5", "-rf-lp-mr8-af",
                 "-ohr", "-dlo", "-pro", "-ohr-dlo-pro", "-rf-lp-mr8-af-ohr-dlo-pro")
-    assert pf.SOTA_AUDIT_VERSIONS == tuple(b[:-len("-tro")] + s + "-tro" for b in (frozen, gh) for s in suffixes)
-    assert len(set(pf.SOTA_AUDIT_VERSIONS)) == 26 and not set(pf.SOTA_AUDIT_VERSIONS) & {frozen, gh}
+    ghf = stem + "-gh156a-fwd-tro"                                        # (SDM 11-14) the FWDATT twin of the gate's choice
+    assert pf.SOTA_AUDIT_VERSIONS == tuple(b[:-len("-tro")] + s + "-tro" for b in (frozen, gh, ghf) for s in suffixes)
+    assert len(set(pf.SOTA_AUDIT_VERSIONS)) == 39 and not set(pf.SOTA_AUDIT_VERSIONS) & {frozen, gh, ghf}
     assert set(pf.SOTA_AUDIT_VERSIONS) <= set(pf.GT15_VERSIONS) and all(pf.is_gtto_version(n) for n in pf.SOTA_AUDIT_VERSIONS)
     assert not any(pf.version_requires_oracle_segmentation(n) for n in pf.SOTA_AUDIT_VERSIONS)            # no GT
     for name in pf.SOTA_AUDIT_VERSIONS:
-        b = gh if "-gh156a" in name else frozen
+        b = ghf if "-gh156a-fwd" in name else gh if "-gh156a" in name else frozen
         n = len(pf.AG3S_VERSIONS[b])
         v = tuple(pf.AG3S_VERSIONS[name])
         assert v[:n] == tuple(pf.AG3S_VERSIONS[b]) and len(v) > n        # the base argv + the new flags only
@@ -44,3 +45,9 @@ def test_audit_versions():
     a = ap.parse_args(pf.version_server_argv(frozen) + list(pf.version_server_flags(stem + "-rf-lp-mr8-af-ohr-dlo-pro-tro")))
     assert ss.trajopt_config_from_args(a).sqp.ee_action_reference_floor and a.scene_obstacle_history_refilter
     assert a.destination_leader_outside_hand and a.ee_action_qp_progress_release_off
+    # (SDM 11-14) the -fwd audit versions = the -gh156a audit versions + --attention-inpass, nothing else
+    for s_ in suffixes:
+        v = tuple(pf.AG3S_VERSIONS[ghf[:-len("-tro")] + s_ + "-tro"])
+        assert sorted(v) == sorted(tuple(pf.AG3S_VERSIONS[gh[:-len("-tro")] + s_ + "-tro"]) + ("--attention-inpass",))
+        a = ap.parse_args(pf.version_server_argv(ghf) + list(pf.version_server_flags(ghf[:-len("-tro")] + s_ + "-tro")))
+        assert a.attention_inpass is True

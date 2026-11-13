@@ -1458,6 +1458,19 @@ for _b in (FROZEN_20261112, FROZEN_20261112[:-len("-tro")] + "-gh156a-tro"):
         SOTA_AUDIT_VERSIONS = SOTA_AUDIT_VERSIONS + (_n,)
 del _b, _suffix, _flags, _n
 GT15_VERSIONS = GT15_VERSIONS + SOTA_AUDIT_VERSIONS   # (not added to SOTA_VERSIONS: its count is pinned family by family)
+#: SL-AUD on SDM (sdm-f6, 2026-11-14): the hand-off plan asks for the FWDATT twin of the version the §9.37 gate chose as one
+#: more SL-AUD base, so the Tab. 1 AG3S arm (always the ``-fwd`` twin, user decision 11-13) can run whatever the adoption
+#: gate freezes. The gate chose ``-gh156a`` (stages 1 and 3 PASS, 11-14 00:00). Name = <base without -tro><suffix>-tro,
+#: i.e. ``…-gh156a-fwd<suffix>-tro`` = the ``-gh156a`` audit version + ``--attention-inpass`` (flags in the same order as
+#: the base: base argv, then the segment's flags).
+SOTA_AUDIT_FWD_BASES: tuple[str, ...] = (FROZEN_20261112[:-len("-tro")] + "-gh156a-fwd-tro",)
+for _b in SOTA_AUDIT_FWD_BASES:
+    for _suffix, _flags in _SOTA_AUDIT_SUFFIXES.items():
+        _n = _b[:-len("-tro")] + _suffix + "-tro"
+        AG3S_VERSIONS[_n] = tuple(AG3S_VERSIONS[_b]) + _flags
+        SOTA_AUDIT_VERSIONS = SOTA_AUDIT_VERSIONS + (_n,)
+        GT15_VERSIONS = GT15_VERSIONS + (_n,)
+del _b, _suffix, _flags, _n
 #: (G88c, 03:5x) the A-alone ablation queued as ``…-obst3`` (gtto23, not started yet) gets the same two fixes, so A alone and
 #: A + B differ only by the held point model: ``…-obst3`` := A'' + no carve + support "under" (``…-obst3-pts`` = B'' keeps
 #: the flags it was evaluated with -- it was built above from the earlier definition).
