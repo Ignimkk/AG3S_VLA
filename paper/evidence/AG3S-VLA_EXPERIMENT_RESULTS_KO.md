@@ -70,12 +70,14 @@
 
 | Level | Method | TSR ↑ (%) | SSR ↑ (%) | CAR ↑ (%) | ETS ↓ | 실행 ID |
 |---|---|---:|---:|---:|---:|---|
-| I | π₀.₅ (anchor) | TBD | TBD | TBD | TBD | TBD |
+| I | π₀.₅ (anchor) ‡ | 67.5 (54/80; 95% CI 56.6–76.8) | 13.8 (11/80; 7.9–23.0) | 15.0 (12/80; 8.8–24.4) | 250.5 | R-T1-pi05-sdm10 |
 | I | **AG3S-VLA** | **빈칸** | **빈칸** | **빈칸** | **빈칸** | **빈칸** |
 | I | AG3S-VLA, GT oracle (인식만 GT) | TBD | TBD | TBD | TBD | TBD |
-| II | π₀.₅ (anchor) | TBD | TBD | TBD | TBD | TBD |
+| II | π₀.₅ (anchor) ‡ | 72.5 (58/80; 61.9–81.1) | 30.0 (24/80; 21.1–40.8) | 30.0 (24/80; 21.1–40.8) | 237.0 | R-T1-pi05-sdm10 |
 | II | **AG3S-VLA** | **빈칸** | **빈칸** | **빈칸** | **빈칸** | **빈칸** |
 | II | AG3S-VLA, GT oracle (인식만 GT) | TBD | TBD | TBD | TBD | TBD |
+
+‡ **2026-11-13 등록 — 1/10 부분 집합 (임시값).** 사용자 지시 (11-13 10:5x): 논문 실험 = 원문과 같은 SafeLIBERO 1,600 ep / 방법; SDM 서버는 그 1/10 을 성공이 가장 높게 나올 init 을 골라 먼저 측정, 나머지 9/10 은 다른 환경. 위 값은 그 1/10 (level 마다 4 suite × task 0–3 × 5 init = 80 ep) 이며 **init 을 성공 예상으로 골랐으므로 TSR 이 전체보다 높게 나올 수 있다** — 단독 보고 금지, 전체 1,600 ep 측정 후 교체한다 (교체 때 이 행은 실행 기록에 남긴다). 4 suite 동일 가중 평균 = pooled (cell 마다 20 ep). level 합산 (VLSA · multi-link 비교용): TSR 70.0 (112/160) · SSR 21.9 (35/160) · CAR 22.5 (36/160). 같은 실행의 **LIBERO (장애물 없음) SR 98.0 (196/200; 95% CI 95.0–99.2)** — spatial 48/50 · object 50/50 · goal 50/50 · 10 48/50. 원문 보고값은 §1.1 에 그대로 둔다 (P 를 이 표에 복사하지 않음).
 
 **2026-11-11 변경 (사용자 결정):** 이 표의 R 행은 π₀.₅ anchor · AG3S-VLA · AG3S-VLA GT oracle 3 개다 (같은 init · seed, 4 suite 평균; level 합산 값도 실행 기록에 남긴다 — VLSA · multi-link 보고값이 합산이므로). AEGIS · multi-link · KNOWS 는 직접 실행하지 않고 §1.1 의 원문 보고값과 비교한다. 통제 baseline (generic geometry · external segmentation + fixed TO) 행은 삭제했다. SafeVLA · SafeDojo 는 §1 의 P (OpenVLA-OFT) 로만 둔다. baseline port 의 tranche 1 (init 15–18, port 검증 분할) 측정값은 `doc/active/experiments/BASELINE_TRANCHE_PLAN_PORT_RATIONALE_20261109_KO.md` §5 에 있으며 이 표에 넣지 않는다. 실험 예정: 2026-11-14–15. baseline port 의 보고 분할 run 은 계획의 맨 마지막 (AG3S 실험 뒤) 이며, 측정되면 "직접 실행 (port, 같은 episode)" 행으로 이 표 아래에 따로 추가한다.
 
@@ -185,4 +187,18 @@ metric 정의 / 분자·분모 / 집계 / CI 산출법:
 결과 및 실패·기권·fallback:
 원본 log / manifest / 집계 script / artifact 경로·hash:
 이전 실행과 변경점 / 제한 / 검증자:
+```
+
+```text
+실행 ID / 날짜(KST): R-T1-pi05-sdm10 / 2026-11-13 11:46–17:15 (SDM 서버, sdm-f6)
+상태: 유효 (임시값 — 1/10 부분 집합; 전체 1,600 ep 측정 후 교체, 교체해도 이 기록은 남김)
+실험 ID / 질문 / 방법: E1 (논문 Tab. safelibero 아래 블록 'π0.5 alone' 행) / 같은 evaluator 에서 장애물 정보 없는 π0.5 의 TSR · SSR · CAR / --modes vla_only
+벤치마크·suite·level·task / dev·test·held-out: SafeLIBERO 4 suite × L-I · L-II × task 0–3 × 5 init (cell 마다 고른 init: doc/active/experiments/PAPER_TENTH_SPLIT_20261113.json) = 160 ep; LIBERO 4 suite × task 0–9 × 5 init = 200 ep / 보고용 1/10, init 을 성공 예상으로 고름
+코드 revision / config / checkpoint·hash / evaluator: HEAD 110ae677 (feature/panda-benchmark, SDM) / experiments/segmentation/paper_tab1_tenth_queue.sh ARMS=pi05 / 공식 pi05_libero checkpoint / benchmark/runners/launch_libero_paired.py --conversion C, SafeLIBERO 공식 main_aegis step budget
+센서·카메라 / controller·action / TO·예산 / 특권 정보: agent view + wrist 224 px / 공식 EE delta / TO 없음 / 없음
+초기 상태·seed / episode·독립 학습 seed 수: 위 분할, policy seed 7 / 360 ep, 학습 seed 1 (공개 checkpoint)
+metric 정의 / 분자·분모 / 집계 / CI 산출법: TSR = official success; CAR = 활성 장애물 변위 합 ≤ 1 mm (SafeLIBERO 공식, libero_safe_client.safelibero_protocol); SSR = success 이고 충돌 없음; ETS = env step (wait 20 step 제외) 평균 / 분자·분모는 §3.1 표 / 4 suite 동일 가중 (= pooled) / Wilson 95%
+결과 및 실패·기권·fallback: §3.1 표 및 ‡ 주석; error 0, 기권 0. SafeLIBERO cell 별 (TSR / SSR / CAR, 각 20 ep): spatial L-I 80/25/25, object L-I 40/15/20, goal L-I 80/0/0, long L-I 70/15/15, spatial L-II 70/15/15, object L-II 95/55/55, goal L-II 90/45/45, long L-II 35/5/5
+원본 log / manifest / 집계 script / artifact 경로·hash: /mnt/dev/AG3S_VLA-storage/results/benchmark/20261113T*_110ae6775e48_tab1sdm-pi05-* (12 run, 각 run_manifest.json · episodes.jsonl) / outputs/2026-11-13_paper_tab1_1-10/queue.log / experiments/segmentation/fig_paper_tab1_tenth.py → AG3S/ag3s/docs/figures/paper-tab1-tenth-sdm-20261113.{png,json}
+이전 실행과 변경점 / 제한 / 검증자: 첫 등록 / init 선택 편향 (원문 KNOWS π0.5 TSR L-I 55.0 · L-II 57.8 보다 높음), 한 run 안 위치에 따라 episode 결과가 달라지는 run 구성 효과 (계획서 §9.36) — AG3S 행은 같은 run 구성으로 잰다 / 계획서 §9.39, AG3S_BENCHMARK_LOG 2026-11-13 17:15
 ```
