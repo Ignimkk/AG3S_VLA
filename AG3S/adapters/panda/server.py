@@ -816,6 +816,33 @@ def check_unported_flags(args, ap) -> None:
         ap.error(message)
 
 
+def check_inpass_flags(args, ap) -> None:
+    """FWDATT -- ``--attention-inpass`` refuses, before the checkpoint is loaded, what it cannot serve: no attention
+    server (``--no-attention`` / ``--no-safe``), a noun / hidden-probe ``--attention-source`` and HSR6 (they read
+    another prefix pass). No-op with the flag off."""
+    if not getattr(args, "attention_inpass", False):
+        return
+    from AG3S.trajopt import serve_safe as ss
+
+    message = None
+    if getattr(args, "no_attention", False) or getattr(args, "no_safe", False):
+        message = "--attention-inpass needs the attention server (not with --no-attention / --no-safe)"
+    elif getattr(args, "attention_source", None) and str(args.attention_source).strip().split(":", 1)[0] != "action":
+        message = (f"--attention-inpass reads an action-query cell only (--attention-source action:<agg>:L<l>H<h>; "
+                   f"got {args.attention_source!r})")
+    elif ss.hsr6_flags_from_args(args) is not None:
+        message = "--attention-inpass does not carry the kv_L4 feature HSR6 reads (not with --hsr6-*)"
+    if message:
+        if ap is None:
+            raise ValueError(message)
+        ap.error(message)
+
+
+def attention_inpass_record(args) -> dict:
+    """FWDATT -- the server config key, only with the flag on (the dump of every other server is unchanged)."""
+    return {"attention_inpass": True} if getattr(args, "attention_inpass", False) else {}
+
+
 def check_record_flags(args) -> None:
     """``--record-constraints`` checks, before the checkpoint is loaded (same refusals as the RB-Y1 server + one).
 
@@ -1077,7 +1104,7 @@ def action_box_kwargs(args, to_config, chunk_policy: "ChunkToJointPolicy", mode:
     return {"action_box_fn": action_box_fn}
 
 
-def build_safe_server(policy, args, *, attention_model=None, gpu_warm_up: bool = True):
+def build_safe_server(policy, args, *, attention_model=None, gpu_warm_up: bool = True, model_config=None):
     """Everything below the openpi policy (also used by tests with a stub policy and no attention model).
 
     SL6-A: the final-configuration options are wired as the RB-Y1 ``serve_safe.main`` wires them -- attention source
@@ -1095,10 +1122,17 @@ def build_safe_server(policy, args, *, attention_model=None, gpu_warm_up: bool =
     if kw.get("self_filter"):   # SL15 sfhand: the RB-Y1 server prints the per-link inflation it applies; so does this one (only when a flag gave one)
         ss.announce_self_filter(ag3s.self_filter_settings(), cli=dict(kw["self_filter"]))
     served_policy = policy
-    attn_kw, attn_rec = attention_policy_kwargs(args, tokenizer=attention_model is not None)
-    if attention_model is not None:
+    inpass = bool(getattr(args, "attention_inpass", False))   # FWDATT: attention from the served sampling
+    attn_kw, attn_rec = attention_policy_kwargs(args, tokenizer=attention_model is not None or inpass)
+    if attention_model is not None or inpass:
         from AG3S.trajopt.attention_policy import AttentionPolicy
 
+        if inpass:   # FWDATT — kwargs only with the flag (off: the call below is the earlier one)
+            if model_config is None:
+                from openpi.training import config as _config
+
+                model_config = _config.get_config(args.config).model
+            attn_kw = {**attn_kw, "inpass": True, "model_config": model_config}
         served_policy = AttentionPolicy(policy, attention_model, subtask_probe=None, **attn_kw)
     constraint = ag3s.constraint_robot_model
     kin = pa.PandaKinematics(constraint)
@@ -1164,7 +1198,8 @@ def build_safe_server(policy, args, *, attention_model=None, gpu_warm_up: bool =
             "to_config": {"horizon": dataclasses.asdict(to_config.horizon), "planned": to_config.horizon.planned},
             "attention": {"alias": ATTENTION_ALIAS, "cameras": ATTENTION_CAMERAS, "unmirror": True,
                           "cell": "V11AB (attention_policy._LAYER/_HEAD/_AGG/_DENOISE_STEP)",
-                          "subtask_probe": None, "loaded": attention_model is not None},
+                          "subtask_probe": None, "loaded": attention_model is not None,
+                          **({"inpass": "step 0 of the served sampling (no second checkpoint)"} if inpass else {})},
             "hands": HANDS, "gripper_columns": GRIPPER_COLUMNS, "gripper_convention": panda_gripper_convention().record(),
             "conversion": pa.conventions(), "static_geometry": None,
             "v11ab_build_kwargs_not_applied": ["constraint_sphere_options", "finger_cover"]}
@@ -1182,6 +1217,7 @@ def build_safe_server(policy, args, *, attention_model=None, gpu_warm_up: bool =
     if getattr(args, "grasp_opening_rule", False):   # SL14 (KS) -- key only with the flag
         info["grasp_opening_rule"] = {"rule": "attach: last executed command closed & settled & opening >= 0.03 & reach <= 120 mm; "
                                                "detach (-> LATCHED): open command & opening > attach + 0.02, or opening < 0.02 (record grasp.opening_rule)"}
+    info.update(attention_inpass_record(args))   # FWDATT — key only with the flag
     final = final_config_record(args, safe, to_config, attn_rec, gpu, inert)
     if response_name != "robosuite141":   # SL11 -- key only with the fork model (the earlier servers' dump is unchanged)
         info["response_model"] = {"name": response_name, "pos": chunk_policy.response["pos"],
@@ -1368,6 +1404,7 @@ def main(args, ap) -> None:
 
     check_unported_flags(args, ap)  # before the checkpoint is loaded (no-op with every new flag at its default)
     check_record_flags(args)  # SL5j: refuse before the checkpoint is loaded (no-op without --record-constraints)
+    check_inpass_flags(args, ap)  # FWDATT: no-op without --attention-inpass
     policy = _policy_config.create_trained_policy(_config.get_config(args.config), args.checkpoint,
                                                   default_prompt=args.default_prompt)
     record: dict[str, Any] = {"robot": "panda", "config": args.config, "checkpoint": args.checkpoint,
@@ -1376,12 +1413,19 @@ def main(args, ap) -> None:
         served = PandaVLAOnly(SeededPolicy(policy))
     else:
         attn = None
-        if not args.no_attention:
+        inpass = bool(getattr(args, "attention_inpass", False))
+        if not args.no_attention and not inpass:   # FWDATT: --attention-inpass loads no second copy
             from AG3S.trajopt.attention_policy import load_attention_model
 
             logging.info("loading a second copy of the checkpoint for attention extraction")
             attn = load_attention_model(args.config, args.checkpoint)
-        served, info = build_safe_server(policy, args, attention_model=attn)
+        if inpass:
+            logging.warning("FWDATT --attention-inpass: attention is step 0 of the served sampling (no second checkpoint "
+                            "copy; the chunk comes from the in-pass sampler, not Policy.infer's compiled sample_actions)")
+            served, info = build_safe_server(policy, args, attention_model=None,
+                                             model_config=_config.get_config(args.config).model)
+        else:
+            served, info = build_safe_server(policy, args, attention_model=attn)
         record.update(info)
     record["config_path"] = _write_config(record)
     logging.info("panda server: %s", json.dumps({k: record[k] for k in ("mode", "port")}))
