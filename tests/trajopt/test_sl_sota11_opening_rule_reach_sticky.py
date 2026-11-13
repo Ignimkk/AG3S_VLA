@@ -119,7 +119,7 @@ def test_flag_plumbing_and_versions():
     for n in pf.SOTA_REACHSTICKY_VERSIONS:
         assert pf.version_server_flags(n)
     for name, flags in pf.AG3S_VERSIONS.items():
-        if name not in pf.SOTA_REACHSTICKY_VERSIONS and not (name in pf.SOTA_ZONE_VERSIONS + pf.SOTA_ZONEPALM_VERSIONS + pf.SOTA_ZONEPALM5_VERSIONS + pf.SOTA_DEADCAM_VERSIONS + pf.SOTA_HELDBAND_VERSIONS + pf.SOTA_LSNATIVE_VERSIONS + pf.SOTA_HANDSIZED_VERSIONS + pf.SOTA_HANDSIZED_ATT_VERSIONS + pf.SOTA_GTO_VERSIONS + pf.SOTA_SPLITWIDE_VERSIONS + pf.SOTA_ATT_VERSIONS and "-rs-" in name):
+        if name not in pf.SOTA_REACHSTICKY_VERSIONS and not (name in pf.SOTA_ZONE_VERSIONS + pf.SOTA_ZONEPALM_VERSIONS + pf.SOTA_ZONEPALM5_VERSIONS + pf.SOTA_DEADCAM_VERSIONS + pf.SOTA_HELDBAND_VERSIONS + pf.SOTA_LSNATIVE_VERSIONS + pf.SOTA_HANDSIZED_VERSIONS + pf.SOTA_HANDSIZED_ATT_VERSIONS + pf.SOTA_GTO_VERSIONS + pf.SOTA_SPLITWIDE_VERSIONS + pf.SOTA_ATT_VERSIONS + pf.SOTA_AUDIT_VERSIONS and "-rs-" in name):
             assert "--grasp-opening-rule-reach-sticky" not in flags, name
     assert "grasp_opening_rule_reach_sticky" not in pf.version_flag_values(pf.parse_v11ab_args())
 

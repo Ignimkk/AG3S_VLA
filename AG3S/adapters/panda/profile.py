@@ -1407,6 +1407,46 @@ for _s, _f in (("-a12h3-tro", ("--attention-source", "action:last:L12H3")),
 del _s, _f, _n
 SOTA_VERSIONS = SOTA_VERSIONS + SOTA_ATT_VERSIONS
 GT15_VERSIONS = GT15_VERSIONS + SOTA_VERSIONS
+#: SL-AUD (code audit of the frozen version, 2026-11-13; ``local_docs/2026-11-13_frozen_config_code_audit_KO.md``) -- the
+#: action-QP candidates on the frozen version, all default off. ``-gr`` = SL-SOTA4 ``--ee-action-qp-gate-rows`` again
+#: (measured once on the unscaled QP before ``-qs`` / ``-hr150`` / ``-hb``: task 0 5 · 6 · 4 vs 9 · 8 · 7, plan §9.8);
+#: ``-rf`` = SL-AUD1 ``--ee-action-qp-reference-floor`` (rows that are not obstacle-object rows: not worse than the policy
+#: chunk, instead of back to +backoff); ``-lp`` = SL-AUD2 ``--ee-action-qp-limit-passthrough``; ``-mr<mm>`` = SL-AUD3
+#: ``--ee-action-qp-min-reach-mm`` (8: hand rows of steps 0-1 left out, 12: steps 0-2); ``-af`` = SL-AUD4
+#: ``--ee-action-qp-audit-fixes``; ``-md5`` = SL-AUD5 ``--ee-action-qp-max-delta 0.5`` (candidate B of the hand-off plan).
+#: ``-rf-lp-mr8-af`` = SL-AUD1-4 together. Registered on the frozen version and on its ``-gh156a`` version (SL-SOTA18b, the
+#: one at the adoption gate on 2026-11-13). Name = <base without -tro><suffix>-tro.
+SOTA_AUDIT_VERSIONS: tuple[str, ...] = ()
+_SOTA_AUDIT_SUFFIXES: dict[str, tuple[str, ...]] = {
+    "-gr": ("--ee-action-qp-gate-rows",),
+    "-rf": ("--ee-action-qp-reference-floor",),
+    "-lp": ("--ee-action-qp-limit-passthrough",),
+    "-mr8": ("--ee-action-qp-min-reach-mm", "8"),
+    "-mr12": ("--ee-action-qp-min-reach-mm", "12"),
+    "-af": ("--ee-action-qp-audit-fixes",),
+    "-md5": ("--ee-action-qp-max-delta", "0.5"),
+    "-rf-lp-mr8-af": ("--ee-action-qp-reference-floor", "--ee-action-qp-limit-passthrough",
+                      "--ee-action-qp-min-reach-mm", "8", "--ee-action-qp-audit-fixes"),
+    # SL-AUD6-8 (candidate C' of the test plan: the place phase): ``-ohr`` = --scene-obstacle-history-refilter, ``-dlo`` =
+    # --destination-leader-outside-hand, ``-pro`` = --ee-action-qp-progress-release-off; ``-ohr-dlo-pro`` = the three
+    "-ohr": ("--scene-obstacle-history-refilter",),
+    "-dlo": ("--destination-leader-outside-hand",),
+    "-pro": ("--ee-action-qp-progress-release-off",),
+    "-ohr-dlo-pro": ("--scene-obstacle-history-refilter", "--destination-leader-outside-hand",
+                     "--ee-action-qp-progress-release-off"),
+    # everything of this audit together (for the adoption gate when both screenings pass)
+    "-rf-lp-mr8-af-ohr-dlo-pro": ("--ee-action-qp-reference-floor", "--ee-action-qp-limit-passthrough",
+                                  "--ee-action-qp-min-reach-mm", "8", "--ee-action-qp-audit-fixes",
+                                  "--scene-obstacle-history-refilter", "--destination-leader-outside-hand",
+                                  "--ee-action-qp-progress-release-off"),
+}
+for _b in (FROZEN_20261112, FROZEN_20261112[:-len("-tro")] + "-gh156a-tro"):
+    for _suffix, _flags in _SOTA_AUDIT_SUFFIXES.items():
+        _n = _b[:-len("-tro")] + _suffix + "-tro"
+        AG3S_VERSIONS[_n] = tuple(AG3S_VERSIONS[_b]) + _flags
+        SOTA_AUDIT_VERSIONS = SOTA_AUDIT_VERSIONS + (_n,)
+del _b, _suffix, _flags, _n
+GT15_VERSIONS = GT15_VERSIONS + SOTA_AUDIT_VERSIONS   # (not added to SOTA_VERSIONS: its count is pinned family by family)
 #: (G88c, 03:5x) the A-alone ablation queued as ``…-obst3`` (gtto23, not started yet) gets the same two fixes, so A alone and
 #: A + B differ only by the held point model: ``…-obst3`` := A'' + no carve + support "under" (``…-obst3-pts`` = B'' keeps
 #: the flags it was evaluated with -- it was built above from the earlier definition).
