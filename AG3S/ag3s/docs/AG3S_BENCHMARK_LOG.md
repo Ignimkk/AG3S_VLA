@@ -5277,3 +5277,18 @@ E1a 40 (`sub-g37gh156aswsdm-*`, HEAD e5f0254d, 18:57–20:34): TSR 25 · **SSR 2
 FWDATT (`--attention-inpass`, sdm-ahs, `wip/fwd-attn` c0202a62): attention 을 seed 0 복제 pass 가 아니라 서빙 sampling 의 step 0 (실제로 실행된 noise) 에서 읽는다. GPU B2 (20:07–20:10): action 765 / 765 call 비트 단위로 같음, attention 추가 비용 50.5 → 4.0 ms. 대상 선택은 달라질 수 있다 (offline 식별률 +1.3 %p, 유의하지 않음). **사용자: 별도 gate 없이 Tab. 1 로 바로** (질문: 'E1a 40 만 확인' 권장안 대신 선택). 판: `<v>-fwd-tro` = `v` + `--attention-inpass` (frozen · `-gh156a` · `-a12h3` 에 등록, test `test_sota_fwd_versions.py`); Tab. 1 AG3S arm `V` = §9.37 gate 가 고른 판의 `-fwd` 짝. GT oracle arm (`-gto`) 은 attention 을 읽지 않아 그대로. main 반영은 gate (분리 실행) 가 끝난 뒤 — 돌고 있는 gate 의 cell 이 main 의 코드를 읽기 때문. 한계: FWDATT 판의 closed-loop 결과는 Tab. 1 에서 처음 나온다.
 
 **동결 판 충돌 원인 (sdm-ahs dev-a1 보고용 분석, 22:0x 전달; `outputs/2026-11-13_action_head_intent_selection/README.md` §11.5–11.7).** §9.37 C1 충돌 38 ep replay: 로봇 · 쥔 물체와 무관 (table 등) 12 · **gripper 10 — 10 ep 모두 hand · finger 구가 충돌 검사에서 빠져 있음** (`target_permission exclude_authorized`, chunk 마다 133 rows 제외, `target_field_exclude` null 이라 field 전체에서 빠짐; 계획 clearance −0.9 – −2.8 cm, 조작 대상과 장애물 2.6–15.5 cm) · 팔 link5/6 10 (6 ep 는 계획 clearance 가 이미 음수 −0.8 – −3.4 cm 인데 budget_only → execute, 4 ep 양수) · 쥔 물체 5 · replay 실패 1. **사용자 결정: 'CPU 로 먼저 확인'** — 코드에서 그 동작이 맞는지, 고치면 기록된 call 에서 충돌이 얼마나 줄지 추정한 뒤 수정안 · GPU 시험을 다시 묻는다 (§9.40 에 기록 예정).
+
+### 2026-11-13 22:2x — 동결 판 gripper 충돌 10 ep: 오인식 5 · TrajOpt 음수 clearance 실행 5 (sdm-f6)
+
+사용자 결정 (22:0x): sdm-ahs 보고 (§9.39 보충) 의 'gripper 충돌 10 ep = 손 구가 충돌 field 전체에서 빠짐' 을 CPU 로 먼저 확인. **코드 (`to_adapter.py` ~220–250):** `exclude_authorized` 는 손 · 손가락 구 (170 중 133) 를 field 에서 빼지 않고 **target-free 층** (대상 주변 ball 을 파낸 층; table · 장애물은 남음) 에 묻는다 — 보고의 '전체에서 빠짐' 은 틀림. 측정 (subagent, MuJoCo replay 로 장애물 · 대상 collision geom 표면점을 base frame 으로; frame 검증: main 층이 장애물 표면점 85–100 % 에서 ≤ 10 mm, 손 구 gap 이 MuJoCo 거리와 ±3 mm; 충돌 call 직전 10 call; `outputs/2026-11-13_supplement_후보/10_충돌원인_손층/result.json`):
+
+| 경우 | ep | 내용 |
+|---|---:|---|
+| **장애물을 조작 대상으로 잘못 잡음 → 손의 층에서 장애물이 파임** | **5** | long t2 e16 · t3 e16 (moka pot), long t2 e15 · t3 e19 (yellow book), object t2 e17 (wine bottle); 대상 점이 장애물 위에 (128–304 / 같은 수), ball 이 장애물 중심; 손이 읽는 층의 거리가 실제보다 20–120 mm 멀다 (main 은 실제와 같음). 진짜 대상은 61–422 mm 떨어짐 |
+| **두 층 모두에 장애물이 있는데 계획이 들어감** | **5** | spatial t0 e7 · e13 · e16 · e19, goal t1 e18 — 대상은 맞게 잡음 (장애물과 15–41 mm), ball 안에 장애물 점 0; 계획 clearance (main) 가 충돌 1–3 call 전 −8 ~ −16 mm 인데 TrajOpt 상태 optimal / feasible |
+| 어느 층에도 없음 (인식 누락) | 0 | |
+
+- '주인 없음 (unowned) voxel 제거' 가설도 아님: 대상을 맞게 잡은 ep 에서는 장애물이 15–21 mm 옆이어도 제거 0 (ball_owned 가 제대로 동작). 잘못 잡은 ep 에서 지워진 voxel 의 55–90 % 는 '대상 (= 장애물 자신) 소유'.
+- 같은 기준으로 38 충돌 ep 전체: 장애물을 대상으로 잡은 ep 10 / 38 (object t2 e15 · e17 · e19, long t2 e15 · e16 · e19, long t3 e15 · e16 · e18 · e19).
+- **해석 (D):** gripper 충돌은 별개 원인이 아니라 두 공통 원인의 일부다 — (1) **대상 오인식** (§9.37 C2; 장애물을 집으려 함), (2) **TrajOpt 가 음수 clearance 계획을 optimal 로 내고 실행** (팔 link 충돌 6 ep (§9.39 보충) 과 같은 계열 — 합 11 / 38). (2) 는 field 문제가 아니라 제약 집행 문제: 다음 확인 = 그 call 들의 TO 기록 (반복 3 · 50 ms 예산, `T88 passthrough`, margin 완화 (grasp zone · contact phase), verdict) 에서 왜 위반을 남긴 채 optimal 인가.
+- 한계: 5 mm voxel nearest read; free 층 값은 계획 row 0 만 (row 1–9 는 기록에 sphere 중심 없음); `collide_t` 는 첫 접촉보다 몇 step 늦을 수 있음.
