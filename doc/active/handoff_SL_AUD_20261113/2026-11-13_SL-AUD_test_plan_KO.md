@@ -304,3 +304,37 @@ T0 = guard 가 끝나는 시각 (계획표로는 약 00:00). X = gate 가 고른
 - 고친 것 2: `test_t47b_b3_sink_cli.py::test_audit_points_exist_in_code`. 이 test 는 `admissibility.py` 의 한 줄 (`if graspable[0] is False and …`) 을 글자 그대로 찾는다. 그 줄을 건드리지 않게 `DestinationRegistry.observe` 의 변경을 다시 썼다.
 - **이 PC 에서 돌지 않는 test 안에도 판 목록을 도는 loop 가 있다** (`fcntl` 에서 먼저 멈춘다). 읽어서 확인한 바로는 모두 `GT15_VERSIONS` 로 허용하므로 새 판에 걸리지 않는다. SDM 의 실제 실행으로 확인해야 한다.
 - closed loop 은 한 번도 돌리지 않았다.
+
+---
+
+## 10. 거르기 1 재실행 — `-rf` 를 고친 뒤 (2026-11-14 추가, 결과 전 고정)
+
+**왜.** 거르기 1 (`aud1sdm`) 에서 `-rf` (SL-AUD1) 가 한 번도 적용되지 않았다. action-QP call 608 개가 모두 `reference_floor = {"why": "no ESDF row"}` 였다 (SDM 중간 보고 §A.4). 원인은 로컬 PC 쪽 code 의 잘못이다: ESDF block 은 `(H, n_query, 1)` 인데 2 차원으로 가정했다. commit `0f1d90b4` 로 고쳤다. 거르기 1 은 사실상 `-lp-mr8-af` 를 잰 것이므로 H1 은 아직 판정되지 않았다. 사용자 결정 (2026-11-14): 원래 계획한 판으로 다시 잰다.
+
+**넣기.** `git fetch origin audit/sl-aud:refs/remotes/origin/audit/sl-aud` 뒤 `git cherry-pick 0f1d90b4`. 로컬 PC 가 더한 줄만 건드린다 (`sqp.py` 의 SL-AUD1 block, `tests/trajopt/test_sl_aud_action_qp.py`). unit test: `tests/trajopt/test_sl_aud_action_qp.py` (19 개. 실제 `EsdfField` 를 지나가는 것 둘 포함).
+
+**먼저 확인 (GPU 약 5 분, 다르면 멈춤).** run 의 첫 episode 가 끝나면 그 `*_calls.jsonl` 에서 action-QP call 의 `to.ee_action_qp.reference_floor` 를 본다. `n_rows_below_backoff` 와 `min_floor_m` 이 있어야 한다. `why` · `error` · `shape_mismatch` 가 하나라도 있으면 run 을 멈추고 그 값 (`clearance_shape` · `centres_shape` 포함) 을 알려 주세요.
+
+| 항목 | 내용 |
+|---|---|
+| 판 | `<frozen>-rf-lp-mr8-af-tro` (거르기 1 과 같은 이름. code 만 `0f1d90b4` 가 더해짐) |
+| 셋 · run 구성 | S32, 거르기 1 과 같다 (§5). run-id 는 거르기 1 과 겹치지 않게 (예: TAG `aud1bsdm`) |
+| GPU | 1 시간 20 분 |
+| 통과 기준 | §5 그대로: SSR ≥ 12, > 50 mm 충돌 ≤ 4, 동결 판의 안전 성공 9 개 중 잃는 것 ≤ 1 |
+| 통과하면 | §7 의 채택 gate 에 넣는다 |
+| 떨어지면 | action QP 쪽 후보를 닫는다. `-rf` 를 따로 재지 않는다 |
+
+**돌려받을 것.** §8.1 · §8.2 의 형식 그대로, 세 판을 나란히 (동결 판 → 거르기 1 → 재실행). 더할 값:
+
+| 값 | key |
+|---|---|
+| `-rf` 가 적용된 action-QP call 수 / 전체 | `to.ee_action_qp.reference_floor` 에 `n_rows_below_backoff` 가 있는 call |
+| 접촉 row 중 5 mm 아래였던 것의 합, call 당 중앙값 | `…reference_floor.n_rows_below_backoff` |
+| 가장 깊은 floor 의 분포 (중앙값 · 최소) | `…reference_floor.min_floor_m` |
+| 큰 보정 call 을 최악 row 의 step 0–4 · 5–9 로 나눈 수 | 거르기 1 의 표와 같은 방식 |
+
+**읽는 법 (결과 전에 적어 둠).**
+
+- 거르기 1 은 큰 보정을 318 → 167 로 줄이고도 SSR 이 9 → 10 이었다. 재실행에서 큰 보정이 더 줄었는데 SSR 이 그대로면 H1 (큰 보정이 실패의 원인) 은 틀린 것으로 닫는다.
+- 112 ep 집계에서 잃은 ep 의 큰 보정은 최악 row 가 step 5–9 인 것이 247, step 0–4 가 77 이었다. `-mr8` 은 뒤쪽을 건드리지 않는다. `-rf` 가 step 5–9 쪽 큰 보정을 줄이는지가 이 재실행에서 볼 것이다.
+- 거르기 1 에서 새로 생긴 충돌 둘 (Spatial L-I task 1 init 15 · 16) 중 init 16 은 통과 판정 (`clear`, 그 밖의 row 위반 29.7 mm) 에서 났다. `-rf` · `-mr8` 과 무관하므로 재실행에서도 날 수 있다.
