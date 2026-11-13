@@ -1406,6 +1406,17 @@ for _s, _f in (("-a12h3-tro", ("--attention-source", "action:last:L12H3")),
     SOTA_ATT_VERSIONS = SOTA_ATT_VERSIONS + (_n,)
 del _s, _f, _n
 SOTA_VERSIONS = SOTA_VERSIONS + SOTA_ATT_VERSIONS
+#: FWDATT (sdm-f6, 2026-11-13 22:0x; user decision relayed by sdm-ahs: "Tab. 1 AG3S arm = the forward pass version", no
+#: separate gate): ``<v without -tro>-fwd-tro`` = ``v`` + ``--attention-inpass`` -- the attention is read inside the served
+#: sampling (step 0 of the executed noise) instead of a seed-0 replica pass; the actions are bit-identical (765 / 765 calls).
+#: Registered for the Tab. 1 candidates (frozen, -gh156a, -a12h3); the GT oracle twin (-gto) does not read attention.
+SOTA_FWD_VERSIONS: tuple[str, ...] = ()
+for _b in (FROZEN_20261112, FROZEN_20261112[:-len("-tro")] + "-gh156a-tro", FROZEN_20261112[:-len("-tro")] + "-a12h3-tro"):
+    _n = _b[:-len("-tro")] + "-fwd-tro"
+    AG3S_VERSIONS[_n] = tuple(AG3S_VERSIONS[_b]) + ("--attention-inpass",)
+    SOTA_FWD_VERSIONS = SOTA_FWD_VERSIONS + (_n,)
+del _b, _n
+SOTA_VERSIONS = SOTA_VERSIONS + SOTA_FWD_VERSIONS
 GT15_VERSIONS = GT15_VERSIONS + SOTA_VERSIONS
 #: (G88c, 03:5x) the A-alone ablation queued as ``…-obst3`` (gtto23, not started yet) gets the same two fixes, so A alone and
 #: A + B differ only by the held point model: ``…-obst3`` := A'' + no carve + support "under" (``…-obst3-pts`` = B'' keeps
