@@ -597,3 +597,8 @@ Step 4 종료 시점의 다음 구성 작업은 Step 5: 공식 template과 manus
 - 값 (%, suite 동일 가중 = 각 cell 20 ep 이라 pooled 와 같음): LIBERO SR 98.0 (196/200) | L-I TSR 67.5 (54/80) · SSR 13.8 (11/80 = 13.75) · CAR 15.0 (12/80) | L-II TSR 72.5 (58/80) · SSR 30.0 (24/80) · CAR 30.0 (24/80).
 - 자료 유형: [M] closed loop, `tab1sdm-pi05-*` 12 run (`/mnt/dev/AG3S_VLA-storage/results/benchmark/20261113T*_110ae6775e48_tab1sdm-pi05-*`), HEAD 110ae677, seed 7, main_aegis step budget, 공식 SafeLIBERO 충돌 정의 (장애물 변위 > 1 mm). 분할 `doc/active/experiments/PAPER_TENTH_SPLIT_20261113.json`. cell 별 표: 계획서 §9.39, 그림 `AG3S/ag3s/docs/figures/paper-tab1-tenth-sdm-20261113.png` (+ `.json`).
 - 주의: init 을 성공 예상으로 고른 부분 집합이라 TSR 이 원문 보고값 (KNOWS 원문 π0.5 L-I 55.0 · L-II 57.8) 보다 높게 나올 수 있다 — 단독 보고 금지, 전체 측정으로 교체. 같은 절의 본문 단락 (\proj, '57.8 % · 18.6 % · 44.3 points') 은 투영 문장으로 그대로 두었다 (표와 숫자가 다름 — 전체 측정 후 함께 고침). pdflatex 가 이 서버에 없어 컴파일은 확인하지 못했다.
+
+## 2026-11-13 18:2x KST — Tab. `tab:safelibero` 아래 블록의 투영 baseline 행은 그대로 둔다 (사용자 결정, sdm-f6)
+
+- 질문: 원고 `exp_section/04_experiments.tex` 아래 블록의 투영값 (\proj) 행 — AEGIS (official code) · AEGIS (GT) · Multi-link CBF$^\ast$ · KNOWS$^\ast$ · generic geometry · external segmentation — 이 결과 기록 §3.1 의 11-11 결정 (baseline 은 원문 보고값과 비교, 통제 baseline 삭제) 과 맞지 않으니 뺄지.
+- 사용자: "빼지말고 그대로 두세요". 행 · 값 · 빨간 투영 표시를 바꾸지 않는다. 결과 기록 §3.1 도 그대로 (두 문서의 차이는 알려진 상태로 남김).
