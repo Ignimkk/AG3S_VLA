@@ -2,13 +2,13 @@
 """(2026-11-13 sdm-f6) Which initial states this server runs: 1/10 of the paper scale, chosen for the highest expected success
 (user instruction 2026-11-13 10:5x: "성공률이 제일 높게 나올 것 같은 init 을 선택"; the other 9/10 runs elsewhere).
 
-SafeLIBERO (Tab. 1): per cell (suite x level) the 5 of init 0-49 with the highest expected safe-success sum over tasks 0-3
+SafeLIBERO (Tab. 1): per cell (suite x level) the 5 of init 5-49 (the launchers' test split; init 0-4 go to the other 9/10) with the highest expected safe-success sum over tasks 0-3
 (one init set per cell, so one server per cell). Expected safe success of (task, init):
   * AG3S measured with the version proxy (`--ag3s-tags`, newest first): 0.98 if SS, else 0.02 (same machine + seed reproduce);
   * else the cell-task prior (Laplace over its measured inits) x the pi0.5-alone likelihood ratio, when pi0.5 alone (same
     launcher `--modes vla_only`, or the earlier baseline launcher) has the episode: LR = P(SS | pi0.5 success) / P(SS) or
     P(SS | pi0.5 failure) / P(SS), fitted on every episode where both are measured.
-LIBERO (Tab. 1 column): per suite the 5 of init 0-49 with the highest expected success over tasks 0-9 (same scheme, success).
+LIBERO (Tab. 1 column): per suite the 5 of init 5-49 with the highest expected success over tasks 0-9 (same scheme, success).
 LIBERO-Safety (Tab. 2): one init per suite x level (recorded only: no evidence to choose on except init 19).
 This 1/10 is NOT a random sample and must not be reported alone; the reportable result is the union with the other 9/10.
 usage: .venv-ag3s/bin/python select_inits.py --ag3s-tags pkgFrssdm,tab10sdm OUT.json"""
@@ -92,7 +92,7 @@ def main():
                     exp[(t, i)] = min(0.95, prior * (lr["lr_success"] if pi[c][(t, i)][1] else lr["lr_failure"]))
                 else:
                     exp[(t, i)] = prior
-        sel, score = choose(exp, range(50), 5)
+        sel, score = choose(exp, range(5, 50), 5)
         out["safelibero"][f"{c[0]} L-{c[1]}"] = {
             "inits": sel, "expected_ss_of_4_tasks": {i: round(score[i], 2) for i in sel},
             "expected_ss_total": round(sum(score[i] for i in sel), 2),
@@ -110,7 +110,7 @@ def main():
         for t in range(10):
             for i in range(50):
                 exp[(t, i)] = 0.98 if agl.get((t, i)) else 0.02 if (t, i) in agl else (0.9 if pil.get((t, i)) else 0.5 if (t, i) in pil else 0.7)
-        sel, score = choose(exp, range(50), 5)
+        sel, score = choose(exp, range(5, 50), 5)
         out["libero"][s] = {"inits": sel, "expected_success_of_10_tasks": {i: round(score[i], 2) for i in sel},
                             "complement_inits": [i for i in range(50) if i not in sel]}
     for suite in ("affordance", "obstacle_avoidance", "obstacle_avoidance_human", "human_safety"):
