@@ -1552,3 +1552,15 @@ GPU 약 1 h 50 분 (52 ep). dev-8a (sdm-ahs) 의 공유 lock 추출은 이 시�
 분리 실행: `run_detached.sh audq 'bash /mnt/dev/AG3S_VLA-wt-aud/experiments/segmentation/aud_queue.sh'` (gate37b 의 pid 를 기다린 뒤 위 순서; 각 단계의 판정 줄은 `outputs/2026-11-14_SL-AUD/queue.log`, S32 의 32 ep 짝은 `s32_<TAG>.json`). 결과는 전달 계획 §8 의 형식 (run 표, `calls.jsonl` 셈, raw 6 ep, CPU 집계 144 ep, 질문) 으로 돌려준다.
 
 **§9.37 gate 결과 4 · gate 끝 (2026-11-14 01:09, [M]; 기록 위치 이관).** L12H3 (`…-rs-a12h3-tro`, TAG `a12h3sdm`) **stage 1 FAIL** (E1a 40 = 기존 t1 run + t0 · t2 · t3, 00:00:47–01:09:51): TSR 23 · CAR 28 · SSR 21 · > 50 mm 3 (동결 판 23 · 34 · 21 · 1; SSR 같고 CAR < 36, > 50 mm 증가 2 > 1). guard 는 돌리지 않음. gate37b 01:09:51 끝 (rc 0; stage 2 기록 64 ep 은 Tab. 1 뒤로 미룬 그대로). **§9.37 gate 결론: X = `-gh156a`** (stage 1 · 3 통과 후보 하나). `audq` (§9.41) 가 01:09:54 에 같은 X 를 고르고 01:09:56 main 을 `wip/sl-aud` (09dc923b) 로 fast-forward, 동결 판 1 ep 확인 시작. 기록: `outputs/2026-11-11_SOTA_개선/gate37/queue.log`, 판정 `experiments/segmentation/gate37_judge.py`. **이후 계획서 · log 덧붙이기는 `wip/sl-aud` 한 branch 에서만 한다** (gate 세션 dev-28 과 합의 01:1x — 두 branch 가 같은 파일 끝에 각각 덧붙이면 합칠 때 충돌).
+
+**§9.41 보충 1 (2026-11-14 01:5x, 사용자 질문 "L12H3 는 인식 실패 scenario 에서 진가를 발휘하지 않나") — L12H3 충돌 원인 [M, replay, GT 는 채점만, CPU].** L12H3 는 인식을 올린다 (SL-ATT1: 쥐기 전 51.0 → 67.5 %, 인식 실패 10 ep 중 9 상승) 그러나 gate E1a 40 짝: 안전 성공 얻음 5 (t0 e5 · e13, t1 e10, t2 e5, t3 e11) · 잃음 5 (t2 e7 · e12, t3 e7 · e10 · e13), 새 충돌 8. 기존 도구 (`gtto_collision_contacts.py` replay + `collision_cause_runs.py`, 동결 판 §11.7 과 같은 방법; osmesa, GPU 0) 로 L12H3 run 6 개 (SL-ATT1 E1a t1 · object · goal + gate E1a t0 · t2 · t3) 와 같은 구성의 동결 판 run 6 개의 충돌 ep 을 분류했다 (분류 기준은 결과 전 고정: A = 닿은 팔 · gripper link 의 계획 clearance 가 충돌 전 20 step 안 실행된 chunk 에서 음수, B = 양수, C = gripper 가 permission 으로 빠짐, D = 쥔 물체, E = 로봇이 닿지 않음). 산출 `outputs/2026-11-14_SL-AUD/l12h3_collision/`, supplement 후보 `11_L12H3_충돌원인/`.
+
+| 같은 56 ep | 충돌 ep | A (그중 C) | B | E |
+|---|---:|---:|---:|---:|
+| 동결 판 | 9 | 7 (4) | 0 | 2 |
+| L12H3 | 16 | 11 (3) | 1 | 4 |
+
+- **L12H3 에만 생긴 충돌 10 ep:** A 7 — spatial t1 e5 (link7) · e8 (link5) · e11 (link7) · e14 (link5), object t2 e16 (link6), goal t3 e17 (link5), spatial t2 e10 (leftfinger, C) / B 1 (spatial t1 e6, link5 +4.7 mm) / E 2 (t3 e7 놓은 뒤 그릇이 닿음, t3 e10 cabinet). 실행된 앞 5 step 의 row 만 보면 A 는 5 (t1 e5 · object t2 e16 은 음수가 실행되지 않은 꼬리에만).
+- **A 의 팔 link 는 대부분 TO 'optimal' + T88 passthrough `clear`**: 장애물 물체 row 의 위반은 0 이고, 그 밖의 row (장애물로 분류되지 않은 표면) 의 위반은 허용 한도 100 mm 안이라 통과 — 예: spatial t1 e11 의 접촉 (step 134) 직전 call (step 130) 은 그 밖의 row 위반 15.2 mm 로 `clear` [M, 원기록 확인]. 나머지는 'feasible / budget_only'.
+- **해석 (D):** L12H3 가 맞는 대상을 고르면 손이 대상 옆으로 가고, 대상 옆 장애물 표면이 그 call 에서 장애물 물체 집합에 들지 않아 팔 link 의 음수 clearance 가 허용 한도 (100 mm) 안에서 실행된다. '음수 clearance 를 실행하지 않음' 의 상한은 새 충돌 10 중 5–7 ep (막았을 때 task 가 성공하는지는 재지 않음). 지금 거르기 중인 SL-AUD flag 는 이 통과 판정을 바꾸지 않는다 (`-rf` 는 QP 의 기준만 바꿈).
+- 주의: 4 ep 에서 MuJoCo contact 목록은 비었으나 geom 거리는 겹침 (t3 e10 link5 −7.2 mm 등) — 로봇 접촉으로 세면 새 충돌의 A 는 8.
