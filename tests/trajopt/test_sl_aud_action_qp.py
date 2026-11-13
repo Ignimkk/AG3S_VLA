@@ -53,7 +53,8 @@ class _Lin:
         return centres, np.zeros((1, self.n_spheres, 3, q.size))
 
     def _esdf_clearance(self, centres, scene):
-        return self._clear(centres[0, 0, :self.g.shape[1]])[None, :]
+        # (H, n_query, 1): the shape `CollisionLinearizer._esdf_clearance_core` really returns (`clear[..., None]`)
+        return self._clear(centres[0, 0, :self.g.shape[1]])[None, :, None]
 
     def obstacle_row_floor(self, centres, scene, margin, **kw):
         self.kw = dict(kw)
@@ -184,7 +185,7 @@ def test_real_linearizer_takes_the_reference_floor_on_its_esdf_block(monkeypatch
     mask = np.zeros((h, n_query), bool)
     mask[:, 0] = True
     cls = type(lin)
-    monkeypatch.setattr(cls, "_esdf_clearance", lambda self, c, s: clear)
+    monkeypatch.setattr(cls, "_esdf_clearance", lambda self, c, s: clear[..., None])   # the real shape
     monkeypatch.setattr(cls, "_esdf_directions", lambda self, pts, rows, scene, n: np.tile([0.0, 0.0, 1.0], (len(pts), 1)))
     monkeypatch.setattr(cls, "obstacle_object_mask", lambda self, c, s, **k: (clear, mask, 0, None))
     opt = TrajectoryOptimizer.__new__(TrajectoryOptimizer)
@@ -205,6 +206,72 @@ def test_real_linearizer_takes_the_reference_floor_on_its_esdf_block(monkeypatch
     assert rec["reference_floor"]["shape_mismatch"] == [[h, 3], [h, n_query]]
     esdf = (np.asarray(rows.slot) == ESDF_SLOT) & rows.used
     assert np.allclose(rows.value[esdf & (np.asarray(rows.sphere) == 1)], -0.03)
+
+
+
+def _field_case():
+    """The real optimizer and linearizer on a real `EsdfField` (an analytic sphere), nothing of the linearizer replaced:
+    one movable robot sphere sits 30 mm inside the field at the middle step -- a model violation the pass-through test
+    accepts (tau 100 mm). No surface belongs to the obstacle-object set (its one point is far away)."""
+    pytest.importorskip("casadi")
+    pytest.importorskip("mujoco")
+    import dataclasses
+
+    from tests.trajopt.fixtures import empty_scene, make_scenario
+    from tests.trajopt.test_esdf_backend import analytic_field, scene_with_field
+
+    sc = make_scenario(horizon=8)
+    centres, jac = sc.linearizer.sphere_states(sc.reference, sc.q_now)
+    mid = centres.shape[0] // 2
+    movable = np.flatnonzero(np.linalg.norm(jac[mid], axis=(1, 2)) > 1e-6)
+    radius = float(sc.linearizer.robot_radii[movable[-1]])
+    field = analytic_field(centres[mid, movable[-1]], 0.03 - radius + 0.0, voxel=0.01)   # sphere surface 30 mm inside
+    scene = scene_with_field(empty_scene(sc.linearizer), field, 0.0)
+    scene = dataclasses.replace(scene, obstacle_object_points=np.array([[9.0, 9.0, 9.0]]))
+    return sc, scene
+
+
+def _field_solve(sc, scene, **sqp):
+    import time
+
+    from AG3S.trajopt.sqp import TrajectoryOptimizer
+
+    cfg = sc.config.with_overrides({"sqp": {"passthrough_when_clear": True, "passthrough_obstacle_tolerance": 0.0,
+                                            "passthrough_tolerance": 0.1, **sqp},
+                                    "safety": {"violation_tolerance": 0.1}})
+    opt = TrajectoryOptimizer(sc.robot, sc.layout, sc.limits, cfg)
+    nq, h = sc.reference.shape
+    opt.ee_action_map = {"M": 0.05 * np.eye(nq * h), "a_ref": np.zeros((h, nq))}   # one action = 0.05 rad of one joint
+    opt.ee_action_scaled = True
+    opt.linearizer.set_attached(None, None)
+    violation = -sc.linearizer.full_violation(sc.reference, sc.q_now, scene)
+    out = opt._solve_ee_action(sc.reference, sc.q_now, scene, sc.chunk, violation, None, [], time.perf_counter(), True, None)
+    return out, out.metrics["ee_action_qp"], violation
+
+
+def test_the_linearizers_esdf_block_is_three_dimensional():
+    """The contract the first version of SL-AUD1 got wrong (it asked for a 2-D block and never applied on a real field)."""
+    sc, scene = _field_case()
+    centres = np.asarray(sc.linearizer.sphere_states(sc.reference, sc.q_now)[0])
+    block = sc.linearizer._esdf_clearance(centres, scene)
+    assert block.shape == (centres.shape[0], centres.shape[1], 1)
+
+
+def test_reference_floor_applies_on_a_real_field():
+    sc, scene = _field_case()
+    # off: the accepted model violation is pulled back -- the action moves
+    off, rec_off, violation = _field_solve(sc, scene)
+    assert 0.02 < violation < 0.1                                         # accepted by the pass-through test (tau 100 mm)
+    assert "reference_floor" not in rec_off and rec_off["max_abs_delta_action"] > 0.05
+    # on: the floor is read from the real field (not "no ESDF row"), that row is held where the policy chunk has it
+    on, rec_on, _ = _field_solve(sc, scene, ee_action_reference_floor=True)
+    floor = rec_on["reference_floor"]
+    assert "why" not in floor and "error" not in floor and "shape_mismatch" not in floor, floor
+    assert floor["n_rows_below_backoff"] >= 1 and floor["min_floor_m"] < -0.02
+    assert rec_on["max_abs_delta_action"] < 0.2 * rec_off["max_abs_delta_action"]
+    assert on.reference_deviation < 0.2 * off.reference_deviation
+    # and it is not made worse: the returned trajectory's worst clearance is not below the policy chunk's
+    assert sc.linearizer.full_violation(on.trajectory, sc.q_now, scene) >= -violation - 1e-3
 
 
 # --- SL-AUD3: rows the free action components cannot move ----------------------------------------------------------------
