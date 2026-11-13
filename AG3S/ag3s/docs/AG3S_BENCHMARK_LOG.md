@@ -5206,3 +5206,7 @@ F8 + (a) `--ee-action-qp-scaled` (행 정규화 + quadratic slack) + (c′) `--g
 - main `/mnt/dev/AG3S_VLA` 를 `wip/sota-hf` 820535cd 로 fast-forward (17:15). 남은 test 실패 9 개는 모두 합치기 전부터 있던 것.
 - 17:16 SL-ATT1 시작: `-a12h3` (KNOWS cell L12H3, head + wrist 융합 유지, 후보) → `-a12h3h` (agent view 만, 진단). 판정 기준은 계획서 §9.38 (결과 전 기록).
 - dev-8a (sdm-ahs) 의 독립 측정 (head 카메라 몫 L8H2 0.019 · L12H3 0.575) 을 계획서 §9.38 보충 2 에 기록.
+
+### 2026-11-13 17:33 — SL-ATT1: `-a12h3h` 제외 (사용자), E1a cell 재시작 (sdm-f6)
+
+- 사용자 결정: **`-a12h3h` (agent view 만) 를 돌리지 않는다** ("head 만 쓰는 판은 필요없을 것 같아"). SL-ATT1 은 `-a12h3` 26 ep 만; 판정 기준 (§9.38) 은 그대로. 운영 사고: queue 를 끊지 않고 `-a12h3h` 만 빼려고 바깥 loop (`sota_att1_queue.sh`) 에 SIGSTOP 을 보냈더니 harness 가 background task 를 끝난 것으로 보고 process tree 를 모두 죽였다 — `-a12h3` E1a t1 run (17:16 시작) 이 5 / 10 ep 에서 끊김 (run dir 에 `INTERRUPTED.txt`, 채점 제외). 17:33 에 `VS=a12h3` 로 처음부터 다시 시작 (run 구성 효과 때문에 앞 5 ep 를 이어 쓰지 않는다). 잃은 GPU 시간 약 17 분. 끝 예상 18:40 무렵.

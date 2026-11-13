@@ -1434,3 +1434,5 @@ GPU 약 1 h 50 분 (52 ep). dev-8a (sdm-ahs) 의 공유 lock 추출은 이 시�
 | **LIBERO 합** | **200** | **0.980** | – | – |
 
 그림 `AG3S/ag3s/docs/figures/paper-tab1-tenth-sdm-20261113.png` (+ `.json`, `experiments/segmentation/fig_paper_tab1_tenth.py` — 뒤 arm 이 끝나면 같은 도구로 새 이름의 그림을 만든다). π0.5 는 일은 하지만 (SR 0.70) 장애물을 거의 피하지 못한다 (CAR 0.225); goal L-I 은 20 / 20 ep 충돌. 다음: 17:16 부터 SL-ATT1 (`-a12h3` → `-a12h3h`, 52 ep), 그 뒤 §9.37 gate, 그 뒤 Tab. 1 AG3S · GT oracle arm. main 은 17:15 에 `wip/sota-hf` 820535cd 로 fast-forward (worktree 전용 실패 11 개는 main 에서 9 개가 남았고 모두 합치기 전 main 110ae677 에서도 실패하던 것; 새 test 통과).
+
+**§9.38 보충 3 (2026-11-13 17:33)** — 사용자 결정: **`-a12h3h` (agent view 만) 를 돌리지 않는다** ("head 만 쓰는 판은 필요없을 것 같아"). SL-ATT1 은 `-a12h3` 26 ep 만; 판정 기준 (§9.38) 은 그대로. 운영 사고: queue 를 끊지 않고 `-a12h3h` 만 빼려고 바깥 loop (`sota_att1_queue.sh`) 에 SIGSTOP 을 보냈더니 harness 가 background task 를 끝난 것으로 보고 process tree 를 모두 죽였다 — `-a12h3` E1a t1 run (17:16 시작) 이 5 / 10 ep 에서 끊김 (run dir 에 `INTERRUPTED.txt`, 채점 제외). 17:33 에 `VS=a12h3` 로 처음부터 다시 시작 (run 구성 효과 때문에 앞 5 ep 를 이어 쓰지 않는다). 잃은 GPU 시간 약 17 분. 끝 예상 18:40 무렵.
