@@ -763,6 +763,14 @@ PORTED_FINAL_CONFIG_DESTS: tuple[str, ...] = (
     'obstacle_hand_beneath',
     # SL-SOTA17: the band of the held object's own rows in that rule (sqp key, same path)
     'obstacle_held_beneath_band_mm',
+    # SL-AUD1-4 (code audit 2026-11-13): the action QP's reference floor / limit pass-through / minimum reach / the two
+    # corrections (sqp keys through serve_safe.passthrough_overrides, same path as ee_action_qp_gate_rows)
+    'ee_action_qp_reference_floor', 'ee_action_qp_limit_passthrough', 'ee_action_qp_min_reach_mm',
+    'ee_action_qp_audit_fixes',
+    'ee_action_qp_max_delta',   # SL-AUD5: the cap on one action component's correction (same path)
+    # SL-AUD6 / 7 (clustering keys through serve_safe.t43t_identity_section, same path as scene_obstacle_target_cut) and
+    # SL-AUD8 (SafePolicy switch through serve_safe.apply_grasp_contact_flags, same path as grasp_zone_release)
+    'scene_obstacle_history_refilter', 'destination_leader_outside_hand', 'ee_action_qp_progress_release_off',
 )
 #: SL-GTTO — the target extents the Panda server runs (``--target-extent``; SL7 attention-surface, SL-GTTO oracle-visible).
 PORTED_TARGET_EXTENTS: tuple[str, ...] = ("estimated", "attention-surface", "oracle-visible")

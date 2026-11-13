@@ -292,8 +292,9 @@ class DestinationRegistry:
         return self._streak
 
     def observe(self, clusters: Sequence[Any], cluster_points: Sequence[np.ndarray],
-                graspable: Sequence[Optional[bool]], *, frame: int) -> Optional[str]:
-        """One frame. `clusters` score-sorted; `graspable[i]` True/False/None (unknown)."""
+                graspable: Sequence[Optional[bool]], *, frame: int, leader_index: Optional[int] = None) -> Optional[str]:
+        """One frame. `clusters` score-sorted; `graspable[i]` True/False/None (unknown). `leader_index` (SL-AUD7): the
+        cluster to consider as the candidate instead of the score leader 0; a negative index = none this frame."""
         self.last_event = None
         if not clusters:
             return None
@@ -311,6 +312,12 @@ class DestinationRegistry:
                     self.last_event = "updated"
             return self.last_event
 
+        if leader_index is not None:   # SL-AUD7: the caller names the candidate (None = the score leader, as before)
+            li = int(leader_index)
+            if li < 0 or li >= len(clusters):   # the caller found no cluster to lead this frame
+                self._candidate, self._streak = None, 0
+                return self.last_event
+            clusters, cluster_points, graspable = [clusters[li]], [cluster_points[li]], [graspable[li]]
         leader = clusters[0]
         if graspable[0] is False and float(leader.target_score) >= self.min_score:
             pts = np.asarray(cluster_points[0], np.float64).reshape(-1, 3)

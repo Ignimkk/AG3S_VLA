@@ -755,6 +755,7 @@ class TargetConfirm:
         self.close_seed_grounding = bool(getattr(cfg, "close_seed_grounding", False))
         self.destination_after_held = bool(getattr(cfg, "destination_after_held", False))
         self.destination_held_leader = bool(getattr(cfg, "destination_held_leader", False))   # SL-PE5
+        self.destination_leader_outside_hand = bool(getattr(cfg, "destination_leader_outside_hand", False))   # SL-AUD7
         self._close_seed = False            # this call's clusters come from the grasp seed (`note_close_seed`)
         self.close_seed_switched = False    # this call adopted the seed object by CLOSE_SEED_SWITCH
         self._seed_adopted_id: Optional[int] = None   # the identity the grasp seed named (adopted or confirmed by it)
@@ -1822,7 +1823,15 @@ class TargetConfirm:
             if self.destination_held_leader and self.frozen and not self._pre_attach_grasp and hand is not None:
                 # SL-PE5: holding something, a cluster away from the hand is not the next pick -- it is where to put it
                 reg_grasp = [False if hand.gap(p) > 0.06 else g for p, g in zip(cluster_points, grasp)]
-            self.destinations.observe(clusters, cluster_points, reg_grasp, frame=self._frame)
+                if self.destination_leader_outside_hand:
+                    # SL-AUD7: the candidate is the score leader among the clusters away from the hand (-1 = none is)
+                    away = [i for i, p in enumerate(cluster_points) if hand.gap(p) > 0.06]
+                    self.destinations.observe(clusters, cluster_points, reg_grasp, frame=self._frame,
+                                              leader_index=away[0] if away else -1)
+                else:
+                    self.destinations.observe(clusters, cluster_points, reg_grasp, frame=self._frame)
+            else:
+                self.destinations.observe(clusters, cluster_points, reg_grasp, frame=self._frame)
         # SL-GTTO2 F1: every GT cluster is the target, so none is registered as the destination (an injected
         # destination still applies).
         dest = self.destinations.current

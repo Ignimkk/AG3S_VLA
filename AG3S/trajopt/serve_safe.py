@@ -1118,6 +1118,9 @@ def t43t_identity_section(args) -> dict:
                  "scene_obstacle_target_cut"):   # SL-PE1-3, 5, 8, 11 (off: no key)
         if getattr(args, name, False):
             out[name] = True
+    for name in ("scene_obstacle_history_refilter", "destination_leader_outside_hand"):   # SL-AUD6 / 7 (off: no key)
+        if getattr(args, name, False):
+            out[name] = True
     if getattr(args, "close_seed_attention_ratio", None) is not None:   # SL-PE7 (off: no key)
         out["close_seed_attention_ratio"] = float(args.close_seed_attention_ratio)
     if getattr(args, "attention_peak_seed", None) is not None:   # SL-PE9 (off: no key)
@@ -2757,6 +2760,42 @@ def build_parser() -> argparse.ArgumentParser:
                     help="SL-SOTA17 — --obstacle-hand-beneath 와 함께만. 쥔 물체 자신의 행에 쓰는 띠의 폭 (xy: 발자국 둘레, "
                          "z: 쥔 물체 바닥 위) — 기본 (없음) 은 2 voxel. 계획이 목적지 면 안으로 10 mm 넘게 내려가거나 최근접 "
                          "집합 점이 접시 rim · basket 벽이면 내려놓기가 거절되던 것 (sqp.obstacle_held_beneath_band)")
+    # SL-AUD — begin (code audit 2026-11-13, local_docs/2026-11-13_frozen_config_code_audit_KO.md; all default off)
+    ap.add_argument("--ee-action-qp-reference-floor", action="store_true",
+                    help="SL-AUD1 — --ee-action-qp · --passthrough-obstacle-tolerance-mm 와 함께만 (--ee-action-qp-gate-rows 와는 "
+                         "같이 못 씀). action QP 가 장애물 물체 행이 아닌 ESDF 행을 backoff 가 아니라 "
+                         "min(backoff, policy chunk 에서의 그 행의 clearance) 에 둔다: 통과 판정이 받아들이는 행을 QP 가 "
+                         "policy chunk 보다 나쁘게 만들지 않되, 고치지도 않는다 (sqp.ee_action_reference_floor)")
+    ap.add_argument("--ee-action-qp-limit-passthrough", action="store_true",
+                    help="SL-AUD2 — --ee-action-qp · --passthrough-when-clear 와 함께만. 통과 판정이 관절 한계 초과 하나로만 거절한 "
+                         "chunk (사유 limit) 는 그대로 통과시킨다: action QP 에는 관절 한계 행이 없어 그 chunk 를 충돌 행으로만 "
+                         "고쳤다 (sqp.ee_action_limit_passthrough)")
+    ap.add_argument("--ee-action-qp-min-reach-mm", type=float, default=None, metavar="MM",
+                    help="SL-AUD3 — --ee-action-qp-scaled 와 함께만. 고칠 수 있는 action 성분에 대한 gradient 크기가 MM "
+                         "(action 1 단위당 clearance mm) 보다 작은 행은 action QP 에서 뺀다. Panda 의 hand 구는 step 0–4 에서 "
+                         "3.5 · 7.0 · 10.6 · 14.0 · 17.3 mm: 8 은 step 0–1, 12 는 step 0–2 를 뺀다. 최종 검사는 그 행도 본다 "
+                         "(sqp.ee_action_min_reach)")
+    ap.add_argument("--ee-action-qp-audit-fixes", action="store_true",
+                    help="SL-AUD4 — --ee-action-qp 와 함께만. (a) 재선형화 조기 종료가 full_violation (최악 clearance, 양수 = 여유) "
+                         "의 부호를 맞게 읽는다 (b) QP 가 쓰는 장애물 행 여유는 이번 call 의 통과 판정이 정한 값이다 — 그 판정이 "
+                         "돌지 않은 call 은 전체 여유 (sqp.ee_action_audit_fixes)")
+    ap.add_argument("--ee-action-qp-max-delta", type=float, default=None, metavar="X",
+                    help="SL-AUD5 — --ee-action-qp 와 함께만. action QP 가 action 한 성분을 X 넘게 바꾸지 못한다 "
+                         "(|a_ref + Da| <= 1 상자는 그대로). 상한에 걸려 남는 위반은 slack 으로 남고 최종 검사 · verdict 는 "
+                         "그대로 (sqp.ee_action_max_delta)")
+    ap.add_argument("--scene-obstacle-history-refilter", action="store_true",
+                    help="SL-AUD6 — --scene-obstacle-objects 와 함께만. 장애물 물체 집합의 '최근 3 요청 합집합' 에서 앞 두 요청의 "
+                         "점도 이번 요청이 빼는 것 (조작 대상 · 그 받침 · 목적지 · 쥔 물체) 15 mm 안이면 뺀다: 목적지가 등록된 뒤에도 "
+                         "2 요청 동안 접시가 장애물로 남던 것 (clustering.scene_obstacle_history_refilter)")
+    ap.add_argument("--destination-leader-outside-hand", action="store_true",
+                    help="SL-AUD7 — --destination-held-leader 와 함께만. 쥔 동안 목적지 후보를 전체 점수 1 위가 아니라 손 (60 mm) "
+                         "밖 cluster 중 점수 1 위로 본다: 1 위가 손 안의 쥔 물체 조각이면 연속 frame 수가 0 으로 돌아가던 것 "
+                         "(clustering.destination_leader_outside_hand)")
+    ap.add_argument("--ee-action-qp-progress-release-off", action="store_true",
+                    help="SL-AUD8 — --ee-action-qp-progress · --grasp-opening-rule 과 함께만. opening rule 이 놓은 뒤 (다음 닫기 "
+                         "시도 전까지) 는 진행 선호의 'target 쪽' 을 끈다: 놓은 뒤에도 latch 가 LATCHED 이고 target 이 옛 자리의 "
+                         "기하라 보정이 집던 자리로 끌리던 것 (SafePolicy.progress_release_off)")
+    # SL-AUD — end
     # SL-SOTA1 — end
     # SL-GTTO10 — begin (lead self-ruling G53, 2026-11-07; user caution 2)
     ap.add_argument("--oracle-destination", action="store_true",
@@ -4896,6 +4935,33 @@ def reject_bad_flag_combinations(ap: argparse.ArgumentParser, args, *, seed_map_
             ap.error("--obstacle-held-beneath-band-mm 는 --obstacle-hand-beneath 와 함께만")
         if not 0.0 < float(args.obstacle_held_beneath_band_mm) <= 100.0:
             ap.error(f"--obstacle-held-beneath-band-mm 는 0 초과 100 이하 (got {args.obstacle_held_beneath_band_mm})")
+    if getattr(args, "ee_action_qp_reference_floor", False):   # SL-AUD1
+        if getattr(args, "passthrough_obstacle_tolerance_mm", None) is None or not getattr(args, "ee_action_qp", False):
+            ap.error("--ee-action-qp-reference-floor 는 --passthrough-obstacle-tolerance-mm · --ee-action-qp 와 함께만")
+        if getattr(args, "ee_action_qp_gate_rows", False):
+            ap.error("--ee-action-qp-reference-floor 와 --ee-action-qp-gate-rows 는 같은 행의 floor 를 정한다: 하나만")
+    if getattr(args, "ee_action_qp_limit_passthrough", False):   # SL-AUD2
+        if not getattr(args, "ee_action_qp", False) or not getattr(args, "passthrough_when_clear", False):
+            ap.error("--ee-action-qp-limit-passthrough 는 --ee-action-qp · --passthrough-when-clear 와 함께만")
+    if getattr(args, "ee_action_qp_min_reach_mm", None) is not None:   # SL-AUD3
+        if not getattr(args, "ee_action_qp_scaled", False):
+            ap.error("--ee-action-qp-min-reach-mm 는 --ee-action-qp-scaled 와 함께만")
+        if not 0.0 < float(args.ee_action_qp_min_reach_mm) <= 50.0:
+            ap.error(f"--ee-action-qp-min-reach-mm 는 0 초과 50 이하 (got {args.ee_action_qp_min_reach_mm})")
+    if getattr(args, "ee_action_qp_audit_fixes", False) and not getattr(args, "ee_action_qp", False):   # SL-AUD4
+        ap.error("--ee-action-qp-audit-fixes 는 --ee-action-qp 와 함께만")
+    if getattr(args, "ee_action_qp_max_delta", None) is not None:   # SL-AUD5
+        if not getattr(args, "ee_action_qp", False):
+            ap.error("--ee-action-qp-max-delta 는 --ee-action-qp 와 함께만")
+        if not 0.0 < float(args.ee_action_qp_max_delta) <= 2.0:
+            ap.error(f"--ee-action-qp-max-delta 는 0 초과 2 이하 (got {args.ee_action_qp_max_delta})")
+    if getattr(args, "scene_obstacle_history_refilter", False) and not getattr(args, "scene_obstacle_objects", False):   # SL-AUD6
+        ap.error("--scene-obstacle-history-refilter 는 --scene-obstacle-objects 와 함께만")
+    if getattr(args, "destination_leader_outside_hand", False) and not getattr(args, "destination_held_leader", False):   # SL-AUD7
+        ap.error("--destination-leader-outside-hand 는 --destination-held-leader 와 함께만")
+    if getattr(args, "ee_action_qp_progress_release_off", False):   # SL-AUD8
+        if getattr(args, "ee_action_qp_progress", None) is None or not getattr(args, "grasp_opening_rule", False):
+            ap.error("--ee-action-qp-progress-release-off 는 --ee-action-qp-progress · --grasp-opening-rule 과 함께만")
     if getattr(args, "obstacle_row_patience", None) is not None:   # SL-SOTA3
         if getattr(args, "obstacle_row_margin_mm", None) is None:
             ap.error("--obstacle-row-patience 는 --obstacle-row-margin-mm 와 함께만")
@@ -5015,6 +5081,9 @@ def apply_grasp_contact_flags(safe, args) -> dict:
     if getattr(args, "grasp_zone_release", False):   # SL-GTTO5 F4 (off: no key)
         safe.grasp_zone_release = True
         out["grasp_zone_release"] = True
+    if getattr(args, "ee_action_qp_progress_release_off", False):   # SL-AUD8 (off: no key, no attribute)
+        safe.progress_release_off = True
+        out["progress_release_off"] = True
     if getattr(args, "grasp_zone_keep_palm_obstacles", False):   # SL-SOTA13 (off: no key, no attribute)
         tol_mm = getattr(args, "obstacle_surface_tol_mm", None)
         safe.grasp_zone_keep_palm_obstacles = (20.0 if tol_mm is None else float(tol_mm)) / 1000.0
@@ -5099,6 +5168,16 @@ def passthrough_overrides(args) -> dict:
         out["obstacle_hand_beneath"] = True
     if getattr(args, "obstacle_held_beneath_band_mm", None) is not None:   # SL-SOTA17
         out["obstacle_held_beneath_band"] = float(args.obstacle_held_beneath_band_mm) / 1000.0
+    if getattr(args, "ee_action_qp_reference_floor", False):   # SL-AUD1
+        out["ee_action_reference_floor"] = True
+    if getattr(args, "ee_action_qp_limit_passthrough", False):   # SL-AUD2
+        out["ee_action_limit_passthrough"] = True
+    if getattr(args, "ee_action_qp_min_reach_mm", None) is not None:   # SL-AUD3
+        out["ee_action_min_reach"] = float(args.ee_action_qp_min_reach_mm) / 1000.0
+    if getattr(args, "ee_action_qp_audit_fixes", False):   # SL-AUD4
+        out["ee_action_audit_fixes"] = True
+    if getattr(args, "ee_action_qp_max_delta", None) is not None:   # SL-AUD5
+        out["ee_action_max_delta"] = float(args.ee_action_qp_max_delta)
     return out
 # --- T88 — end ---
 
