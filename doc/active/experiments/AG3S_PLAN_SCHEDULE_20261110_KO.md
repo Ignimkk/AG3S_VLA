@@ -1436,3 +1436,15 @@ GPU 약 1 h 50 분 (52 ep). dev-8a (sdm-ahs) 의 공유 lock 추출은 이 시�
 그림 `AG3S/ag3s/docs/figures/paper-tab1-tenth-sdm-20261113.png` (+ `.json`, `experiments/segmentation/fig_paper_tab1_tenth.py` — 뒤 arm 이 끝나면 같은 도구로 새 이름의 그림을 만든다). π0.5 는 일은 하지만 (SR 0.70) 장애물을 거의 피하지 못한다 (CAR 0.225); goal L-I 은 20 / 20 ep 충돌. 다음: 17:16 부터 SL-ATT1 (`-a12h3` → `-a12h3h`, 52 ep), 그 뒤 §9.37 gate, 그 뒤 Tab. 1 AG3S · GT oracle arm. main 은 17:15 에 `wip/sota-hf` 820535cd 로 fast-forward (worktree 전용 실패 11 개는 main 에서 9 개가 남았고 모두 합치기 전 main 110ae677 에서도 실패하던 것; 새 test 통과).
 
 **§9.38 보충 3 (2026-11-13 17:33)** — 사용자 결정: **`-a12h3h` (agent view 만) 를 돌리지 않는다** ("head 만 쓰는 판은 필요없을 것 같아"). SL-ATT1 은 `-a12h3` 26 ep 만; 판정 기준 (§9.38) 은 그대로. 운영 사고: queue 를 끊지 않고 `-a12h3h` 만 빼려고 바깥 loop (`sota_att1_queue.sh`) 에 SIGSTOP 을 보냈더니 harness 가 background task 를 끝난 것으로 보고 process tree 를 모두 죽였다 — `-a12h3` E1a t1 run (17:16 시작) 이 5 / 10 ep 에서 끊김 (run dir 에 `INTERRUPTED.txt`, 채점 제외). 17:33 에 `VS=a12h3` 로 처음부터 다시 시작 (run 구성 효과 때문에 앞 5 ep 를 이어 쓰지 않는다). 잃은 GPU 시간 약 17 분. 끝 예상 18:40 무렵.
+
+**§9.38 보충 4 (2026-11-13 18:2x) — SL-ATT1 중간 결과 [M] · 두 번째 중단.** reload 전 세션의 Claude process 가 18:20:33 에 끝나며 그 아래 queue 를 데려가 goal L-I 묶음이 0 / 8 ep 에서 끊김 (`INTERRUPTED.txt`); 18:20 에 이 세션에서 goal 묶음만 다시 시작. 끝난 18 ep (같은 run 구성의 동결 판과 짝):
+
+| 묶음 | 동결 판 (L8H2) SS · 충돌 ep | `-a12h3` SS · 충돌 ep | episode 변화 |
+|---|---|---|---|
+| E1a spatial L-I t1 init 5–14 | 2 · 3 | 3 · 8 | 얻음 i10 (F+C → SS), 충돌 새로 5 (i5 S+C 1.6 mm · i6 10.3 · i8 3.1 · i11 1.2 · i14 16.3 mm; 동결 판은 이 5 ep 에서 충돌 없는 실패) |
+| object L-I init 15, 16 | 4 · 1 | 3 · 1 | t2 i15 F+C (174 mm) → SS (milk: 동결 판은 wine bottle 을 집음), t2 i16 F → F+C 826 mm, t1 i16 · t3 i16 SS → F |
+| 합 18 ep | 6 · 4 | 6 · 8 | |
+
+**판정 (§9.38 기준, 결과 전 고정): 유망 아님** — 충돌 ep 가 이미 8 > 5 (남은 goal 8 ep 로 줄지 않는다). gate 에 L12H3 후보를 넣지 않는다. 미리 정한 26 ep 측정은 끝까지 마친다 (goal 8 ep, 기제 기록용). 해석 (D, 확인 전): 대상을 바로 잡으면 (E1a t1: ramekin 대신 bowl) 동결 판이 멈춰 있던 episode 에서 손이 장애물 쪽으로 움직여 작은 충돌이 늘어난다 — attention 만 바꿔서는 안전 성공이 늘지 않는다.
+
+**§9.37 gate 운영 (결과 전, 18:2x).** `experiments/segmentation/sota_gate37_queue.sh` + `gate37_judge.py`. 단계 순서를 1 → 3 → 2 로 바꾼다 (채택 조건인 E1a 40 · guard 를 먼저, 기제 기록 56 ep 는 통과한 판에만). judge 가 §9.2 · §9.37 기준을 기계적으로 적용하고 실패하면 다음 단계로 가지 않는다: E1a — SSR ≥ 22, 또는 21 이고 CAR ≥ 36, > 50 mm ep 증가 ≤ 1 (동결 판 E1a 40: TSR 23 · CAR 34 · SSR 21 · > 50 mm 1); guard — LIBERO 27 ≥ 21, LS 10 성공 ≥ 4 · 위반 0, SafeLIBERO 11 > 50 mm 증가 ≤ 1. 기존 run 으로 judge 확인: 동결 판 E1a FAIL (자기 자신 +1 이 아니므로), mug 후보 `pkgFgh` E1a FAIL (> 50 mm 1 → 3, §9.35 와 같음), guard 둘 다 PASS. 후보 순서 `-gh156a-sw` → (실패 시) `-gh156a`. run-id TAG `g37<판>sdm`. 시작: SL-ATT1 goal 묶음이 끝나고 main 을 fast-forward 한 직후.
