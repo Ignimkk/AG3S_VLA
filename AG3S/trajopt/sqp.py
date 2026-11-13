@@ -1581,15 +1581,22 @@ class TrajectoryOptimizer:
         ref_floor = None
         if bool(getattr(getattr(cfg, "sqp", None), "ee_action_reference_floor", False)):
             try:
-                c_ref = np.asarray(self.linearizer._esdf_clearance(
-                    np.asarray(self.linearizer.sphere_states(reference, q_now)[0], np.float64), scene), np.float64)
-                if c_ref.ndim == 2 and c_ref.shape[0] == H and c_ref.shape[1] > 0:
+                ref_centres = np.asarray(self.linearizer.sphere_states(reference, q_now)[0], np.float64)
+                c_ref = np.asarray(self.linearizer._esdf_clearance(ref_centres, scene), np.float64)
+                # the linearizer returns the ESDF block as (H, n_query, 1) (`_esdf_clearance_core`: `clear[..., None]`; an
+                # empty array without a field) -- read it to (H, n_query), as `obstacle_object_mask` does. The first
+                # version of this switch asked for ndim == 2 and so never applied on a real field (SDM 2026-11-14:
+                # `{"why": "no ESDF row"}` on 608 of 608 action-QP calls).
+                n_query = int(ref_centres.shape[1]) if ref_centres.ndim >= 2 else 0
+                if c_ref.size and n_query > 0 and ref_centres.shape[0] == H and c_ref.size == H * n_query:
+                    c_ref = c_ref.reshape(H, n_query)
                     ref_floor = np.minimum(0.0, c_ref - backoff)
                     ref_floor[~np.isfinite(ref_floor)] = 0.0
                     rec["reference_floor"] = {"n_rows_below_backoff": int((c_ref < backoff).sum()),
                                               "min_floor_m": float(ref_floor.min(initial=0.0))}
                 else:
-                    rec["reference_floor"] = {"why": "no ESDF row"}
+                    rec["reference_floor"] = {"why": "no ESDF row", "clearance_shape": [int(n) for n in c_ref.shape],
+                                              "centres_shape": [int(n) for n in ref_centres.shape]}
             except Exception as exc:   # the solve must not die on the floor: the plain rows, recorded
                 rec["reference_floor"] = {"error": repr(exc)}
         min_reach = getattr(getattr(cfg, "sqp", None), "ee_action_min_reach", None)   # SL-AUD3 (None = off)
