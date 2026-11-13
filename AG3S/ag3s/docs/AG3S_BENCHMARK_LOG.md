@@ -5266,3 +5266,6 @@ queue 를 세션과 분리 (사용자: "세션이 끊기는 것을 대비합시�
 
 ### 2026-11-13 20:0x — gate 중 lock 없는 GPU 접근 영향 확인 (sdm-f6)
 dev-88 이 20:01:58 에 `.venv-openpi-live` 로 `import jax` 를 lock 없이 실행 (JAX_PLATFORMS=cpu 누락) — GPU 메모리 선할당 시도 후 OOM 으로 1–2 s 안에 종료, 계산 없음. 그때 돌던 것: gate E1a 40 task 2 init 12 (`20261113T194314_…sub-g37gh156aswsdm-e1a-spatial-LI-t2`, ep 20:01:38–20:02:56). 확인: server log 에 OOM · RESOURCE_EXHAUSTED · Traceback 없음, server process 그대로 (GPU 18.4 GB); 그 ep 의 37 call 중 time-budget hit 0 (같은 run 의 다른 7 ep 296 call 도 0), solve_ms 최대 916 ms 로 다른 ep 의 p95 (1,129 ms) 안. 결과 = 성공 · 충돌 없음. **영향은 측정 범위 안에서 보이지 않음 → 이 ep 를 그대로 쓴다** (기록만 남김).
+
+### 2026-11-13 20:34 — §9.37 gate: `-gh156a-sw` E1a 40 탈락 (sdm-f6)
+E1a 40 (18:57–20:34, HEAD e5f0254d, 분리 실행): TSR 25 · CAR 33 · **SSR 22** · > 50 mm **3** (동결 판 23 · 34 · 21 · 1). SSR 기준 (≥ 22) 은 채웠으나 > 50 mm 증가 2 > 1 로 탈락 (§9.2, 결과 전 고정). 바뀐 episode: 얻음 t1 i11 (F → SS), t1 i9 (F+C 1.6 mm → F); 잃음 t1 i6 (F → F+C 25 mm), **t1 i12 F+C 26 → 304 mm**, **t3 i14 F → S+C 269 mm**. 넓은 덩어리 쪼개기가 대상을 바로잡는 이득 (+1 SS) 보다 큰 충돌 2 ep 가 생겼다 — 두 ep 의 원인은 다음 CPU 분석 대상. 계획대로 대안 `-gh156a` E1a 40 이 20:34 에 시작 (TAG g37gh156asdm), 그 뒤 L12H3 (`-a12h3`) 두 번째 후보.
