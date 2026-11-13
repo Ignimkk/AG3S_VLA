@@ -1586,3 +1586,18 @@ GPU 약 1 h 50 분 (52 ep). dev-8a (sdm-ahs) 의 공유 lock 추출은 이 시�
 4. 채택: 재실행 통과 → `-rf-lp-mr8-af`; 떨어지면 action QP 쪽 후보를 닫는다 (§10; `-md5` 도 포함 — `-md5` 는 원래 거르기 1 (`-rf` 미작동) 의 갈림으로 돈 것이므로 결과는 기록만 한다). 거르기 2 통과면 `-ohr-dlo-pro` 를 더한다. 통과가 있으면 X (`-gh156a`) + segment 로 채택 gate (E1a 40 + guard, `-gh156a` 와 같은 기준), 그 뒤 Tab. 1 (최종 판의 `-fwd` 짝 + GT oracle).
 - 읽는 법 (§10, 결과 전): 큰 보정이 더 줄었는데 SSR 이 그대로면 H1 을 닫는다. `-rf` 가 최악 row step 5–9 쪽 큰 보정을 줄이는지 본다 (`-mr8` 은 뒤쪽을 건드리지 않음). 거르기 1 의 새 충돌 Spatial L-I t1 e16 은 통과 판정 (`clear`, 그 밖의 row 위반 29.7 mm) 에서 났으므로 재실행에서도 날 수 있다.
 - 일정 [P]: 거르기 2 ~03:55, `-md5` ~03:55–05:15, 첫 ep 확인 ~05:20, 재실행 ~05:20–06:40, (통과 시) 채택 gate ~06:40–10:10, Tab. 1 그 뒤.
+
+**§9.41 결과 2 (2026-11-14 04:0x, [M]) — 거르기 2 `-ohr-dlo-pro` PASS; queue 일시 정지 (RB-Y1 실물 학습 우선).** TAG `aud2sdm`, HEAD 09dc923b, 02:37:03–03:55:03 (run 20261114T023705 · 031255 · 033440).
+
+| S32 | 동결 판 TSR · CAR · SSR, > 50 mm | 거르기 1 `-rf-lp-mr8-af` (`-rf` 미작동) | 거르기 2 `-ohr-dlo-pro` |
+|---|---|---|---|
+| Spatial L-I (16) | 7 · 12 · 5, 2 | 8 · 11 · 7, 2 | 8 · 13 · 7, 1 |
+| Goal L-I (8) | 2 · 6 · 1, 1 | 2 · 6 · 1, 0 | 3 · 6 · 2, 1 |
+| Goal L-II (8) | 4 · 5 · 3, 0 | 4 · 5 · 2, 1 | 5 · 5 · 4, 0 |
+| 합 (32) | 13 · 23 · 9, 3 | 14 · 22 · 10, 3 | **16 · 24 · 13, 2** |
+
+- 기준 (§6.3): SSR ≥ 11 통과 (13), > 50 mm ≤ 4 통과 (2), 동결 판 안전 성공 잃음 ≤ 1 통과 (0) → **PASS** → 채택 gate 후보. 안전 성공 얻음 4 (spatial t0 e16 S+C → SS, spatial t2 e18 F → SS, goal L-I t2 e18 F → SS (잃은 13 중), goal L-II t3 e18 F → SS), 잃음 0. 잃은 13 중 돌아온 것 1.
+- **flag 가 바꾼 episode [M]:** call 단위 (`max_abs_action_change_executed` · `passthrough_clear.reason`) 로 동결 판과 같은 ep 19 / 32, 다른 ep 13 (처음 달라지는 call 은 대부분 20–46 번째 = 쥔 뒤 · 놓는 구간; spatial t0 e16 은 7, goal L-II t3 e18 은 8). 얻은 4 ep 은 모두 '다른' 13 ep 에 있다. (거르기 1 은 30 / 32 가 다름 — `-mr8` 이 매 QP call 을 바꿈.)
+- 놓는 구간 기록 (32 ep 합, 동결 판 → 거르기 2): `-pro` 작동 call (`progress.mode = after the release`) 0 → 74, 놓은 뒤 'toward the target' 83 → 8; 쥔 구간 거절 call 353 → 296, 놓은 뒤 거절 101 → 94; 큰 보정 318 → 260. **목적지 등록 (`-dlo` 간접 지표):** 쥔 뒤 목적지가 처음 기록된 chunk 까지의 지연 분포가 같고 (중앙값 2–3 chunk), 등록된 ep 18 → 19; 목적지가 한 번도 등록되지 않는 ep 이 13 / 32 남는다. `-ohr` 의 `history_refilter.n_removed` 는 server 가 call · chunk 기록에 남기지 않아 셀 수 없다 (`metrics["obstacle_objects"]` 미저장).
+- 해석 (D): H4 (쥔 구간 거절은 목적지가 늦게 빠져서) 는 일부 — 쥔 구간 거절이 16 % 줄고 안전 성공 +4 / −0 이나, 목적지 등록 시점은 바뀌지 않았고 '아예 등록되지 않는' ep 이 그대로다. 효과는 `-pro` (놓은 뒤 옛 target 쪽 끌림 제거) 와 `-ohr` 쪽으로 보인다 (분리는 재지 않음, §6.3).
+- **일시 정지 (사용자 결정 03:5x, 이 세션에서 확인 03:5x):** 거르기 2 판정 직후 시작한 `-md5` (run 20261114T035504, episode 0) 와 함께 `audq` · `audqb` 를 04:00 에 멈춤, `-md5` run 은 INTERRUPTED. GPU 는 실물 RB-Y1 red_block 16D 학습 (dev-6b: config `pi05_rby1_real_red_block_16d_lora`, branch `rby1-real/red-block` 11371da9, worktree `/mnt/dev/AG3S_VLA-rby1real`, run dir `AG3S_VLA-storage/results/benchmark/20261114T034049+0900_11371da93b13_rby1real-red-block-v1-sdm`; 04:01 시작, 약 8 h) → 13:00 실물 시험 (inference 서버, shared). 끝나면 `-md5` → 거르기 1 재실행 (§9.41 보충 2) → 채택 gate (거르기 2 통과이므로 반드시 돈다: X + `-ohr-dlo-pro`, 재실행도 통과면 X + `-rf-lp-mr8-af-ohr-dlo-pro`) → Tab. 1 로 재개.
