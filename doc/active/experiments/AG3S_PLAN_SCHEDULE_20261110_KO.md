@@ -1416,3 +1416,21 @@ GPU 약 1 h 50 분 (52 ep). dev-8a (sdm-ahs) 의 공유 lock 추출은 이 시�
 **§9.38 보충 (2026-11-13 15:0x, 사용자 지적 "head 만 쓰면 팔에 의한 가려짐에 대응하지 못해 위험")** — `-a12h3h` 는 **진단 판** (cell 효과와 융합 효과를 가르는 용도) 이고 채택 후보가 아니다. wrist 의 기하 (ESDF) 는 유지되지만, 쥐기 직전 agent view 에서 팔이 대상을 가리면 attention 근거가 없어진다 — offline '1 위 물체' 채점은 이것을 재지 못한다. 후보는 `-a12h3` (융합 유지): wrist 우세 call 비율이 쥐기 10 call 이상 전 33 % · 3–9 call 전 18 % · **마지막 3 call 61 %** (L8H2 는 각각 96 · 98 · 99 %) — 멀리서는 head 가, 가려지는 마지막 구간에서는 wrist 가 정한다. queue 순서를 `-a12h3` → `-a12h3h` 로 바꿨다. 판정표의 '유망하면' 은 `-a12h3` 에만 적용한다.
 
 **§9.38 보충 2 (2026-11-13 17:0x, dev-8a (sdm-ahs) 독립 측정 전달 — 사용자 요청으로 공유받음, 보고용 · 사전 판정 아님)** — pool L (libero9s7–9) 27 ep, step 0, seed 0, 쥐기 전 call 381 개. action-query attention 질량 중 head 블록 몫 head/(head+wrist): **L8H2 0.019** · **L12H3 0.575** · last-144 unit 평균 0.286. held-out 식별률 (eval view 491: head 256 · wrist 235): L12H3 head 0.76 · wrist 0.44, L8H2 head 0.21 · wrist 0.25 (view 들은 서로 독립 아님). 우리 측정 (peak 비 중앙값 L8H2 748 · L12H3 0.196, wrist > head 97 % vs 33 %) 과 **같은 방향**이다 — 질량 기준으로도 L8H2 는 wrist 에 98 % 몰린다. dev-8a 가 열어 둔 질문 '서버가 원래 값으로 합치나, 블록별 정규화 후 합치나' 의 답: **원래 값의 voxel max 후 한 번 정규화** (`AG3S/ag3s/runtime/multiview.py`, RB-Y1 F2 결정) — 따라서 L8H2 서빙에서 head 기여는 0 에 가깝고, 블록별 정규화로 noise peak 가 3D 에 들어가는 경로는 아니다. 출처: `outputs/2026-11-13_action_head_intent_selection/README.md` §9.6, `figures/ahs-camera-share.png`, `paper/tools/action_head_select/camera_share.py` (dev-8a). SL-ATT1 계획 · 판정 기준은 바꾸지 않는다.
+
+**§9.39 논문 Tab. 1 (SDM 1/10) — π0.5 단독 arm 끝 (2026-11-13 17:15, [M])** — `paper_tab1_tenth_queue.sh` ARMS=pi05, HEAD 110ae677, seed 7, main_aegis step budget, 11:46–17:15 (5 h 29 m), error 0. SR = official success, SSR = `safelibero.safe_success`, CAR = 1 − `safelibero.collided`.
+
+| cell | n | SR | SSR | CAR |
+|---|---|---|---|---|
+| spatial L-I | 20 | 0.80 | 0.25 | 0.25 |
+| object L-I | 20 | 0.40 | 0.15 | 0.20 |
+| goal L-I | 20 | 0.80 | 0.00 | 0.00 |
+| long L-I | 20 | 0.70 | 0.15 | 0.15 |
+| spatial L-II | 20 | 0.70 | 0.15 | 0.15 |
+| object L-II | 20 | 0.95 | 0.55 | 0.55 |
+| goal L-II | 20 | 0.90 | 0.45 | 0.45 |
+| long L-II | 20 | 0.35 | 0.05 | 0.05 |
+| **SafeLIBERO 합** | **160** | **0.700** | **0.219** | **0.225** |
+| LIBERO spatial · object · goal · 10 | 50 씩 | 0.96 · 1.00 · 1.00 · 0.96 | – | – |
+| **LIBERO 합** | **200** | **0.980** | – | – |
+
+그림 `AG3S/ag3s/docs/figures/paper-tab1-tenth-sdm-20261113.png` (+ `.json`, `experiments/segmentation/fig_paper_tab1_tenth.py` — 뒤 arm 이 끝나면 같은 도구로 새 이름의 그림을 만든다). π0.5 는 일은 하지만 (SR 0.70) 장애물을 거의 피하지 못한다 (CAR 0.225); goal L-I 은 20 / 20 ep 충돌. 다음: 17:16 부터 SL-ATT1 (`-a12h3` → `-a12h3h`, 52 ep), 그 뒤 §9.37 gate, 그 뒤 Tab. 1 AG3S · GT oracle arm. main 은 17:15 에 `wip/sota-hf` 820535cd 로 fast-forward (worktree 전용 실패 11 개는 main 에서 9 개가 남았고 모두 합치기 전 main 110ae677 에서도 실패하던 것; 새 test 통과).

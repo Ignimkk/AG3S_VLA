@@ -5184,3 +5184,25 @@ F8 + (a) `--ee-action-qp-scaled` (행 정규화 + quadratic slack) + (c′) `--g
 | 08:1x | 달라진 4 ep 의 target 인식 (`target_truth.py`) | task 0 init 10: mug 모양 장애물 (`red_coffee_mug_obstacle_1`) 이 10 / 10 call 에 target → 안전 성공을 잃고 252 mm 밀림 |
 
 **판정:** §9.2 의 기준은 채우지만, mug 모양 장애물이 조작 대상으로 잡히는 기제가 확인돼 **교체를 권하지 않는다** (동결 판 `pkgFrs` 유지, 사용자 판단에 올림). 측정한 140 ep 합: 안전 성공 · 성공 +3 / −1, > 50 mm 충돌 +2. 상세는 계획서 §9.35.
+
+### 2026-11-13 17:15 — 논문 Tab. 1 SDM 1/10, π0.5 단독 arm 끝 · SL-ATT1 시작 (sdm-f6)
+
+
+| cell | n | SR | SSR | CAR |
+|---|---|---|---|---|
+| spatial L-I | 20 | 0.80 | 0.25 | 0.25 |
+| object L-I | 20 | 0.40 | 0.15 | 0.20 |
+| goal L-I | 20 | 0.80 | 0.00 | 0.00 |
+| long L-I | 20 | 0.70 | 0.15 | 0.15 |
+| spatial L-II | 20 | 0.70 | 0.15 | 0.15 |
+| object L-II | 20 | 0.95 | 0.55 | 0.55 |
+| goal L-II | 20 | 0.90 | 0.45 | 0.45 |
+| long L-II | 20 | 0.35 | 0.05 | 0.05 |
+| **SafeLIBERO 합** | **160** | **0.700** | **0.219** | **0.225** |
+| LIBERO spatial · object · goal · 10 | 50 씩 | 0.96 · 1.00 · 1.00 · 0.96 | – | – |
+| **LIBERO 합** | **200** | **0.980** | – | – |
+
+- 측정: `tab1sdm-pi05-*` 12 run (HEAD 110ae677, seed 7), 11:46–17:15, error 0. 그림 `AG3S/ag3s/docs/figures/paper-tab1-tenth-sdm-20261113.png` (+ `.json`).
+- main `/mnt/dev/AG3S_VLA` 를 `wip/sota-hf` 820535cd 로 fast-forward (17:15). 남은 test 실패 9 개는 모두 합치기 전부터 있던 것.
+- 17:16 SL-ATT1 시작: `-a12h3` (KNOWS cell L12H3, head + wrist 융합 유지, 후보) → `-a12h3h` (agent view 만, 진단). 판정 기준은 계획서 §9.38 (결과 전 기록).
+- dev-8a (sdm-ahs) 의 독립 측정 (head 카메라 몫 L8H2 0.019 · L12H3 0.575) 을 계획서 §9.38 보충 2 에 기록.
