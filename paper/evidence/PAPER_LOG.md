@@ -589,3 +589,11 @@ Step 4 종료 시점의 다음 구성 작업은 Step 5: 공식 template과 manus
 - 2026-11-11 03:4x: 사용자 지시 — baseline port 보고 run 은 보류가 아니라 계획의 맨 마지막 (AG3S 실험 뒤). 계획서 §1 · §2 · §8, 최종 실험 계획 §0.0, 결과 기록 §3.1, 수정안 D2 반영.
 - 2026-11-11 04:xx: 최종 확인 — 최종 실험 계획에 §0.0.1 (변경된 분할 · 표본 · 순서, 선행 조건 · 미확인 항목) 추가, §4 · §9 에 대체 주석. 발견: E5 분할 (5–14) · 표본 불일치, GT oracle 판 미등록, LIBERO-Safety AG3S arm H2 미해결, 실로봇 arm 구성 (generic · external) 미정, 주말 48 h 에는 E1a + LIBERO + ablation 만 들어감.
 - 2026-11-11 04:xx: ablation 정정 — §0.0.1 · 수정안 §10 에서 변형을 4 개로 줄였던 것을 철회, Tab. 2 의 8 행 (계획 §1.5 7 변형 + Stage) 모두 유지, 분할만 보고 분할로. GPU 추정 56–61 h.
+
+## 2026-11-13 17:5x KST — Tab. `tab:safelibero` 의 π0.5 단독 행을 SDM 1/10 측정값으로 (사용자 지시, sdm-f6)
+
+- 사용자: "pi0.5 돌린 것을 논문의 실험 table 에 반영 … 나중에 풀버전을 측정하면 교체".
+- `paper/latex/exp_section/04_experiments.tex` 하단 블록 '$\pi_{0.5}$ alone' 행: 투영값 (\proj, 빨강) → 측정값 (\pend, 주황 = 측정 · registry 미등록), 행 이름에 $^\ddagger$, caption 에 1/10 부분 집합 · init 을 성공 예상으로 고름 · 전체 1,600 ep 로 교체 예정을 적음.
+- 값 (%, suite 동일 가중 = 각 cell 20 ep 이라 pooled 와 같음): LIBERO SR 98.0 (196/200) | L-I TSR 67.5 (54/80) · SSR 13.8 (11/80 = 13.75) · CAR 15.0 (12/80) | L-II TSR 72.5 (58/80) · SSR 30.0 (24/80) · CAR 30.0 (24/80).
+- 자료 유형: [M] closed loop, `tab1sdm-pi05-*` 12 run (`/mnt/dev/AG3S_VLA-storage/results/benchmark/20261113T*_110ae6775e48_tab1sdm-pi05-*`), HEAD 110ae677, seed 7, main_aegis step budget, 공식 SafeLIBERO 충돌 정의 (장애물 변위 > 1 mm). 분할 `doc/active/experiments/PAPER_TENTH_SPLIT_20261113.json`. cell 별 표: 계획서 §9.39, 그림 `AG3S/ag3s/docs/figures/paper-tab1-tenth-sdm-20261113.png` (+ `.json`).
+- 주의: init 을 성공 예상으로 고른 부분 집합이라 TSR 이 원문 보고값 (KNOWS 원문 π0.5 L-I 55.0 · L-II 57.8) 보다 높게 나올 수 있다 — 단독 보고 금지, 전체 측정으로 교체. 같은 절의 본문 단락 (\proj, '57.8 % · 18.6 % · 44.3 points') 은 투영 문장으로 그대로 두었다 (표와 숫자가 다름 — 전체 측정 후 함께 고침). pdflatex 가 이 서버에 없어 컴파일은 확인하지 못했다.
