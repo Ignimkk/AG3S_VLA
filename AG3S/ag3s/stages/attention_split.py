@@ -218,6 +218,7 @@ def split_by_attention(
     ratio_attention: Optional[np.ndarray] = None,
     partition: bool = False,
     partition_min_drop: float = 0.03,
+    wide: bool = False,
 ) -> Optional[SplitDecision]:
     """Decide whether the cluster `members` (indices into `points`) is split (module doc).
 
@@ -240,8 +241,18 @@ def split_by_attention(
     att_all = np.asarray(attention, np.float64).reshape(-1)
     pts = pts_all[members]
     ext = principal_extents(pts) if extents is None else np.sort(np.asarray(extents, np.float64))
-    if max_opening is None or not triggered(ext, max_opening):
+    if max_opening is None:
         return None
+    if not triggered(ext, max_opening):
+        # SL-SOTA19 (`clustering.attention_split_wide`; False: as T31b) -- a cluster wider than the opening in EVERY direction is
+        # also re-clustered, but only re-clustered (no attention partition: a single wide object such as a crate re-clusters
+        # into one component and stays whole). Measured need (2026-11-13, frozen-version SafeLIBERO pre-grasp calls replayed
+        # offline): when the attention's top body was the task object but the server chose another body, the task object sat
+        # only inside a non-graspable cluster in 627 of 980 calls (the target merged with its neighbours, e.g. 110 x 120 x 256 mm).
+        e = np.sort(np.asarray(ext, np.float64).reshape(-1))
+        if not (wide and e.size == 3 and e[0] > float(max_opening)):
+            return None
+        partition = False
     att = att_all[members]
     gate = None
     if ratio_attention is not None:

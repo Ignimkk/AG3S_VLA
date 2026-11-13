@@ -2359,7 +2359,8 @@ def _split_groups(groups, points, attention, cfg, confirm, *, enabled, ratio_att
             points, attention, idx, max_opening=opening, radius=float(cfg.attention_split_radius),
             min_points=int(cfg.min_points), min_ratio=float(cfg.attention_split_ratio),
             ratio_attention=ratio_attention, partition=bool(cfg.attention_split_partition),
-            partition_min_drop=float(cfg.attention_partition_min_drop))
+            partition_min_drop=float(cfg.attention_partition_min_drop),
+            **({"wide": True} if getattr(cfg, "attention_split_wide", False) else {}))   # SL-SOTA19 (off: as before)
         if dec is None:
             out.append((idx, None))
             continue

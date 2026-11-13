@@ -217,6 +217,10 @@ class ClusteringConfig:
     #: admissible clusters (`TargetConfirm._hand_sized_attention_gate`): a mug-shaped obstacle next to the attended
     #: target cannot win on the geometry term of the grounding score.
     graspable_hand_sized_attention_top: bool = False
+    #: **SL-SOTA19 — the T31b attention split also re-clusters clusters wider than the opening in every direction** (default
+    #: False = T31b: such clusters are never split). Re-cluster only (no attention partition), so one wide object stays whole;
+    #: several objects merged into one blob (the target touching its neighbours) come apart and the attended one can compete.
+    attention_split_wide: bool = False
     #: A cluster is "the destination" (and so never the manipulated object) when at least this
     #: fraction of its points lie within `destination_overlap_distance` of the destination's points
     #: (T26). 0.5 = "mostly the destination's surface": a re-observed crate fragment scores ~1, an
@@ -639,6 +643,10 @@ class ClusteringConfig:
             raise AG3SConfigError(
                 f"clustering.gripper_max_opening must be null (from the robot model) or a finite "
                 f"value > 0 in metres, got {mo!r}")
+        if not isinstance(self.attention_split_wide, bool):   # SL-SOTA19
+            raise AG3SConfigError("clustering.attention_split_wide must be true or false")
+        if self.attention_split_wide and self.attention_split_radius is None:
+            raise AG3SConfigError("clustering.attention_split_wide needs clustering.attention_split_radius (the split's re-cluster radius)")
         if not isinstance(self.graspable_hand_sized_attention_top, bool):   # SL-SOTA18b
             raise AG3SConfigError("clustering.graspable_hand_sized_attention_top must be true or false")
         if self.graspable_hand_sized_attention_top and self.graspable_hand_sized is None:

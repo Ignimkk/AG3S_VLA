@@ -77,7 +77,8 @@ def test_config_option_version_and_gate():
     assert pf.AG3S_VERSIONS[name_hf] == (tuple(pf.AG3S_VERSIONS[FROZEN]) + ("--obstacle-held-beneath-band-mm", "30")
                                          + ("--graspable-hand-sized-mm", "156"))
     assert [v for v, f in pf.AG3S_VERSIONS.items() if "--graspable-hand-sized-mm" in f] == [
-        name, name_hf, name[:-len("-gh156-tro")] + "-gh156a-tro", name_hf[:-len("-gh156-tro")] + "-gh156a-tro"]
+        name, name_hf, name[:-len("-gh156-tro")] + "-gh156a-tro", name_hf[:-len("-gh156-tro")] + "-gh156a-tro",
+        name[:-len("-gh156-tro")] + "-gh156a-sw-tro"]
     assert "graspable_hand_sized_mm" in srv.PORTED_FINAL_CONFIG_DESTS
     args = pf.parse_v11ab_args(argv=pf.version_server_argv(name) + list(pf.AG3S_VERSIONS[name]))
     assert args.graspable_hand_sized_mm == 156.0

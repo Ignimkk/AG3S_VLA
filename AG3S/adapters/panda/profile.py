@@ -1359,6 +1359,19 @@ for _b in tuple(SOTA_HANDSIZED_VERSIONS):
     SOTA_HANDSIZED_ATT_VERSIONS = SOTA_HANDSIZED_ATT_VERSIONS + (_n,)
 del _b, _n
 SOTA_VERSIONS = SOTA_VERSIONS + SOTA_HANDSIZED_ATT_VERSIONS
+#: SL-SOTA19 (sdm-f6, 2026-11-13 12:1x; user: fix causes common to many scenarios): ``…-gh156a-sw-tro`` = ``-gh156a`` +
+#: ``--attention-split-wide``. Cross-scenario count on every frozen-version SafeLIBERO failure (184 ep): the most common cause is a
+#: wrong target (52 of 103 failures, all 4 suites, 18 scenarios); per pre-grasp call, the attention's top body was the task object
+#: but the server chose another in 980 calls, 627 of them because the task object sat only inside a non-graspable (merged)
+#: cluster. Offline per-frame replay on 3,130 calls: task object picked 45.5 % (frozen rule) -> 55.6 % (wide split) -> 62.9 %
+#: (hand-sized top) -> 72.8 % (both; +880 / -23 calls; gains in Spatial and Long, both levels).
+SOTA_SPLITWIDE_VERSIONS: tuple[str, ...] = ()
+for _b in (FROZEN_20261112[:-len("-tro")] + "-gh156a-tro",):
+    _n = _b[:-len("-tro")] + "-sw-tro"
+    AG3S_VERSIONS[_n] = tuple(AG3S_VERSIONS[_b]) + ("--attention-split-wide",)
+    SOTA_SPLITWIDE_VERSIONS = SOTA_SPLITWIDE_VERSIONS + (_n,)
+del _b, _n
+SOTA_VERSIONS = SOTA_VERSIONS + SOTA_SPLITWIDE_VERSIONS
 #: Tab. 1 row "AG3S-VLA GT oracle" (sdm-f6, 2026-11-13; paper plan §0.0.1: "최종 구성에서 인식만 GT 로 바꾼 판"): ``<frozen>-gto`` =
 #: the frozen version with its perception swapped for the GT path of SL-GTTO23 (B5): the attention perception flags of
 #: SL-GTTO24 (attention split, surface non-target evidence, --scene-obstacle-objects) and the perception-side SL-PE flags
