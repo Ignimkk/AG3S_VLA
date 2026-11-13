@@ -1,0 +1,78 @@
+{
+ "figure": "AG3S/ag3s/docs/figures/sl-att1-l12h3-offline-20261113.png",
+ "made_by": "experiments/segmentation/sota_offline_20261111/fig_att1_sdm.py",
+ "inputs": {
+  "score": "/tmp/claude-0/-mnt-dev/a2a2d792-941a-400f-8ace-60815fa2c777/scratchpad/cells/score_all.json",
+  "replay": "/mnt/dev/AG3S_VLA-storage/results/benchmark/20261113_attn-cells-replay-sdm"
+ },
+ "kind": "measured offline (replayed attention on recorded calls)",
+ "panel_a": {
+  "spatial-LI": {
+   "n": 739,
+   "served": 532,
+   "L8H2": 422,
+   "L12H3": 691
+  },
+  "spatial-LII": {
+   "n": 239,
+   "served": 197,
+   "L8H2": 151,
+   "L12H3": 209
+  },
+  "object-LI": {
+   "n": 269,
+   "served": 174,
+   "L8H2": 220,
+   "L12H3": 218
+  },
+  "object-LII": {
+   "n": 223,
+   "served": 208,
+   "L8H2": 204,
+   "L12H3": 214
+  },
+  "goal-LI": {
+   "n": 167,
+   "served": 76,
+   "L8H2": 82,
+   "L12H3": 103
+  },
+  "goal-LII": {
+   "n": 151,
+   "served": 110,
+   "L8H2": 92,
+   "L12H3": 112
+  },
+  "long-LI": {
+   "n": 587,
+   "served": 173,
+   "L8H2": 121,
+   "L12H3": 168
+  },
+  "long-LII": {
+   "n": 709,
+   "served": 104,
+   "L8H2": 111,
+   "L12H3": 123
+  },
+  "all": {
+   "n": 3084,
+   "served": 1574,
+   "L8H2": 1403,
+   "L12H3": 1838
+  }
+ },
+ "panel_b": {
+  "L8H2": {
+   "calls": 3084,
+   "median": 748.1402908468776,
+   "wrist_gt_head": 0.9740596627756161
+  },
+  "L12H3": {
+   "calls": 3084,
+   "median": 0.19583484244838828,
+   "wrist_gt_head": 0.32522697795071337
+  }
+ },
+ "caveat": "top-attention body is not the server's final target; the closed-loop effect is measured by sota_att1_queue.sh"
+}

@@ -2639,6 +2639,10 @@ def build_parser() -> argparse.ArgumentParser:
                     help="SL-SOTA18 — 가장 좁은 폭이 gripper 최대 열림을 넘는 cluster 도 가장 긴 폭이 MM 이하이면 조작 대상 후보로 "
                          "인정한다 (mug 처럼 테두리 · 손잡이를 집는 손 크기 물체; 기본: 꺼짐 = T26 규칙 그대로). crate · basket · "
                          "cabinet 은 계속 탈락 (clustering.graspable_hand_sized)")
+    ap.add_argument("--attention-head-only", action="store_true",
+                    help="SL-ATT1 (--robot panda 만) — attention 을 agent view (head) camera 에서만 받는다. wrist camera 의 attention "
+                         "map 은 버리고 (그 camera 의 기하는 그대로), 점별 max 융합에 head 값만 들어간다. 이유: pi0.5 LIBERO 에서 wrist "
+                         "raw attention 이 head 의 약 200 배 (중앙값) 라 융합 attention 이 wrist 시야에 끌려간다 (2026-11-13). 기본 off")
     ap.add_argument("--attention-split-wide", action="store_true",
                     help="SL-SOTA19 — T31b attention split 을 모든 방향으로 gripper 최대 열림보다 넓은 cluster 에도 적용 (재군집만, "
                          "attention partition 없음): 대상이 이웃과 붙어 한 덩어리가 된 것을 떼어 낸다 (clustering.attention_split_wide)")
@@ -4195,6 +4199,8 @@ def reject_panda_only_flags(ap: argparse.ArgumentParser, args) -> None:
     if getattr(args, "hsr6_placement_contact_lift", False):   # SL10e
         ap.error("--hsr6-placement-contact-lift 는 Panda 서버의 ⑤ 단계 조건입니다 (--robot panda 만). RB-Y1 서버는 "
                  "거절합니다")
+    if getattr(args, "attention_head_only", False):   # SL-ATT1
+        ap.error("--attention-head-only 은 Panda 서버의 attention camera 선택입니다 (--robot panda 만). RB-Y1 서버는 거절합니다")
     if getattr(args, "oracle_target_volume", False):   # SL13
         ap.error("--oracle-target-volume 은 Panda LIBERO client 의 정답 segmentation 진단입니다 (--robot panda 만). RB-Y1 서버는 "
                  "거절합니다")

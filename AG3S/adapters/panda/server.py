@@ -97,6 +97,16 @@ def panda_latch_config(gap_opening: bool = False, placed_rearm: bool = False, op
     return LatchConfig(empty_below=float(c["empty_below"]), blocked_gap=float(c["blocked_gap"]),
                        hold_empty_below=float(c["hold_empty_below"]), assist_requires_reach=bool(c["assist_requires_reach"]), **extra)
 ATTENTION_CAMERAS = ("head", "left_wrist")
+
+
+def attention_alias(head_only: bool = False) -> dict:
+    """SL-ATT1 — policy attention camera -> wire camera; with ``head_only`` the wrist entry is dropped, so the extractor passes only
+    the agent-view map (the wrist camera keeps its geometry and lifts no attention: zero = no opinion)."""
+    return {k: v for k, v in ATTENTION_ALIAS.items() if not head_only or v == "head"}
+
+
+def attention_cameras(head_only: bool = False) -> tuple:
+    return ("head",) if head_only else ATTENTION_CAMERAS
 HANDS = {pm.MANIPULATOR_SIDE: 0}
 GRIPPER_COLUMNS = (pa.GRIPPER_COLUMN,)
 #: request keys only the Panda adapter reads (never reach the policy)
@@ -690,6 +700,7 @@ PORTED_FINAL_CONFIG_DESTS: tuple[str, ...] = (
     # SL-SOTA18 (2026-11-13): hand-sized clusters are graspable (clustering key through serve_safe.t43t_identity_section)
     'graspable_hand_sized_mm', 'graspable_hand_sized_attention_top',   # + SL-SOTA18b
     'attention_split_wide',   # SL-SOTA19
+    'attention_head_only',    # SL-ATT1 (2026-11-13): agent-view attention only (the attention extractor below)
     # SL-GTTO10 F8a (lead self-ruling G53, 2026-11-07): the GT destination injection (clustering key, same section) and the
     # held rows' destination margin (AG3S `contact.destination_margin`, through serve_safe.destination_margin_section)
     'oracle_destination', 'destination_margin_mm',
@@ -1097,7 +1108,8 @@ def build_safe_server(policy, args, *, attention_model=None, gpu_warm_up: bool =
     to_config = _replace_horizon_limits(ss.trajopt_config_from_args(args))
     if getattr(args, "to_action_box", False):
         to_config = action_box_qp_config(to_config)   # SL10 §2.2: a QP budget the action rows can converge in
-    attention_fn = ss.attention_extractor(alias=ATTENTION_ALIAS, cameras=ATTENTION_CAMERAS,
+    head_only = bool(getattr(args, "attention_head_only", False))   # SL-ATT1: drop the wrist attention map
+    attention_fn = ss.attention_extractor(alias=attention_alias(head_only), cameras=attention_cameras(head_only),
                                           transform=lambda _cam, grid: pat.unmirror_grid(np.asarray(grid)))
     mode = conversion_mode()
     # SL5j — None without --record-constraints (then the SafePolicy arguments are the pre-SL5j ones)

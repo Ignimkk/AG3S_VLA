@@ -1391,6 +1391,21 @@ SOTA_GTO_ADD: tuple[str, ...] = ("--target-extent", "oracle-visible", "--oracle-
 SOTA_GTO_VERSIONS: tuple[str, ...] = (FROZEN_20261112 + "-gto",)
 AG3S_VERSIONS[FROZEN_20261112 + "-gto"] = _drop_flags(tuple(AG3S_VERSIONS[FROZEN_20261112]), SOTA_GTO_DROP) + SOTA_GTO_ADD
 SOTA_VERSIONS = SOTA_VERSIONS + SOTA_GTO_VERSIONS
+#: SL-ATT1 (sdm-f6, 2026-11-13 14:xx; user: "어텐션 자체가 틀린 건 … L12H3 으로 소량만 테스트"): the frozen version with the KNOWS
+#: attention cell (pi0.5 layer 12 / head 3, action query, denoise step 0; paper-specified, not selected on our data):
+#: ``…-a12h3-tro`` = frozen + ``--attention-source action:last:L12H3`` (head + wrist fused as served), ``…-a12h3h-tro`` = the same
+#: + ``--attention-head-only`` (agent view only, as KNOWS reads it). Why head-only: the served cloud is the per-voxel max of the
+#: RAW head / wrist values and the wrist raw is ~200x the head raw (median of 939 sampled calls, wrist > head in 91 %, all suites).
+#: Offline head-only top body on 1,348 pre-grasp calls (no Spatial L-I yet): pick object 45.7 % served -> 43.6 % L8H2 head ->
+#: 50.8 % L12H3 head.
+SOTA_ATT_VERSIONS: tuple[str, ...] = ()
+for _s, _f in (("-a12h3-tro", ("--attention-source", "action:last:L12H3")),
+               ("-a12h3h-tro", ("--attention-source", "action:last:L12H3", "--attention-head-only"))):
+    _n = FROZEN_20261112[:-len("-tro")] + _s
+    AG3S_VERSIONS[_n] = tuple(AG3S_VERSIONS[FROZEN_20261112]) + _f
+    SOTA_ATT_VERSIONS = SOTA_ATT_VERSIONS + (_n,)
+del _s, _f, _n
+SOTA_VERSIONS = SOTA_VERSIONS + SOTA_ATT_VERSIONS
 GT15_VERSIONS = GT15_VERSIONS + SOTA_VERSIONS
 #: (G88c, 03:5x) the A-alone ablation queued as ``…-obst3`` (gtto23, not started yet) gets the same two fixes, so A alone and
 #: A + B differ only by the held point model: ``…-obst3`` := A'' + no carve + support "under" (``…-obst3-pts`` = B'' keeps
