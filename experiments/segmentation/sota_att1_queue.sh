@@ -6,11 +6,13 @@
 #   ms-pkgFrssdm-object-LI-i15_16         object L-I task 0-3 init 15,16 (t2 milk: attention on the wine-bottle obstacle)
 #   ms-pkgFrssdm-goal-LI-i17_18           goal L-I task 0-3 init 17,18   (t3 bowl -> cabinet: attention on the plate)
 # 26 episodes per version. NOT an adoption run. The launchers take the GPU lock themselves. Do not edit while it runs.
-# usage: bash experiments/segmentation/sota_att1_queue.sh   [VS="a12h3h a12h3"]
+# usage: bash experiments/segmentation/sota_att1_queue.sh   [VS="a12h3 a12h3h"]
+# -a12h3 = the candidate; -a12h3h (agent view only) is a DIAGNOSTIC arm (cell effect vs fusion effect), never adopted: without the
+# wrist map the target has no attention evidence when the arm occludes it in the agent view near the grasp (user, 2026-11-13).
 set -u
 cd /mnt/dev/AG3S_VLA
 F="AG3S-commonto-att-termsoff-pass-zr-ee-hdp-loose2-obst4-pts-nocarve-fh-t100-pe12345811-to0-om15p10s40-ntc-pt6-pg4-hr150-hb-qs-rs"
-VS=${VS:-"a12h3h a12h3"}
+VS=${VS:-"a12h3 a12h3h"}
 for s in $VS; do
   V="$F-$s-tro"; TAG="${s}sdm"
   V="$V" TAG="$TAG" SUB="1:5,6,7,8,9,10,11,12,13,14" bash experiments/segmentation/sota_sub_queue.sh
