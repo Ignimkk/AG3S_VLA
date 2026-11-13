@@ -49,6 +49,7 @@ baseline [`BASELINE_TRANCHE_PLAN_PORT_RATIONALE_20261109_KO.md`](BASELINE_TRANCH
 | **11-12 01:4x – (SDM, AG3S 쪽 GPU 시작 전까지)** | dev-4a (사용자가 SDM 에서 실행) | **π0.5 단독 측정 run 3 개 (논문 §4 표의 측정 baseline 행):** ① SafeLIBERO π0.5 anchor 4 suite × 4 task × L-I · L-II × init 19–28 = 320 ep (`T=s1 SUFFIX=-sdm SAFE_ARMS_SEL="none|" … bl_tranche_arms_queue.sh`) → ② LIBERO π0.5 4 suite × 10 task × init 19–23 = 200 ep → ③ LIBERO-Safety π0.5 tranche C init 19 = 60 ep | ① Tab. 1 "π0.5 alone" 행 (AG3S 주말 본 run 과 같은 episode 짝 · McNemar, 원문 π0.5 재현 = 보고값 비교의 근거), ② Tab. 1 LIBERO 열, ③ LIBERO-Safety 표 (원문 π0.5 35.3 / 56.7 / 51.3 대비) | 독점 (π0.5 단독끼리 공유 가능) | SDM 은 사용자가 GitHub fresh clone (af3cc897) 으로 세팅 (`doc/active/migration/SDM_FRESH_SETUP_20261111_KO.md`). AG3S 구성과 무관해 동결 불필요. dev-57 확인 (01:3x): AG3S 본 run 에 π0.5 arm 없음 → ① 중복 아님; SDM GPU 는 08:00 이후 AG3S 쪽이 시작할 때 block 경계에서 넘김. 최종 순서는 사용자 결정 |
 | **계획의 맨 마지막** (사용자 지시 11-11 03:4x: 시간 문제로 뺀 것이므로 취소하지 않고 마지막에 둔다) | dev-4a | **baseline 직접 실행 (port) 보고 run**: 동결 port, AG3S 와 **같은 init · seed · 기계** — AEGIS ±GT · multi-link ±GT (+ π0.5 는 AG3S 실험의 anchor 재사용), KNOWS ±GT 는 판정 (F5 · `-r4`) 뒤 | 같은 episode 짝 비교 (McNemar) — 원문 보고값 비교보다 강한 근거. 마감 전에 끝난 만큼 supplement (또는 Tab. 1 의 "our runs" 행) 에, 나머지는 rebuttal · camera-ready 용 | 독점 | **선행: 주말 AG3S 논문 실험 (11-14–15) 이 모두 끝난 뒤.** 순서 권고: AG3S 가 쓴 init (19–28) 부터 → AEGIS → multi-link → KNOWS. 전체 init 19–49 는 약 210 GPU h [D] 라 마감 (11-17 20:59 KST) 전에는 일부만 가능. Tab. 1 의 본 비교는 원문 보고값 그대로 |
 | 11-12 01:56 – 07:19 (SDM, **일시 중단**) | sdm-c7 | 위 ①–④ 실행 (`sdm_pi05_anchor_queue.sh`, `launch_libero_paired.py --modes vla_only` = AG3S arm 과 같은 launcher · policy_seed) | 49 행의 실행 기록 | 독점 | **① 6/8 block 끝** (spatial · object · goal × L-I · L-II, 240 ep): 3 suite 평균 L-I TSR 55.0 · CAR 9.2 · SSR 7.5, L-II 65.8 · 19.2 · 15.8 [M]. 06:5x AMRC push 합치기로 1 차 중단 (long L-I 37/40 버림), 07:16 재시작, **07:19 사용자 지시로 중단** — 남은 long × 2 · ② · ③ · ④ 약 7–8 h. 재개 = 같은 script (끝난 block 건너뜀). `AG3S_BASELINE_LOG.md` BL-15, §9.24 |
+| **11-14 00:10 – (SDM, 결과 전 계획)** | sdm-f6 | **gate (gate37b) 종료 후 → SL-AUD → Tab. 1** (§9.41; 로컬 PC 의 전달 `doc/active/handoff_SL_AUD_20261113/`): T0 = gate37b 끝 (L12H3 1 단계 탈락이면 약 01:10, 통과면 guard 뒤 약 03:00). T0 main fast-forward (`wip/sl-aud`) · 동결 판 1 ep 확인 (약 5 분, 다르면 멈춤) → 거르기 1 `-rf-lp-mr8-af` S32 (1 h 20 m) → 거르기 2 `-ohr-dlo-pro` S32 (1 h 20 m) → (조건부) `-md5` S32 (1 h 20 m) → (통과가 있을 때만) 채택 gate X + 통과 segment (E1a 40 + guard, 약 3 h 30 m) → **Tab. 1 AG3S arm (최종 판의 `-fwd` 짝, 10–11 h) → GT oracle arm (7–8 h)** | Tab. 1 전에 동결 판 code 점검의 action QP · 놓는 구간 수정을 거른다 | 독점 | 분리 실행 `audq` (`experiments/segmentation/aud_queue.sh`), `outputs/2026-11-14_SL-AUD/`. Tab. 1 시작은 약 2 h 50 m (둘 다 닫힘) – 6 h 30 m (채택 gate) 늦어짐 |
 
 규칙 (모든 세션): GPU 는 `scripts/setup/gpu_lock.py` 로만 (closed-loop = 독점, offline 추출 = 공유), 바깥 flock 금지; queue 가 도는 동안 공유 checkout 의 HEAD 불변; 단계 끝마다 commit 후 다음 단계 (자동 연쇄 금지); CPU 작업은 세션당 2 core 이하 — **`OMP_NUM_THREADS=MKL_NUM_THREADS=OPENBLAS_NUM_THREADS=1`** (11-10 P4 가 다중 thread BLAS 로 dev-4a run 을 3–4 배 느리게 함); E1a init 15–49 는 사용자 승인 없이는 보지 않는다 (G171). **보고 분할 = init 19–49** (11-10 23:1x 사용자 A안: init 15–18 은 baseline port 수정을 결정할 때 본 분할이라 'baseline port 검증 분할' 로 표시, 모든 arm · AG3S headline 에서 뺌).
 
@@ -204,6 +205,7 @@ T5 뒤에 하면 이 서버에서 끝낸다. **이전 시점은 T5 와의 순서
 | 2026-11-13 04:5x | sdm-f6: §9.32 SL-SOTA18 `-gh156` 2 단계 (part G, 02:23–04:53, HEAD 579ee680) — §9.34. **나머지 46 ep 의 결과가 동결 판과 episode 단위로 같다 (잃은 것 0) → 2 단계 통과.** 1/10 셋 전체 (같은 52 ep): LIBERO 14 → **15** / 20, SafeLIBERO TSR · SSR · CAR 17 · 12 · 22 → **18 · 13 · 24** / 32, > 50 mm 3 → 3. 04:54 복원한 계획서 · log 를 main 에 합침 (aee17c0c). 04:55 채택 gate (guard → E1a 40, TAG `pkgFghsdm`) 시작. 동결 판 교체는 gate 결과 뒤 사용자 판단 |
 | 2026-11-13 08:1x | sdm-f6: `-gh156` 채택 gate (04:55–08:07, HEAD aee17c0c, TAG `pkgFghsdm`) — §9.35. **guard 는 동결 판과 같다** (LIBERO 27 = 23, SafeLIBERO 11 = 5 · 9 · 4 · > 50 mm 0, LIBERO-Safety 10 = 5). **E1a 40 = 24 · 32 · 21** (동결 판 23 · 34 · 21): 안전 성공은 같고 > 50 mm 충돌이 1 → 3. 원인 확인: t0 e10 에서 mug 모양 장애물 (`red_coffee_mug_obstacle_1`) 이 쥐기 전 10 / 10 call 에 target 으로 인식돼 회피 대상에서 빠짐 (안전 성공 → 실패 + 충돌 252 mm) — §9.32 에 적은 위험이 실제로 남. §9.2 의 기준은 글자 그대로는 채우지만 **교체를 권하지 않고 사용자 판단에 올림** |
 | 2026-11-13 11:0x | sdm-f6: **사용자 지시 (10:5x): 논문 실험 = 원문과 같은 SafeLIBERO 1,600 ep / 방법; 이 서버는 그 1/10 을 Tab. 1 → 2 → 3 순서로, 성공이 가장 높게 나올 init 을 골라서; 나머지 9/10 은 다른 환경.** (11-11 계획서의 'init 19–28, 320 ep' 는 확정된 적 없는 권고였다.) §9.36: 고른 init (`PAPER_TENTH_SPLIT_20261113.json`), Tab. 1 · 2 queue, GT oracle 판 `<frozen>-gto`. **발견: episode 결과는 run 안의 위치에 따라 달라진다** (같은 seed · 장면에서 call 0 의 policy 출력이 다름) — 판 비교는 같은 run 구성끼리만. SL-SOTA18b `-gh156a` (손 크기 후보는 attention 1 위일 때만) 구현 · 확인 중. 11:03 queue: 동결 판 재측정 (구성 맞춤) → Tab. 1 π0.5 단독 행 |
+| 2026-11-14 00:3x | sdm-f6: **SL-AUD 를 Tab. 1 앞에 넣음** (사용자 전달, 로컬 PC 세션의 동결 판 code 점검) — §9.41 (결과 전 기록). `tab1ag3s` (gate 뒤 Tab. 1 자동 시작) 를 대기 중에 멈춤 (사용자 확인 00:10, 시작된 것 없음). worktree `wip/sl-aud` (= `wip/sota-hf` + cherry-pick 282e22d9 · ac62c2bc + `-gh156a-fwd` base): unit test 233 통과 · 실패 0. 새 분리 실행 queue `audq` 가 gate 뒤 동결 판 확인 → 거르기 1 · 2 → (조건부) 채택 gate → Tab. 1 |
 
 ---
 
@@ -1511,3 +1513,39 @@ GPU 약 1 h 50 분 (52 ep). dev-8a (sdm-ahs) 의 공유 lock 추출은 이 시�
 **§9.37 gate 결과 2 · 운영 (2026-11-13 23:4x).** `-gh156a` (동결 판 + `--graspable-hand-sized-mm 156 --graspable-hand-sized-attention-top`, FWDATT · L12H3 없음) **stage 1 PASS** (20:34–22:10): TSR 25 · CAR 33 · **SSR 22** · > 50 mm **2** (동결 판 23 · 34 · 21 · 1; SSR +1, > 50 mm 증가 1 ≤ 1). 22:10 부터 guard. **정정:** stage 2 기제 기록은 56 이 아니라 **64 ep** (spatial L-I init 15–18 16 + spatial L-II · long L-I · long L-II 각 init 15–18 16; 동결 판 run 구성과 같음) — §9.37 표의 '56' 은 합산 잘못. **사용자 (22:3x): stage 2 를 Tab. 1 뒤로.** `experiments/segmentation/gate37_defer_ms.sh` 를 분리 실행 (`gate37b`, 23:41): guard 통과 직후 stage 2 시작 줄을 보면 gate 를 멈추고 (시작 run 은 INTERRUPTED 표시) L12H3 두 번째 후보 (E1a 30 ep + guard) 를 이어 돌린다; guard 탈락이면 gate 가 스스로 L12H3 로 넘어가므로 아무것도 안 한다. Tab. 1 은 그 뒤 (03:00 무렵 예상), 판 = 통과한 후보 중 E1a 40 SSR 이 높은 쪽 (같으면 CAR) 의 `-fwd` 짝.
 
 **§9.37 gate 결과 3 · Tab. 1 자동 시작 (2026-11-14 00:0x).** `-gh156a` **guard PASS** (22:10–00:00): LIBERO 27 = 23, SafeLIBERO 11 = TSR 5 · SSR 4 · CAR 9 · > 50 mm 0, LIBERO-Safety 10 = 성공 5 · 위반 0 — 동결 판과 모두 같음. → **`-gh156a` = Tab. 1 후보 (stage 1 · 3 통과).** 감시 script 가 00:00:47 에 stage 2 를 시작 전에 멈췄고 (run 생성 없음), L12H3 E1a 30 ep 이 00:00:47 시작. `experiments/segmentation/tab1_after_gate37.sh` 를 분리 실행 (`tab1ag3s`): gate37b 가 끝나면 (1) 통과 후보 중 E1a 40 SSR → CAR 순 최고 (없으면 동결 판), (2) main 을 `wip/sota-hf` 로 fast-forward (FWDATT 코드 · `-fwd` 판), (3) launcher dry-run 의 server argv 에 `--attention-inpass` 확인, (4) `paper_tab1_tenth_queue.sh` ARMS="ag3s gto", V = 고른 판의 `-fwd-tro`, VGT = 동결 판 `-gto`. 예상: L12H3 탈락이면 01:10 무렵, 통과면 03:00 무렵 시작; AG3S arm 약 10–11 h, GT oracle arm 약 7–8 h.
+
+### 9.41 SL-AUD — 동결 판 code 점검의 action QP · 놓는 구간 수정을 Tab. 1 앞에서 거른다 (sdm-f6, 결과 전 기록, 2026-11-14 00:3x)
+
+**받은 것.** 로컬 PC 세션 (GPU 없음) 이 동결 판 `pkgFrs` 의 flag 가 켜는 code 를 점검해 후보 flag 8 개 (모두 기본 꺼짐) 를 구현해 `origin/audit/sl-aud` 로 보냈다. 근거 · 시험 계획: `doc/active/handoff_SL_AUD_20261113/2026-11-13_SL-AUD_test_plan_KO.md` (이하 '전달 계획'), 점검 문서 · offline 계산 script 같은 폴더. closed loop 은 한 번도 돌리지 않은 code 다.
+
+**넣은 방법 [M].** 본 checkout 은 gate (`gate37b`) 가 돌고 있어 건드리지 않았다. worktree `/mnt/dev/AG3S_VLA-wt-aud`, branch `wip/sl-aud` = `wip/sota-hf` (FWDATT · `-fwd` 판, Tab. 1 이 쓸 code) + cherry-pick `282e22d9` (code, 깨끗이) + `ac62c2bc` (판 등록; test 두 파일의 판 허용 목록이 `-fwd` 등록과 겹침 → 양쪽 모두 남김: `+ pf.SOTA_FWD_VERSIONS + pf.SOTA_AUDIT_VERSIONS`) + gate 가 고른 `-gh156a` 의 `-fwd` 짝을 SL-AUD base 에 추가 (판 등록 영역 끝에 추가만, 13 개 → 합 39 개, 이름 `…-gh156a-fwd<segment>-tro`) + `test_sl_sota18_hand_sized` 의 판 목록에서 `SOTA_FWD_VERSIONS` 제외 (FWDATT 등록 `328f601e` 뒤 `wip/sota-hf` 에서 이미 실패하던 것). 전달 계획 §3 의 test 14 파일 + FWDATT test 2 파일: **233 통과 · 4 skip · 실패 0** (CPU). `tab1ag3s` (gate 뒤 Tab. 1 을 자동 시작하는 감시) 는 대기 중에 멈췄다 (사용자 확인 00:10; 시작된 run 없음).
+
+**셋 (결과 전 고정).** S32 = Spatial L-I task 0–3 × init 15–18 (한 run, 16 ep) + Goal L-I task 0–3 × init 17 · 18 (8 ep) + Goal L-II task 0–3 × init 17 · 18 (8 ep), 기준 run 과 같은 구성 (`sota_ms_queue.sh`, seed 7, main_aegis; episode 결과는 run 안의 위치에 따라 달라진다 — §9.36). 기준 = 동결 판 `ms-pkgFrssdm-{spatial-LI-i15_16_17_18, goal-LI-i17_18, goal-LII-i17_18}`: **TSR 13 · CAR 23 · SSR 9, > 50 mm 3** (다시 셈 [D]: Spatial L-I 7 · 12 · 5, 2 / Goal L-I 2 · 6 · 1, 1 / Goal L-II 4 · 5 · 3, 0), 안전 성공 9, 잃은 ep 13 (동결 판 task 실패 · 같은 episode π0.5 단독 task 성공; π0.5 = baseline tranche t1 `blocks.csv`). 잃은 13 ep 모두 큰 보정 (action QP `max_abs_delta_action` ≥ 1) 이 5 call 이상이다 [D].
+
+**판과 기준 (전달 계획 §5 · §6.3 그대로, 판정 `experiments/segmentation/aud_judge.py`).**
+
+| 순서 | 판 (TAG) | 통과 기준 (S32) | 통과하지 못하면 |
+|---|---|---|---|
+| 0 | 동결 판 `…-rs-tro` 의 Spatial L-I init 15–18 run 첫 episode (task 0 init 15) 를 같은 인자로 다시 (`ms-audchksdm-spatial-LI-i15`) | `*_calls.jsonl` 의 call 수, call 마다 `max_abs_action_change_executed` · `to.passthrough_clear.reason` 이 기준 run 과 모두 같다 | **멈춤** — 거르기를 시작하지 않고 보고 (다른 call · 그 call 의 경로 기록) |
+| 1-1 | `…-rs-rf-lp-mr8-af-tro` (`aud1sdm`) | SSR ≥ 12, > 50 mm ≤ 4, 동결 판 안전 성공 9 중 잃는 것 ≤ 1 | SSR ≥ 12 이고 > 50 mm ≥ 5 → 닫음 (`-mr12` 재지 않음). SSR ≤ 11 이고 잃은 13 ep 중 큰 보정 5 call 이상이 7 ep 이상 남음 → 1-2. 그 밖 → 닫음 (H1 기각) |
+| 1-2 (조건부) | `…-rs-md5-tro` (`aud1md5sdm`) | 1-1 과 같음 | 닫음 |
+| 2-1 | `…-rs-ohr-dlo-pro-tro` (`aud2sdm`) | SSR ≥ 11, > 50 mm ≤ 4, 동결 판 안전 성공 9 중 잃는 것 ≤ 1 | 닫음 (세 flag 를 따로 재지 않음) |
+| 3 (통과가 있을 때만) | X + 통과 segment (`audgsdm`): `-rf-lp-mr8-af` · `-ohr-dlo-pro` · 둘 다 `-rf-lp-mr8-af-ohr-dlo-pro` (`-md5` 만 통과면 `-md5`) | `-gh156a` 와 같은 단계 · 기준 (§9.2 / §9.37, `gate37_judge.py`, 기준 판 = 동결 판 `pkgFrssdm`): 1 단계 E1a 40 SSR ≥ 기준 + 1 (또는 같고 CAR ≥ 36), > 50 mm 증가 ≤ 1; 3 단계 guard LIBERO 27 ≥ 21 · LIBERO-Safety 10 성공 ≥ 4 · 위반 0 · SafeLIBERO 11 > 50 mm 증가 ≤ 1 | 최종 = X |
+
+- X = §9.37 gate 가 고른 판 (`tab1_after_gate37.sh` 와 같은 규칙: 1 · 3 단계 통과 후보 중 E1a 40 SSR → CAR 순; 지금 `-gh156a` 통과, L12H3 진행 중). L12H3 가 X 가 되면 그 SL-AUD 판은 등록되지 않았으므로 queue 는 거르기 뒤 3 단계 앞에서 멈춘다 (등록 후 이어 감).
+- `-md5` 와 `-ohr-dlo-pro` 가 함께 통과하는 조합은 등록되지 않았다 → 같은 자리에서 멈춘다.
+- 1-1 의 기준표에 없는 경우 (SSR ≥ 12 · > 50 mm ≤ 4 인데 안전 성공을 2 이상 잃음) 는 '통과 아님 → 닫음' 으로 둔다.
+- **최종 동결:** 채택 gate 통과 → X + 통과 segment, 아니면 X. Tab. 1 AG3S arm = 최종 판의 `-fwd` 짝 (`…-gh156a-fwd-tro` 또는 `…-gh156a-fwd<segment>-tro`), GT oracle arm = 동결 판 `-gto` (그대로). Tab. 1 을 시작한 뒤에는 판을 바꾸지 않는다.
+
+**일정 [P]** (T0 = gate37b 끝: L12H3 1 단계 탈락이면 약 01:10, 통과면 약 03:00).
+
+| 시각 | 일 | GPU |
+|---|---|---|
+| T0 | main fast-forward → `wip/sl-aud`, 동결 판 1 ep 확인 | 약 5 분 |
+| T0 + 0:05 – 1:25 | 거르기 1 (`-rf-lp-mr8-af`) | 1 h 20 m |
+| + 1:25 – 2:45 | 거르기 2 (`-ohr-dlo-pro`) | 1 h 20 m |
+| (조건부) | `-md5` S32 | 1 h 20 m |
+| (통과가 있을 때만) | 채택 gate (E1a 40 약 1 h 35 m + guard 약 1 h 50 m) | 약 3 h 30 m |
+| 그 뒤 | Tab. 1 AG3S arm → GT oracle arm (`paper_tab1_tenth_queue.sh` ARMS="ag3s gto") | 10–11 h + 7–8 h |
+
+분리 실행: `run_detached.sh audq 'bash /mnt/dev/AG3S_VLA-wt-aud/experiments/segmentation/aud_queue.sh'` (gate37b 의 pid 를 기다린 뒤 위 순서; 각 단계의 판정 줄은 `outputs/2026-11-14_SL-AUD/queue.log`, S32 의 32 ep 짝은 `s32_<TAG>.json`). 결과는 전달 계획 §8 의 형식 (run 표, `calls.jsonl` 셈, raw 6 ep, CPU 집계 144 ep, 질문) 으로 돌려준다.
