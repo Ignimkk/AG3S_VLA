@@ -1641,3 +1641,17 @@ GPU 약 1 h 50 분 (52 ep). dev-8a (sdm-ahs) 의 공유 lock 추출은 이 시�
 - LIBERO suite 별 (AG3S / π0.5): Spatial 38 / 48, Object 45 / 50, **Goal 29 / 50**, **LIBERO-10 30 / 48**. SafeLIBERO cell 별은 §9.41 Tab. 1 진행 항목. > 50 mm 충돌 ep: AG3S 20 / 160, π0.5 90 / 160.
 - 해석 (D): 장애물이 있는 SafeLIBERO 에서 안전 성공은 2.3 배 (35 → 81 / 160), 그 대가로 장애물이 없는 LIBERO 에서 SR 이 0.98 → 0.71. LIBERO Spatial 실패 12 ep 은 모두 `max_steps` 이고 거절 사유 `obstacle` (장면 물체를 장애물로 막음) — 원인 집계 (CPU) 를 이어서 한다. 이 손실은 논문에 그대로 보고하고, 개선 실험 (LIBERO Goal L12H3 등, §9.42) 의 대상이다.
 - 03:35:02 GT oracle arm 첫 cell 시작 줄에서 `tab1yield` 가 `tab1q` 를 멈춤 (03:35:23; GT oracle run dir 생성 없음, GPU process 0) → dev-cf 에 넘김 (basket 학습). 반납 뒤 GT oracle arm 을 ARMS=gto 로 띄운다.
+
+**§9.42 결과 2 (2026-11-15 04:1x, [M] replay · GT 는 채점만, CPU) — Tab. 1 AG3S arm 의 잃은 ep 원인.** 정의: π0.5 단독 task 성공 · AG3S task 실패. **95 ep** = SafeLIBERO 41 (Goal 16 · Spatial 10 · Long 10 · Object 5) + LIBERO 54 (Goal 21 · LIBERO-10 18 · Spatial 10 · Object 5); 반대 방향 (AG3S 만 성공) 18 ep, 모두 SafeLIBERO (112 − 41 + 18 = 89, 196 − 54 = 142 로 Tab. 1 과 맞음). 분류는 §9.37 공통 원인 집계와 같은 체계 (충돌은 부 flag 로, C3 · C5 를 나눔, C10 HOLD 잠김 추가). 산출 `outputs/2026-11-15_Tab1_실패원인/` (supplement `13_tab1_실패원인/`).
+
+| 주원인 | ep | 걸친 suite (8 중) · task |
+|---|---:|---|
+| C2 대상 오인식 | 32 | 7 · 17 (drawer 를 여는 task 11 — server 는 쥘 수 있는 물체만 대상으로 고른다; 비슷한 물체 9; 접시 · 장애물 · 로봇 12) |
+| C3 task 물체 자신의 표면이 손을 막음 | 30 | 6 · 20 (대상 14 · 목적지 12 · 대상의 받침 · 그릇 4) |
+| C6 · C5o SafeLIBERO 장애물 · 무관 장면 물체가 막음 | 19 | 8 · 14 (10 · 9) |
+| C4 · C10 로봇 자신의 상 · HOLD 잠김 | 12 | 대부분 LIBERO-10 · Goal (증거 강도 중간) |
+| C8 grasp latch | 2 | |
+
+- LIBERO Spatial task 4 ('bowl in the top drawer') 5 / 5: 대상 인식은 맞음 (쥐기 전 약 64 %) 이나 서랍 벽 (`wooden_cabinet_1_cabinet_top`) 이 장애물로 남아 잃은 4 ep 의 거절 131 call 을 막음 (계획 중앙값 손 · 손가락 13 mm 침투), 닫았지만 HELD 에 못 감.
+- LIBERO Goal 21: t0 '가운데 서랍 열기' 5 = 전부 오인식 (대상이 wine rack · 접시, 서랍은 한 번도 아님), t3 '서랍 열고 그릇 넣기' 5 = 오인식 4 · 넣을 cabinet 이 막음 1, t5 '접시 밀기' 4 = 접시 자신 3 · 옆 cream cheese 1, t9 '와인병을 rack 에' 5 = rack 2 · HOLD 1 · 로봇 1 · 오인식 1.
+- 해석 (D): 장애물이 없는 task 에서 잃는 성공의 공통 원인은 (1) '쥘 수 있는 물체' 만 대상으로 보는 인식이 서랍 · 미는 동작 같은 비파지 task 를 다루지 못함, (2) task 가 손을 대야 하는 물체 (대상 · 목적지 · 그 받침 · 서랍 벽) 를 장애물로 남김. 둘 다 여러 suite 에 걸친다 → 개선 실험 후보 (L12H3 는 (1) 의 일부, 표면 권한 규칙은 (2)). 구현은 사용자 판단 뒤.
