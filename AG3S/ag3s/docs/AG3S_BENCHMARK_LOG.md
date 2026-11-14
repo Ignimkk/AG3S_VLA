@@ -5301,3 +5301,6 @@ FWDATT (`--attention-inpass`, sdm-ahs, `wip/fwd-attn` c0202a62): attention 을 s
 
 ### 2026-11-14 01:1x — §9.37 gate 끝: L12H3 stage 1 FAIL → X = `-gh156a`; SL-AUD queue 시작 (sdm-f6 SL-AUD 세션, gate 세션 dev-28 인계)
 L12H3 (`…-rs-a12h3-tro`) **stage 1 FAIL** (00:00:47–01:09:51): E1a 40 TSR 23 · CAR 28 · SSR 21 · > 50 mm 3 (동결 판 23 · 34 · 21 · 1). gate37b 01:09:51 끝 → **X = `-gh156a`** (stage 1 · 3 통과 후보 하나). 계획서 §9.41: Tab. 1 앞에 SL-AUD (로컬 PC 의 동결 판 code 점검 — action QP · 놓는 구간 flag 8 개, 기본 꺼짐) 거르기를 넣음; `tab1ag3s` 는 대기 중 멈춤 (사용자 00:10), 분리 실행 `audq` 가 대신. 01:09:56 main → `wip/sl-aud` (09dc923b), 동결 판 1 ep 확인 → 거르기 1 `-rf-lp-mr8-af` · 거르기 2 `-ohr-dlo-pro` (S32) → (조건부) 채택 gate → Tab. 1. 이후 이 log · 계획서 덧붙이기는 `wip/sl-aud` 에서만.
+
+### 2026-11-14 04:00 – 14:16 — SL-AUD 일시 정지 (실물 RB-Y1 학습 · 시험 우선) 와 재개 (sdm-f6 SL-AUD 세션)
+04:00 사용자 결정으로 `audq` · `audqb` 를 거르기 2 판정 직후 멈춤 (`-md5` run INTERRUPTED). 거르기 2 `-ohr-dlo-pro` 는 PASS (S32 TSR 16 · CAR 24 · SSR 13, > 50 mm 2; 동결 판 13 · 23 · 9, 3; 안전 성공 +4 / −0) — 계획서 §9.41 결과 2. 그동안 실물 RB-Y1 red_block 16D LoRA 학습 04:05–11:49 (ckpt 19999), 실물 시험 13:23–13:35 (slow 2 · 정속 모두 성공), 14:09 서버 내림 (dev-6b · dev-cf, branch `rby1-real/red-block` 7f007cdc). 14:16:02 `audqc` 재개: `-md5` → 거르기 1 재실행 (`-rf` fix 2a27e4c4 = 로컬 0f1d90b4) → 채택 gate → Tab. 1.
