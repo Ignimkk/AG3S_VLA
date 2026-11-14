@@ -77,7 +77,8 @@ def test_config_option_version_and_gate():
     assert pf.AG3S_VERSIONS[name_hf] == (tuple(pf.AG3S_VERSIONS[FROZEN]) + ("--obstacle-held-beneath-band-mm", "30")
                                          + ("--graspable-hand-sized-mm", "156"))
     assert [v for v, f in pf.AG3S_VERSIONS.items() if "--graspable-hand-sized-mm" in f
-            and v not in pf.SOTA_AUDIT_VERSIONS and v not in pf.SOTA_FWD_VERSIONS] == [   # (SL-AUD: the -gh156a version + an action-QP / place switch; FWDATT: + --attention-inpass)
+            and v not in pf.SOTA_AUDIT_VERSIONS and v not in pf.SOTA_FWD_VERSIONS
+            and v not in pf.SOTA_FINAL_NEXT_VERSIONS] == [   # (SL-AUD: the -gh156a version + an action-QP / place switch; FWDATT: + --attention-inpass; 11-15: Tab. 2 / L12H3 / -pas on -gh156a)
         name, name_hf, name[:-len("-gh156-tro")] + "-gh156a-tro", name_hf[:-len("-gh156-tro")] + "-gh156a-tro",
         name[:-len("-gh156-tro")] + "-gh156a-sw-tro"]
     assert "graspable_hand_sized_mm" in srv.PORTED_FINAL_CONFIG_DESTS

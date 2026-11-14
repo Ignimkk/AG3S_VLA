@@ -1026,6 +1026,14 @@ class SqpConfig:
     #: action QP may change one action component by at most this much (the box `|a_ref + Da| <= 1` stays). A correction
     #: the cap leaves short stays a slack; the final check and the verdict are the ones as before. None = as before.
     ee_action_max_delta: Optional[float] = None
+    #: ARMSTRICT (`--passthrough-arm-strict`, 2026-11-15) — in the pass-through test the rows of the robot's ARM links
+    #: (Panda `panda_link1..7`, RB-Y1 `link_{left,right}_arm_<i>`: `sqp.arm_link_row_mask`; never the hand, fingers or
+    #: held-object rows) are held to `passthrough_obstacle_tolerance` whatever their nearest surface is. Before, an arm
+    #: row whose nearest surface was not classified as an obstacle object (target / support / destination / unclassified)
+    #: was accepted down to `passthrough_tolerance` (100 mm in the frozen version): with L12H3 the arm (link5 / link7)
+    #: grazed the obstacle beside the target in chunks passed as `clear`. An arm row below its floor by more than that
+    #: tolerance refuses the pass-through with reason `arm` (the call then goes on as for `obstacle`). False = as before.
+    passthrough_arm_strict: bool = False
     # --- T88 — end ---
 
     def validate(self) -> None:
@@ -1086,6 +1094,11 @@ class SqpConfig:
         if self.ee_action_max_delta is not None:   # SL-AUD5
             if not (math.isfinite(float(self.ee_action_max_delta)) and 0.0 < float(self.ee_action_max_delta) <= 2.0):
                 raise TrajOptConfigError(f"sqp.ee_action_max_delta must be in (0, 2], got {self.ee_action_max_delta!r}")
+        if not isinstance(self.passthrough_arm_strict, bool):   # ARMSTRICT
+            raise TrajOptConfigError(f"sqp.passthrough_arm_strict must be a bool, got {self.passthrough_arm_strict!r}")
+        if self.passthrough_arm_strict and (not self.passthrough_when_clear or self.passthrough_obstacle_tolerance is None):
+            raise TrajOptConfigError("sqp.passthrough_arm_strict needs sqp.passthrough_when_clear and "
+                                     "sqp.passthrough_obstacle_tolerance (the tolerance the arm rows are held to)")
         if not (math.isfinite(float(self.obstacle_row_priority)) and float(self.obstacle_row_priority) >= 1.0):
             raise TrajOptConfigError(f"sqp.obstacle_row_priority must be >= 1, got {self.obstacle_row_priority!r}")
         if isinstance(self.multi_seed, bool) or not isinstance(self.multi_seed, int) or self.multi_seed < 0:
@@ -1672,6 +1685,7 @@ _OMIT_WHEN_DEFAULT.update({("sqp", "obstacle_held_beneath_band"): None})   # SL-
 _OMIT_WHEN_DEFAULT.update({("sqp", "ee_action_reference_floor"): False, ("sqp", "ee_action_limit_passthrough"): False,
                            ("sqp", "ee_action_min_reach"): None, ("sqp", "ee_action_audit_fixes"): False,
                            ("sqp", "ee_action_max_delta"): None})   # SL-AUD1-5
+_OMIT_WHEN_DEFAULT.update({("sqp", "passthrough_arm_strict"): False})   # ARMSTRICT
 _OMIT_WHEN_DEFAULT.update({("sqp", "passthrough_obstacle_full_horizon"): False})   # SL-GTTO22   # SL-GTTO16 A'
 # --- T88 — end ---
 #: T72 — the grasp-set reach constraint: without `--grasp-set-to` the config dump keeps the keys it had before.

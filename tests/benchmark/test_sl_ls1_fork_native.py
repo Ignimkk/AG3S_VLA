@@ -192,7 +192,8 @@ def test_option_version_and_launcher_rules():
     name = FROZEN + "-lsnative"
     assert pf.SOTA_LSNATIVE_VERSIONS == (name,) and name in pf.SOTA_VERSIONS
     assert pf.AG3S_VERSIONS[name] == tuple(pf.AG3S_VERSIONS[FROZEN]) + ("--response-model", NATIVE)
-    others = [v for v in pf.AG3S_VERSIONS if v != name and NATIVE in pf.AG3S_VERSIONS[v]]
+    others = [v for v in pf.AG3S_VERSIONS if v != name and NATIVE in pf.AG3S_VERSIONS[v]
+              and v not in pf.SOTA_TAB2_LSNATIVE_VERSIONS]   # (2026-11-15: the Tab. 2 twins of -gh156a / -gh156a-fwd)
     assert others == []
     assert lls.native_fork_version(name) and not lls.native_fork_version(FROZEN)
     assert not lls.native_fork_version("AG3S-final-panda-v3-e0to-pc-lsfork") and not lls.native_fork_version("V11AB")
