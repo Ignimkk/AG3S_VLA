@@ -5307,3 +5307,6 @@ L12H3 (`…-rs-a12h3-tro`) **stage 1 FAIL** (00:00:47–01:09:51): E1a 40 TSR 23
 
 ### 2026-11-14 14:16 – 18:42 — SL-AUD 마무리: `-md5` · 거르기 1 재실행 · 채택 gate 모두 탈락 → 최종 동결 판 `-gh156a`, Tab. 1 시작 (sdm-f6 SL-AUD 세션)
 S32 (32 ep, TSR · CAR · SSR, > 50 mm; 동결 판 13 · 23 · 9, 3): `-md5` 16 · 19 · 12, **8** FAIL; 거르기 1 재실행 (`-rf` fix 2a27e4c4, 628 / 628 call 적용) 15 · 21 · **14**, 4 FAIL (동결 판 안전 성공 2 잃음, 기준 ≤ 1) → action QP 쪽 닫음; 거르기 2 `-ohr-dlo-pro` 16 · 24 · 13, 2 PASS → 채택 gate `-gh156a-ohr-dlo-pro` E1a 40 = 22 · 33 · **20** · 3 FAIL (X 25 · 33 · 22 · 2). → 최종 동결 판 = `…-rs-gh156a-tro`. 18:42 Tab. 1 (`tab1q`): AG3S arm `…-gh156a-fwd-tro`, GT oracle arm `…-tro-gto`. 계획서 §9.41 결과 3–5.
+
+### 2026-11-15 03:35 — 논문 Tab. 1 AG3S arm 끝 (SDM 1/10) (sdm-f6 SL-AUD 세션)
+`P-gh156a-fwd-tro` (최종 동결 판 + FWDATT), 11-14 18:42 – 11-15 03:35. LIBERO SR 0.710 (142 / 200; π0.5 단독 0.980), SafeLIBERO L-I TSR · SSR · CAR 0.500 · 0.475 · 0.787 (π0.5 0.675 · 0.138 · 0.150), L-II 0.613 · 0.537 · 0.750 (π0.5 0.725 · 0.300 · 0.300). LIBERO 손실은 Goal (29 / 50) · LIBERO-10 (30 / 48) 이 크다. arm 경계에서 RB-Y1 basket 학습에 GPU 양보 (사용자 01:3x), GT oracle arm 은 그 뒤. 계획서 §9.42 결과 1.
