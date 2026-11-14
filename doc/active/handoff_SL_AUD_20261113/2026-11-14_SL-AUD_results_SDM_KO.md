@@ -1,9 +1,9 @@
-# SL-AUD 결과 (SDM → 로컬 PC, 2026-11-14 02:4x 시작 · 04:0x 갱신, 중간 보고)
+# SL-AUD 결과 (SDM → 로컬 PC, 2026-11-14 02:4x 시작 · 18:5x 마감)
 
 받는 쪽: SL-AUD code 를 만든 로컬 PC 세션. 작성: SDM 세션 (sdm-f6, audq). 요청 문서 `2026-11-13_SL-AUD_test_plan_KO.md` §8 의 형식을 따른다.
-**중간 보고다.** 거르기 2 (`-ohr-dlo-pro`) 는 02:37 시작 (약 03:57 끝), 그 뒤 `-md5` (§5 셋째 줄 조건 충족) 가 돈다. 끝나면 이 문서에 §B · §C 를 덧붙인다.
+**마감 (18:5x).** §A = 동결 판 확인 · 거르기 1, §B = 거르기 2, §C = `-md5` · 거르기 1 재실행 · 채택 gate · 최종 동결. 결론: 채택 gate 탈락 → 최종 동결 판 = `-gh156a`.
 
-**가장 먼저 볼 것: `-rf` (SL-AUD1) 가 closed loop 에서 한 번도 작동하지 않았다 (§A.4).** 거르기 1 은 사실상 `-lp-mr8-af` 를 잰 것이다.
+**가장 먼저 볼 것: `-rf` (SL-AUD1) 가 closed loop 에서 한 번도 작동하지 않았다 (§A.4).** 거르기 1 은 사실상 `-lp-mr8-af` 를 잰 것이다. → `0f1d90b4` 로 고친 재실행은 §C.3 (628 / 628 call 적용, 결과 FAIL).
 
 ---
 
@@ -249,3 +249,123 @@ SDM `/mnt/dev/AG3S_VLA/outputs/2026-11-14_SL-AUD/raw6/{aud1sdm,pkgFrssdm}/<stem>
 ## 일시 정지와 남은 순서 (04:00)
 
 사용자 결정 (03:5x): 거르기 2 판정 직후 queue 를 멈추고 GPU 를 실물 RB-Y1 학습 (약 8 h) · 13:00 실물 시험에 먼저 쓴다. 03:55:03 에 시작한 `-md5` run (episode 0) 은 INTERRUPTED 표시. 재개 순서: `-md5` (§5 셋째 줄) → **거르기 1 재실행** (`0f1d90b4` 넣음, §10; 첫 ep 의 `reference_floor` 확인 → S32, TAG `aud1bsdm`) → 채택 gate (거르기 2 가 통과했으므로 반드시: X = `-gh156a` + `-ohr-dlo-pro`, 재실행도 통과면 + `-rf-lp-mr8-af`) → Tab. 1. §10 의 '떨어지면 action QP 쪽을 닫는다' 는 `-md5` 도 포함하는 것으로 읽었다 (`-md5` 는 `-rf` 미작동 거르기 1 의 갈림이므로 결과는 기록만).
+
+---
+
+## C. 재개 뒤: `-md5` · 거르기 1 재실행 · 채택 gate · 최종 동결 (2026-11-14 18:5x 덧붙임)
+
+실물 RB-Y1 학습 · 시험 (04:05–14:09) 동안 queue 를 멈췄다가 14:16 에 재개 (`aud_queue_c.sh`). 순서: `-md5` → main 을 `0f1d90b4` 포함 commit (`93478890`) 으로 → `-rf` 첫 ep 확인 → 거르기 1 재실행 → 채택 gate → Tab. 1.
+
+### C.1 `-md5` (§5 셋째 줄; §10 에 따라 기록만)
+
+TAG `aud1md5sdm`, HEAD `09dc923b`, 14:16–15:35 (03:55 의 run 은 INTERRUPTED, 처음부터). S32 합 **TSR 16 · CAR 19 · SSR 12, > 50 mm 8** (Spatial L-I 7 · 7 · 5, 6 / Goal L-I 5 · 7 · 5, 1 / Goal L-II 4 · 5 · 2, 1). 기준: SSR ≥ 12 ✓, > 50 mm ≤ 4 ✗ (8), 동결 판 안전 성공 잃음 ≤ 1 ✗ (4) → FAIL. > 50 mm 8 ep: spatial t0 e16 151 · t0 e18 253 · t1 e15 214 · t1 e16 54 · t1 e18 251 · t3 e16 262, goal L-I t1 e18 722, goal L-II t1 e17 78 mm. 읽기 (D): 상한은 task 성공을 늘리지만 장애물을 크게 민다 — H2 쪽 근거. (판정 줄의 '잃은 13 중 큰 보정 5 call 이상 0 / 13' 은 상한 0.5 때문에 정의상 0.)
+
+### C.2 `-rf` 첫 ep 확인 (§10)
+
+`ms-aud1bchksdm-spatial-LI-i15` (고친 판, Spatial L-I task 0 init 15 = S32 spatial run 의 첫 episode 를 같은 인자로 따로; §A.1 의 동결 판 확인이 이 방식으로 call 단위 같음을 보였다), 15:35–15:44: **OK** — action-QP call 8 / 8 에 `reference_floor.{n_rows_below_backoff, min_floor_m}`, why / error / shape_mismatch 없음. `n_rows_below_backoff` 합 293 (call 당 중앙값 39), `min_floor_m` 중앙값 −5.2 mm · 최소 −33.3 mm.
+
+### C.3 거르기 1 재실행 (§10)
+
+판 `…-hb-qs-rs-rf-lp-mr8-af-tro` (거르기 1 과 같은 이름), HEAD `93478890`, TAG `aud1bsdm`, 15:44:51–17:02:45. run: `20261114T154453_…_ms-aud1bsdm-spatial-LI-i15_16_17_18`, `20261114T162105_…_goal-LI-i17_18`, `20261114T164306_…_goal-LII-i17_18`.
+
+| S32 (TSR · CAR · SSR, > 50 mm) | 동결 판 | 거르기 1 (`-rf` 미작동) | **재실행** (`-rf` 작동) |
+|---|---|---|---|
+| Spatial L-I (16) | 7 · 12 · 5, 2 | 8 · 11 · 7, 2 | 7 · 9 · 7, 4 |
+| Goal L-I (8) | 2 · 6 · 1, 1 | 2 · 6 · 1, 0 | 3 · 7 · 3, 0 |
+| Goal L-II (8) | 4 · 5 · 3, 0 | 4 · 5 · 2, 1 | 5 · 5 · 4, 0 |
+| **합** | **13 · 23 · 9, 3** | **14 · 22 · 10, 3** | **15 · 21 · 14, 4** |
+
+기준 §5: SSR ≥ 12 ✓ (14), > 50 mm ≤ 4 ✓ (4, 경계), **동결 판 안전 성공 잃음 ≤ 1 ✗ (2: spatial t3 e16 → F+C 291 mm, goal L-II t3 e17 → F)** → **FAIL → action QP 쪽 후보를 닫음** (§10). 잃은 두 ep 은 거르기 1 · `-md5` 에서도 잃었다. 안전 성공 얻음 7 (spatial t0 e16 · t1 e17 · t2 e18, goal L-I t0 e17 · t0 e18, goal L-II t2 e17 · t3 e18), 잃은 13 중 돌아옴 4. > 50 mm: spatial t1 e15 88 · t1 e18 77 · t3 e15 **749** · t3 e16 291 mm.
+
+**§10 의 더할 값.**
+
+| 값 | 재실행 |
+|---|---|
+| `-rf` 가 적용된 action-QP call / 전체 | **628 / 628** (세 run 모두 `aud_rf_check.py` OK) |
+| 접촉 row 중 5 mm 아래였던 것의 합 · call 당 중앙값 | 45,852 · 16–23 (run 별) |
+| 가장 깊은 floor (`min_floor_m`) 중앙값 · 최소 | −18 – −25 mm (run 별 중앙값) · −91.2 mm |
+| 큰 보정 call 의 최악 row step 0–4 · 5–9 | 31 · 120 (동결 판 61 · 178, 거르기 1 32 · 131) |
+
+S32 32 ep 의 짝 (다섯 판):
+
+| cell | task | init | π0.5 | 동결 판 | 거르기 1 | 재실행 | -md5 | 거르기 2 | 변위 mm (동결 → 재실행) | 큰 보정 (동결 → 1 → 재실행) | 잃은 13 |
+|---|---:|---:|---|---|---|---|---|---|---|---|---|
+| spatial L-I | 0 | 15 | F+C | SS | SS | **SS** | S+C | SS | 0.0 → 0.0 | 0 → 0 → 0 |  |
+| spatial L-I | 0 | 16 | F+C | S+C | SS | **SS** | F+C | SS | 56.9 → 0.0 | 8 → 4 → 3 |  |
+| spatial L-I | 0 | 17 | S+C | SS | SS | **SS** | SS | SS | 0.0 → 0.0 | 0 → 0 → 0 |  |
+| spatial L-I | 0 | 18 | F+C | S+C | F+C | **F+C** | F+C | S+C | 5.0 → 5.8 | 9 → 5 → 3 |  |
+| spatial L-I | 1 | 15 | S+C | F | F+C | **F+C** | F+C | F | 0.0 → 88.2 | 26 → 9 → 6 | ✓ |
+| spatial L-I | 1 | 16 | S+C | F+C | S+C | **F+C** | F+C | F+C | 7.3 → 16.5 | 12 → 3 → 4 | ✓ |
+| spatial L-I | 1 | 17 | SS | F | SS | **SS** | SS | F | 0.0 → 0.0 | 12 → 1 → 1 | ✓ |
+| spatial L-I | 1 | 18 | S+C | F | F+C | **F+C** | F+C | F | 0.0 → 76.5 | 24 → 7 → 1 | ✓ |
+| spatial L-I | 2 | 15 | S+C | SS | SS | **SS** | F | SS | 0.0 → 0.0 | 1 → 2 → 2 |  |
+| spatial L-I | 2 | 16 | S+C | F | F | **F** | SS | F | 0.0 → 0.0 | 19 → 7 → 22 | ✓ |
+| spatial L-I | 2 | 17 | S+C | SS | SS | **SS** | SS | SS | 0.0 → 0.0 | 2 → 3 → 1 |  |
+| spatial L-I | 2 | 18 | F+C | F | SS | **SS** | SS | SS | 0.0 → 0.0 | 1 → 1 → 1 |  |
+| spatial L-I | 3 | 15 | F+C | F | F | **F+C** | F+C | F | 0.4 → 749.1 | 6 → 6 → 16 |  |
+| spatial L-I | 3 | 16 | S+C | SS | F | **F+C** | S+C | SS | 0.0 → 291.3 | 2 → 6 → 7 |  |
+| spatial L-I | 3 | 17 | S+C | F | F | **F** | F | F | 0.0 → 0.0 | 6 → 1 → 1 | ✓ |
+| spatial L-I | 3 | 18 | F+C | F+C | F+C | **F+C** | F+C | F+C | 294.5 → 1.5 | 5 → 12 → 13 |  |
+| goal L-I | 0 | 17 | S+C | F+C | F | **SS** | SS | F+C | 2.2 → 0.0 | 22 → 20 → 10 | ✓ |
+| goal L-I | 0 | 18 | S+C | F | SS | **SS** | SS | F | 0.0 → 0.0 | 16 → 0 → 0 | ✓ |
+| goal L-I | 1 | 17 | S+C | SS | S+C | **SS** | SS | SS | 0.0 → 0.0 | 3 → 4 → 2 |  |
+| goal L-I | 1 | 18 | S+C | S+C | F+C | **F+C** | F+C | S+C | 83.6 → 2.4 | 7 → 3 → 3 |  |
+| goal L-I | 2 | 17 | F+C | F | F | **F** | SS | F | 0.0 → 0.0 | 26 → 5 → 6 |  |
+| goal L-I | 2 | 18 | S+C | F | F | **F** | SS | SS | 0.0 → 0.0 | 29 → 10 → 11 | ✓ |
+| goal L-I | 3 | 17 | F+C | F | F | **F** | F | F | 0.0 → 0.0 | 8 → 3 → 1 |  |
+| goal L-I | 3 | 18 | S+C | F | F | **F** | F | F | 0.0 → 0.0 | 7 → 5 → 12 | ✓ |
+| goal L-II | 0 | 17 | F+C | SS | S+C | **SS** | SS | SS | 0.0 → 0.0 | 4 → 4 → 0 |  |
+| goal L-II | 0 | 18 | F | SS | SS | **SS** | SS | SS | 0.0 → 0.0 | 1 → 1 → 3 |  |
+| goal L-II | 1 | 17 | S+C | F+C | F | **F+C** | S+C | F+C | 10.5 → 30.9 | 17 → 18 → 12 | ✓ |
+| goal L-II | 1 | 18 | S+C | F | F | **F+C** | F | F | 0.0 → 7.7 | 16 → 8 → 7 | ✓ |
+| goal L-II | 2 | 17 | S+C | F+C | F+C | **SS** | F+C | F+C | 6.7 → 0.0 | 8 → 8 → 1 | ✓ |
+| goal L-II | 2 | 18 | S+C | S+C | S+C | **S+C** | S+C | S+C | 2.2 → 2.2 | 0 → 0 → 0 |  |
+| goal L-II | 3 | 17 | S+C | SS | F | **F** | F | SS | 0.9 → 0.9 | 11 → 7 → 2 |  |
+| goal L-II | 3 | 18 | F+C | F | SS | **SS** | F | SS | 0.0 → 0.0 | 10 → 4 → 0 |  |
+
+§8.2 의 값 (다섯 판 나란히):
+
+| 값 (32 ep 합) | 동결 판 | 거르기 1 | 재실행 | -md5 | 거르기 2 |
+|---|---:|---:|---:|---:|---:|
+| action-QP call | 754 | 608 | 628 | 613 | 671 |
+| 큰 보정 (≥ 1) | 318 | 167 | 151 | 0 | 260 |
+| · 쥔 동안 | 205 | 107 | 66 | 0 | 159 |
+| · 놓은 뒤 | 55 | 17 | 39 | 0 | 52 |
+| · 최악 row step 0–4 | 61 | 32 | 31 | 0 | 59 |
+| · 최악 row step 5–9 | 178 | 131 | 120 | 0 | 161 |
+| ±1 포화 성분 합 | 3735 | 1847 | 1867 | 805 | 3100 |
+| slack > 15 mm call | 177 | 57 | 69 | 183 | 130 |
+| QP 에서 뺀 row (마지막 iteration) | 930 | 30953 | 32935 | 812 | 869 |
+| 접촉 row 5 mm 아래 (`-rf`) | 0 | 0 | 45852 | 0 | 0 |
+| `limit` 통과 call | 0 | 9 | 6 | 0 | 0 |
+| 쥔 구간 거절 call | 353 | 292 | 256 | 197 | 296 |
+| IK 한도 call | 316 | 290 | 286 | 253 | 286 |
+| OSQP 한도 call | 148 | 41 | 28 | 190 | 110 |
+
+**읽기 (§10 에 결과 전에 적은 대로).**
+- `-rf` 는 쥔 동안의 큰 보정을 107 → 66 으로 더 줄였고, `-mr8` 이 건드리지 않는 step 5–9 쪽도 131 → 120 으로 줄였다.
+- 큰 보정이 더 줄면서 SSR 은 10 → 14 로 올랐다 → 'SSR 이 그대로면 H1 을 닫는다' 는 해당하지 않음. 그러나 같은 두 ep 을 늘 잃고 > 50 mm 가 경계 (4, 그중 749 mm 1) 에 닿아 정해 둔 기준을 넘지 못했다.
+- 거르기 1 의 새 충돌 Spatial L-I t1 e15 · e16 중 e15 는 재실행에서도 F+C 88 mm, e16 은 F+C 16.5 mm.
+
+### C.4 채택 gate (§7)
+
+거르기 2 만 통과 → `…-rs-gh156a-ohr-dlo-pro-tro` (TAG `audgsdm`, HEAD `93478890`, 17:02–18:40), `-gh156a` 와 같은 기준 (계획서 §9.2 / §9.37, 기준 판 = 동결 판).
+
+| E1a 40 (TSR · CAR · SSR, > 50 mm) | 값 |
+|---|---|
+| 동결 판 | 23 · 34 · 21, 1 |
+| X = `-gh156a` | 25 · 33 · 22, 2 |
+| X + `-ohr-dlo-pro` | **22 · 33 · 20, 3** |
+
+1 단계 **FAIL** (SSR ≥ 22 또는 21 · CAR ≥ 36 를 못 채움) → guard 는 돌리지 않음. X 대비 짝: 안전 성공 얻음 0 · 잃음 2 (task 1 init 13 → F, task 3 init 8 → F); task 별 SSR 동결 판 7 · 2 · 7 · 5 / X 7 · 3 · 7 · 5 / 이 판 7 · 2 · 7 · 4. 읽기 (D): S32 의 +4 / −0 이 E1a (Spatial L-I 한 cell, init 5–14) 로 옮겨가지 않았다 — S32 는 놓는 구간 문제가 몰린 Goal cell 을 담는다.
+
+### C.5 최종 동결과 Tab. 1
+
+**최종 동결 판 = X = `…-hb-qs-rs-gh156a-tro`** (§7: 채택 gate 탈락 → X). SL-AUD flag 는 판에 들어가지 않는다. Tab. 1: 18:42 시작, AG3S arm = `…-rs-gh156a-fwd-tro` (`--attention-inpass` · `--graspable-hand-sized-mm 156` 확인), GT oracle arm = `…-rs-tro-gto`; 예상 끝 AG3S ~11-15 05:00, GT oracle ~11-15 13:00.
+
+### C.6 로컬 PC 에 남기는 것
+
+- **`-ohr` 기록:** `metrics["obstacle_objects"]` (`history_refilter.n_removed` 포함) 가 call · chunk 기록에 저장되지 않는다 (§B). 다음에 잴 때 셀 수 있게 기록 경로가 필요하다.
+- **단위 test 와 live 경로:** `-rf` 의 shape 문제는 CPU 의 stub · monkeypatch 가 2 차원을 돌려줘 숨었다. `0f1d90b4` 의 실제 `EsdfField` test 처럼, 새 flag 는 서버 경로 (`--esdf-backend curobo --to-fast-eval`) 에서 기록 key 가 나오는지 첫 ep 으로 먼저 보는 것이 안전하다 (이번 §10 의 첫 ep 확인이 그 역할).
+- **S32 와 E1a 의 차이:** 놓는 구간 후보는 S32 에서 통과하고 E1a 에서 떨어졌다. 다음 후보를 거를 때 셋이 그 후보가 고치는 문제를 담는지 먼저 보는 것이 좋다.
+- §8.3 raw: `raw6/{pkgFrssdm, aud1sdm, aud1bsdm, aud1md5sdm, aud2sdm}/` (다섯 판 × 6 ep).
