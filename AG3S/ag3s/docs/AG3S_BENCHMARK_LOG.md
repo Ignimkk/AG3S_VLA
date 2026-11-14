@@ -5310,3 +5310,6 @@ S32 (32 ep, TSR · CAR · SSR, > 50 mm; 동결 판 13 · 23 · 9, 3): `-md5` 16 
 
 ### 2026-11-15 03:35 — 논문 Tab. 1 AG3S arm 끝 (SDM 1/10) (sdm-f6 SL-AUD 세션)
 `P-gh156a-fwd-tro` (최종 동결 판 + FWDATT), 11-14 18:42 – 11-15 03:35. LIBERO SR 0.710 (142 / 200; π0.5 단독 0.980), SafeLIBERO L-I TSR · SSR · CAR 0.500 · 0.475 · 0.787 (π0.5 0.675 · 0.138 · 0.150), L-II 0.613 · 0.537 · 0.750 (π0.5 0.725 · 0.300 · 0.300). LIBERO 손실은 Goal (29 / 50) · LIBERO-10 (30 / 48) 이 크다. arm 경계에서 RB-Y1 basket 학습에 GPU 양보 (사용자 01:3x), GT oracle arm 은 그 뒤. 계획서 §9.42 결과 1.
+
+### 2026-11-15 03:39 – 04:49 — 실물 RB-Y1 basket 학습 (GPU 양보) 뒤 Tab. 1 GT oracle arm 시작 (sdm-f6 SL-AUD 세션)
+dev-cf: basket LoRA 03:39–04:40 (loss 0.254 → 0.005), checkpoint `basket_v1/2499` (검증 MAE 0.038 rad), run `20261115T013849+0900_068baf6a448b_rby1real-basket-v1-sdm`, commit b78b5d99. 04:49:29 `tab1gto` (GT oracle arm, `…-rs-tro-gto`). 실물 구간 13:30–15:15 GPU 비움.
