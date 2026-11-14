@@ -5304,3 +5304,6 @@ L12H3 (`…-rs-a12h3-tro`) **stage 1 FAIL** (00:00:47–01:09:51): E1a 40 TSR 23
 
 ### 2026-11-14 04:00 – 14:16 — SL-AUD 일시 정지 (실물 RB-Y1 학습 · 시험 우선) 와 재개 (sdm-f6 SL-AUD 세션)
 04:00 사용자 결정으로 `audq` · `audqb` 를 거르기 2 판정 직후 멈춤 (`-md5` run INTERRUPTED). 거르기 2 `-ohr-dlo-pro` 는 PASS (S32 TSR 16 · CAR 24 · SSR 13, > 50 mm 2; 동결 판 13 · 23 · 9, 3; 안전 성공 +4 / −0) — 계획서 §9.41 결과 2. 그동안 실물 RB-Y1 red_block 16D LoRA 학습 04:05–11:49 (ckpt 19999), 실물 시험 13:23–13:35 (slow 2 · 정속 모두 성공), 14:09 서버 내림 (dev-6b · dev-cf, branch `rby1-real/red-block` 7f007cdc). 14:16:02 `audqc` 재개: `-md5` → 거르기 1 재실행 (`-rf` fix 2a27e4c4 = 로컬 0f1d90b4) → 채택 gate → Tab. 1.
+
+### 2026-11-14 14:16 – 18:42 — SL-AUD 마무리: `-md5` · 거르기 1 재실행 · 채택 gate 모두 탈락 → 최종 동결 판 `-gh156a`, Tab. 1 시작 (sdm-f6 SL-AUD 세션)
+S32 (32 ep, TSR · CAR · SSR, > 50 mm; 동결 판 13 · 23 · 9, 3): `-md5` 16 · 19 · 12, **8** FAIL; 거르기 1 재실행 (`-rf` fix 2a27e4c4, 628 / 628 call 적용) 15 · 21 · **14**, 4 FAIL (동결 판 안전 성공 2 잃음, 기준 ≤ 1) → action QP 쪽 닫음; 거르기 2 `-ohr-dlo-pro` 16 · 24 · 13, 2 PASS → 채택 gate `-gh156a-ohr-dlo-pro` E1a 40 = 22 · 33 · **20** · 3 FAIL (X 25 · 33 · 22 · 2). → 최종 동결 판 = `…-rs-gh156a-tro`. 18:42 Tab. 1 (`tab1q`): AG3S arm `…-gh156a-fwd-tro`, GT oracle arm `…-tro-gto`. 계획서 §9.41 결과 3–5.
