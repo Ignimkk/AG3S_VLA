@@ -5319,3 +5319,6 @@ SafeLIBERO SSR (L-I · L-II): π0.5 단독 0.138 · 0.300, AG3S 0.475 · 0.537, 
 
 ### 2026-11-15 13:19 — 논문 Tab. 2 π0.5 단독 행 끝 (SDM 1/10) (sdm-f6 SL-AUD 세션)
 LIBERO-Safety 4 suite × L0–L2 × task 0–4 × init 19 = 60 ep, 공식 checkpoint `pi05_libero_safety`: 성공 37 (0.617), 공식 위반 1. 13:30–15:15 실물 RB-Y1 구간에 GPU 양보. 계획서 §9.42 결과 4.
+
+### 2026-11-15 14:12 – 15:36 — 개선 실험 1: L12H3 + 팔 link strict (link1–7) 를 Tab. 1 두 cell 에서 (sdm-f6 SL-AUD 세션)
+`P-gh156a-a12h3-fwd-pas-tro`. Goal L-I TSR · SSR · CAR 11 · 9 · 18 (AG3S 8 · 7 · 18), Spatial L-II 6 · 6 · 16 (AG3S 10 · 10 · 16); 두 cell 합 SSR 15 vs AG3S 17 → 개선 없음. Spatial L-II 의 `arm` 거절 150 call 중 link7 76. 15:36 Tab. 2 AG3S 행 시작. 계획서 §9.43.
