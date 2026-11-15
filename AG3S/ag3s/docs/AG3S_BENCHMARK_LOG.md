@@ -5328,3 +5328,6 @@ LIBERO-Safety 4 suite × L0–L2 × task 0–4 × init 19 = 60 ep, 공식 checkp
 
 ### 2026-11-15 19:03 – 22:28 — 실물 RB-Y1 basket 단독 시험 · 실물 AG3S 적용 (GPU 양보), Tab. 2 재개 (sdm-f6 SL-AUD 세션, 지금 dev-35)
 19:03 Tab. 2 AG3S 행을 cell 경계에서 멈춤 (7 / 12 cell 끝). sdm-rby1real (dev-43): 실물 AG3S (red_block + 컵, S2) on 1 에서 15 / 16 응답 refined 실행 · 컵 충돌 없음, 그러나 컵을 넘는 경로를 TrajOpt 가 못 찾아 운반 실패; commit f88ee5ce (rby1-real/red-block). 22:28 GPU 반납 → Tab. 2 재개. 계획서 §9.42.
+
+### 2026-11-15 23:50 – 11-16 00:05 — 논문 Tab. 2 끝, Tab. 3 (ablation) 행 2 · 5 · 6 시작 (sdm-f6 SL-AUD 세션)
+Tab. 2 LIBERO-Safety 60 ep: π0.5 단독 성공 37 · 위반 1, AG3S 성공 27 · 위반 0. Tab. 3: X-fwd 에서 extent (ab2) · 대상 늘 장애물 (ab5) · 대상 모든 link 해제 (ab6) 판 등록 (e3d71f8a), 00:05 SafeLIBERO L-I 로 시작. 원고 방법 절 (graph / Laplacian / descriptor) 이 X 의 실제 인식 (ball-owned + 표면 증거, TargetConfirm) 과 다름 — 사용자 판단 대기. 계획서 §9.42 결과 5, §9.44.

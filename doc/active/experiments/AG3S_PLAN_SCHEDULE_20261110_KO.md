@@ -1706,3 +1706,15 @@ GPU 약 1 h 50 분 (52 ep). dev-8a (sdm-ahs) 의 공유 lock 추출은 이 시�
 | 7 쥔 물체 부착 없음 | 없음 (`--held-body-cover` 제거는 거절됨) | `--no-attached-query` ~30–60 줄 | ~2.6 h |
 
 - 바로 돌릴 수 있는 행: 2 · 5 · 6 (판 등록만, 약 8–9 GPU h). 새 code: 1 · 4 · 7 (작음), 3 (GT mask 는 등록만, 진짜 분할기는 큼). 7 행 전부 약 19–23 GPU h. full 행 = Tab. 1 AG3S L-I 4 cell 재사용 (같은 판 `-fwd`, 같은 run 구성). 원고의 예상 Δ 값은 근거가 없다 (이전 측정이 반대 부호인 행도 있음).
+
+**§9.42 결과 5 (2026-11-16 00:0x, [M]) — Tab. 2 (LIBERO-Safety, SDM 1/10) 두 행 끝.** AG3S 행 `P-gh156a-fwd-tro-lsnative` (HEAD 17d3e8c0 → cee3aa90, 11-15 15:36–23:50, 두 번 멈춤: 15:55 · 19:03 cell 경계, 끝난 cell 은 이어 감; 12 cell 모두 rc 0 · 5 ep). 60 ep 씩:
+
+| Tab. 2 | 성공 | 공식 위반 | L2: AAG · TSA · FSHOA · HRI (각 5) |
+|---|---:|---:|---|
+| π0.5 단독 (`pi05_libero_safety`) | 37 (0.617) | 1 | 2 · 3 · 1 · 5 |
+| AG3S | 27 (0.450) | **0** | 1 · 3 · 1 · 3 |
+
+- suite × L0 · L1 · L2 성공 (AG3S / π0.5): affordance 3 · 3 · 1 / 4 · 4 · 2, obstacle_avoidance 1 · 2 · 3 / 3 · 3 · 3, obstacle_avoidance_human 2 · 1 · 1 / 3 · 2 · 1, human_safety 3 · 4 · 3 / 3 · 4 · 5.
+- 해석 (D): 이 benchmark 에서 π0.5 단독의 위반이 60 ep 중 1 뿐이라 AG3S 가 줄일 위반이 거의 없고, 성공은 10 ep 낮다 (Tab. 1 LIBERO 손실과 같은 방향). 원고의 예상 값 (π0.5 CR 26 % → AG3S 6.7 %) 과 다르다 — cell 당 5 ep 이라 작다.
+
+**§9.44 Tab. 3 시작 (2026-11-16 00:05, 결과 전 기록).** 사용자 결정 전이지만 A · B 두 안에 모두 들어 있는 행 2 · 5 · 6 (판 등록만, 원고 행 정의 그대로) 을 '표 먼저' 지시대로 먼저 돌린다. 판 `P-gh156a-fwd-ab2-tro` (extent: `ball-owned` + 표면 증거 → `ball`), `-ab5-tro` (`--target-field-policy none` + ab2 의 제거), `-ab6-tro` (`--target-field-policy exclude-all`) — commit e3d71f8a (등록 + test; `version_flag_values` 의 GT15 이후 판정에서 V11AB 기본 인자 제외: ab5 · ab6 이 기본 인자의 `--target-field-policy` 를 덮어써 V11AB 기본 기록 key 에 뒤 판 key 가 끼어들던 것). launcher dry-run 셋 rc 0. `tab3a` (`tab1_improve_cells.sh`, TAG ab2 → ab6 → ab5, 각 SafeLIBERO L-I 4 cell, Tab. 1 과 같은 init · seed · run 구성; run-id `tab1sdm-<ab*>-sl-<suite>-LI`), HEAD e3d71f8a. full 행 = Tab. 1 AG3S L-I (0.500 · 0.475 · 0.787). 예상 [P]: ~2.6–3.5 h 씩 → ~09:00–09:30 끝. 행 1 · 4 · 7 (작은 code) 과 행 3 (GT mask 또는 분할기), 방법 절과 X 의 차이는 사용자 결정 대기.
