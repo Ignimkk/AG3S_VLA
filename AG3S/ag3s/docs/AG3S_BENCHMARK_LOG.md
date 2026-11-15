@@ -5325,3 +5325,6 @@ LIBERO-Safety 4 suite × L0–L2 × task 0–4 × init 19 = 60 ep, 공식 checkp
 
 ### 2026-11-15 15:55 – 17:12 — 개선 실험 2: L12H3 + 팔 strict link1–6 (link7 제외) (sdm-f6 SL-AUD 세션)
 `P-gh156a-a12h3-fwd-pas6-tro` (새 선택지 `--passthrough-arm-strict-no-wrist`). Spatial L-II TSR · SSR · CAR 12 · 12 · 15 (AG3S 10 · 10 · 16; link1–7 판 6 · 6 · 16), Goal L-I 10 · 8 · 18 (AG3S 8 · 7 · 18). 두 cell 합 SSR 20 vs AG3S 17 vs GT oracle 26. `arm` 거절 Spatial L-II 150 → 53. 17:12 Tab. 2 AG3S 행 재개. 계획서 §9.43 결과 3.
+
+### 2026-11-15 19:03 – 22:28 — 실물 RB-Y1 basket 단독 시험 · 실물 AG3S 적용 (GPU 양보), Tab. 2 재개 (sdm-f6 SL-AUD 세션, 지금 dev-35)
+19:03 Tab. 2 AG3S 행을 cell 경계에서 멈춤 (7 / 12 cell 끝). sdm-rby1real (dev-43): 실물 AG3S (red_block + 컵, S2) on 1 에서 15 / 16 응답 refined 실행 · 컵 충돌 없음, 그러나 컵을 넘는 경로를 TrajOpt 가 못 찾아 운반 실패; commit f88ee5ce (rby1-real/red-block). 22:28 GPU 반납 → Tab. 2 재개. 계획서 §9.42.
