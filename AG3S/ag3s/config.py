@@ -221,6 +221,22 @@ class ClusteringConfig:
     #: False = T31b: such clusters are never split). Re-cluster only (no attention partition), so one wide object stays whole;
     #: several objects merged into one blob (the target touching its neighbours) come apart and the attended one can compete.
     attention_split_wide: bool = False
+    # --- TAB3 ablation (2026-11-16, paper Tab. 3 rows 1 / 4) — begin
+    #: **TAB3 row 1 — where the grounding seed comes from** (default ``"attention"`` = bit-identical). With
+    #: ``"hand_nearest"``, on calls with nothing attached and no grasp in progress, `ground_target` takes its seeds, its
+    #: peak and its cluster ranking from the hand proximity of each point (`stages.target_grounding.hand_proximity`:
+    #: ``exp(-(d - d_min) / HAND_NEAREST_SCALE_M)``, d = distance to the hand spheres' surface, support points 0) instead
+    #: of the attention -- the nearest object becomes the target. The attention split (extent: which touching objects are
+    #: separate), the release split and every later stage still read the attention; the close seed (VLA action, not
+    #: attention) still wins on its calls. Record: `metrics["seed_source"]` (only when not ``"attention"``).
+    seed_source: str = "attention"
+    #: **TAB3 row 4 — cross-call identity memory** (default True = bit-identical). False: `TargetConfirm` forgets the
+    #: manipulated object at every call that is not frozen (no grasp in progress, nothing attached), so the target is the
+    #: call's top admissible cluster with no switch hysteresis, no occluded carry-over of the last geometry, no T30
+    #: association and no T43 latched hold. The freeze (closing → held → release) keeps its rules -- that is the grasp
+    #: latch / attachment lock, not memory. Record: `metrics["identity_memory_off"]` (only when False).
+    identity_memory: bool = True
+    # --- TAB3 ablation — end
     #: A cluster is "the destination" (and so never the manipulated object) when at least this
     #: fraction of its points lie within `destination_overlap_distance` of the destination's points
     #: (T26). 0.5 = "mostly the destination's surface": a re-observed crate fragment scores ~1, an
@@ -619,6 +635,7 @@ class ClusteringConfig:
 
     METHODS = ("dbscan", "region_growing")
     GROUNDING_SOURCES = ("attention", "oracle")   # SL-GTTO
+    SEED_SOURCES = ("attention", "hand_nearest")   # TAB3 row 1
 
     def validate(self) -> None:
         if self.method not in self.METHODS:
@@ -656,6 +673,13 @@ class ClusteringConfig:
             raise AG3SConfigError("clustering.attention_split_wide must be true or false")
         if self.attention_split_wide and self.attention_split_radius is None:
             raise AG3SConfigError("clustering.attention_split_wide needs clustering.attention_split_radius (the split's re-cluster radius)")
+        if self.seed_source not in self.SEED_SOURCES:   # TAB3 row 1
+            raise AG3SConfigError(f"clustering.seed_source must be one of {self.SEED_SOURCES}, got {self.seed_source!r}")
+        if not isinstance(self.identity_memory, bool):   # TAB3 row 4
+            raise AG3SConfigError(f"clustering.identity_memory must be true or false, got {self.identity_memory!r}")
+        if self.seed_source != "attention" and self.grounding_source != "attention":
+            raise AG3SConfigError("clustering.seed_source replaces the attention seeds; with grounding_source "
+                                  f"{self.grounding_source!r} the GT names the target (one or the other)")
         if not isinstance(self.graspable_hand_sized_attention_top, bool):   # SL-SOTA18b
             raise AG3SConfigError("clustering.graspable_hand_sized_attention_top must be true or false")
         if self.graspable_hand_sized_attention_top and self.graspable_hand_sized is None:

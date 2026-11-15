@@ -1090,17 +1090,69 @@ def reject_identity_rules_flags(ap, args) -> None:
 # SL8b — end
 
 
+# ABL-M6 — begin
+#: ``--external-target-mask`` choices (the segmenter the sidecar runs; ``adapters.panda.external_mask.PROVIDER_NAME``)
+EXTERNAL_TARGET_MASKS: tuple[str, ...] = ("grounded-sam2",)
+
+
+def reject_external_mask_flags(ap, args) -> None:
+    """ABL-M6 — `--external-target-mask` replaces only the client GT code image of the oracle-visible extent; combinations
+    that would read the segmenter mask as ground truth, or not read it at all, are refused at start."""
+    on = getattr(args, "external_target_mask", None) is not None
+    if getattr(args, "external_target_mask_mode", None) is not None and not on:
+        ap.error("--external-target-mask-mode 는 --external-target-mask 의 분할기 mode 입니다 — 함께 주십시오")
+    if not on:
+        return
+    if getattr(args, "target_extent", None) != "oracle-visible":
+        ap.error("--external-target-mask 는 --target-extent oracle-visible 의 code 영상을 만듭니다 — 함께 주십시오 "
+                 f"(받은 값 {getattr(args, 'target_extent', None)})")
+    if getattr(args, "grounding_source", "attention") != "attention":
+        ap.error("--external-target-mask 와 --grounding-source oracle 은 함께 쓸 수 없습니다: GT grounding 은 code 영상을 "
+                 "정답 target 으로 읽습니다 (분할기 mask 가 identity 까지 바꿈 — 한 요소 교체가 아님)")
+    if getattr(args, "oracle_target_volume", False):
+        ap.error("--external-target-mask 와 --oracle-target-volume 은 함께 쓸 수 없습니다: SL13 은 정답 target 부피 진단입니다")
+# ABL-M6 — end
+
+
 # TAB3 — begin
 def reject_tab3_flags(ap, args) -> None:
-    """TAB3 (paper Tab. 3) — combinations that would not run the asked ablation are refused at start."""
+    """TAB3 (paper Tab. 3 rows 1 / 4 / 7) — combinations that would not run the asked ablation are refused at start."""
     no_ag3s = bool(args.no_safe or getattr(args, "no_perception", False))
+    if getattr(args, "seed_source", "attention") == "hand-nearest":
+        if no_ag3s:
+            ap.error("--seed-source hand-nearest 는 AG3S grounding 의 flag 입니다 (--no-safe · --no-perception 은 그것을 안 만듭니다)")
+        if getattr(args, "grounding_source", "attention") != "attention":
+            ap.error("--seed-source hand-nearest 는 attention seed 를 바꿉니다 — --grounding-source oracle 은 GT 가 대상을 "
+                     "말하므로 둘 중 하나만")
+        if str(getattr(args, "target_extent", None) or "").startswith("attention-surface"):
+            ap.error("--seed-source hand-nearest 와 --target-extent attention-surface* 는 함께 쓸 수 없습니다: surface "
+                     "extent 는 attention seed map 을 따로 읽어 대상 표면을 고릅니다 (seed 출처가 반만 바뀜)")
+        for flag, on in (("--attention-peak-seed", getattr(args, "attention_peak_seed", None) is not None),
+                         ("--identity-attention-release", getattr(args, "identity_attention_release", None) is not None)):
+            if on:
+                ap.error(f"--seed-source hand-nearest 와 {flag} 는 함께 쓸 수 없습니다: {flag} 는 attention 으로 대상을 "
+                         "고르거나 놓습니다 (seed 출처가 반만 바뀜)")
+    if getattr(args, "identity_memory", "on") == "off":
+        if no_ag3s:
+            ap.error("--identity-memory off 는 AG3S TargetConfirm 의 flag 입니다 (--no-safe · --no-perception 은 그것을 안 만듭니다)")
+        for flag, on in (("--identity-switch-window", getattr(args, "identity_switch_window", None) is not None),
+                         ("--identity-attention-release", getattr(args, "identity_attention_release", None) is not None),
+                         ("--target-vacancy-release", getattr(args, "target_vacancy_release", False)),
+                         ("--refused-identity-release", getattr(args, "refused_identity_release", None) is not None)):
+            if on:
+                ap.error(f"--identity-memory off 와 {flag} 는 함께 쓸 수 없습니다: {flag} 는 call 사이에 남은 identity 를 "
+                         "바꾸거나 놓는 규칙이라 기억이 없으면 읽히지 않습니다 — 그대로 띄우면 효과가 있었다고 믿게 됩니다")
     if getattr(args, "no_attached_query", False) and no_ag3s:
         ap.error("--no-attached-query 는 AG3S attach 의 질의 구를 끕니다 (--no-safe · --no-perception 에는 attach 가 없습니다)")
 
 
 def tab3_inert(args) -> list[dict]:
     """TAB3 — base-argv flags the asked ablation makes inert (recorded with the server's inert list; none = `[]`)."""
-    return []
+    out = []
+    if getattr(args, "identity_memory", "on") == "off" and getattr(args, "latched_identity_hold", False):
+        out.append({"flag": "--latched-identity-hold",
+                    "why": "--identity-memory off: no identity is kept between unfrozen calls, so no latched hold"})
+    return out
 # TAB3 — end
 
 
@@ -1123,6 +1175,10 @@ def t43t_identity_section(args) -> dict:
         out["attention_split_wide"] = True   # SL-SOTA19 (off: no key)
     if getattr(args, "grounding_source", "attention") not in (None, "attention"):
         out["grounding_source"] = str(args.grounding_source)   # SL-GTTO (default attention: no key)
+    if getattr(args, "seed_source", "attention") not in (None, "attention"):   # TAB3 row 1 (default: no key)
+        out["seed_source"] = str(args.seed_source).replace("-", "_")
+    if getattr(args, "identity_memory", "on") == "off":   # TAB3 row 4 (default on: no key)
+        out["identity_memory"] = False
     for name in ("oracle_admissible", "oracle_held_target", "oracle_destination", "oracle_robot_mask",
                  "oracle_obstacle_objects", "scene_obstacle_objects"):   # SL-GTTO2 / 10 / 15 / 19 / 20 (off: no key)
         if getattr(args, name, False):
@@ -2641,6 +2697,18 @@ def build_parser() -> argparse.ArgumentParser:
                          "(xy = 이 episode 의 target 표본 xy 볼록 껍질을 미세 voxel 1칸 팽창, z = z_floor 부터 target 표본 최고 z + 1칸) "
                          "안의 seed 를 가장 가까운 표본이 누구든 모두 미세 target-free 층에서 지운다 (탁자에 닿는 아래쪽 seed 포함). "
                          "target 표본이 없으면 아무것도 더하지 않는다. --target-extent oracle-visible 과 함께만. RB-Y1 서버는 거절. 기본 off")
+    # ABL-M6 — begin (main ablation row 6 "AG3S with external segmenter", 2026-11-16; default off = the earlier server)
+    ap.add_argument("--external-target-mask", choices=EXTERNAL_TARGET_MASKS, default=None,
+                    help="ABL-M6 (--robot panda 만) — oracle-visible 의 code 영상을 client GT 대신 서버가 외부 분할기로 만든다: "
+                         "요청마다 head · wrist 의 policy RGB 와 instruction 명사 (Baseline wire_obs.target_phrase_from_instruction) "
+                         "를 .venv-baselines sidecar 의 Grounded-SAM-2 에 보내 target mask 를 받고 code 1 = mask, 2 = 그 밖 depth, "
+                         "0 = 로봇 (TSDF robot mask) 로 wire.ORACLE_SEG 자리에 넣는다. 못 찾으면 code 1 없음 (target 이 안 보일 "
+                         "때와 같다). 나머지 (같은 depth 의 3D, extent, 접촉 규칙, 부착, TO) 는 그대로. --target-extent "
+                         "oracle-visible 필수, client segmentation 은 필요 없다. 기록 panda/oracle.external_mask")
+    ap.add_argument("--external-target-mask-mode", choices=("per_frame", "track"), default=None,
+                    help="ABL-M6 — Grounded-SAM-2 의 mode: per_frame (기본) = 요청마다 detect + segment, track = 첫 발견 뒤 SAM 2 "
+                         "video tracking (episode 마다 reset). --external-target-mask 와 함께만")
+    # ABL-M6 — end
     # T46e A13 — end
     # SL-GTTO — begin
     ap.add_argument("--grounding-source", choices=("attention", "oracle"), default="attention",
@@ -2824,7 +2892,18 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--passthrough-arm-strict-no-wrist", action="store_true",   # ARMSTRICT-W (2026-11-15; default off)
                     help="ARMSTRICT-W — --passthrough-arm-strict 와 함께만. 팔 link 에서 Panda 손목 panda_link7 을 뺀다 "
                          "(link1..6 만; sqp.passthrough_arm_strict_no_wrist)")
-    # TAB3 — begin (paper Tab. 3 ablation row 7, 2026-11-16; default off = the earlier server)
+    # TAB3 — begin (paper Tab. 3 ablation rows 1 / 4 / 7, 2026-11-16; all default off = the earlier server)
+    ap.add_argument("--seed-source", choices=("attention", "hand-nearest"), default="attention",
+                    help="TAB3 행 1 — grounding seed 의 출처. attention (기본) = 그대로. hand-nearest = 아무것도 쥐지 않았고 "
+                         "잡는 중이 아닌 call 에서 seed · peak · cluster 순위를 attention 대신 손 (palm + finger 구 표면) 에서의 "
+                         "거리로 (exp(-(d - d_min) / 50 mm), 받침면 점 0): 손에 가장 가까운 물체가 대상. attention split · "
+                         "close seed (VLA 의 닫는 점) · extent · identity · 접촉 규칙은 그대로 (clustering.seed_source, "
+                         "기록 metrics.seed_source)")
+    ap.add_argument("--identity-memory", choices=("on", "off"), default="on",
+                    help="TAB3 행 4 — call 사이 target identity 기억. on (기본) = 그대로. off = 잡는 중 (closing) · 쥔 동안 "
+                         "(frozen) 이 아닌 모든 call 에서 이전 identity 를 잊고 그 call 의 1 위 admissible cluster 를 대상으로: "
+                         "전환 hysteresis · 가려진 동안 마지막 기하 · T30 association · --latched-identity-hold 가 없다 "
+                         "(latch · attach 규칙은 그대로; clustering.identity_memory, 기록 metrics.identity_memory_off)")
     ap.add_argument("--no-attached-query", action="store_true",
                     help="TAB3 행 7 — 쥔 물체를 optimizer 의 로봇에 붙이지 않는다: TO 행과 최종 검사 (같은 snapshot) 에 쥔 물체 "
                          "질의 구가 없다. grasp latch · 장면 field 의 쥔 물체 제외 · self-filter 는 그대로 "
@@ -4299,6 +4378,10 @@ def reject_panda_only_flags(ap: argparse.ArgumentParser, args) -> None:
     if getattr(args, "observe_only", False):   # SL11
         ap.error("--observe-only 는 Panda 서버가 client 에 정책 action 을 그대로 보내는 진단 flag 입니다 (--robot panda 만). "
                  "RB-Y1 서버는 거절합니다")
+    if (getattr(args, "external_target_mask", None) is not None
+            or getattr(args, "external_target_mask_mode", None) is not None):   # ABL-M6
+        ap.error("--external-target-mask 는 Panda 서버가 LIBERO policy RGB 로 code 영상을 만드는 flag 입니다 (--robot panda 만). "
+                 "RB-Y1 서버는 거절합니다")
 
 
 def reject_bad_flag_combinations(ap: argparse.ArgumentParser, args, *, seed_map_labels=None) -> None:
@@ -5005,6 +5088,7 @@ def reject_bad_flag_combinations(ap: argparse.ArgumentParser, args, *, seed_map_
     if getattr(args, "passthrough_arm_strict_no_wrist", False) and not getattr(args, "passthrough_arm_strict", False):   # ARMSTRICT-W
         ap.error("--passthrough-arm-strict-no-wrist 는 --passthrough-arm-strict 와 함께만")
     reject_tab3_flags(ap, args)   # TAB3 (all off: returns at once)
+    reject_external_mask_flags(ap, args)   # ABL-M6 (off: returns at once)
     if getattr(args, "obstacle_row_patience", None) is not None:   # SL-SOTA3
         if getattr(args, "obstacle_row_margin_mm", None) is None:
             ap.error("--obstacle-row-patience 는 --obstacle-row-margin-mm 와 함께만")

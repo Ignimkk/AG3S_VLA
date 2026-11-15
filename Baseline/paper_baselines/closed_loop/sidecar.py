@@ -13,6 +13,8 @@ Ops (request ``{"op": ..., ...}`` -> reply ``{"ok": True, ...}`` or ``{"ok": Fal
 | ``reset`` | -- | -- |
 | ``filter`` | ``obs`` (``wire_obs.obs_to_dict``), ``actions`` (T, 7) | ``actions``, ``intervened``, ``info``, ``ms`` |
 | ``target`` | ``obs``, ``cameras``, thresholds | per camera top-1 ``box`` / ``score`` of ``obs.target_phrase``, ``ms`` |
+| ``segmenter_init`` | ``provider`` (``grounded_sam2`` or ``module:attr``), ``kwargs`` | ``provenance`` (ABL-M6) |
+| ``target_mask`` | ``rgb`` ``{cam: (H, W, 3) uint8}``, ``prompt`` | ``masks`` ``{cam: (H, W) bool}``, ``results`` (per camera ``TargetMaskResult.summary``), ``ms`` (ABL-M6) |
 | ``ping`` / ``close`` | -- | versions / -- |
 
 ``AG3S_SIDECAR_DETECTION_CACHE=<dir>`` (CPU replay only, CLOSED-LOOP-FIX): every ``detect`` result is stored under
@@ -140,6 +142,7 @@ class _State:
         self.method = None
         self.detector = None
         self.det_cfg = dict(DEFAULT_DETECTOR)
+        self.segmenter = None   # ABL-M6: a TargetMaskProvider (``segmenter_init``); None = the ops above only
 
     def get_detector(self):
         if self.detector is None:
@@ -182,7 +185,16 @@ def handle(state: _State, req: dict) -> dict:
     if op == "reset":
         if state.filter is not None:
             state.filter.reset()
+        if state.segmenter is not None:   # ABL-M6: episode boundary (track mode drops its per-camera state)
+            state.segmenter.reset()
         return {}
+    if op == "segmenter_init":   # ABL-M6 -- the AG3S Panda server's external target mask (--external-target-mask)
+        state.segmenter = _make_segmenter(str(req["provider"]), dict(req.get("kwargs") or {}))
+        from Baseline.paper_baselines.methods.interface import jsonable
+
+        return {"provenance": jsonable(state.segmenter.provenance()), "versions": _versions()}
+    if op == "target_mask":   # ABL-M6
+        return _target_mask(state, req)
     if op == "filter":
         obs = obs_from_dict(req["obs"])
         A = np.asarray(req["actions"], np.float64)
@@ -212,6 +224,37 @@ def handle(state: _State, req: dict) -> dict:
     if op == "close":
         return {}
     raise ValueError(f"unknown op {op!r}")
+
+
+def _make_segmenter(provider: str, kwargs: dict):
+    """ABL-M6 -- a registered provider name (``interface.BUILTIN_PROVIDERS``) or ``module:attr`` (a test stub)."""
+    if ":" in provider:
+        import importlib
+
+        module, attr = provider.split(":", 1)
+        return getattr(importlib.import_module(module), attr)(**kwargs)
+    from Baseline.paper_baselines.interface import get_provider
+
+    return get_provider(provider, **kwargs)
+
+
+def _target_mask(state: _State, req: dict) -> dict:
+    """ABL-M6 -- one request's target mask per camera (``TargetQuery(prompt_mode="phrase")``: the detector gets ``prompt``).
+
+    Contract (``interface.validate_results``): one bool mask per camera of the input RGB's shape, empty when not found.
+    """
+    from Baseline.paper_baselines.interface import TargetQuery, validate_results
+
+    if state.segmenter is None:
+        raise RuntimeError("target_mask before segmenter_init")
+    rgb = {str(c): np.ascontiguousarray(np.asarray(a, np.uint8)) for c, a in dict(req.get("rgb") or {}).items()}
+    prompt = str(req.get("prompt") or "")
+    t0 = time.perf_counter()
+    res = state.segmenter.predict(rgb, TargetQuery(instruction=prompt, target_phrase=prompt, prompt_mode="phrase"))
+    ms = (time.perf_counter() - t0) * 1e3
+    validate_results(res, rgb)
+    return {"masks": {c: np.asarray(r.mask, bool) for c, r in res.items()},
+            "results": {c: r.summary() for c, r in res.items()}, "prompt": prompt, "ms": ms}
 
 
 def main() -> int:
