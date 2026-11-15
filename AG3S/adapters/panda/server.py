@@ -771,6 +771,9 @@ PORTED_FINAL_CONFIG_DESTS: tuple[str, ...] = (
     # SL-AUD6 / 7 (clustering keys through serve_safe.t43t_identity_section, same path as scene_obstacle_target_cut) and
     # SL-AUD8 (SafePolicy switch through serve_safe.apply_grasp_contact_flags, same path as grasp_zone_release)
     'scene_obstacle_history_refilter', 'destination_leader_outside_hand', 'ee_action_qp_progress_release_off',
+    # ARMSTRICT (2026-11-15): the arm-link rows of the pass-through test at the obstacle tolerance (sqp key through
+    # serve_safe.passthrough_overrides, same path as ee_action_qp_limit_passthrough)
+    'passthrough_arm_strict',
 )
 #: SL-GTTO — the target extents the Panda server runs (``--target-extent``; SL7 attention-surface, SL-GTTO oracle-visible).
 PORTED_TARGET_EXTENTS: tuple[str, ...] = ("estimated", "attention-surface", "oracle-visible")

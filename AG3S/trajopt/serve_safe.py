@@ -2801,6 +2801,12 @@ def build_parser() -> argparse.ArgumentParser:
                          "시도 전까지) 는 진행 선호의 'target 쪽' 을 끈다: 놓은 뒤에도 latch 가 LATCHED 이고 target 이 옛 자리의 "
                          "기하라 보정이 집던 자리로 끌리던 것 (SafePolicy.progress_release_off)")
     # SL-AUD — end
+    ap.add_argument("--passthrough-arm-strict", action="store_true",   # ARMSTRICT (2026-11-15; default off)
+                    help="ARMSTRICT — --passthrough-when-clear · --passthrough-obstacle-tolerance-mm 와 함께만. 통과 판정에서 "
+                         "팔 link (Panda panda_link1..7; hand · finger · 쥔 물체 행은 아님) 의 행은 가장 가까운 면이 무엇이든 "
+                         "장애물 물체 행의 허용치 (--passthrough-obstacle-tolerance-mm) 로 본다. 전에는 장애물 물체로 분류되지 않은 "
+                         "면 (target · 받침 · 목적지 · 미분류) 에 붙은 팔 행이 --passthrough-tolerance 까지 통과했다. 어기면 사유 "
+                         "arm 으로 거절하고 obstacle 과 같은 경로 (action QP / SQP) 로 간다 (sqp.passthrough_arm_strict)")
     # SL-SOTA1 — end
     # SL-GTTO10 — begin (lead self-ruling G53, 2026-11-07; user caution 2)
     ap.add_argument("--oracle-destination", action="store_true",
@@ -4970,6 +4976,9 @@ def reject_bad_flag_combinations(ap: argparse.ArgumentParser, args, *, seed_map_
     if getattr(args, "ee_action_qp_progress_release_off", False):   # SL-AUD8
         if getattr(args, "ee_action_qp_progress", None) is None or not getattr(args, "grasp_opening_rule", False):
             ap.error("--ee-action-qp-progress-release-off 는 --ee-action-qp-progress · --grasp-opening-rule 과 함께만")
+    if getattr(args, "passthrough_arm_strict", False):   # ARMSTRICT
+        if not getattr(args, "passthrough_when_clear", False) or getattr(args, "passthrough_obstacle_tolerance_mm", None) is None:
+            ap.error("--passthrough-arm-strict 는 --passthrough-when-clear · --passthrough-obstacle-tolerance-mm 와 함께만")
     if getattr(args, "obstacle_row_patience", None) is not None:   # SL-SOTA3
         if getattr(args, "obstacle_row_margin_mm", None) is None:
             ap.error("--obstacle-row-patience 는 --obstacle-row-margin-mm 와 함께만")
@@ -5186,6 +5195,8 @@ def passthrough_overrides(args) -> dict:
         out["ee_action_audit_fixes"] = True
     if getattr(args, "ee_action_qp_max_delta", None) is not None:   # SL-AUD5
         out["ee_action_max_delta"] = float(args.ee_action_qp_max_delta)
+    if getattr(args, "passthrough_arm_strict", False):   # ARMSTRICT
+        out["passthrough_arm_strict"] = True
     return out
 # --- T88 — end ---
 

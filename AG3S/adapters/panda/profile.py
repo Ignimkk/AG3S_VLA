@@ -1471,6 +1471,38 @@ for _b in SOTA_AUDIT_FWD_BASES:
         SOTA_AUDIT_VERSIONS = SOTA_AUDIT_VERSIONS + (_n,)
         GT15_VERSIONS = GT15_VERSIONS + (_n,)
 del _b, _suffix, _flags, _n
+#: Tab. 2 / L12H3 / ARMSTRICT (2026-11-15) -- on the final frozen version of the paper ``X = <frozen>-gh156a-tro``
+#: (2026-11-14) and its FWDATT twin. All default off elsewhere; every earlier argv unchanged. Registered in GT15_VERSIONS
+#: only (not SOTA_VERSIONS: its count is pinned family by family, as for SOTA_AUDIT_VERSIONS).
+#: (1) Tab. 2 (LIBERO-Safety, official ``pi05_libero_safety`` checkpoint): ``X-lsnative`` / ``X(fwd)-lsnative`` = the SL-LS1
+#:     suffix (``LSNATIVE_FLAGS``) on X and on its ``-fwd`` twin (``--attention-inpass`` does not touch the response model:
+#:     the in-pass sampler wraps the same policy and transforms; pi05_libero_safety is pi05_libero's model config).
+#: (2) L12H3 on X: ``<X without -tro>-a12h3-tro`` = X + ``--attention-source action:last:L12H3`` (the segment SL-ATT1 put on
+#:     the frozen version) and its FWDATT twin ``...-gh156a-a12h3-fwd-tro`` (+ ``--attention-inpass``, as ``-a12h3-fwd-tro``).
+#: (3) ARMSTRICT ``-pas`` = ``--passthrough-arm-strict`` (the arm-link rows of the pass-through test at the obstacle-object
+#:     tolerance) on X, X-a12h3 and their FWDATT twins: ``<base without -tro>-pas-tro``.
+SOTA_FINAL_X: str = FROZEN_20261112[:-len("-tro")] + "-gh156a-tro"
+SOTA_FINAL_X_FWD: str = FROZEN_20261112[:-len("-tro")] + "-gh156a-fwd-tro"
+SOTA_TAB2_LSNATIVE_VERSIONS: tuple[str, ...] = ()
+for _b in (SOTA_FINAL_X, SOTA_FINAL_X_FWD):
+    AG3S_VERSIONS[_b + LSNATIVE_SUFFIX] = tuple(AG3S_VERSIONS[_b]) + LSNATIVE_FLAGS
+    SOTA_TAB2_LSNATIVE_VERSIONS = SOTA_TAB2_LSNATIVE_VERSIONS + (_b + LSNATIVE_SUFFIX,)
+del _b
+_n = SOTA_FINAL_X[:-len("-tro")] + "-a12h3-tro"
+AG3S_VERSIONS[_n] = tuple(AG3S_VERSIONS[SOTA_FINAL_X]) + ("--attention-source", "action:last:L12H3")
+AG3S_VERSIONS[_n[:-len("-tro")] + "-fwd-tro"] = tuple(AG3S_VERSIONS[_n]) + ("--attention-inpass",)
+SOTA_FINAL_ATT_VERSIONS: tuple[str, ...] = (_n, _n[:-len("-tro")] + "-fwd-tro")
+del _n
+ARMSTRICT_SEGMENT = "-pas"
+ARMSTRICT_FLAGS: tuple[str, ...] = ("--passthrough-arm-strict",)
+SOTA_ARMSTRICT_VERSIONS: tuple[str, ...] = ()
+for _b in (SOTA_FINAL_X, SOTA_FINAL_ATT_VERSIONS[0], SOTA_FINAL_X_FWD, SOTA_FINAL_ATT_VERSIONS[1]):
+    _n = _b[:-len("-tro")] + ARMSTRICT_SEGMENT + "-tro"
+    AG3S_VERSIONS[_n] = tuple(AG3S_VERSIONS[_b]) + ARMSTRICT_FLAGS
+    SOTA_ARMSTRICT_VERSIONS = SOTA_ARMSTRICT_VERSIONS + (_n,)
+del _b, _n
+SOTA_FINAL_NEXT_VERSIONS: tuple[str, ...] = SOTA_TAB2_LSNATIVE_VERSIONS + SOTA_FINAL_ATT_VERSIONS + SOTA_ARMSTRICT_VERSIONS
+GT15_VERSIONS = GT15_VERSIONS + SOTA_FINAL_NEXT_VERSIONS   # (not SOTA_VERSIONS, as SOTA_AUDIT_VERSIONS)
 #: (G88c, 03:5x) the A-alone ablation queued as ``…-obst3`` (gtto23, not started yet) gets the same two fixes, so A alone and
 #: A + B differ only by the held point model: ``…-obst3`` := A'' + no carve + support "under" (``…-obst3-pts`` = B'' keeps
 #: the flags it was evaluated with -- it was built above from the earlier definition).

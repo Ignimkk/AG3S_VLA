@@ -39,6 +39,7 @@ to whoever owns the task — the same division of labour AG3S keeps with `Constr
 from __future__ import annotations
 
 import dataclasses
+import re
 import time
 from typing import Any, Optional
 
@@ -80,6 +81,23 @@ def _obstacle_row_kwargs(cfg) -> dict:
     if getattr(cfg, "obstacle_held_beneath_band", None) is not None:   # SL-SOTA17
         kw["held_band"] = float(cfg.obstacle_held_beneath_band)
     return kw
+
+
+#: ARMSTRICT (`sqp.passthrough_arm_strict`) — the links of the ARM: the Panda's `panda_link1..7` (not `panda_link0`, the
+#: fixed base, which the constraint model does not carry) and the RB-Y1's `link_{left,right}_arm_<i>`. The hand / palm
+#: (`panda_hand`, `ee_*`), the fingers and the held-object query rows (`attached:<link>[i]`, beyond `n_spheres`) are not.
+_ARM_LINK_RE = re.compile(r"^(panda_link[1-7]|link_(left|right)_arm_[0-9]+)$")
+
+
+def arm_link_row_mask(sphere_link_names, n_spheres: int) -> np.ndarray:
+    """ARMSTRICT — `(n_spheres,)` bool: the robot spheres on an arm link (`_ARM_LINK_RE`). The names are the robot model's
+    `sphere_link_names` (one per sphere, in the FK order, the same list `linearizer._query_name` reads); a list of another
+    length cannot say which rows are arm rows, so it is refused (the caller fails closed)."""
+    names = [str(n) for n in (sphere_link_names or ())]
+    if len(names) != int(n_spheres):
+        raise ValueError(f"passthrough_arm_strict: the robot model names {len(names)} sphere links for {n_spheres} "
+                         "spheres -- cannot tell which rows are arm rows")
+    return np.asarray([bool(_ARM_LINK_RE.match(n)) for n in names], bool)
 
 
 class TrajectoryOptimizer:
@@ -1407,6 +1425,8 @@ class TrajectoryOptimizer:
             record["reason"] = "collision"
         elif self._obstacle_row_refuses(reference, q_now, scene, record):   # SL-GTTO16 (A; None = off, not called)
             record["reason"] = "obstacle"
+        elif self._arm_row_refuses(reference, q_now, scene, record):   # ARMSTRICT (off: False at once, no key)
+            record["reason"] = "arm"
         elif self.path is not None and self._path_violation(reference, scene) > 0.0:
             record["reason"] = "path"
         elif max((over := self._limit_overshoot(reference, q_now, envelope)).values()) > max(
@@ -1486,6 +1506,49 @@ class TrajectoryOptimizer:
             record["obstacle_rows"]["patience"] = patience_rec
         return violation > float(tol)
 
+    def _arm_row_refuses(self, reference, q_now, scene, record) -> bool:
+        """ARMSTRICT (`sqp.passthrough_arm_strict`) — the rows of the robot's ARM links (`arm_link_row_mask`) are held to
+        `passthrough_obstacle_tolerance` whatever surface is nearest: an arm row whose clearance (the number every check
+        uses: worst over the candidate, plane and ESDF blocks, floor included) is below `-tolerance` refuses the
+        pass-through. Same window as the obstacle-object test (the whole horizon with `passthrough_obstacle_full_horizon`,
+        else the executed window). Records `record["arm_rows"]`. Off (default): `False` at once, nothing read or recorded."""
+        if not getattr(self.config.sqp, "passthrough_arm_strict", False):
+            return False
+        tol = float(getattr(self.config.sqp, "passthrough_obstacle_tolerance", None) or 0.0)
+        full = bool(getattr(self.config.sqp, "passthrough_obstacle_full_horizon", False))
+        steps = None if full else self.lookahead_from
+        lin = self.linearizer
+        try:
+            n = int(lin.n_spheres)
+            arm = arm_link_row_mask(getattr(lin.robot_model, "sphere_link_names", ()), n)
+            centres = np.asarray(lin.sphere_states(reference, q_now)[0], np.float64)
+            horizon, n_query = int(centres.shape[0]), int(centres.shape[1])
+            candidate, plane, _ = lin._clearances_from(centres, scene)            # robot spheres only: (H, n, M) / (H, n, K)
+            esdf = np.asarray(lin._esdf_clearance(centres, scene), np.float64)   # (H, n_query, 1) on a field, else empty
+            per = np.full((horizon, n), np.inf)
+            for block in (candidate, plane):
+                block = np.asarray(block, np.float64)
+                if block.size:
+                    per = np.minimum(per, block.reshape(horizon, n, -1).min(axis=2))
+            if esdf.size:
+                # read to (H, n_query) as `obstacle_object_mask` does (a block of another size raises: fail closed)
+                per = np.minimum(per, esdf.reshape(horizon, n_query, -1).min(axis=2)[:, :n])
+            if steps is not None:
+                per = per[:int(steps)]
+            rows = np.where(arm[None, :], per, np.inf)
+        except Exception as exc:   # fail closed: rows that cannot be read are not clear arm rows
+            import traceback
+            record["arm_rows"] = {"error": repr(exc), "where": traceback.format_exc(limit=-3)[-900:]}
+            return True
+        violating = rows < -tol
+        out: dict[str, Any] = {"n_violating": int(violating.sum()), "worst_m": None, "link": None, "step": None,
+                               "tolerance_m": tol, "n_arm_spheres": int(arm.sum())}
+        if rows.size and np.isfinite(rows).any():
+            k = int(np.argmin(rows))
+            step, query = np.unravel_index(k, rows.shape)
+            out.update(worst_m=float(rows.reshape(-1)[k]), link=lin._query_name(int(query)), step=int(step))
+        record["arm_rows"] = out
+        return bool(violating.any())
 
     def _finish_passthrough(self, reference, q_now, scene, template, reference_violation, previous_chunk, notes,
                             started, geometry_certified, envelope, record, note=None) -> TrajOptResult:
