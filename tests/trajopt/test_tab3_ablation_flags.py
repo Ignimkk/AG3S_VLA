@@ -109,7 +109,9 @@ def test_tab3_code_versions():
     xf = pf.SOTA_FINAL_X_FWD
     names = tuple(xf[:-len("-tro")] + s + "-tro" for s in SEGMENTS)
     assert pf.SOTA_TAB3_CODE_VERSIONS == names and set(names) <= set(pf.GT15_VERSIONS)
-    assert list(pf.AG3S_VERSIONS)[-len(names):] == list(names)                       # appended at the end of the registry
+    keys = list(pf.AG3S_VERSIONS)                                                     # appended after the Tab. 3 block
+    i = keys.index(names[0])
+    assert keys[i:i + len(names)] == list(names) and i > max(keys.index(v) for v in pf.SOTA_TAB3_VERSIONS)
     base = tuple(pf.AG3S_VERSIONS[xf])
     xa = _parse(xf)
     xvals = pf.version_flag_values(xa)

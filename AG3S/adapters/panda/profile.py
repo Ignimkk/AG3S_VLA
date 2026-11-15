@@ -1542,6 +1542,19 @@ del _s, _add, _n
 GT15_VERSIONS = GT15_VERSIONS + SOTA_TAB3_CODE_VERSIONS
 #: TAB3 code rows: their own dests (joined to the record only when set, so every earlier GT15 version keeps its keys)
 TAB3_CODE_DESTS: tuple[str, ...] = ("no_attached_query",)
+#: Main ablation table (user 2026-11-16 00:3x, plan §9.45): AG3S re-assembled step by step, no attachment until row 5.
+#:   row 4 = ``-ab7`` (X-fwd + --no-attached-query: stage- and link-specific rule, no attachment)
+#:   row 3 = ``-m3``  (row 4 + --target-field-policy exclude-all: target freed for every link and stage, no attachment)
+#:   row 2 = ``-m2``  (row 4 + --target-field-policy none and the extent flags dropped: no target surface, no attachment)
+#: rows 1 / 5 = the Tab. 1 pi0.5-alone / AG3S runs; row 6 (external segmenter) is not registered yet.
+SOTA_ABL_MAIN_VERSIONS: tuple[str, ...] = ()
+for _s, _drop, _add in (("-m3", {}, ("--target-field-policy", "exclude-all", "--no-attached-query")),
+                        ("-m2", TAB3_EXTENT_DROP, ("--target-field-policy", "none", "--no-attached-query"))):
+    _n = SOTA_FINAL_X_FWD[:-len("-tro")] + _s + "-tro"
+    AG3S_VERSIONS[_n] = _drop_flags(tuple(AG3S_VERSIONS[SOTA_FINAL_X_FWD]), _drop) + _add
+    SOTA_ABL_MAIN_VERSIONS = SOTA_ABL_MAIN_VERSIONS + (_n,)
+del _s, _drop, _add, _n
+GT15_VERSIONS = GT15_VERSIONS + SOTA_ABL_MAIN_VERSIONS
 #: (G88c, 03:5x) the A-alone ablation queued as ``…-obst3`` (gtto23, not started yet) gets the same two fixes, so A alone and
 #: A + B differ only by the held point model: ``…-obst3`` := A'' + no carve + support "under" (``…-obst3-pts`` = B'' keeps
 #: the flags it was evaluated with -- it was built above from the earlier definition).
