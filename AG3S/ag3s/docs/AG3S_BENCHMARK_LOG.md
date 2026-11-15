@@ -5316,3 +5316,6 @@ dev-cf: basket LoRA 03:39–04:40 (loss 0.254 → 0.005), checkpoint `basket_v1/
 
 ### 2026-11-15 11:58 — 논문 Tab. 1 (SDM 1/10) 세 arm 끝; Tab. 2 π0.5 단독 행 시작 (sdm-f6 SL-AUD 세션)
 SafeLIBERO SSR (L-I · L-II): π0.5 단독 0.138 · 0.300, AG3S 0.475 · 0.537, AG3S GT oracle 0.500 · 0.588; LIBERO SR π0.5 0.980 · AG3S 0.710. > 50 mm 충돌 ep (160 중) π0.5 90 · AG3S 20 · GT oracle 6. 계획서 §9.42 결과 3. 11:58 Tab. 2 (`paper_tab2_cells.sh`, 13:30 상한).
+
+### 2026-11-15 13:19 — 논문 Tab. 2 π0.5 단독 행 끝 (SDM 1/10) (sdm-f6 SL-AUD 세션)
+LIBERO-Safety 4 suite × L0–L2 × task 0–4 × init 19 = 60 ep, 공식 checkpoint `pi05_libero_safety`: 성공 37 (0.617), 공식 위반 1. 13:30–15:15 실물 RB-Y1 구간에 GPU 양보. 계획서 §9.42 결과 4.
