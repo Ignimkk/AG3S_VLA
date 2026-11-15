@@ -767,6 +767,8 @@ def version_requires_oracle_segmentation(version: str) -> bool:
     if not is_gtto_version(version):   # 2026-11-06 merge: the SL12 / SL13 oracle versions use --oracle-segmentation
         return False
     flags = list(AG3S_VERSIONS.get(str(version), ()))
+    if "--external-target-mask" in flags:   # ABL-M6: the server makes the code images itself (no client segmentation)
+        return False
     return any(flags[i] == "--target-extent" and flags[i + 1] == "oracle-visible" for i in range(len(flags) - 1))
 # --- SL-GTTO — end
 # --- SL-GTTO2 — begin: the GT identity / extent reaches the TO (task SL-GTTO2 §1, lead 2026-11-05) ----------------------
@@ -1568,6 +1570,20 @@ for _s, _add in (("-ab1", ("--seed-source", "hand-nearest")),
 del _s, _add, _n
 GT15_VERSIONS = GT15_VERSIONS + SOTA_TAB3_ID_VERSIONS
 SOTA_TAB3_CODE_VERSIONS = SOTA_TAB3_CODE_VERSIONS + SOTA_TAB3_ID_VERSIONS   # -ab7, -ab1, -ab4
+#: ABL-M6 (main ablation row 6 "AG3S with external segmenter", user table 2026-11-16, plan §9.45; ``ABL-M6-EXTSEG.impl.md``):
+#: row 5 (X-fwd) with only the target surface's source replaced -- a Grounded-SAM-2 mask prompted with the instruction's
+#: noun, lifted with the same depth (``--target-extent oracle-visible`` on server-made code images,
+#: ``--external-target-mask grounded-sam2``; identity = AG3S's own, ``--oracle-extent-identity pipeline``).
+#: ``--nontarget-evidence surface`` is dropped because the oracle-visible extent replaces the ball-owned split it acts on
+#: (``serve_safe`` refuses the pair). Contact rule, attachment and the optimizer are X-fwd's.
+ABL_M6_DROP = {"--nontarget-evidence": 1}
+ABL_M6_FLAGS: tuple[str, ...] = ("--target-extent", "oracle-visible", "--oracle-extent-identity", "pipeline",
+                                 "--external-target-mask", "grounded-sam2")
+SOTA_ABL_M6_VERSIONS: tuple[str, ...] = (SOTA_FINAL_X_FWD[:-len("-tro")] + "-m6-tro",)
+AG3S_VERSIONS[SOTA_ABL_M6_VERSIONS[0]] = _drop_flags(tuple(AG3S_VERSIONS[SOTA_FINAL_X_FWD]), ABL_M6_DROP) + ABL_M6_FLAGS
+GT15_VERSIONS = GT15_VERSIONS + SOTA_ABL_M6_VERSIONS
+#: its own dests join a record only when set (as the TAB3 code rows): every earlier version keeps its keys
+TAB3_CODE_DESTS = TAB3_CODE_DESTS + ("external_target_mask", "external_target_mask_mode")
 #: (G88c, 03:5x) the A-alone ablation queued as ``…-obst3`` (gtto23, not started yet) gets the same two fixes, so A alone and
 #: A + B differ only by the held point model: ``…-obst3`` := A'' + no carve + support "under" (``…-obst3-pts`` = B'' keeps
 #: the flags it was evaluated with -- it was built above from the earlier definition).

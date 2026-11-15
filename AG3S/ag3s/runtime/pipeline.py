@@ -876,15 +876,44 @@ class AG3S:
             return
         self._oracle_pending = None if seg is None else dict(seg)
 
-    def _oracle_update(self, observations) -> dict[str, Any]:
-        """T46e — fold this request's segmentation into the episode's samples. Returns the frame record."""
+    def _oracle_update(self, observations, cameras=None) -> dict[str, Any]:
+        """T46e — fold this request's segmentation into the episode's samples. Returns the frame record.
+
+        ABL-M6: a code image the *server* made from an external segmenter mask (`meta["robot_mask"] == "server"`,
+        `adapters.panda.external_mask`) has no robot code; its robot pixels are set to code 0 here from this frame's
+        TSDF robot mask (`cameras[i].robot_mask`, the same mask the TSDF integrates without), as the simulator code
+        image has them. A client code image (no such key) is folded as before.
+        """
         seg, self._oracle_pending = self._oracle_pending, None
         mem = self._oracle_memory_or_new()
         rec: dict[str, Any] = {"segmentation": seg is not None}
         if seg is None or not observations:
             rec["memory"] = {"n_samples": len(mem), "update": mem.n_updates, "updated": False}
             return rec
-        return self._oracle_fold(observations, dict(seg.get("labels") or {}), dict(seg.get("meta") or {}), rec)
+        labels, meta = dict(seg.get("labels") or {}), dict(seg.get("meta") or {})
+        if meta.get("robot_mask") == "server":   # ABL-M6 (off: key never present, labels as received)
+            labels, rec["robot_masked_px"] = self._oracle_server_robot_codes(labels, cameras)
+        return self._oracle_fold(observations, labels, meta, rec)
+
+    @staticmethod
+    def _oracle_server_robot_codes(labels: Mapping[str, Any], cameras) -> tuple[dict[str, Any], dict[str, Optional[int]]]:
+        """ABL-M6 — `labels` with each camera's TSDF robot-mask pixels set to code 0 (`CODE_NONE`), and the count per
+        camera (None = no mask for that camera: the labels are kept as they are)."""
+        from AG3S.ag3s.runtime.oracle_segmentation import CODE_NONE
+
+        masks = {getattr(c, "name", None): getattr(c, "robot_mask", None) for c in (cameras or ())}
+        out, n = {}, {}
+        for key, lab in labels.items():
+            lab = np.asarray(lab, np.uint8)
+            m = masks.get(key)
+            if m is None or np.asarray(m).size != lab.size:
+                out[key], n[key] = lab, None
+                continue
+            m = np.asarray(m, bool).reshape(lab.shape)
+            lab = lab.copy()
+            lab[m] = CODE_NONE
+            out[key], n[key] = lab, int(m.sum())
+        return out, n
 
     def _oracle_memory_or_new(self):
         """The episode's `OracleMemory`, made on first use (T46e; IFG-CL1 shares it)."""
@@ -3501,7 +3530,7 @@ class AG3S:
                 # target or not — the TSDF accumulates every frame too). Off: not called, nothing stored.
                 extent = getattr(cfg.esdf, "target_extent", "estimated")
                 if extent == "oracle_visible":
-                    self._oracle_frame = self._oracle_update(observations)
+                    self._oracle_frame = self._oracle_update(observations, cameras)
                 elif extent == "attention_surface":
                     # --- T97 — begin: the hand-freeze inputs (only when on)
                     if getattr(cfg.esdf, "surface_crease_hand_freeze_mm", None) is not None:

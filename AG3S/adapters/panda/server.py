@@ -285,8 +285,11 @@ class PandaSafeServer:
     """Outside ``SafePolicy``: refined joint chunk -> EE-delta chunk (``action.joint_chunk_to_delta_chunk``)."""
 
     def __init__(self, safe, chunk_policy: ChunkToJointPolicy, mode: str = "A", observe_only: bool = False,
-                 gap_opening: bool = False):
+                 gap_opening: bool = False, external_mask=None):
         self._policy = safe
+        #: ABL-M6 ``--external-target-mask``: an ``external_mask.ExternalTargetMask`` that puts this request's code images
+        #: (``ag3s/oracle_seg/<cam>``) into the request before ``SafePolicy`` reads it. None (default): not touched.
+        self.external_mask = external_mask
         self.chunk_policy = chunk_policy
         self.mode = mode
         #: SL11 ``--observe-only`` (diagnostic): everything is computed and recorded as without it, but the response the
@@ -300,7 +303,15 @@ class PandaSafeServer:
 
     @property
     def metadata(self):
-        return getattr(self._policy, "metadata", {})
+        meta = getattr(self._policy, "metadata", {})
+        if self.external_mask is None:
+            return meta
+        # ABL-M6: the code images are made here, so the client must not be asked for (or send) the GT segmentation
+        from AG3S.trajopt import wire
+
+        meta = {k: v for k, v in dict(meta or {}).items() if k != wire.ORACLE_SEG_REQUIRED}
+        meta["external_target_mask"] = self.external_mask.metadata()
+        return meta
 
     @property
     def recorder(self):
@@ -379,6 +390,12 @@ class PandaSafeServer:
         fb_rec = self._feedback(obs)
         if self.gap_opening:
             fb_rec = self._gap_feedback(obs, fb_rec)
+        ext = None
+        if self.external_mask is not None:   # ABL-M6 (off: the request is not touched)
+            if any(k.startswith("ag3s/oracle_seg/") for k in obs):
+                raise RuntimeError("--external-target-mask server got a client GT code image (ag3s/oracle_seg/*): "
+                                   "start the client without --oracle-seg / --oracle-segmentation")
+            ext = self.external_mask.apply(obs)
         response = dict(self._policy.infer(adapt_request(obs), **kwargs))
         conv = self.chunk_policy.last
         refined, reference = response["actions"], response.get("actions_reference")
@@ -417,6 +434,13 @@ class PandaSafeServer:
         oracle = oracle_call_record(self._policy)
         if oracle is not None:    # SL12 -- key only with --target-extent oracle-visible (every other response unchanged)
             response["panda/oracle"] = oracle
+        if ext is not None:       # ABL-M6 -- key only with --external-target-mask (inside the oracle record of the call row)
+            frame = getattr(getattr(self._policy, "ag3s", None), "_oracle_frame", None)
+            if isinstance(frame, dict) and "robot_masked_px" in frame:
+                ext["robot_masked_px"] = dict(frame["robot_masked_px"])
+            from AG3S.trajopt.safe_policy import _jsonable
+
+            response["panda/oracle"] = {**dict(response.get("panda/oracle") or {}), "external_mask": _jsonable(ext)}
         surface = surface_call_record(self._policy)
         if surface is not None:   # SL7i — key only with the attention-surface extent on (V11AB / pb / pc responses unchanged)
             response["panda/surface"] = surface
@@ -779,6 +803,9 @@ PORTED_FINAL_CONFIG_DESTS: tuple[str, ...] = (
     # through serve_safe.t43t_identity_section) and the held object's query spheres (collision key through
     # serve_safe.trajopt_config_from_args, which this server already calls)
     'seed_source', 'identity_memory', 'no_attached_query',
+    # ABL-M6 (2026-11-16, main ablation row 6): the oracle-visible code images from an external segmenter sidecar
+    # (PandaSafeServer.external_mask, built in build_safe_server)
+    'external_target_mask', 'external_target_mask_mode',
 )
 #: SL-GTTO — the target extents the Panda server runs (``--target-extent``; SL7 attention-surface, SL-GTTO oracle-visible).
 PORTED_TARGET_EXTENTS: tuple[str, ...] = ("estimated", "attention-surface", "oracle-visible")
@@ -1132,13 +1159,17 @@ def action_box_kwargs(args, to_config, chunk_policy: "ChunkToJointPolicy", mode:
     return {"action_box_fn": action_box_fn}
 
 
-def build_safe_server(policy, args, *, attention_model=None, gpu_warm_up: bool = True, model_config=None):
+def build_safe_server(policy, args, *, attention_model=None, gpu_warm_up: bool = True, model_config=None,
+                      external_mask=None):
     """Everything below the openpi policy (also used by tests with a stub policy and no attention model).
 
     SL6-A: the final-configuration options are wired as the RB-Y1 ``serve_safe.main`` wires them -- attention source
     and HSR6 probe into ``AttentionPolicy``, ``hsr6=`` / ``hsr6_objective_scope=`` into ``SafePolicy``, the GPU seed
     warm-up (``gpu_warm_up``; tests on a CPU host pass False) -- each only when its flag is on, plus the Panda
-    geometry for SafePolicy's robot injections (:func:`safe_policy_injections`)."""
+    geometry for SafePolicy's robot injections (:func:`safe_policy_injections`).
+
+    ABL-M6: with ``--external-target-mask`` the segmenter sidecar is started here (``external_mask``: tests pass a ready
+    ``ExternalTargetMask`` on a stub client); without the flag ``external_mask`` must be None."""
     from AG3S.adapters.panda import attention as pat
     from AG3S.adapters.panda import profile
     from AG3S.ag3s.robot_models.gripper_state import FingerJointMap
@@ -1249,6 +1280,16 @@ def build_safe_server(policy, args, *, attention_model=None, gpu_warm_up: bool =
         info["grasp_opening_rule"] = {"rule": "attach: last executed command closed & settled & opening >= 0.03 & reach <= 120 mm; "
                                                "detach (-> LATCHED): open command & opening > attach + 0.02, or opening < 0.02 (record grasp.opening_rule)"}
     info.update(attention_inpass_record(args))   # FWDATT — key only with the flag
+    ext_kw = {}
+    if getattr(args, "external_target_mask", None) is not None:   # ABL-M6 — key and sidecar only with the flag
+        from AG3S.adapters.panda import external_mask as em
+
+        if external_mask is None:
+            external_mask = em.ExternalTargetMask.from_args(args)
+        info["external_target_mask"] = external_mask.record()
+        ext_kw = {"external_mask": external_mask}
+    elif external_mask is not None:
+        raise ValueError("external_mask given without --external-target-mask")
     info.update(tab3_record(args))   # TAB3 — keys only with the flags
     final = final_config_record(args, safe, to_config, attn_rec, gpu, inert)
     if response_name != "robosuite141":   # SL11 -- key only with the fork model (the earlier servers' dump is unchanged)
@@ -1273,8 +1314,8 @@ def build_safe_server(policy, args, *, attention_model=None, gpu_warm_up: bool =
         logging.warning("!!! --observe-only: the client gets the policy's action bit for bit and is never held; the "
                         "verdict and the converted actions the server computed are recorded (panda/observe) !!!")
         return PandaSafeServer(safe, chunk_policy, mode=mode, observe_only=True,
-                               **({"gap_opening": True} if gap_opening else {})), info
-    return PandaSafeServer(safe, chunk_policy, mode=mode, **({"gap_opening": True} if gap_opening else {})), info
+                               **({"gap_opening": True} if gap_opening else {}), **ext_kw), info
+    return PandaSafeServer(safe, chunk_policy, mode=mode, **({"gap_opening": True} if gap_opening else {}), **ext_kw), info
 
 
 def final_options_on(args) -> list[str]:
@@ -1403,8 +1444,11 @@ def final_config_record(args, safe, to_config, attn_rec: dict, gpu: Optional[dic
         **({"attention_surface": surface_record(args, safe.ag3s)} if getattr(args, "target_extent", None) == "attention-surface"
            else {}),
         **({"oracle_visible": {"target_extent": "oracle_visible", "identity": getattr(args, "oracle_extent_identity", None) or "pipeline",
-                               "needs_client_flag": ("--oracle-seg (SL-GTTO versions, gtto_oracle_codes)" if _gt_perception_on(args) else
-                                                     "--oracle-segmentation") + " (metadata oracle_segmentation_required)",
+                               "needs_client_flag": ("none: the server makes the code images (ABL-M6 --external-target-mask "
+                                                     f"{args.external_target_mask})"
+                                                     if getattr(args, "external_target_mask", None) is not None else
+                                                     ("--oracle-seg (SL-GTTO versions, gtto_oracle_codes)" if _gt_perception_on(args) else
+                                                      "--oracle-segmentation") + " (metadata oracle_segmentation_required)"),
                                "cameras": ["head", "left_wrist"], "code_table": "0 robot/none, 1 target, 2 static, >=3 other objects",
                                **({"target_volume": True} if getattr(args, "oracle_target_volume", False) else {})}}
            if getattr(args, "target_extent", None) == "oracle-visible" else {}),
@@ -1476,3 +1520,6 @@ def main(args, ap) -> None:
         # write the queued chunks and meta.json. Without a recorder this is a no-op.
         if recording:
             logging.info("constraint recorder: %s", close_recorder(served))
+        ext = getattr(served, "external_mask", None)
+        if ext is not None:   # ABL-M6: stop the segmenter sidecar (it also exits on its own when the pipe closes)
+            logging.info("external target mask sidecar: exit %s after %d calls", ext.close(), ext.n_calls)
