@@ -87,9 +87,12 @@ def _obstacle_row_kwargs(cfg) -> dict:
 #: fixed base, which the constraint model does not carry) and the RB-Y1's `link_{left,right}_arm_<i>`. The hand / palm
 #: (`panda_hand`, `ee_*`), the fingers and the held-object query rows (`attached:<link>[i]`, beyond `n_spheres`) are not.
 _ARM_LINK_RE = re.compile(r"^(panda_link[1-7]|link_(left|right)_arm_[0-9]+)$")
+#: ARMSTRICT-W (`sqp.passthrough_arm_strict_no_wrist`, 2026-11-15) — the same without the Panda wrist `panda_link7`
+#: (right above the hand; 76 of 150 `arm` refusals in Spatial L-II of the first run). RB-Y1 links are unchanged.
+_ARM_LINK_NO_WRIST_RE = re.compile(r"^(panda_link[1-6]|link_(left|right)_arm_[0-9]+)$")
 
 
-def arm_link_row_mask(sphere_link_names, n_spheres: int) -> np.ndarray:
+def arm_link_row_mask(sphere_link_names, n_spheres: int, no_wrist: bool = False) -> np.ndarray:
     """ARMSTRICT — `(n_spheres,)` bool: the robot spheres on an arm link (`_ARM_LINK_RE`). The names are the robot model's
     `sphere_link_names` (one per sphere, in the FK order, the same list `linearizer._query_name` reads); a list of another
     length cannot say which rows are arm rows, so it is refused (the caller fails closed)."""
@@ -97,7 +100,8 @@ def arm_link_row_mask(sphere_link_names, n_spheres: int) -> np.ndarray:
     if len(names) != int(n_spheres):
         raise ValueError(f"passthrough_arm_strict: the robot model names {len(names)} sphere links for {n_spheres} "
                          "spheres -- cannot tell which rows are arm rows")
-    return np.asarray([bool(_ARM_LINK_RE.match(n)) for n in names], bool)
+    rx = _ARM_LINK_NO_WRIST_RE if no_wrist else _ARM_LINK_RE   # ARMSTRICT-W (default: all of 1..7, as before)
+    return np.asarray([bool(rx.match(n)) for n in names], bool)
 
 
 class TrajectoryOptimizer:
@@ -1520,7 +1524,8 @@ class TrajectoryOptimizer:
         lin = self.linearizer
         try:
             n = int(lin.n_spheres)
-            arm = arm_link_row_mask(getattr(lin.robot_model, "sphere_link_names", ()), n)
+            no_wrist = bool(getattr(self.config.sqp, "passthrough_arm_strict_no_wrist", False))   # ARMSTRICT-W
+            arm = arm_link_row_mask(getattr(lin.robot_model, "sphere_link_names", ()), n, no_wrist=no_wrist)
             centres = np.asarray(lin.sphere_states(reference, q_now)[0], np.float64)
             horizon, n_query = int(centres.shape[0]), int(centres.shape[1])
             candidate, plane, _ = lin._clearances_from(centres, scene)            # robot spheres only: (H, n, M) / (H, n, K)
@@ -1543,6 +1548,8 @@ class TrajectoryOptimizer:
         violating = rows < -tol
         out: dict[str, Any] = {"n_violating": int(violating.sum()), "worst_m": None, "link": None, "step": None,
                                "tolerance_m": tol, "n_arm_spheres": int(arm.sum())}
+        if no_wrist:   # ARMSTRICT-W: key only when on
+            out["no_wrist"] = True
         if rows.size and np.isfinite(rows).any():
             k = int(np.argmin(rows))
             step, query = np.unravel_index(k, rows.shape)

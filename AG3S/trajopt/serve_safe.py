@@ -2807,6 +2807,9 @@ def build_parser() -> argparse.ArgumentParser:
                          "장애물 물체 행의 허용치 (--passthrough-obstacle-tolerance-mm) 로 본다. 전에는 장애물 물체로 분류되지 않은 "
                          "면 (target · 받침 · 목적지 · 미분류) 에 붙은 팔 행이 --passthrough-tolerance 까지 통과했다. 어기면 사유 "
                          "arm 으로 거절하고 obstacle 과 같은 경로 (action QP / SQP) 로 간다 (sqp.passthrough_arm_strict)")
+    ap.add_argument("--passthrough-arm-strict-no-wrist", action="store_true",   # ARMSTRICT-W (2026-11-15; default off)
+                    help="ARMSTRICT-W — --passthrough-arm-strict 와 함께만. 팔 link 에서 Panda 손목 panda_link7 을 뺀다 "
+                         "(link1..6 만; sqp.passthrough_arm_strict_no_wrist)")
     # SL-SOTA1 — end
     # SL-GTTO10 — begin (lead self-ruling G53, 2026-11-07; user caution 2)
     ap.add_argument("--oracle-destination", action="store_true",
@@ -4979,6 +4982,8 @@ def reject_bad_flag_combinations(ap: argparse.ArgumentParser, args, *, seed_map_
     if getattr(args, "passthrough_arm_strict", False):   # ARMSTRICT
         if not getattr(args, "passthrough_when_clear", False) or getattr(args, "passthrough_obstacle_tolerance_mm", None) is None:
             ap.error("--passthrough-arm-strict 는 --passthrough-when-clear · --passthrough-obstacle-tolerance-mm 와 함께만")
+    if getattr(args, "passthrough_arm_strict_no_wrist", False) and not getattr(args, "passthrough_arm_strict", False):   # ARMSTRICT-W
+        ap.error("--passthrough-arm-strict-no-wrist 는 --passthrough-arm-strict 와 함께만")
     if getattr(args, "obstacle_row_patience", None) is not None:   # SL-SOTA3
         if getattr(args, "obstacle_row_margin_mm", None) is None:
             ap.error("--obstacle-row-patience 는 --obstacle-row-margin-mm 와 함께만")
@@ -5197,6 +5202,8 @@ def passthrough_overrides(args) -> dict:
         out["ee_action_max_delta"] = float(args.ee_action_qp_max_delta)
     if getattr(args, "passthrough_arm_strict", False):   # ARMSTRICT
         out["passthrough_arm_strict"] = True
+    if getattr(args, "passthrough_arm_strict_no_wrist", False):   # ARMSTRICT-W
+        out["passthrough_arm_strict_no_wrist"] = True
     return out
 # --- T88 — end ---
 

@@ -319,7 +319,7 @@ def test_versions_of_2026_11_15():
         assert (a.attention_source == "action:last:L12H3") is ("-a12h3-" in name)
         assert (getattr(a, "response_model", None) == "libero_safety_fork_native") is name.endswith("-lsnative")
     # the earlier versions keep their argv: no other version carries the new flag
-    assert [n for n, f in V.items() if "--passthrough-arm-strict" in f] == list(pas)
+    assert [n for n, f in V.items() if "--passthrough-arm-strict" in f and n not in pf.SOTA_ARMSTRICT_W_VERSIONS] == list(pas)   # (-pas6: test_pas6_versions)
 
 
 def test_tab2_versions_pass_the_libero_safety_launcher_rules(monkeypatch):
@@ -337,3 +337,47 @@ def test_tab2_versions_pass_the_libero_safety_launcher_rules(monkeypatch):
         lls.check(ns, ["vla_v11ab"])
         assert ns.action_adapter == "fork_native_unit"
     assert not lls.native_fork_version(X) and not lls.native_fork_version(XF)
+
+
+# --- ARMSTRICT-W (2026-11-15 15:4x): --passthrough-arm-strict-no-wrist leaves panda_link7 out -------------------------
+def test_no_wrist_mask_and_config_rules():
+    from AG3S.trajopt import sqp as sq
+
+    names = ["panda_link1", "panda_link6", "panda_link7", "panda_hand", "link_right_arm_6"]
+    assert sq.arm_link_row_mask(names, 5).tolist() == [True, True, True, False, True]
+    assert sq.arm_link_row_mask(names, 5, no_wrist=True).tolist() == [True, True, False, False, True]
+    with pytest.raises(TrajOptConfigError):
+        TrajOptConfig.from_dict({"sqp": {"passthrough_arm_strict_no_wrist": True}})
+    assert "passthrough_arm_strict_no_wrist" not in TrajOptConfig().to_dict()["sqp"]
+
+
+def test_real_rows_link7_refused_by_strict_and_passed_without_the_wrist(panda):
+    w = panda
+    scene = _field_scene(w, "panda_link7", (0.0, 1.0, 0.0))
+    on = _panda_opt(w, True).solve(w.ref, Q0, scene, template=w.chunk)
+    assert on.metrics["passthrough_clear"]["reason"] == "arm" and on.metrics["passthrough_clear"]["arm_rows"]["link"] == "panda_link7"
+    nw = _panda_opt(w, True, passthrough_arm_strict_no_wrist=True).solve(w.ref, Q0, scene, template=w.chunk)
+    rec = nw.metrics["passthrough_clear"]
+    assert rec["applied"] is True and rec["reason"] == "clear" and rec["arm_rows"]["no_wrist"] is True
+    assert rec["arm_rows"]["n_arm_spheres"] < 37 and rec["arm_rows"]["n_violating"] == 0
+    # link5 is still an arm row without the wrist
+    scene5 = _field_scene(w, "panda_link5", (0.0, 1.0, 0.0))
+    r5 = _panda_opt(w, True, passthrough_arm_strict_no_wrist=True).solve(w.ref, Q0, scene5, template=w.chunk)
+    assert r5.metrics["passthrough_clear"]["reason"] == "arm"
+
+
+def test_pas6_versions():
+    from AG3S.adapters.panda import profile as pf
+    from AG3S.adapters.panda import server as srv
+    from AG3S.trajopt import serve_safe as ss
+    v6 = (STEM + "-gh156a-a12h3-fwd-pas6-tro", STEM + "-gh156a-fwd-pas6-tro")
+    assert pf.SOTA_ARMSTRICT_W_VERSIONS == v6 and set(v6) <= set(pf.GT15_VERSIONS)
+    assert pf.AG3S_VERSIONS[v6[0]] == tuple(pf.AG3S_VERSIONS[STEM + "-gh156a-a12h3-fwd-tro"]) + pf.ARMSTRICT_W_FLAGS
+    assert pf.AG3S_VERSIONS[v6[1]] == tuple(pf.AG3S_VERSIONS[XF]) + pf.ARMSTRICT_W_FLAGS
+    ap = ss.build_parser()
+    for v in v6:
+        a = ap.parse_args(pf.version_server_argv(v) + list(pf.version_server_flags(v)))
+        ss.reject_bad_flag_combinations(ap, a); srv.check_unported_flags(a, None)
+        c = ss.trajopt_config_from_args(a); c.validate()
+        assert c.sqp.passthrough_arm_strict and c.sqp.passthrough_arm_strict_no_wrist
+

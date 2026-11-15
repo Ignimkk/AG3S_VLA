@@ -1503,6 +1503,18 @@ for _b in (SOTA_FINAL_X, SOTA_FINAL_ATT_VERSIONS[0], SOTA_FINAL_X_FWD, SOTA_FINA
 del _b, _n
 SOTA_FINAL_NEXT_VERSIONS: tuple[str, ...] = SOTA_TAB2_LSNATIVE_VERSIONS + SOTA_FINAL_ATT_VERSIONS + SOTA_ARMSTRICT_VERSIONS
 GT15_VERSIONS = GT15_VERSIONS + SOTA_FINAL_NEXT_VERSIONS   # (not SOTA_VERSIONS, as SOTA_AUDIT_VERSIONS)
+#: ARMSTRICT-W (sdm-f6, 2026-11-15 15:4x; user: "link7 만 빼고") -- ``-pas6`` = ``--passthrough-arm-strict
+#: --passthrough-arm-strict-no-wrist`` (arm rows = panda_link1..6; the first -pas run had 76 of 150 `arm` refusals on
+#: link7 in Spatial L-II). On X-a12h3-fwd (the improvement run) and X-fwd (arm-strict alone): ``<base without -tro>-pas6-tro``.
+ARMSTRICT_W_SEGMENT = "-pas6"
+ARMSTRICT_W_FLAGS: tuple[str, ...] = ("--passthrough-arm-strict", "--passthrough-arm-strict-no-wrist")
+SOTA_ARMSTRICT_W_VERSIONS: tuple[str, ...] = ()
+for _b in (SOTA_FINAL_ATT_VERSIONS[1], SOTA_FINAL_X_FWD):
+    _n = _b[:-len("-tro")] + ARMSTRICT_W_SEGMENT + "-tro"
+    AG3S_VERSIONS[_n] = tuple(AG3S_VERSIONS[_b]) + ARMSTRICT_W_FLAGS
+    SOTA_ARMSTRICT_W_VERSIONS = SOTA_ARMSTRICT_W_VERSIONS + (_n,)
+del _b, _n
+GT15_VERSIONS = GT15_VERSIONS + SOTA_ARMSTRICT_W_VERSIONS
 #: (G88c, 03:5x) the A-alone ablation queued as ``…-obst3`` (gtto23, not started yet) gets the same two fixes, so A alone and
 #: A + B differ only by the held point model: ``…-obst3`` := A'' + no carve + support "under" (``…-obst3-pts`` = B'' keeps
 #: the flags it was evaluated with -- it was built above from the earlier definition).

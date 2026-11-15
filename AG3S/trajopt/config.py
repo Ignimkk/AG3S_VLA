@@ -1034,6 +1034,9 @@ class SqpConfig:
     #: grazed the obstacle beside the target in chunks passed as `clear`. An arm row below its floor by more than that
     #: tolerance refuses the pass-through with reason `arm` (the call then goes on as for `obstacle`). False = as before.
     passthrough_arm_strict: bool = False
+    #: ARMSTRICT-W (`--passthrough-arm-strict-no-wrist`, 2026-11-15) — with `passthrough_arm_strict`, leave the Panda
+    #: wrist `panda_link7` out of the arm rows (links 1..6 only). False = all arm links, as before.
+    passthrough_arm_strict_no_wrist: bool = False
     # --- T88 — end ---
 
     def validate(self) -> None:
@@ -1094,6 +1097,10 @@ class SqpConfig:
         if self.ee_action_max_delta is not None:   # SL-AUD5
             if not (math.isfinite(float(self.ee_action_max_delta)) and 0.0 < float(self.ee_action_max_delta) <= 2.0):
                 raise TrajOptConfigError(f"sqp.ee_action_max_delta must be in (0, 2], got {self.ee_action_max_delta!r}")
+        if not isinstance(self.passthrough_arm_strict_no_wrist, bool):   # ARMSTRICT-W
+            raise TrajOptConfigError(f"sqp.passthrough_arm_strict_no_wrist must be a bool, got {self.passthrough_arm_strict_no_wrist!r}")
+        if self.passthrough_arm_strict_no_wrist and not self.passthrough_arm_strict:
+            raise TrajOptConfigError("sqp.passthrough_arm_strict_no_wrist needs sqp.passthrough_arm_strict")
         if not isinstance(self.passthrough_arm_strict, bool):   # ARMSTRICT
             raise TrajOptConfigError(f"sqp.passthrough_arm_strict must be a bool, got {self.passthrough_arm_strict!r}")
         if self.passthrough_arm_strict and (not self.passthrough_when_clear or self.passthrough_obstacle_tolerance is None):
@@ -1686,6 +1693,7 @@ _OMIT_WHEN_DEFAULT.update({("sqp", "ee_action_reference_floor"): False, ("sqp", 
                            ("sqp", "ee_action_min_reach"): None, ("sqp", "ee_action_audit_fixes"): False,
                            ("sqp", "ee_action_max_delta"): None})   # SL-AUD1-5
 _OMIT_WHEN_DEFAULT.update({("sqp", "passthrough_arm_strict"): False})   # ARMSTRICT
+_OMIT_WHEN_DEFAULT.update({("sqp", "passthrough_arm_strict_no_wrist"): False})   # ARMSTRICT-W
 _OMIT_WHEN_DEFAULT.update({("sqp", "passthrough_obstacle_full_horizon"): False})   # SL-GTTO22   # SL-GTTO16 A'
 # --- T88 — end ---
 #: T72 — the grasp-set reach constraint: without `--grasp-set-to` the config dump keeps the keys it had before.

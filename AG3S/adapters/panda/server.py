@@ -774,6 +774,7 @@ PORTED_FINAL_CONFIG_DESTS: tuple[str, ...] = (
     # ARMSTRICT (2026-11-15): the arm-link rows of the pass-through test at the obstacle tolerance (sqp key through
     # serve_safe.passthrough_overrides, same path as ee_action_qp_limit_passthrough)
     'passthrough_arm_strict',
+    'passthrough_arm_strict_no_wrist',
 )
 #: SL-GTTO — the target extents the Panda server runs (``--target-extent``; SL7 attention-surface, SL-GTTO oracle-visible).
 PORTED_TARGET_EXTENTS: tuple[str, ...] = ("estimated", "attention-surface", "oracle-visible")
