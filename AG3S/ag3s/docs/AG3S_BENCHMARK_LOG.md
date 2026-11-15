@@ -5322,3 +5322,6 @@ LIBERO-Safety 4 suite × L0–L2 × task 0–4 × init 19 = 60 ep, 공식 checkp
 
 ### 2026-11-15 14:12 – 15:36 — 개선 실험 1: L12H3 + 팔 link strict (link1–7) 를 Tab. 1 두 cell 에서 (sdm-f6 SL-AUD 세션)
 `P-gh156a-a12h3-fwd-pas-tro`. Goal L-I TSR · SSR · CAR 11 · 9 · 18 (AG3S 8 · 7 · 18), Spatial L-II 6 · 6 · 16 (AG3S 10 · 10 · 16); 두 cell 합 SSR 15 vs AG3S 17 → 개선 없음. Spatial L-II 의 `arm` 거절 150 call 중 link7 76. 15:36 Tab. 2 AG3S 행 시작. 계획서 §9.43.
+
+### 2026-11-15 15:55 – 17:12 — 개선 실험 2: L12H3 + 팔 strict link1–6 (link7 제외) (sdm-f6 SL-AUD 세션)
+`P-gh156a-a12h3-fwd-pas6-tro` (새 선택지 `--passthrough-arm-strict-no-wrist`). Spatial L-II TSR · SSR · CAR 12 · 12 · 15 (AG3S 10 · 10 · 16; link1–7 판 6 · 6 · 16), Goal L-I 10 · 8 · 18 (AG3S 8 · 7 · 18). 두 cell 합 SSR 20 vs AG3S 17 vs GT oracle 26. `arm` 거절 Spatial L-II 150 → 53. 17:12 Tab. 2 AG3S 행 재개. 계획서 §9.43 결과 3.
