@@ -5313,3 +5313,6 @@ S32 (32 ep, TSR · CAR · SSR, > 50 mm; 동결 판 13 · 23 · 9, 3): `-md5` 16 
 
 ### 2026-11-15 03:39 – 04:49 — 실물 RB-Y1 basket 학습 (GPU 양보) 뒤 Tab. 1 GT oracle arm 시작 (sdm-f6 SL-AUD 세션)
 dev-cf: basket LoRA 03:39–04:40 (loss 0.254 → 0.005), checkpoint `basket_v1/2499` (검증 MAE 0.038 rad), run `20261115T013849+0900_068baf6a448b_rby1real-basket-v1-sdm`, commit b78b5d99. 04:49:29 `tab1gto` (GT oracle arm, `…-rs-tro-gto`). 실물 구간 13:30–15:15 GPU 비움.
+
+### 2026-11-15 11:58 — 논문 Tab. 1 (SDM 1/10) 세 arm 끝; Tab. 2 π0.5 단독 행 시작 (sdm-f6 SL-AUD 세션)
+SafeLIBERO SSR (L-I · L-II): π0.5 단독 0.138 · 0.300, AG3S 0.475 · 0.537, AG3S GT oracle 0.500 · 0.588; LIBERO SR π0.5 0.980 · AG3S 0.710. > 50 mm 충돌 ep (160 중) π0.5 90 · AG3S 20 · GT oracle 6. 계획서 §9.42 결과 3. 11:58 Tab. 2 (`paper_tab2_cells.sh`, 13:30 상한).

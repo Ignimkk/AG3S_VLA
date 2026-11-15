@@ -1656,3 +1656,15 @@ GPU 약 1 h 50 분 (52 ep). dev-8a (sdm-ahs) 의 공유 lock 추출은 이 시�
 - LIBERO Goal 21: t0 '가운데 서랍 열기' 5 = 전부 오인식 (대상이 wine rack · 접시, 서랍은 한 번도 아님), t3 '서랍 열고 그릇 넣기' 5 = 오인식 4 · 넣을 cabinet 이 막음 1, t5 '접시 밀기' 4 = 접시 자신 3 · 옆 cream cheese 1, t9 '와인병을 rack 에' 5 = rack 2 · HOLD 1 · 로봇 1 · 오인식 1.
 - 해석 (D): 장애물이 없는 task 에서 잃는 성공의 공통 원인은 (1) '쥘 수 있는 물체' 만 대상으로 보는 인식이 서랍 · 미는 동작 같은 비파지 task 를 다루지 못함, (2) task 가 손을 대야 하는 물체 (대상 · 목적지 · 그 받침 · 서랍 벽) 를 장애물로 남김. 둘 다 여러 suite 에 걸친다 → 개선 실험 후보 (L12H3 는 (1) 의 일부, 표면 권한 규칙은 (2)). 구현은 사용자 판단 뒤.
 - (04:4x) 실물 RB-Y1 basket LoRA 학습 (dev-cf) 03:39–04:40 rc 0 (loss 0.254 → 0.005), checkpoint 비교 04:40–04:48 (검증 ep 11 오른팔 MAE 0.044 → 0.038 rad, 과적합 신호 없음 → 실물은 step 2499); run dir `AG3S_VLA-storage/results/benchmark/20261115T013849+0900_068baf6a448b_rby1real-basket-v1-sdm`, 최종 checkpoint `basket_v1/2499`, commit b78b5d99. 04:48:51 GPU 반납 (compute 0, lock free). **04:49:29 Tab. 1 GT oracle arm 시작** (분리 실행 `tab1gto`, `paper_tab1_tenth_queue.sh` ARMS=gto, VGT = `P-tro-gto`, HEAD 93478890; SafeLIBERO 8 cell, 예상 ~09:50 끝).
+
+**§9.42 결과 3 (2026-11-15 12:0x, [M]) — Tab. 1 (SDM 1/10) 세 arm 끝.** GT oracle arm (`P-tro-gto`, `tab1gto`, 04:49–11:58, rc 0 전부; SafeLIBERO 만 — 계획대로 LIBERO 는 GT oracle 행 없음).
+
+| Tab. 1 (SDM 1/10) | LIBERO SR (200) | SafeLIBERO L-I TSR · SSR · CAR (80), > 50 mm | L-II TSR · SSR · CAR (80), > 50 mm |
+|---|---|---|---|
+| π0.5 단독 | 0.980 | 0.675 · 0.138 · 0.150, 47 | 0.725 · 0.300 · 0.300, 43 |
+| **AG3S** (`-gh156a-fwd`) | 0.710 | 0.500 · 0.475 · 0.787, 10 | 0.613 · 0.537 · 0.750, 10 |
+| AG3S GT oracle (`-tro-gto`) | — | 0.550 · 0.500 · 0.775, 4 | 0.637 · 0.588 · 0.863, 2 |
+
+- GT oracle cell 별 SR · SSR · CAR: Spatial L-I 15 · 14 · 17 / Object L-I 13 · 13 · 19 / Goal L-I 13 · 11 · 16 / Long L-I 3 · 2 · 10 / Spatial L-II 16 · 15 · 16 / Object L-II 17 · 16 · 19 / Goal L-II 15 · 13 · 16 / Long L-II 3 · 3 · 18.
+- 해석 (D): 인식을 정답으로 바꿔도 SSR 은 L-I +0.025 · L-II +0.051 만 오른다 — AG3S 의 SafeLIBERO SSR 은 GT oracle 의 95 % (L-I) · 91 % (L-II). 인식 손실은 Object L-I · Goal L-I · Spatial L-II 에서 크고, Long 은 GT oracle 이 오히려 낮다 (TSR L-I 3 vs 7, L-II 3 vs 9) — Long 의 손실은 인식 밖 (제약 · 놓는 구간) 에 있다. GT oracle 도 TSR 이 π0.5 단독보다 낮다 → TSR 손실의 큰 몫은 인식이 아니라 제약 쪽 (§9.42 결과 2 의 'task 물체 자신의 표면이 손을 막음' 과 같은 방향).
+- 11:58:49 Tab. 2 π0.5 단독 행 시작 (`tab2pi05` → `paper_tab2_cells.sh` ARMS=pi05, CUTOFF 13:30).
