@@ -1090,6 +1090,20 @@ def reject_identity_rules_flags(ap, args) -> None:
 # SL8b — end
 
 
+# TAB3 — begin
+def reject_tab3_flags(ap, args) -> None:
+    """TAB3 (paper Tab. 3) — combinations that would not run the asked ablation are refused at start."""
+    no_ag3s = bool(args.no_safe or getattr(args, "no_perception", False))
+    if getattr(args, "no_attached_query", False) and no_ag3s:
+        ap.error("--no-attached-query 는 AG3S attach 의 질의 구를 끕니다 (--no-safe · --no-perception 에는 attach 가 없습니다)")
+
+
+def tab3_inert(args) -> list[dict]:
+    """TAB3 — base-argv flags the asked ablation makes inert (recorded with the server's inert list; none = `[]`)."""
+    return []
+# TAB3 — end
+
+
 def t43t_identity_section(args) -> dict:
     """T43 T fix 3 — `clustering` keys for the given flags only (none given = `{}`, config as is)."""
     out = {}
@@ -2810,6 +2824,12 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--passthrough-arm-strict-no-wrist", action="store_true",   # ARMSTRICT-W (2026-11-15; default off)
                     help="ARMSTRICT-W — --passthrough-arm-strict 와 함께만. 팔 link 에서 Panda 손목 panda_link7 을 뺀다 "
                          "(link1..6 만; sqp.passthrough_arm_strict_no_wrist)")
+    # TAB3 — begin (paper Tab. 3 ablation row 7, 2026-11-16; default off = the earlier server)
+    ap.add_argument("--no-attached-query", action="store_true",
+                    help="TAB3 행 7 — 쥔 물체를 optimizer 의 로봇에 붙이지 않는다: TO 행과 최종 검사 (같은 snapshot) 에 쥔 물체 "
+                         "질의 구가 없다. grasp latch · 장면 field 의 쥔 물체 제외 · self-filter 는 그대로 "
+                         "(collision.attached_query = false, 기록 grasp.attached.queried). 기본 off")
+    # TAB3 — end
     # SL-SOTA1 — end
     # SL-GTTO10 — begin (lead self-ruling G53, 2026-11-07; user caution 2)
     ap.add_argument("--oracle-destination", action="store_true",
@@ -4984,6 +5004,7 @@ def reject_bad_flag_combinations(ap: argparse.ArgumentParser, args, *, seed_map_
             ap.error("--passthrough-arm-strict 는 --passthrough-when-clear · --passthrough-obstacle-tolerance-mm 와 함께만")
     if getattr(args, "passthrough_arm_strict_no_wrist", False) and not getattr(args, "passthrough_arm_strict", False):   # ARMSTRICT-W
         ap.error("--passthrough-arm-strict-no-wrist 는 --passthrough-arm-strict 와 함께만")
+    reject_tab3_flags(ap, args)   # TAB3 (all off: returns at once)
     if getattr(args, "obstacle_row_patience", None) is not None:   # SL-SOTA3
         if getattr(args, "obstacle_row_margin_mm", None) is None:
             ap.error("--obstacle-row-patience 는 --obstacle-row-margin-mm 와 함께만")
@@ -5360,6 +5381,11 @@ def obstacle_overrides(args) -> dict:
 
 
 # T44 I2 (A2) — begin
+def attached_query_overrides(args) -> dict:
+    """TAB3 row 7 — `--no-attached-query` → `collision.attached_query = False`. 안 줬으면 `{}`."""
+    return {"attached_query": False} if getattr(args, "no_attached_query", False) else {}
+
+
 def permission_overrides(args) -> dict:
     """`--target-permission-strict` → `collision.target_permission_strict` (T44 I2). 안 줬으면 `{}`."""
     return {"target_permission_strict": True} if getattr(args, "target_permission_strict",
@@ -5638,6 +5664,8 @@ def trajopt_config_from_args(args):
                       **permission_overrides(args),
                       # T44b A4 (I2b CLI) — 준 것만.
                       **held_permission_overrides(args),
+                      # TAB3 row 7 — 준 것만.
+                      **attached_query_overrides(args),
                       # **기본값을 여기 다시 적지 않는다.** 켠 경우에는 키가 아예 없다.
                       **({"enabled": False} if no_collision else {})},
         **({"cost": weights} if weights else {}),

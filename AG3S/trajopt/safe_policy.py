@@ -3273,6 +3273,8 @@ class SafePolicy:
             "n_spheres": len(getattr(attached, "primitives", ()) or ()),
             "held": getattr(self.ag3s, "held_record", None),
         }
+        if rec["attached"] is not None and not bool(getattr(self.to_config.collision, "attached_query", True)):
+            rec["attached"]["queried"] = False   # TAB3 row 7: held, but no query spheres in the TO / final check (off: no key)
 
     def _latch_gripper_signal(self, hand: str) -> Optional[float]:
         """latch 가 볼 gripper 값. **측정 개도(피드백)가 먼저**, 없으면 계획 첫 행 (T18).
