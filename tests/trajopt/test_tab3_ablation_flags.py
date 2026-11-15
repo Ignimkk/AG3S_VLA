@@ -1,8 +1,8 @@
-"""TAB3 (paper Tab. 3, 2026-11-16) — row 7 (`--no-attached-query`) and its version on X-fwd.
+"""TAB3 (paper Tab. 3, 2026-11-16) — the code rows' flags, their versions on X-fwd and row 7 (`--no-attached-query`).
 
 Row 7: with `collision.attached_query` False the real `scene_from_constraint_set` drops the held object's query spheres
 (TO rows and final check share the snapshot); the holding-state rules (held capture volume, strict held permission) stay.
-Version `-ab7`: argv = X-fwd + the one switch, parsed with the server's own checks, config validated,
+Versions `-ab1` / `-ab4` / `-ab7`: argv = X-fwd + the one switch, parsed with the server's own checks, config validated,
 record keys only with the flag. Off: the config dump, the snapshot and every earlier version's record keys are as before.
 """
 from __future__ import annotations
@@ -16,8 +16,9 @@ from AG3S.trajopt.config import TrajOptConfig
 from AG3S.trajopt.linearize import scene_from_constraint_set
 from tests.trajopt.test_t32_held_query import _constraint_set, _CrateWall, _held
 
-SEGMENTS = ("-ab7",)
-ADDED = {"-ab7": ("--no-attached-query",)}
+SEGMENTS = ("-ab1", "-ab4", "-ab7")
+ADDED = {"-ab1": ("--seed-source", "hand-nearest"), "-ab4": ("--identity-memory", "off"),
+         "-ab7": ("--no-attached-query",)}
 
 
 def _cfg(**collision):
@@ -115,6 +116,8 @@ def test_tab3_code_versions():
     xvals = pf.version_flag_values(xa)
     assert not set(pf.TAB3_CODE_DESTS) & set(xvals)
     assert srv.tab3_record(xa) == {} and ss.tab3_inert(xa) == []
+    ident_x = ss.t43t_identity_section(xa)
+    assert "seed_source" not in ident_x and "identity_memory" not in ident_x
     for seg, v in zip(SEGMENTS, names):
         assert pf.AG3S_VERSIONS[v] == base + ADDED[seg]                        # X-fwd + the one switch
         a = _parse(v)                                                           # reject_bad_flag_combinations inside
@@ -127,9 +130,20 @@ def test_tab3_code_versions():
         vals = pf.version_flag_values(a)
         new = set(vals) - set(xvals)
         assert set(xvals) <= set(vals) and all(vals[k] == xvals[k] for k in xvals)
+        ident = ss.t43t_identity_section(a)
         rec = srv.tab3_record(a)["tab3_ablation"]
-        assert new == {"no_attached_query"} and vals["no_attached_query"] is True and rec == {"attached_query": False}
-        assert set(srv.final_options_on(a)) - set(srv.final_options_on(xa)) == {"no_attached_query"}
+        if seg == "-ab1":
+            assert new == {"seed_source"} and vals["seed_source"] == "hand-nearest"
+            assert ident["seed_source"] == "hand_nearest" and rec == {"seed_source": "hand-nearest"}
+        elif seg == "-ab4":
+            assert new == {"identity_memory"} and vals["identity_memory"] == "off"
+            assert ident["identity_memory"] is False and rec == {"identity_memory": "off"}
+            assert [i["flag"] for i in ss.tab3_inert(a)] == ["--latched-identity-hold"]
+        else:
+            assert new == {"no_attached_query"} and vals["no_attached_query"] is True and rec == {"attached_query": False}
+            assert "seed_source" not in ident and "identity_memory" not in ident
+        assert set(srv.final_options_on(a)) - set(srv.final_options_on(xa)) == {
+            {"-ab1": "seed_source", "-ab4": "identity_memory", "-ab7": "no_attached_query"}[seg]}
 
 
 def test_earlier_versions_keep_their_record_keys():
@@ -141,7 +155,28 @@ def test_earlier_versions_keep_their_record_keys():
         assert not set(pf.TAB3_CODE_DESTS) & set(pf.version_flag_values(_parse(v)))
 
 
+def test_the_ag3s_config_takes_the_identity_keys():
+    from AG3S.ag3s.config import AG3SConfig
+    from AG3S.adapters.panda import profile as pf
+    from AG3S.trajopt import serve_safe as ss
+
+    xf = pf.SOTA_FINAL_X_FWD
+    for seg, key, want in (("-ab1", "seed_source", "hand_nearest"), ("-ab4", "identity_memory", False)):
+        ident = ss.t43t_identity_section(_parse(xf[:-len("-tro")] + seg + "-tro"))
+        cfg = AG3SConfig().with_overrides({"clustering": ident})
+        cfg.validate()
+        assert getattr(cfg.clustering, key) == want
+        ss.assert_ag3s_config(cfg, collision_backend=cfg.collision_backend, esdf_backend=cfg.esdf.backend,
+                              clustering=ident)
+
+
 @pytest.mark.parametrize("extra, msg", [
+    (["--seed-source", "hand-nearest", "--no-safe"], "hand-nearest"),
+    (["--seed-source", "hand-nearest", "--attention-peak-seed", "2"], "attention-peak-seed"),
+    (["--seed-source", "hand-nearest", "--identity-attention-release", "3"], "identity-attention-release"),
+    (["--identity-memory", "off", "--identity-switch-window", "5"], "identity-switch-window"),
+    (["--identity-memory", "off", "--target-vacancy-release"], "target-vacancy-release"),
+    (["--identity-memory", "off", "--refused-identity-release", "3"], "refused-identity-release"),
     (["--no-attached-query", "--no-safe"], "no-attached-query"),
 ])
 def test_bad_combinations_are_refused(extra, msg, capsys):
@@ -154,3 +189,14 @@ def test_bad_combinations_are_refused(extra, msg, capsys):
     with pytest.raises(SystemExit):
         ss.reject_tab3_flags(ap, args)
     assert msg in capsys.readouterr().err
+
+
+def test_seed_source_refuses_the_gt_grounding_and_the_surface_extent(capsys):
+    from AG3S.trajopt import serve_safe as ss
+
+    ap = ss.build_parser()
+    base = ["--config", "x", "--checkpoint", "y", "--model-xml", "z", "--seed-source", "hand-nearest"]
+    for extra in (["--grounding-source", "oracle"], ["--target-extent", "attention-surface"]):
+        with pytest.raises(SystemExit):
+            ss.reject_tab3_flags(ap, ap.parse_args(base + extra))
+    ss.reject_tab3_flags(ap, ap.parse_args(base))                       # alone: fine

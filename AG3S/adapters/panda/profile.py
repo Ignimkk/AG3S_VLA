@@ -1532,16 +1532,20 @@ for _s, _drop, _add in (("-ab2", TAB3_EXTENT_DROP, ()),
 del _s, _drop, _add, _n
 GT15_VERSIONS = GT15_VERSIONS + SOTA_TAB3_VERSIONS
 #: TAB3 rows that need code (2026-11-16, ``TAB3-ABLATION-FLAGS.impl.md``; same rule: X-fwd + one switch, optimizer unchanged):
+#:   ``-ab1``  seeds: attention -> the object nearest the hand (``--seed-source hand-nearest``)
+#:   ``-ab4``  identity: no cross-call memory (``--identity-memory off``; the base ``--latched-identity-hold`` is inert then)
 #:   ``-ab7``  policy: the grasped object is not attached to the robot for the optimizer (``--no-attached-query``)
 SOTA_TAB3_CODE_VERSIONS: tuple[str, ...] = ()
-for _s, _add in (("-ab7", ("--no-attached-query",)),):
+for _s, _add in (("-ab1", ("--seed-source", "hand-nearest")),
+                 ("-ab4", ("--identity-memory", "off")),
+                 ("-ab7", ("--no-attached-query",))):
     _n = SOTA_FINAL_X_FWD[:-len("-tro")] + _s + "-tro"
     AG3S_VERSIONS[_n] = tuple(AG3S_VERSIONS[SOTA_FINAL_X_FWD]) + _add
     SOTA_TAB3_CODE_VERSIONS = SOTA_TAB3_CODE_VERSIONS + (_n,)
 del _s, _add, _n
 GT15_VERSIONS = GT15_VERSIONS + SOTA_TAB3_CODE_VERSIONS
 #: TAB3 code rows: their own dests (joined to the record only when set, so every earlier GT15 version keeps its keys)
-TAB3_CODE_DESTS: tuple[str, ...] = ("no_attached_query",)
+TAB3_CODE_DESTS: tuple[str, ...] = ("identity_memory", "no_attached_query", "seed_source")
 #: (G88c, 03:5x) the A-alone ablation queued as ``…-obst3`` (gtto23, not started yet) gets the same two fixes, so A alone and
 #: A + B differ only by the held point model: ``…-obst3`` := A'' + no carve + support "under" (``…-obst3-pts`` = B'' keeps
 #: the flags it was evaluated with -- it was built above from the earlier definition).

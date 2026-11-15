@@ -231,6 +231,9 @@ class AG3S:
         #: (`metrics["close_seed"]`). Both None unless `clustering.close_seed_grounding`.
         self._close_seed: Optional[np.ndarray] = None
         self._close_seed_frame: Optional[dict[str, Any]] = None
+        #: TAB3 row 1: the last frame's hand-nearest seed record (`metrics["seed_source"]`). None unless
+        #: `clustering.seed_source == "hand_nearest"`.
+        self._seed_source_frame: Optional[dict[str, Any]] = None
         #: SL-PE1: the last local support plane a seed cut stood on, kept for the episode (support test on calls without a seed).
         self._close_seed_plane: Optional[np.ndarray] = None
         #: IFG-CL1: this frame's attention-surface record (`stats["target_free"]["attention_surface"]`) and code
@@ -515,6 +518,7 @@ class AG3S:
         self._close_seed = None   # SL-PE1
         self._close_seed_frame = None
         self._close_seed_plane = None
+        self._seed_source_frame = None   # TAB3 row 1
         self._obstacle_frame = None   # SL-GTTO19
         self._held_motion = None   # SL-PE8: per-episode tracker (made on first use)
         self._esdf_cameras_seen = set()   # SL-QE1: cameras that wrote voxels this episode (read only with esdf.dead_camera_seen_ok)
@@ -624,6 +628,36 @@ class AG3S:
             return None
         i = np.flatnonzero(ok)[int(np.argmax(raw[ok]))]
         return pts[i].copy()
+
+    def _hand_nearest_seed_signal(self, grounding_cloud, exclude_mask, hand):
+        """TAB3 row 1 (`clustering.seed_source == "hand_nearest"`) -- the seed signal `ground_target` reads instead of the
+        attention (`target_grounding.hand_proximity`), or None (the attention seeds, as with the option off) when the
+        call is not a pre-grasp search: something attached, a grasp in progress (frozen -- the grasp lock decides), or
+        this call's input is the close-seed cut (SL-PE1: the VLA's grasp point, kept as in X). Also None with no hand
+        model / state or no usable point. Writes this frame's record (`metrics["seed_source"]`)."""
+        from AG3S.ag3s.stages.target_grounding import HAND_NEAREST_SCALE_M, hand_proximity
+
+        rec: dict[str, Any] = {"source": "hand_nearest", "applied": False, "scale_mm": HAND_NEAREST_SCALE_M * 1000.0}
+        self._seed_source_frame = rec
+        cs = getattr(self, "_close_seed_frame", None)
+        if self._attached is not None:
+            rec["skipped"] = "attached"
+        elif self._target_confirm.frozen:
+            rec["skipped"] = "frozen"
+        elif cs is not None and cs.get("applied"):
+            rec["skipped"] = "close_seed"
+        elif hand is None:
+            rec["skipped"] = "no_hand"
+        elif grounding_cloud is None or len(grounding_cloud) == 0:
+            rec["skipped"] = "no_points"
+        else:
+            signal = hand_proximity(grounding_cloud.points, hand, exclude_mask)
+            if signal is None:
+                rec["skipped"] = "no_usable_point"
+            else:
+                rec["applied"] = True
+                return signal
+        return None
 
     def _close_seed_grounding_input(self, attention_cloud, support_mask):
         """SL-PE1 — `(cloud, exclude_mask)` for `ground_target`: with a seed and a cut, attention = raw = 1.0 on the object
@@ -3222,7 +3256,8 @@ class AG3S:
         self._subtask_p = None
         # T32b S3: the hands at this frame's state — challengers do not count while the manipulated
         # object is hidden by the hand (`TargetConfirm.note_hand`, consumed by this grounding call).
-        self._target_confirm.note_hand(self._hand_for_grounding(robot_state))
+        hand_now = self._hand_for_grounding(robot_state)
+        self._target_confirm.note_hand(hand_now)
         if self._target_confirm.vacancy_release:   # T81: this request's depth for the vacancy rule (off: not called)
             self._target_confirm.note_views(self._vacancy_views(observations, depth, camera_intrinsics, T_base_cam))
         # --- SL-GTTO — begin: GT grounding input (`clustering.grounding_source == "oracle"`; off: the attention
@@ -3245,6 +3280,9 @@ class AG3S:
         # --- SL-GTTO — end
         if getattr(cfg.clustering, "close_seed_grounding", False):   # SL-PE1 (off: not called, nothing recorded)
             grounding_cloud, grounding_exclude = self._close_seed_grounding_input(grounding_cloud, grounding_exclude)
+        seed_signal = None   # TAB3 row 1 (off: None, the call below is the earlier one)
+        if getattr(cfg.clustering, "seed_source", "attention") == "hand_nearest":
+            seed_signal = self._hand_nearest_seed_signal(grounding_cloud, grounding_exclude, hand_now)
         with profiler.stage("target_grounding"):
             grounding = ground_target(
                 grounding_cloud,
@@ -3255,6 +3293,7 @@ class AG3S:
                 min_radius=cfg.geometry.min_radius,
                 timestamp=ts,
                 confirm=self._target_confirm,
+                **({"seed_signal": seed_signal} if seed_signal is not None else {}),
             )
         if fusion is not None and grounding.target is not None:
             grounding = dataclasses.replace(
@@ -3266,6 +3305,13 @@ class AG3S:
             self._close_seed_frame["n_target_points"] = (
                 0 if grounding.target is None else int(len(grounding.target.point_indices)))
             self._close_seed_frame["switched"] = bool(getattr(self._target_confirm, "close_seed_switched", False))
+        if self._seed_source_frame is not None:   # TAB3 row 1: what grounding returned on the hand-nearest seeds
+            rec = self._seed_source_frame
+            rec["status"] = getattr(grounding.status, "value", str(grounding.status))
+            tgt = grounding.target
+            rec["n_target_points"] = 0 if tgt is None else int(len(tgt.point_indices))
+            gap = None if tgt is None or hand_now is None or not len(tgt.point_indices) else hand_now.gap(tgt.points)
+            rec["target_hand_gap_mm"] = None if gap is None else round(float(gap) * 1000.0, 1)
         if self._grounding_frame is not None:   # SL-GTTO: what grounding returned on the GT input
             self._grounding_frame["status"] = getattr(grounding.status, "value", str(grounding.status))
             self._grounding_frame["n_target_points"] = (
@@ -3684,6 +3730,8 @@ class AG3S:
             constraint_set.metrics["grounding_source"] = dict(self._grounding_frame)
         if self._close_seed_frame is not None:   # SL-PE1 (off: no key)
             constraint_set.metrics["close_seed"] = dict(self._close_seed_frame)
+        if getattr(self, "_seed_source_frame", None) is not None:   # TAB3 row 1 (off: no key)
+            constraint_set.metrics["seed_source"] = dict(self._seed_source_frame)
         of = getattr(self, "_obstacle_frame", None)
         if of is not None:   # SL-GTTO19 (off: None, nothing attached)
             object.__setattr__(constraint_set, "obstacle_object_points", of[0])

@@ -1092,15 +1092,43 @@ def reject_identity_rules_flags(ap, args) -> None:
 
 # TAB3 — begin
 def reject_tab3_flags(ap, args) -> None:
-    """TAB3 (paper Tab. 3) — combinations that would not run the asked ablation are refused at start."""
+    """TAB3 (paper Tab. 3 rows 1 / 4 / 7) — combinations that would not run the asked ablation are refused at start."""
     no_ag3s = bool(args.no_safe or getattr(args, "no_perception", False))
+    if getattr(args, "seed_source", "attention") == "hand-nearest":
+        if no_ag3s:
+            ap.error("--seed-source hand-nearest 는 AG3S grounding 의 flag 입니다 (--no-safe · --no-perception 은 그것을 안 만듭니다)")
+        if getattr(args, "grounding_source", "attention") != "attention":
+            ap.error("--seed-source hand-nearest 는 attention seed 를 바꿉니다 — --grounding-source oracle 은 GT 가 대상을 "
+                     "말하므로 둘 중 하나만")
+        if str(getattr(args, "target_extent", None) or "").startswith("attention-surface"):
+            ap.error("--seed-source hand-nearest 와 --target-extent attention-surface* 는 함께 쓸 수 없습니다: surface "
+                     "extent 는 attention seed map 을 따로 읽어 대상 표면을 고릅니다 (seed 출처가 반만 바뀜)")
+        for flag, on in (("--attention-peak-seed", getattr(args, "attention_peak_seed", None) is not None),
+                         ("--identity-attention-release", getattr(args, "identity_attention_release", None) is not None)):
+            if on:
+                ap.error(f"--seed-source hand-nearest 와 {flag} 는 함께 쓸 수 없습니다: {flag} 는 attention 으로 대상을 "
+                         "고르거나 놓습니다 (seed 출처가 반만 바뀜)")
+    if getattr(args, "identity_memory", "on") == "off":
+        if no_ag3s:
+            ap.error("--identity-memory off 는 AG3S TargetConfirm 의 flag 입니다 (--no-safe · --no-perception 은 그것을 안 만듭니다)")
+        for flag, on in (("--identity-switch-window", getattr(args, "identity_switch_window", None) is not None),
+                         ("--identity-attention-release", getattr(args, "identity_attention_release", None) is not None),
+                         ("--target-vacancy-release", getattr(args, "target_vacancy_release", False)),
+                         ("--refused-identity-release", getattr(args, "refused_identity_release", None) is not None)):
+            if on:
+                ap.error(f"--identity-memory off 와 {flag} 는 함께 쓸 수 없습니다: {flag} 는 call 사이에 남은 identity 를 "
+                         "바꾸거나 놓는 규칙이라 기억이 없으면 읽히지 않습니다 — 그대로 띄우면 효과가 있었다고 믿게 됩니다")
     if getattr(args, "no_attached_query", False) and no_ag3s:
         ap.error("--no-attached-query 는 AG3S attach 의 질의 구를 끕니다 (--no-safe · --no-perception 에는 attach 가 없습니다)")
 
 
 def tab3_inert(args) -> list[dict]:
     """TAB3 — base-argv flags the asked ablation makes inert (recorded with the server's inert list; none = `[]`)."""
-    return []
+    out = []
+    if getattr(args, "identity_memory", "on") == "off" and getattr(args, "latched_identity_hold", False):
+        out.append({"flag": "--latched-identity-hold",
+                    "why": "--identity-memory off: no identity is kept between unfrozen calls, so no latched hold"})
+    return out
 # TAB3 — end
 
 
@@ -1123,6 +1151,10 @@ def t43t_identity_section(args) -> dict:
         out["attention_split_wide"] = True   # SL-SOTA19 (off: no key)
     if getattr(args, "grounding_source", "attention") not in (None, "attention"):
         out["grounding_source"] = str(args.grounding_source)   # SL-GTTO (default attention: no key)
+    if getattr(args, "seed_source", "attention") not in (None, "attention"):   # TAB3 row 1 (default: no key)
+        out["seed_source"] = str(args.seed_source).replace("-", "_")
+    if getattr(args, "identity_memory", "on") == "off":   # TAB3 row 4 (default on: no key)
+        out["identity_memory"] = False
     for name in ("oracle_admissible", "oracle_held_target", "oracle_destination", "oracle_robot_mask",
                  "oracle_obstacle_objects", "scene_obstacle_objects"):   # SL-GTTO2 / 10 / 15 / 19 / 20 (off: no key)
         if getattr(args, name, False):
@@ -2824,7 +2856,18 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--passthrough-arm-strict-no-wrist", action="store_true",   # ARMSTRICT-W (2026-11-15; default off)
                     help="ARMSTRICT-W — --passthrough-arm-strict 와 함께만. 팔 link 에서 Panda 손목 panda_link7 을 뺀다 "
                          "(link1..6 만; sqp.passthrough_arm_strict_no_wrist)")
-    # TAB3 — begin (paper Tab. 3 ablation row 7, 2026-11-16; default off = the earlier server)
+    # TAB3 — begin (paper Tab. 3 ablation rows 1 / 4 / 7, 2026-11-16; all default off = the earlier server)
+    ap.add_argument("--seed-source", choices=("attention", "hand-nearest"), default="attention",
+                    help="TAB3 행 1 — grounding seed 의 출처. attention (기본) = 그대로. hand-nearest = 아무것도 쥐지 않았고 "
+                         "잡는 중이 아닌 call 에서 seed · peak · cluster 순위를 attention 대신 손 (palm + finger 구 표면) 에서의 "
+                         "거리로 (exp(-(d - d_min) / 50 mm), 받침면 점 0): 손에 가장 가까운 물체가 대상. attention split · "
+                         "close seed (VLA 의 닫는 점) · extent · identity · 접촉 규칙은 그대로 (clustering.seed_source, "
+                         "기록 metrics.seed_source)")
+    ap.add_argument("--identity-memory", choices=("on", "off"), default="on",
+                    help="TAB3 행 4 — call 사이 target identity 기억. on (기본) = 그대로. off = 잡는 중 (closing) · 쥔 동안 "
+                         "(frozen) 이 아닌 모든 call 에서 이전 identity 를 잊고 그 call 의 1 위 admissible cluster 를 대상으로: "
+                         "전환 hysteresis · 가려진 동안 마지막 기하 · T30 association · --latched-identity-hold 가 없다 "
+                         "(latch · attach 규칙은 그대로; clustering.identity_memory, 기록 metrics.identity_memory_off)")
     ap.add_argument("--no-attached-query", action="store_true",
                     help="TAB3 행 7 — 쥔 물체를 optimizer 의 로봇에 붙이지 않는다: TO 행과 최종 검사 (같은 snapshot) 에 쥔 물체 "
                          "질의 구가 없다. grasp latch · 장면 field 의 쥔 물체 제외 · self-filter 는 그대로 "

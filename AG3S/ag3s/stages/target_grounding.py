@@ -327,6 +327,41 @@ def extract_seeds(attention: np.ndarray, config: ClusteringConfig, seed_percenti
     return keep
 
 
+#: TAB3 row 1 (`clustering.seed_source == "hand_nearest"`): the length scale of the hand-proximity seed signal (m).
+#: 50 mm: one object width -- a point on the nearest object's far side still outranks a neighbour 50 mm further away.
+HAND_NEAREST_SCALE_M = 0.05
+
+
+def hand_proximity(points: np.ndarray, hand: Any, exclude_mask: Optional[np.ndarray] = None,
+                   scale: float = HAND_NEAREST_SCALE_M) -> Optional[np.ndarray]:
+    """TAB3 row 1 -- per-point hand proximity in (0, 1], the seed signal of `seed_source == "hand_nearest"`.
+
+    ``exp(-(d - d_min) / scale)`` with ``d`` the distance from the point to the nearest hand sphere's **surface**
+    (`HandSpheres`: palm + fingers at this frame's state) and ``d_min`` the smallest ``d`` over the usable points, so the
+    usable point nearest the hand is 1. Excluded (support-surface) points are 0: they are never seeds and must not take
+    the top percentile. None when there is no hand, no point or no usable point (the caller keeps the attention then).
+    """
+    if hand is None or not len(hand):
+        return None
+    p = np.asarray(points, np.float64).reshape(-1, 3)
+    if not len(p):
+        return None
+    usable = np.ones(len(p), bool)
+    if exclude_mask is not None and len(np.asarray(exclude_mask).reshape(-1)) == len(p):
+        usable &= ~np.asarray(exclude_mask, bool).reshape(-1)
+    if not usable.any():
+        return None
+    centres = np.asarray(hand.centres, np.float64).reshape(-1, 3)
+    radii = np.asarray(hand.radii, np.float64).reshape(-1)
+    d = np.full(len(p), np.inf)
+    for c, r in zip(centres, radii):   # a few spheres; one pass each keeps memory at O(n)
+        d = np.minimum(d, np.linalg.norm(p - c, axis=1) - r)
+    out = np.zeros(len(p), np.float32)
+    d_u = d[usable]
+    out[usable] = np.exp(-(d_u - float(d_u.min())) / float(scale)).astype(np.float32)
+    return out
+
+
 # --------------------------------------------------------------------------------- results
 
 
@@ -747,6 +782,12 @@ class TargetConfirm:
         self.follow_record: Optional[dict[str, Any]] = None
         # --- T43 T 3(a) · 3(b) (both off by default; off = not read anywhere) ---
         self.latched_identity_hold = bool(getattr(cfg, "latched_identity_hold", False))
+        # --- TAB3 row 4 (`clustering.identity_memory`; True = every rule above and below as before) ---
+        #: False: the manipulated object is forgotten at the start of every call that is not frozen
+        #: (`_forget_without_memory`), so `select` adopts the call's top admissible cluster.
+        self.identity_memory = bool(getattr(cfg, "identity_memory", True))
+        #: This call forgot an identity because of it (record `identity_memory_forgot`).
+        self.memory_forgot = False
         rr = getattr(cfg, "refused_identity_release_frames", None)
         self.refused_release_frames: Optional[int] = None if rr is None else int(rr)
         #: The caller's grasp latch has the pick target locked or is closing (`note_latched`).
@@ -1177,6 +1218,17 @@ class TargetConfirm:
         self._release_pending, self._geometry_attention = False, None
         self._release_split, self._release_event = None, None
 
+    def _forget_without_memory(self) -> None:
+        """TAB3 row 4 -- with `identity_memory` off and no grasp in progress / nothing attached (not frozen), the
+        manipulated object of the earlier calls is forgotten: this call's identity comes from this call's clusters
+        alone. Frozen calls keep the grasp lock (the latch's object, closing-kept geometry, association). On: no-op."""
+        self.memory_forgot = False
+        if self.identity_memory or self.frozen:
+            return
+        if self._held is not None or self._id is not None:
+            self._forget_manipulated()
+            self.memory_forgot = True
+
     def note_hand(self, hand: Optional[HandSpheres]) -> None:
         """The hands' collision spheres at this frame's robot state, in the cloud frame (T32b S3).
 
@@ -1336,6 +1388,7 @@ class TargetConfirm:
             # an occluded object.
             self._vacancy_step()
         self._latched_hold = False
+        self._forget_without_memory()   # TAB3 row 4 (memory on: no-op)
         self._hand_occluded, self._hand_gap = False, self._take_hand()
         with substage.part("grounding.confirm_admissibility"):
             adm = self._assess_frame(clusters, points)
@@ -1530,6 +1583,7 @@ class TargetConfirm:
         if self.vacancy_release:
             self._vacancy_step()   # T81 (a release here leaves no target this call; the re-pick waits)
         self._latched_hold = False
+        self._forget_without_memory()   # TAB3 row 4 (memory on: no-op)
         self._hand_occluded, self._hand_gap = False, self._take_hand()
         if self._held is None:
             return None
@@ -2105,6 +2159,7 @@ def ground_target(
     min_radius: float = 0.005,
     timestamp: Optional[float] = None,
     confirm: Optional["TargetConfirm"] = None,
+    seed_signal: Optional[np.ndarray] = None,
 ) -> GroundingResult:
     """Find the object attention is pointing at, or report why there isn't one.
 
@@ -2128,6 +2183,12 @@ def ground_target(
             When `confirm` checks admissibility (T26; always inside `AG3S`), only admissible
             clusters compete, and a frame with nothing held and nothing admissible returns no
             target with `GroundingStatus.NO_ADMISSIBLE`.
+        seed_signal: TAB3 row 1 (`clustering.seed_source == "hand_nearest"`; default None = bit-identical). A per-point
+            signal that replaces the attention where the target seed comes from: the flat-map test, the seeds (top
+            `seed_percentile`; `seed_threshold` is an attention value and is not applied to it), the peak and the
+            cluster score (`mean_attention` of each `ClusterInfo` is then this signal's mean, so every rule that ranks
+            clusters on it -- the SL-SOTA18b hand-sized gate included -- ranks on it). The attention split (which touching
+            objects are separate) and the attention kept for the release split still read the cloud's attention.
 
     Note the excluded points are excluded from *connectivity and clustering only*. They remain in the
     cloud and go on to become `SUPPORT_SURFACE` candidates in stage 5; nothing is deleted here.
@@ -2141,12 +2202,18 @@ def ground_target(
     points = attention_cloud.points
     attention = attention_cloud.attention
     n = len(attention_cloud)
+    # TAB3 row 1: `seed` is what seeds, peak and score read (the attention unless a seed signal is given)
+    seed = attention
+    if seed_signal is not None:
+        seed = np.asarray(seed_signal, np.float32).reshape(-1)
+        if seed.shape[0] != n:
+            raise ValueError(f"seed_signal has {seed.shape[0]} values for {n} points")
 
     if n == 0:
         _unseen(confirm)
         return GroundingResult(None, GroundingStatus.NO_GEOMETRY)
 
-    if float(attention.max()) - float(attention.min()) <= _EPS:
+    if float(seed.max()) - float(seed.min()) <= _EPS:
         # A flat map carries no information about which object is the target. Taking its "top 5%"
         # would return an arbitrary slice of the scene and dress it up as a grounded target.
         _unseen(confirm)
@@ -2156,7 +2223,7 @@ def ground_target(
     # top percentile, which ties hundreds of points at 1.0 and makes `argmax` return whichever one
     # happens to be first in raster order — on the default fixture, a table point 12 cm from the
     # object. `AttentionPointCloud.peak_signal` keeps the two concerns apart.
-    peak_index = int(np.argmax(attention_cloud.peak_signal))
+    peak_index = int(np.argmax(attention_cloud.peak_signal if seed_signal is None else seed))
     peak_point = points[peak_index]
 
     usable = np.ones(n, bool)
@@ -2165,7 +2232,8 @@ def ground_target(
 
     seed_mask = np.zeros(n, bool)
     with substage.part("grounding.seeds"):
-        seed_mask[extract_seeds(attention, cfg, seed_percentile, seed_threshold)] = True
+        seed_mask[extract_seeds(seed, cfg, seed_percentile,
+                                seed_threshold if seed_signal is None else None)] = True
     seed_mask &= usable
     seeds = np.nonzero(seed_mask)[0]
     if seeds.size == 0:
@@ -2178,7 +2246,7 @@ def ground_target(
         # no separation of touching objects. This is the behaviour AG3S exists to improve on, kept
         # reachable so the improvement can be measured rather than asserted.
         groups = {0: seeds}
-        member_points, member_attention = points, attention
+        member_points, member_attention = points, seed
     else:
         candidate_idx = np.nonzero(usable)[0]
         local_seed = np.searchsorted(candidate_idx, seeds)
@@ -2204,7 +2272,7 @@ def ground_target(
             members = grown[labels == label]
             if members.size >= cfg.min_points:
                 groups[int(label)] = members
-        member_points, member_attention = points, attention
+        member_points, member_attention = points, seed
 
     if not groups:
         _unseen(confirm)
@@ -2249,7 +2317,7 @@ def ground_target(
     # one, a challenger has to lead `target_confirm_frames` frames running before the target moves.
     with substage.part("grounding.confirm"):
         if confirm is not None:
-            confirm.note_seeds(points[seeds], attention[seeds], seeds)   # SL8b (off: returns at once)
+            confirm.note_seeds(points[seeds], seed[seeds], seeds)   # SL8b (off: returns at once)
         decision = confirm.select(clusters, points=points) if confirm is not None else None
     if decision is not None and decision.mode == NO_ADMISSIBLE:
         # Nothing held yet and no cluster may become the manipulated object (T26) — e.g. the crate
@@ -2328,6 +2396,7 @@ def ground_target(
             **_split_metrics(chosen),
             **_hand_metrics(decision),
             **_identity_metrics(confirm, decision),
+            **_memory_metrics(confirm),
         },
     )
     if confirm is not None:
@@ -2466,6 +2535,13 @@ def _identity_metrics(confirm: Optional["TargetConfirm"], decision: Optional[Con
     if rec is not None and rec.get("off_share") is not None:
         out["identity_attention_off_share"] = float(rec["off_share"])
     return out
+
+
+def _memory_metrics(confirm: Optional["TargetConfirm"]) -> dict[str, float]:
+    """TAB3 row 4: identity memory off, and whether this call forgot an identity (none with the memory on)."""
+    if confirm is None or getattr(confirm, "identity_memory", True):
+        return {}
+    return {"identity_memory_off": 1.0, "identity_memory_forgot": float(bool(confirm.memory_forgot))}
 
 
 def _hand_metrics(decision: Optional[ConfirmDecision]) -> dict[str, float]:

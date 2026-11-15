@@ -775,9 +775,10 @@ PORTED_FINAL_CONFIG_DESTS: tuple[str, ...] = (
     # serve_safe.passthrough_overrides, same path as ee_action_qp_limit_passthrough)
     'passthrough_arm_strict',
     'passthrough_arm_strict_no_wrist',
-    # TAB3 (2026-11-16, paper Tab. 3 row 7): the held object's query spheres (collision key through
+    # TAB3 (2026-11-16, paper Tab. 3 rows 1 / 4 / 7): the hand-nearest seed and the identity memory switch (clustering keys
+    # through serve_safe.t43t_identity_section) and the held object's query spheres (collision key through
     # serve_safe.trajopt_config_from_args, which this server already calls)
-    'no_attached_query',
+    'seed_source', 'identity_memory', 'no_attached_query',
 )
 #: SL-GTTO — the target extents the Panda server runs (``--target-extent``; SL7 attention-surface, SL-GTTO oracle-visible).
 PORTED_TARGET_EXTENTS: tuple[str, ...] = ("estimated", "attention-surface", "oracle-visible")
@@ -854,8 +855,12 @@ def check_inpass_flags(args, ap) -> None:
 
 
 def tab3_record(args) -> dict:
-    """TAB3 (paper Tab. 3) -- the ablation switches this server runs, each key only when its flag is on."""
+    """TAB3 (paper Tab. 3 rows 1 / 4 / 7) -- the ablation switches this server runs, each key only when its flag is on."""
     out: dict = {}
+    if getattr(args, "seed_source", "attention") != "attention":
+        out["seed_source"] = str(args.seed_source)
+    if getattr(args, "identity_memory", "on") == "off":
+        out["identity_memory"] = "off"
     if getattr(args, "no_attached_query", False):
         out["attached_query"] = False
     return {"tab3_ablation": out} if out else {}
