@@ -16,7 +16,7 @@ from AG3S.trajopt.config import TrajOptConfig
 from AG3S.trajopt.linearize import scene_from_constraint_set
 from tests.trajopt.test_t32_held_query import _constraint_set, _CrateWall, _held
 
-SEGMENTS = ("-ab1", "-ab4", "-ab7")
+SEGMENTS = ("-ab7", "-ab1", "-ab4")
 ADDED = {"-ab1": ("--seed-source", "hand-nearest"), "-ab4": ("--identity-memory", "off"),
          "-ab7": ("--no-attached-query",)}
 
@@ -110,7 +110,11 @@ def test_tab3_code_versions():
     xf = pf.SOTA_FINAL_X_FWD
     names = tuple(xf[:-len("-tro")] + s + "-tro" for s in SEGMENTS)
     assert pf.SOTA_TAB3_CODE_VERSIONS == names and set(names) <= set(pf.GT15_VERSIONS)
-    assert list(pf.AG3S_VERSIONS)[-len(names):] == list(names)                       # appended at the end of the registry
+    keys = list(pf.AG3S_VERSIONS)                                                     # -ab7 after the Tab. 3 block,
+    i = keys.index(names[0])                                                          # -ab1 / -ab4 after the main table
+    assert i > max(keys.index(v) for v in pf.SOTA_TAB3_VERSIONS)
+    assert keys.index(names[1]) > max(keys.index(v) for v in pf.SOTA_ABL_MAIN_VERSIONS)
+    assert keys[keys.index(names[1]):keys.index(names[1]) + 2] == list(names[1:])
     base = tuple(pf.AG3S_VERSIONS[xf])
     xa = _parse(xf)
     xvals = pf.version_flag_values(xa)

@@ -5331,3 +5331,6 @@ LIBERO-Safety 4 suite × L0–L2 × task 0–4 × init 19 = 60 ep, 공식 checkp
 
 ### 2026-11-15 23:50 – 11-16 00:05 — 논문 Tab. 2 끝, Tab. 3 (ablation) 행 2 · 5 · 6 시작 (sdm-f6 SL-AUD 세션)
 Tab. 2 LIBERO-Safety 60 ep: π0.5 단독 성공 37 · 위반 1, AG3S 성공 27 · 위반 0. Tab. 3: X-fwd 에서 extent (ab2) · 대상 늘 장애물 (ab5) · 대상 모든 link 해제 (ab6) 판 등록 (e3d71f8a), 00:05 SafeLIBERO L-I 로 시작. 원고 방법 절 (graph / Laplacian / descriptor) 이 X 의 실제 인식 (ball-owned + 표면 증거, TargetConfirm) 과 다름 — 사용자 판단 대기. 계획서 §9.42 결과 5, §9.44.
+
+### 2026-11-16 00:43 — 본문 ablation 행 4 · 3 · 2 시작 (sdm-f6 SL-AUD 세션)
+사용자 표 (π0.5 → + dense geometry → + target surface, freed for all → + stage · link rule → + attachment = AG3S → + 외부 분할기). 새 `--no-attached-query` 로 행 4 (`-ab7`) · 3 (`-m3`) · 2 (`-m2`) 판, SafeLIBERO L-I + L-II 1/10 각 160 ep. 'graph → radius growth' 는 사용자 지시로 제외 (`-ab2` run INTERRUPTED). 계획서 §9.45.
