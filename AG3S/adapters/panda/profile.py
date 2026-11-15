@@ -1515,6 +1515,22 @@ for _b in (SOTA_FINAL_ATT_VERSIONS[1], SOTA_FINAL_X_FWD):
     SOTA_ARMSTRICT_W_VERSIONS = SOTA_ARMSTRICT_W_VERSIONS + (_n,)
 del _b, _n
 GT15_VERSIONS = GT15_VERSIONS + SOTA_ARMSTRICT_W_VERSIONS
+#: TAB3 ablation (sdm-f6 SL-AUD, 2026-11-15 23:5x; plan §9.44; paper Tab. 3 on SafeLIBERO L-I, full = Tab. 1 AG3S
+#: ``X-fwd``). One component of X-fwd replaced; everything else (optimizer included) unchanged. Rows that need no new code:
+#:   ``-ab2``  extent: surface-backed ball (``ball-owned`` + F1 surface evidence) -> plain ``ball`` (the T13 default)
+#:   ``-ab5``  policy: the target is always an obstacle (``--target-field-policy none``; ab2's drops too, ``none`` has no owned ball)
+#:   ``-ab6``  policy: the target freed for every link in every stage (``--target-field-policy exclude-all``)
+#: Name = <X-fwd without -tro><segment>-tro.
+TAB3_EXTENT_DROP = {"--target-exclusion": 1, "--owned-max-dist-voxels": 1, "--nontarget-evidence": 1}
+SOTA_TAB3_VERSIONS: tuple[str, ...] = ()
+for _s, _drop, _add in (("-ab2", TAB3_EXTENT_DROP, ()),
+                        ("-ab5", TAB3_EXTENT_DROP, ("--target-field-policy", "none")),
+                        ("-ab6", {}, ("--target-field-policy", "exclude-all"))):
+    _n = SOTA_FINAL_X_FWD[:-len("-tro")] + _s + "-tro"
+    AG3S_VERSIONS[_n] = _drop_flags(tuple(AG3S_VERSIONS[SOTA_FINAL_X_FWD]), _drop) + _add
+    SOTA_TAB3_VERSIONS = SOTA_TAB3_VERSIONS + (_n,)
+del _s, _drop, _add, _n
+GT15_VERSIONS = GT15_VERSIONS + SOTA_TAB3_VERSIONS
 #: (G88c, 03:5x) the A-alone ablation queued as ``…-obst3`` (gtto23, not started yet) gets the same two fixes, so A alone and
 #: A + B differ only by the held point model: ``…-obst3`` := A'' + no carve + support "under" (``…-obst3-pts`` = B'' keeps
 #: the flags it was evaluated with -- it was built above from the earlier definition).
@@ -1759,7 +1775,9 @@ def version_flag_values(args: argparse.Namespace) -> dict[str, Any]:
     # SL-GTTO16+: the options of the later LIBERO-parity versions (registered in GT15_VERSIONS) join only when set
     seen16 = set(dests) | seen14 | set(gt14)
     gt16 = [d for d in _version_dests(GT15_VERSIONS) if d not in seen16]
-    if any(getattr(args, d, None) != parser.get_default(d) for d in gt16):
+    # TAB3 (2026-11-15): a later version may re-set a V11AB base option (``--target-field-policy``); the base value alone
+    # is not a later option -- the same rule as the final check above (``pinned``)
+    if any(getattr(args, d, None) != parser.get_default(d) for d in gt16 if d not in pinned):
         dests = sorted(seen16 | set(gt16))
     return {d: _jsonable(getattr(args, d, None)) for d in dests}
 
