@@ -1384,6 +1384,12 @@ class CollisionBackendConfig:
     #: the gripper only. Before the grasp the permission is unchanged (`exclude_authorized` mask).
     #: User verdict 2026-10-10: 1.
     held_permission_parent_links: int = 1
+    #: **TAB3 row 7 — the held object is queried as part of the robot** (default True = bit-identical). False
+    #: (`--no-attached-query`): `scene_from_constraint_set` drops the attachment's query spheres (`attached_points` /
+    #: `attached_radii` / `attached_parent_link` = None), so neither the TO rows nor the final check (same snapshot)
+    #: see the grasped object. Everything else of the attachment stays: the grasp latch, the held object's removal
+    #: from the scene field and the self-filter, the strict held permission rows.
+    attached_query: bool = True
     #: **충돌 제약을 최적화기에 보이는가.** `True` 가 기본이고 그것이 지금까지의 TO 다.
     #:
     #: `False` 는 사용자가 요청한 ablation 이다 (*"TO 에 가장 기본적인 jerk 목적함수만 포함하고
@@ -1457,6 +1463,8 @@ class CollisionBackendConfig:
                 or self.held_permission_parent_links < 0):
             raise ValueError("collision.held_permission_parent_links must be an int >= 0, got "
                              f"{self.held_permission_parent_links!r}")
+        if not isinstance(self.attached_query, bool):   # TAB3 row 7
+            raise ValueError(f"collision.attached_query must be a bool, got {self.attached_query!r}")
         if self.held_obstacle_margin and not self.obstacle_margin > 0.0:
             raise ValueError(
                 "collision.held_obstacle_margin needs collision.obstacle_margin > 0 — it gives the "
@@ -1695,6 +1703,7 @@ _OMIT_WHEN_DEFAULT.update({("sqp", "ee_action_reference_floor"): False, ("sqp", 
 _OMIT_WHEN_DEFAULT.update({("sqp", "passthrough_arm_strict"): False})   # ARMSTRICT
 _OMIT_WHEN_DEFAULT.update({("sqp", "passthrough_arm_strict_no_wrist"): False})   # ARMSTRICT-W
 _OMIT_WHEN_DEFAULT.update({("sqp", "passthrough_obstacle_full_horizon"): False})   # SL-GTTO22   # SL-GTTO16 A'
+_OMIT_WHEN_DEFAULT.update({("collision", "attached_query"): True})   # TAB3 row 7
 # --- T88 — end ---
 #: T72 — the grasp-set reach constraint: without `--grasp-set-to` the config dump keeps the keys it had before.
 _OMIT_WHEN_DEFAULT.update({("cost", k): v for k, v in {

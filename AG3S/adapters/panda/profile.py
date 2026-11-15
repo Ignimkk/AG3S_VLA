@@ -1531,6 +1531,17 @@ for _s, _drop, _add in (("-ab2", TAB3_EXTENT_DROP, ()),
     SOTA_TAB3_VERSIONS = SOTA_TAB3_VERSIONS + (_n,)
 del _s, _drop, _add, _n
 GT15_VERSIONS = GT15_VERSIONS + SOTA_TAB3_VERSIONS
+#: TAB3 rows that need code (2026-11-16, ``TAB3-ABLATION-FLAGS.impl.md``; same rule: X-fwd + one switch, optimizer unchanged):
+#:   ``-ab7``  policy: the grasped object is not attached to the robot for the optimizer (``--no-attached-query``)
+SOTA_TAB3_CODE_VERSIONS: tuple[str, ...] = ()
+for _s, _add in (("-ab7", ("--no-attached-query",)),):
+    _n = SOTA_FINAL_X_FWD[:-len("-tro")] + _s + "-tro"
+    AG3S_VERSIONS[_n] = tuple(AG3S_VERSIONS[SOTA_FINAL_X_FWD]) + _add
+    SOTA_TAB3_CODE_VERSIONS = SOTA_TAB3_CODE_VERSIONS + (_n,)
+del _s, _add, _n
+GT15_VERSIONS = GT15_VERSIONS + SOTA_TAB3_CODE_VERSIONS
+#: TAB3 code rows: their own dests (joined to the record only when set, so every earlier GT15 version keeps its keys)
+TAB3_CODE_DESTS: tuple[str, ...] = ("no_attached_query",)
 #: (G88c, 03:5x) the A-alone ablation queued as ``…-obst3`` (gtto23, not started yet) gets the same two fixes, so A alone and
 #: A + B differ only by the held point model: ``…-obst3`` := A'' + no carve + support "under" (``…-obst3-pts`` = B'' keeps
 #: the flags it was evaluated with -- it was built above from the earlier definition).
@@ -1774,11 +1785,16 @@ def version_flag_values(args: argparse.Namespace) -> dict[str, Any]:
         dests = sorted(seen14 | set(gt14))
     # SL-GTTO16+: the options of the later LIBERO-parity versions (registered in GT15_VERSIONS) join only when set
     seen16 = set(dests) | seen14 | set(gt14)
-    gt16 = [d for d in _version_dests(GT15_VERSIONS) if d not in seen16]
+    gt16 = [d for d in _version_dests(GT15_VERSIONS) if d not in seen16 and d not in TAB3_CODE_DESTS]
     # TAB3 (2026-11-15): a later version may re-set a V11AB base option (``--target-field-policy``); the base value alone
     # is not a later option -- the same rule as the final check above (``pinned``)
     if any(getattr(args, d, None) != parser.get_default(d) for d in gt16 if d not in pinned):
         dests = sorted(seen16 | set(gt16))
+    # TAB3 code rows (2026-11-16): each of their dests joins only when it is set -- every earlier version's record keeps
+    # exactly its keys, and a TAB3 version records its own switch only
+    tab3 = [d for d in TAB3_CODE_DESTS if d not in set(dests) and getattr(args, d, None) != parser.get_default(d)]
+    if tab3:
+        dests = sorted(set(dests) | set(tab3))
     return {d: _jsonable(getattr(args, d, None)) for d in dests}
 
 

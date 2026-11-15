@@ -2925,6 +2925,15 @@ def scene_from_constraint_set(constraint_set, robot_radii: np.ndarray,
         attached_points, attached_radii = arr[:, :3].copy(), arr[:, 3].copy()
     if attached_points is not None and len(attached_points) == 0:
         attached_points, attached_link, attached_radii = None, None, None
+    # TAB3 row 7: something is held and queried (as before) -- the held capture volume below keys on this, so it stays
+    # when the query spheres are dropped
+    holding = attached_points is not None
+    if holding and not bool(getattr(getattr(config, "collision", None), "attached_query", True)):
+        # TAB3 row 7 (`collision.attached_query` False): the held object is not part of the robot for the optimizer --
+        # no query spheres for the TO rows or the final check (they share this snapshot). `attached` itself stays:
+        # the holding-state rules below (strict held permission, no target volume, the held capture volume of the
+        # field's held remnant) still see that something is held.
+        attached_points, attached_link, attached_radii = None, None, None
     # 목적지 마진. AG3S 가 정책에서 뽑아 실어 보낸 값을 그대로 읽는다 — 여기서 다시 계산하지
     # 않는 것은 마진이 나오는 곳이 하나여야 하기 때문이다 (`ClearancePolicy`).
     destination_label = getattr(constraint_set, "destination_label", None)
@@ -3031,7 +3040,7 @@ def scene_from_constraint_set(constraint_set, robot_radii: np.ndarray,
         if bool(getattr(collision_cfg, "held_obstacle_margin", False)):
             # T43 HM — the held rows are classified too; the capture volume only while holding.
             obstacle["held_obstacle_margin"] = True
-            if attached_points is not None and held_capture is not None:
+            if holding and held_capture is not None:
                 cap = np.asarray(held_capture, np.float64).reshape(-1, 4)
                 obstacle["held_capture_spheres"] = cap if cap.shape[0] else None
     if getattr(getattr(config, "horizon", None), "lookahead", "off") != "off":
@@ -3040,7 +3049,7 @@ def scene_from_constraint_set(constraint_set, robot_radii: np.ndarray,
         # is read anywhere else then: `_held_rows_class` runs only for HM and for the tail).
         if "support_planes" not in obstacle:
             obstacle["support_planes"] = support_planes_of(constraint_set)
-        if ("held_capture_spheres" not in obstacle and attached_points is not None
+        if ("held_capture_spheres" not in obstacle and holding
                 and held_capture is not None):
             cap = np.asarray(held_capture, np.float64).reshape(-1, 4)
             obstacle["held_capture_spheres"] = cap if cap.shape[0] else None
